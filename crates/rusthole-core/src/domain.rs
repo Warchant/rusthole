@@ -23,6 +23,8 @@ pub enum DomainError {
     LabelTooLong { index: usize },
     #[error("character {ch:?} is not valid in a domain name")]
     BadChar { ch: char },
+    #[error("the international domain name cannot be changed to punycode")]
+    Idn,
 }
 
 /// A normalized domain name. See the module documentation for the rules.
@@ -54,6 +56,16 @@ impl DomainName {
             }
         }
         Ok(Self(trimmed.to_ascii_lowercase().into_boxed_str()))
+    }
+
+    /// Parses `input` like [`DomainName::parse`], but first changes a Unicode name to
+    /// punycode (IDNA, UTS 46). Use this at each input edge (config, import, lists).
+    pub fn parse_idn(input: &str) -> Result<Self, DomainError> {
+        if input.is_ascii() {
+            return Self::parse(input);
+        }
+        let ascii = idna::domain_to_ascii(input).map_err(|_| DomainError::Idn)?;
+        Self::parse(&ascii)
     }
 
     /// The name as text, lowercase, without a trailing dot.
@@ -135,6 +147,18 @@ mod tests {
     }
 
     #[test]
+    fn idn_becomes_punycode() {
+        let d = DomainName::parse_idn("B\u{fc}cher.example").unwrap();
+        assert_eq!(d.as_str(), "xn--bcher-kva.example");
+        assert_eq!(
+            DomainName::parse_idn("ads.example").unwrap().as_str(),
+            "ads.example"
+        );
+        assert!(DomainName::parse("b\u{fc}cher.example").is_err());
+        assert!(DomainName::parse_idn("a\u{fc} b.example").is_err());
+    }
+
+    #[test]
     fn accepts_underscore_and_digits() {
         assert!(DomainName::parse("_dmarc.0-1.example").is_ok());
     }
@@ -187,6 +211,13 @@ mod tests {
                 prop_assert!(d.as_str().len() <= MAX_NAME_LEN);
                 prop_assert!(d.labels().all(|l| !l.is_empty() && l.len() <= MAX_LABEL_LEN));
                 prop_assert!(d.as_str().chars().all(|c| is_label_char(c) && !c.is_ascii_uppercase()));
+            }
+        }
+
+        #[test]
+        fn parse_idn_never_panics(s in "\\PC{0,80}") {
+            if let Ok(d) = DomainName::parse_idn(&s) {
+                prop_assert!(d.as_str().is_ascii());
             }
         }
 

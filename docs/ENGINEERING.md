@@ -30,7 +30,9 @@ flowchart LR
 
 1. **No unsafe.** `unsafe_code = "forbid"` is set for the workspace. Do not change it.
 2. **Lints.** `cargo clippy --workspace --all-targets -- -D warnings` must pass. Use
-   `#[allow(...)]` only on one item, and add a comment that says why.
+   `#[allow(...)]` only on one item, and add a comment that says why. Clippy reads only the
+   nearest `clippy.toml`: `crates/rusthole-core/clippy.toml` repeats the root settings and
+   forbids `Instant::now` and `SystemTime::now`. Change both files together.
 3. **No panic in production code.** Do not use `unwrap`, `expect`, `panic!` or slice
    indexing that can fail. Return an error. Tests can use `unwrap`.
 4. **Dependencies.** Add a crate to `[workspace.dependencies]` in the root `Cargo.toml`, then use
@@ -78,11 +80,32 @@ cargo test --workspace
 On Linux through WSL (the build output goes to drive D):
 
 ```bash
-wsl -d Ubuntu-22.04 -- bash -lc '/mnt/e/bohdan/rusthole/scripts/linux.sh test --workspace'
+wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/linux.sh test --workspace
+wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/linux.sh fuzz domain_parse 60
 ```
+
+Static musl build (amendment A2). The script installs zig and cargo-zigbuild on drive D:
 
 ```bash
-wsl -d Ubuntu-22.04 -- bash -lc '/mnt/e/bohdan/rusthole/scripts/linux.sh fuzz domain_parse 60'
+wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
+Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`.
+
 Temporary files go to `D:\tmp`, not to drive C.
+
+## Build folders
+
+Use one build folder per platform, and reuse it, so incremental builds work:
+
+| Platform | Build folder |
+|---|---|
+| Windows | `target\` in the repo (the default) |
+| Linux (WSL) | `/mnt/d/tmp/rusthole-target-linux` (set by `scripts/linux.sh`) |
+| Fuzz (WSL, nightly) | `/mnt/d/tmp/rusthole-target-linux/fuzz` (set by `scripts/linux.sh fuzz`) |
+
+- Do not set another `--target-dir` or `CARGO_TARGET_DIR`. Cross builds (for example musl)
+  use the Linux folder: cargo puts them in a `<target-triple>/` subfolder.
+- Windows and Linux cannot share one folder: their host builds overwrite each other.
+- Dev and test builds keep line tables only for our crates and no debug info for
+  dependencies (see `[profile.dev]` in `Cargo.toml`).

@@ -190,6 +190,20 @@ Owner answers:
 | A9 | Pi-hole features added to scope: enable or disable blocking with a timer (a state machine); list refresh schedule, "update now" and status per list; "which list blocks this domain" search (scan of list files on disk); subscribed allow lists and regex allow rules; statistics (queries over time, query types, upstream share, top domains, top blocked, top clients); audit log of admin actions; start with list files on disk when the network is down; config reload without restart (a bad config keeps the old one). | M12 |
 | A10 | New part split (see below). P1 adds `config_version` and a key-by-key import mapping table (translated, ignored, reported). Client identity uses a `NeighborTable` trait: the pure core gets a snapshot; a bounded cache refreshes on a period; no lookup on the hot path; an unknown MAC uses the default group; IPv6 neighbors come from netlink. Memory: compact set (arena or `fst`) with a list bitmask per domain and a list mask per group; 64 MB is the peak during a refresh. | M7, M8, M10, m1, m2 |
 
+### A11. IPv4 only in v1 (owner decision, 2026-11-17)
+
+v1 supports IPv4 transport only. IPv6 transport is a feature for the next version.
+
+- Listeners (DNS, DoH, admin) bind IPv4 addresses only. Auto-detect uses IPv4 interface addresses.
+- The client ACL, clients, rate limits and bans work on IPv4 addresses and CIDRs. Config validation
+  rejects an IPv6 listen address, ACL CIDR or client address with a clear "not supported in v1" message.
+- Upstreams are reached over IPv4 (an IPv6 upstream address is a validation error).
+- MAC lookup reads the IPv4 neighbor table (`/proc/net/arp`). No netlink in v1.
+- DNS content is not affected: AAAA queries are forwarded, cached and blocked as usual
+  (NULL mode answers `::` for a blocked AAAA).
+- Keep types open for IPv6 (for example `IpAddr` in the config model) where this costs little,
+  so v2 can add it without a config migration.
+
 Proposed part split (A10):
 
 ```mermaid

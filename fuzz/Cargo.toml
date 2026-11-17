@@ -3,6 +3,7 @@ name = "rusthole-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2024"
+license = "MIT OR Apache-2.0"
 
 [package.metadata]
 cargo-fuzz = true
@@ -10,6 +11,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 rusthole-core = { path = "../crates/rusthole-core" }
+rusthole-import = { path = "../crates/rusthole-import" }
 
 # Not a member of the main workspace: it needs nightly and libFuzzer.
 [workspace]
@@ -17,6 +19,27 @@ rusthole-core = { path = "../crates/rusthole-core" }
 [[bin]]
 name = "domain_parse"
 path = "fuzz_targets/domain_parse.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "config_parse"
+path = "fuzz_targets/config_parse.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "teleporter_zip"
+path = "fuzz_targets/teleporter_zip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pihole_toml"
+path = "fuzz_targets/pihole_toml.rs"
 test = false
 doc = false
 bench = false

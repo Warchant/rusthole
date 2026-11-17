@@ -1,12 +1,21 @@
 //! rusthole command-line entry point.
 
-use std::path::PathBuf;
+mod fsutil;
+
+use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use anyhow::Context;
 use clap::{Parser, Subcommand};
+use rusthole_core::Config;
 
 /// Default config file path on Linux.
 const DEFAULT_CONFIG: &str = "/etc/rusthole/rusthole.toml";
+/// Largest config file that rusthole reads.
+const MAX_CONFIG_BYTES: u64 = 16 * 1024 * 1024;
+/// Largest Teleporter zip that rusthole reads.
+const MAX_ZIP_BYTES: u64 = 1024 * 1024 * 1024;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -27,12 +36,18 @@ struct Cli {
 enum Command {
     /// Run the DNS server, the DNS-over-HTTPS server and the admin UI.
     Run,
-    /// Read and validate the config file, then exit.
+    /// Read and validate the config file. Exit code 1 means that the config has problems.
     CheckConfig,
     /// Convert a Pi-hole v6 Teleporter export (zip) into a rusthole config file.
     Import {
         /// Path to the Teleporter zip file.
         teleporter: PathBuf,
+        /// Path of the new config file.
+        #[arg(short, long, default_value = "rusthole.toml")]
+        output: PathBuf,
+        /// Replace the output file if it exists.
+        #[arg(long)]
+        force: bool,
     },
     /// Set the admin password. Reads the password from the terminal.
     Passwd,
@@ -42,7 +57,7 @@ fn main() -> ExitCode {
     init_logging();
     let cli = Cli::parse();
     match run(&cli) {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(code) => code,
         Err(err) => {
             tracing::error!("{err:#}");
             ExitCode::FAILURE
@@ -50,13 +65,81 @@ fn main() -> ExitCode {
     }
 }
 
-fn run(cli: &Cli) -> anyhow::Result<()> {
-    match cli.command {
+fn run(cli: &Cli) -> anyhow::Result<ExitCode> {
+    // The report and the issues are the output of the command, so they go to stdout.
+    let mut out = std::io::stdout().lock();
+    match &cli.command {
         Command::Run => anyhow::bail!("`run` is not available yet (part P2)"),
-        Command::CheckConfig => anyhow::bail!("`check-config` is not available yet (part P1)"),
-        Command::Import { .. } => anyhow::bail!("`import` is not available yet (part P1)"),
+        Command::CheckConfig => check_config(&cli.config, &mut out),
+        Command::Import {
+            teleporter,
+            output,
+            force,
+        } => import(teleporter, output, *force, &mut out),
         Command::Passwd => anyhow::bail!("`passwd` is not available yet (part P5)"),
     }
+}
+
+/// Loads and validates a config file. Prints each issue.
+fn check_config(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
+    let bytes = fsutil::read_limited(path, MAX_CONFIG_BYTES)
+        .with_context(|| format!("cannot read {}", path.display()))?;
+    let text = String::from_utf8(bytes)
+        .with_context(|| format!("{} is not UTF-8 text", path.display()))?;
+    let config = match Config::from_toml_str(&text) {
+        Ok(c) => c,
+        Err(e) => {
+            writeln!(out, "{}: {e}", path.display())?;
+            return Ok(ExitCode::FAILURE);
+        }
+    };
+    let issues = config.validate();
+    if issues.is_empty() {
+        writeln!(out, "{}: config is valid", path.display())?;
+        return Ok(ExitCode::SUCCESS);
+    }
+    for issue in &issues {
+        writeln!(out, "{}: {issue}", path.display())?;
+    }
+    writeln!(out, "{} problem(s) found", issues.len())?;
+    Ok(ExitCode::FAILURE)
+}
+
+/// Header of an imported config file.
+const IMPORT_HEADER: &str = "\
+# rusthole config, made by `rusthole import` from a Pi-hole v6 Teleporter export.
+# docs/CONFIG.md explains each field. Set the admin password with `rusthole passwd`.
+
+";
+
+/// Imports a Teleporter zip and writes the config file atomically.
+fn import(
+    zip: &Path,
+    output: &Path,
+    force: bool,
+    out: &mut impl Write,
+) -> anyhow::Result<ExitCode> {
+    if !force && output.exists() {
+        anyhow::bail!("{} exists; use --force to replace it", output.display());
+    }
+    let bytes = fsutil::read_limited(zip, MAX_ZIP_BYTES)
+        .with_context(|| format!("cannot read {}", zip.display()))?;
+    let imported = rusthole_import::import_teleporter(&bytes, &rusthole_import::Limits::default())
+        .with_context(|| format!("cannot import {}", zip.display()))?;
+    let text = format!("{IMPORT_HEADER}{}", imported.config.to_toml_string()?);
+    fsutil::write_atomic(output, text.as_bytes(), force)
+        .with_context(|| format!("cannot write {}", output.display()))?;
+    write!(out, "{}", imported.report)?;
+    writeln!(out, "Wrote {}", output.display())?;
+    let issues = imported.config.validate();
+    if issues.is_empty() {
+        return Ok(ExitCode::SUCCESS);
+    }
+    // The import makes a valid config, so this is a bug. Show it, and keep the file.
+    for issue in &issues {
+        writeln!(out, "{}: {issue}", output.display())?;
+    }
+    Ok(ExitCode::FAILURE)
 }
 
 /// Log to stderr. The `RUSTHOLE_LOG` environment variable sets the filter (default `info`).

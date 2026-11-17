@@ -21,11 +21,24 @@ publish = false
 
 [workspace.dependencies]
 # Our crates. Add each one here when another crate first uses it.
+rusthole-core = { path = "crates/rusthole-core" }
+rusthole-import = { path = "crates/rusthole-import" }
 
 # Third-party crates. Add new ones here, then use `x = { workspace = true }` in a member.
 anyhow = "1"
 clap = { version = "4", features = ["derive", "env"] }
+idna = "1.1"
+# Pure-Rust deflate only. The default features pull in C and crypto crates.
+zip = { version = "9.6", default-features = false, features = ["deflate"] }
+regex = "1.13"
+# `bundled` builds SQLite from source, so the static musl build needs no system library.
+# `serialize` lets the import read a database from memory, with no temp file.
+# `limits` and `hooks` let the import cap value sizes and VM steps for an untrusted file.
+rusqlite = { version = "0.43", default-features = false, features = ["bundled", "serialize", "limits", "hooks"] }
+serde = { version = "1", features = ["derive"] }
+tempfile = "3.27"
 thiserror = "2"
+toml = "1.2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 
@@ -40,6 +53,9 @@ missing_debug_implementations = "warn"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+indexing_slicing = "warn"
+string_slice = "warn"
+unreachable = "warn"
 unwrap_used = "warn"
 expect_used = "warn"
 panic = "warn"
@@ -61,5 +77,12 @@ strip = true
 # Unwind (not abort): a panic in one task must not stop DNS for everyone.
 panic = "unwind"
 
+# Dev and test builds: line tables only for our crates (backtraces keep file and line),
+# no debug info for dependencies. Builds are faster and use less disk.
+# The test profile inherits these settings from dev.
+[profile.dev]
+debug = "line-tables-only"
+
 [profile.dev.package."*"]
 opt-level = 1
+debug = false

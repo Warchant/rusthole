@@ -9,3 +9,4 @@
 # Real Pi-hole exports hold private data. Never commit them.
 *teleporter*.zip
 /data
+/.claude/

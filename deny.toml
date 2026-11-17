@@ -26,15 +26,25 @@ allow = [
     "BSL-1.0",
     "0BSD",
 ]
+# libFuzzer (from LLVM) is under NCSA. It is only in the fuzz targets, never in the rusthole
+# binary. `cargo deny --manifest-path fuzz/Cargo.toml check` needs this exception.
+exceptions = [
+    { allow = ["NCSA"], crate = "libfuzzer-sys" },
+]
 
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
+# Path dependencies between our own crates have no version. They are not published.
+allow-wildcard-paths = true
 # OpenSSL is not allowed: TLS uses rustls, so the static musl build needs no system libraries.
+# aws-lc is not allowed: the TLS crypto provider is `ring` (amendment A1).
 deny = [
     { name = "openssl" },
     { name = "openssl-sys" },
     { name = "native-tls" },
+    { name = "aws-lc-sys" },
+    { name = "aws-lc-rs" },
 ]
 
 [sources]

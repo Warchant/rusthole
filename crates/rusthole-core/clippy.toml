@@ -1,0 +1,15 @@
+# Clippy reads only the nearest clippy.toml, so this file repeats the root settings.
+# Change both files together.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+allow-indexing-slicing-in-tests = true
+# Protocol names that are not code. ".." keeps the default list.
+doc-valid-idents = ["DoH", "DoT", "SQLite", "IPv4", "IPv6", ".."]
+
+# rusthole-core is pure: it reads no clock. A function that needs the time gets `now` as an input.
+disallowed-methods = [
+    { path = "std::time::Instant::now", reason = "rusthole-core reads no clock: take `now` as an input" },
+    { path = "std::time::SystemTime::now", reason = "rusthole-core reads no clock: take `now` as an input" },
+]

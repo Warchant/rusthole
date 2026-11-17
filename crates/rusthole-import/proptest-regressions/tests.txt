@@ -1,0 +1,8 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 042589f59e70f910dbd741d622de32ba78835d62b294f22a9f785b34f4687055 # shrinks to g = Gravity { groups: [], adlists: [], adlist_by_group: [], domainlist: [], domainlist_by_group: [(21, 2), (0, 0)], clients: [], client_by_group: [] }
+cc ab15a9af3f2d8ccc454e84ae981ec4ddf8ca639c544d48f4b9a925bf0a78aea1 # shrinks to g = Gravity { groups: [GroupRow { id: 0, enabled: true, name: "Default", description: None }], adlists: [], adlist_by_group: [], domainlist: [], domainlist_by_group: [], clients: [ClientRow { id: 1, ip: "00:00:00:00:00:00", comment: None }], client_by_group: [(1, 0)] }

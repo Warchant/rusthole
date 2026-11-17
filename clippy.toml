@@ -1,4 +1,9 @@
+# Clippy reads only the nearest clippy.toml. crates/rusthole-core/clippy.toml repeats these
+# settings. Change both files together.
 allow-unwrap-in-tests = true
 allow-expect-in-tests = true
 allow-panic-in-tests = true
 allow-print-in-tests = true
+allow-indexing-slicing-in-tests = true
+# Protocol names that are not code. ".." keeps the default list.
+doc-valid-idents = ["DoH", "DoT", "SQLite", "IPv4", "IPv6", ".."]

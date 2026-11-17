@@ -15,8 +15,14 @@ path = "src/main.rs"
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true }
+rusthole-core = { workspace = true }
+rusthole-import = { workspace = true }
+tempfile = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+rusthole-import = { workspace = true, features = ["testkit"] }
 
 [lints]
 workspace = true

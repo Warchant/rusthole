@@ -2,7 +2,7 @@
 
 This document is the contract between the admin API (part P5, Rust) and the web UI
 (part P6, `web/`). The UI is built on this contract. P5 implements it.
-[PLAN.md](PLAN.md) has the decisions (D9, D10, A7, A9). Where this document and PLAN.md
+[PLAN.md](PLAN.md) has the decisions (D9, D10, A7, A9, A11). Where this document and PLAN.md
 differ, PLAN.md wins, and this document must be updated.
 
 ## 1. General rules
@@ -19,6 +19,7 @@ differ, PLAN.md wins, and this document must be updated.
 | Unknown fields | The server rejects a request body with an unknown field (422). The server can add new fields to a response. The UI ignores fields that it does not know. |
 | Read-only fields | A field that is marked "read-only" is in responses only. The server rejects it in a request body (422). |
 | Versioning | A change that breaks a client goes to `/api/v2`. Additive changes stay in v1. |
+| IP version (A11) | rusthole v1 uses IPv4 transport only. All client addresses, client ids, CIDRs, upstream addresses, conditional-forwarding servers and audit-log addresses are IPv4. The server rejects an IPv6 value in these fields with 422 and the message "IPv6 comes in a later version." DNS content does not change: AAAA queries and local AAAA records are supported. A later version adds IPv6 as an additive change. |
 
 ### 1.1 Methods
 
@@ -166,7 +167,7 @@ Request:
 - A TOTP code cannot be used two times (A7).
 - With no password set in the config, every login fails (A7). You set the password with
   `rusthole passwd`. The API has no endpoint to set or change the password.
-- Each failure counts in the ban state machine (per IPv4 address, per IPv6 /64). During a
+- Each failure counts in the ban state machine (per IPv4 address). During a
   ban the server returns 429 `rate_limited` with `Retry-After`, and it does not check the
   password.
 
@@ -451,7 +452,7 @@ Parameters: `range`, `limit`, `cursor`, `q` (filter: a part of the name, IP or M
   "key": "02:00:00:00:00:01",
   "name": "laptop",
   "ip": "192.0.2.10",
-  "ips": ["192.0.2.10", "2001:db8::10"],
+  "ips": ["192.0.2.10", "192.0.2.110"],
   "mac": "02:00:00:00:00:01",
   "client_id": 4,
   "groups": [0],
@@ -777,7 +778,7 @@ Response 200:
 
 | Field | Type | Rule |
 |---|---|---|
-| `match` | string | Required, unique. An IPv4 or IPv6 address, a CIDR, a MAC address, or a host name. |
+| `match` | string | Required, unique. An IPv4 address, an IPv4 CIDR, a MAC address, or a host name. IPv6 gives 422 (A11). |
 | `kind` | `ip`, `cidr`, `mac`, `host` | Read-only. The server finds it from `match`. |
 | `groups` | integer array | Default `[0]`. |
 | `comment` | string | Default `""`. The UI shows it as the client name. |
@@ -844,7 +845,8 @@ Parameters: `limit` (default 200), `cursor`.
 ```
 
 - `domain`: a domain or a reverse zone, for example `2.0.192.in-addr.arpa`.
-- `servers`: 1 to 4 addresses, with an optional port (`192.0.2.1:53`).
+- `servers`: 1 to 4 IPv4 addresses, with an optional port (`192.0.2.1:53`). IPv6 gives 422 (A11).
+- A reverse zone for an IPv4 subnet ends in `.in-addr.arpa`. An `ip6.arpa` zone is allowed, because it is DNS content, but v1 has no IPv6 clients.
 
 | Collection | Paths |
 |---|---|
@@ -938,7 +940,7 @@ stateDiagram-v2
   },
   "acl": {
     "extra_cidrs": ["198.51.100.0/24"],
-    "local_subnets": ["192.0.2.0/24", "2001:db8::/64"]
+    "local_subnets": ["192.0.2.0/24"]
   },
   "stats": {
     "flush_interval_seconds": 60,
@@ -953,7 +955,7 @@ stateDiagram-v2
 
 | Field | Rule |
 |---|---|
-| `upstreams.servers` | 1 to 8 items. Plain `IP` or `IP:port`. P7 adds `tls://` and `https://` forms. |
+| `upstreams.servers` | 1 to 8 items. Plain IPv4 `IP` or `IP:port`. IPv6 gives 422 (A11). P7 adds `tls://` and `https://` forms. |
 | `upstreams.timeout_ms` | 100 to 10000. |
 | `blocking.mode` | `null` (`0.0.0.0` and `::`, the default), `nxdomain`, `refused`, `custom_ip`. |
 | `blocking.custom_ipv4`, `custom_ipv6` | Used only with `custom_ip`. Else `null`. |
@@ -963,8 +965,8 @@ stateDiagram-v2
 | `cache.max_entries` | 0 to 1000000. |
 | `cache.min_ttl`, `max_ttl`, `negative_ttl` | Seconds. `min_ttl` ≤ `max_ttl`. |
 | `rate_limit.queries_per_second` | Per client. 0 = no limit. |
-| `acl.extra_cidrs` | Up to 64 CIDRs in addition to the local subnets (D7). |
-| `acl.local_subnets` | Read-only. The subnets that the server found on its interfaces. |
+| `acl.extra_cidrs` | Up to 64 IPv4 CIDRs in addition to the local subnets (D7). IPv6 gives 422 (A11). |
+| `acl.local_subnets` | Read-only. The IPv4 subnets that the server found on its interfaces. |
 | `stats.flush_interval_seconds` | 0 (RAM only) or 10 to 3600 (D5). |
 | `stats.retention_days` | 1 to 365. |
 | `stats.recent_queries_size` | 100 to 100000. |

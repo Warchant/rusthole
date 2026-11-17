@@ -1,0 +1,159 @@
+# rusthole: plan
+
+Status: APPROVED on 2026-11-17. The owner said "yes" to D1–D17 and to the part split P0–P8.
+
+Repo: GitHub org `warchant`. License: MIT OR Apache-2.0.
+
+## 1. Goal
+
+rusthole is a DNS ad blocker for a home or small office network.
+
+- It replaces a running Pi-hole. It imports a Pi-hole v6 Teleporter export.
+- It is safer than Pi-hole. It is one static binary, it has no unsafe code in our crates,
+  and every admin endpoint needs a login.
+- It is a base for the owner's custom features. The owner defines these later.
+
+It is not a line-by-line Pi-hole rewrite.
+
+## 2. Facts from the sample export (Pi-hole v6 Teleporter)
+
+| Item | Value | Effect on the plan |
+|---|---|---|
+| Files | `pihole.toml`, `gravity.db`, `pihole-FTL.db`, `etc/hosts`, `dhcp.leases` | Import reads the first four. DHCP is out of scope. |
+| Adlists | 9 URLs (1 disabled), about 370k entries | `gravity.db` has the URLs only. rusthole downloads the lists itself. |
+| Domain rules | 5 exact allow, 20 exact deny, 9 regex deny | Regex uses no Pi-hole extensions. All fit the Rust `regex` crate. |
+| Groups | 2 groups | Groups are needed for parity. |
+| Clients | 13 clients. 12 by MAC address, 1 by IP. | rusthole must find a client's MAC from the neighbor table. |
+| Client groups | 2 clients are only in the second group. That group has no adlists. | These clients are not blocked. The import must keep this. |
+| Upstreams | 4 plain DNS servers | Forwarding mode. |
+| Blocking mode | `NULL` (answer `0.0.0.0` / `::`) | Default reply mode. |
+| `dnssec` | `true` | See decision D12. |
+| Password | `pwhash` (not Argon2id) | Cannot import. See decision D10. |
+
+The sample stays out of the repo. Tests use synthetic fixtures only.
+
+## 3. Architecture
+
+```mermaid
+flowchart LR
+    subgraph clients[LAN clients]
+        C1[Plain DNS client]
+        C2[DoH client]
+        C3[Browser: admin UI]
+    end
+
+    subgraph rh[rusthole binary]
+        L53[DNS listener UDP/TCP :53]
+        LDOH[DoH listener :443 /dns-query]
+        LADM[Admin listener HTTPS]
+        ACL[Client ACL - pure]
+        POL[Policy engine - pure<br/>groups, lists, rules, regex]
+        CACHE[Cache]
+        UP[Upstream pool<br/>UDP/TCP/DoT/DoH<br/>health state machine]
+        LOG[Query log ring buffer<br/>+ aggregates in RAM]
+        DB[(SQLite<br/>batched flush)]
+        API[REST API + auth<br/>ban state machine]
+        UI[Embedded Svelte UI]
+        CFG[rusthole.toml]
+        LISTS[List refresher<br/>ETag / If-Modified-Since]
+    end
+
+    UPS[(Upstream resolvers)]
+    WEB[(Adlist URLs)]
+
+    C1 --> L53 --> ACL
+    C2 --> LDOH --> ACL
+    ACL --> POL --> CACHE --> UP --> UPS
+    POL --> LOG --> DB
+    C3 --> LADM --> API
+    LADM --> UI
+    API --> CFG
+    API --> LOG
+    LISTS --> WEB
+    LISTS --> POL
+    CFG --> POL
+```
+
+### Crates (Cargo workspace)
+
+| Crate | Content | I/O |
+|---|---|---|
+| `rusthole-core` | Config model, policy engine, ACL, list parsers, regex translation, cache policy, state machines (ban, upstream health, list refresh) | None. Pure functions. `now` is an input. |
+| `rusthole-import` | Pi-hole v6 Teleporter reader | Reads a zip and SQLite. |
+| `rusthole-dns` | Listeners, upstream clients, request pipeline | Sockets. |
+| `rusthole-store` | Query log, stats, SQLite flush | SQLite. |
+| `rusthole-web` | REST API, auth, TLS, embedded UI | HTTP. |
+| `rusthole` (bin) | CLI, wiring, signals, systemd notify | Process. |
+| `web/` | Svelte + Vite UI | Node at build time only. |
+| `fuzz/` | cargo-fuzz targets | None. |
+
+## 4. Parts
+
+Each part is one branch and one pull request. Each part can be reviewed, shipped and
+reverted alone.
+
+```mermaid
+flowchart TD
+    P0[P0 Skeleton + CI] --> P1[P1 Config model + Teleporter import]
+    P1 --> P2[P2 DNS forwarder + ACL + cache]
+    P2 --> P3[P3 Blocking engine + groups + local records]
+    P3 --> P4[P4 Query log + stats]
+    P4 --> P5[P5 Admin API + auth + TLS]
+    P5 --> P6[P6 Svelte UI]
+    P2 --> P7[P7 DoH server + DoH/DoT upstreams]
+    P6 --> P8[P8 Release: static musl builds + systemd]
+    P7 --> P8
+```
+
+| Part | Content | Done when |
+|---|---|---|
+| P0 | Workspace, lints (`unsafe_code = "forbid"`, clippy pedantic), rustfmt, cargo-deny, CI (fmt, clippy, test, deny), proptest and cargo-fuzz setup | CI is green on an empty workspace. |
+| P1 | `rusthole.toml` schema and validation. `rusthole import teleporter.zip` writes a `rusthole.toml`. It reports each item it cannot translate. | Import of a synthetic v6 export gives the expected TOML. Proptest: config serialize then parse gives the same value. Fuzz: config parser, import reader. |
+| P2 | UDP/TCP listeners, client ACL (local subnets), upstream pool (UDP/TCP) with health state machine and failover, cache (positive and negative), per-client rate limit | `dig @rusthole` works on Linux. Off-net clients get REFUSED. Fuzz: request handler. |
+| P3 | List download and parse (hosts, domain-only, ABP `\|\|x^`), exact and regex rules, groups, clients by IP/CIDR/MAC, reply modes, local A/AAAA/CNAME records, `/etc/hosts` import, conditional forwarding | Sample-shaped fixture blocks and allows the same as Pi-hole. Proptest: allow beats deny; group membership. Fuzz: list parser, regex translation. |
+| P4 | Query log ring buffer, per-client and per-domain counters, batched SQLite flush, retention | No disk write between flushes. Proptest: counters equal the log. |
+| P5 | REST API, Argon2id login, optional TOTP, API tokens, login ban state machine, CSRF, Host-header check, security headers, TLS (file or self-signed) | No route works without a session except login and static assets (test lists all routes). Ban bound test. |
+| P6 | Svelte UI: dashboard, query log, lists, rules, groups, clients, settings | UI builds into the binary. Main flows work in a browser. |
+| P7 | DoH server (RFC 8484, GET and POST), DoH and DoT upstreams | `curl` and Firefox DoH work. Fuzz: DoH request decode. |
+| P8 | x86_64 and aarch64 musl static builds, systemd unit, install script | Binary runs on Ubuntu x86_64 and Raspberry Pi OS 64-bit. |
+
+## 5. Decisions (all approved)
+
+| ID | Decision | Approved rule |
+|---|---|---|
+| D1 | "No unsafe" scope | `unsafe_code = "forbid"` in all our crates. Dependencies (tokio, rusqlite, ring) contain unsafe code, and SQLite and ring contain C. cargo-deny checks advisories, licenses and sources. |
+| D2 | "Single TOML" scope | `rusthole.toml` holds all settings, adlist URLs, rules, groups and clients. A data directory holds downloaded lists, the query DB and the self-signed cert. The UI edits the TOML with `toml_edit` (comments stay) and writes it atomically (temp file, fsync, rename). |
+| D3 | Groups and clients | Full parity: groups; clients by IP, CIDR or MAC; lists and rules attach to groups. MAC comes from the kernel neighbor table (IPv4 and IPv6). |
+| D4 | Regex engine | Rust `regex` crate: linear time, so no ReDoS. Match is case-insensitive. The import reports Pi-hole extensions (`;querytype=`, `;invert`, `;reply=`). Support for them comes later. |
+| D5 | SD-card wear | Query log and counters live in RAM. Flush to SQLite in one batch every 60 s (configurable; 0 = RAM only). WAL mode, `synchronous=NORMAL`. A crash loses up to 60 s of log. Lists are refetched only when changed (ETag / If-Modified-Since). The compiled block set lives in RAM only. |
+| D6 | Memory target | Target: 1M blocked domains in less than 64 MB RSS on aarch64. Measure in P3. |
+| D7 | Client ACL | Default allow: loopback, plus each subnet on a local interface (IPv4 and IPv6). Rescan when interfaces change. Extra CIDRs in config. Other clients get REFUSED. The ACL also applies to DoH and to the admin UI. |
+| D8 | Listeners | Three listeners: DNS (53 UDP/TCP), DoH (443, `/dns-query`), admin (8443 HTTPS). Each can be turned off or moved in config. |
+| D9 | Web security | Only login and static assets work without a session. Cookies: `Secure`, `HttpOnly`, `SameSite=Strict`. CSRF token on each write. Host-header check (DNS rebinding). Strict CSP. |
+| D10 | Auth | One admin. Argon2id hash in the TOML. Optional TOTP. Hashed API tokens. Login ban per IPv4 address and per IPv6 /64, with exponential backoff and a bounded (LRU) map. The Pi-hole password is not imported: you set a new one with `rusthole passwd`. |
+| D11 | DNS stack | tokio. `hickory-proto` for the wire format. Our own handler and upstream pool. |
+| D12 | DNSSEC | v1: send the DO bit, pass the upstream AD bit through (trust the upstream). Local validation is a later part. |
+| D13 | Local DNS | Local A/AAAA/CNAME records, `/etc/hosts` import, conditional forwarding (reverse lookup for client names). All in P3. |
+| D14 | UI build | `cargo build` does not run Node. `rust-embed` embeds `web/dist`. If `web/dist` is missing, a placeholder page is embedded, so a Rust-only build still works. CI builds the UI before the release build. |
+| D15 | Release | `cargo-zigbuild` for x86_64 and aarch64 musl. systemd unit runs as a non-root user with `AmbientCapabilities=CAP_NET_BIND_SERVICE`. |
+| D16 | Tests and fuzzing | proptest in `rusthole-core` and `rusthole-import`. cargo-fuzz targets on nightly in WSL or Linux CI (cargo-fuzz works badly on Windows MSVC). |
+| D17 | Engineering rules | Pure core with `now` as input. Monotonic clock for durations. Timeout on each wait. State machines log invalid transitions at ERROR and go to a safe state. Bounded loops with a rank-function test. Cleanup on all exit paths. Manual fault injection for safety-critical logic. |
+
+## 6. Resolved and open questions
+
+Resolved:
+
+1. Repo: GitHub org `warchant`, license MIT OR Apache-2.0.
+2. DoH is for the LAN and VPN only. The D7 ACL applies to DoH. No open DoH path.
+3. Regex match is case-insensitive (part of D4).
+
+Open:
+
+1. Custom features: the owner defines them later. The policy engine stays open for them.
+
+## 7. Assumptions
+
+- Target OS is Linux only. Windows builds are for development only.
+- The DNS listener runs on a host with a fixed LAN address.
+- No DHCP server.
+- No full recursive resolver. Forwarding only.

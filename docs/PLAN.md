@@ -1,6 +1,8 @@
 # rusthole: plan
 
-Status: APPROVED on 2026-11-17. The owner said "yes" to D1–D17 and to the part split P0–P8.
+Status: APPROVED on 2026-11-17. The owner said "yes" to D1–D17. Section 8 amends the plan
+after an independent review; where section 8 and the earlier sections differ, section 8 wins.
+The part split in section 8 replaces the split in section 4.
 
 Repo: GitHub org `warchant`. License: MIT OR Apache-2.0.
 
@@ -157,3 +159,52 @@ Open:
 - The DNS listener runs on a host with a fixed LAN address.
 - No DHCP server.
 - No full recursive resolver. Forwarding only.
+
+## 8. Review amendments (DECIDED 2026-11-17)
+
+An independent review (Fable 5.2, 2026-11-17) found no blocker. These amendments come from it.
+
+Owner answers:
+
+- A1: owner has no preference. Decision: use `ring` (easier static musl build).
+- A2, A3, A5, A6, A7, A8: yes.
+- A4: owner said "do all kinds of security hardenings". Decision: yes (CNAME cloaking is a
+  tracking bypass).
+- A9: yes to blocking toggle with timer, list management, statistics and audit log.
+  No to offline start and config reload. The disk cache of lists (P3b) still loads at start.
+- A9 statistics focus (owner): which domains each client resolves (grouped), how many times,
+  and when (histograms by hour of day). A raw query table is less important: keep only a
+  small recent-query ring buffer in RAM.
+- A10: owner said "do everything". Decision: use the new split below.
+
+| ID | Amendment | Source |
+|---|---|---|
+| A1 | Pin the TLS crypto provider to `ring`: `default-features = false` + `ring` for rustls, tokio-rustls, hyper-rustls, rcgen; `rustls-no-provider` for reqwest. Ban `aws-lc-sys` and `aws-lc-rs` in `deny.toml`. | M3 |
+| A2 | Prove the static build early: from P1, CI builds `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` with `cargo-zigbuild` and checks that the binary is static. P8 keeps only packaging. | M4 |
+| A3 | A blocked name is blocked for all query types: NULL mode gives `0.0.0.0`/`::` for A/AAAA and NODATA for other types (HTTPS/SVCB too). ANY gets an RFC 8482 answer. A "special domains" list, on by default: Firefox DoH canary (`use-application-dns.net` → NXDOMAIN), iCloud Private Relay (`mask.icloud.com`, `mask-h2.icloud.com` → NXDOMAIN). | M2 |
+| A4 | Deep CNAME check: after the upstream answer, each CNAME target goes through the client's policy. The cache holds the unfiltered answer; the policy runs on every reply. | M1 |
+| A5 | Upstream hardening in P2: random source port and CSPRNG ID per query; accept only from the upstream address with the same ID and question; TCP retry on TC; EDNS size 1232; obey the client UDP size and set TC; cache key holds qname, qtype, qclass and DO bit; TTL clamp; bound on in-flight queries. Listeners bind one UDP and one TCP socket per local address (not the wildcard), and rebind on interface change. Docs and the install script handle the systemd-resolved stub on port 53. | M5, M6 |
+| A6 | DoH rules: DoH clients need a trusted certificate (a file, or a local CA that rusthole makes and you install on devices). The self-signed fallback is for the admin UI only. The DoH server uses HTTP/2 with ALPN, and has limits on body size, GET length, header time, connections and streams. Each DoH/DoT upstream has bootstrap IP addresses. When the clock is wrong after boot (no RTC on a Pi), a configured plain-DNS fallback is used until the clock is valid. | M9 |
+| A7 | Secrets and first run: `rusthole.toml` and the TLS key are written with mode 0600; rusthole warns when they can be read by others. The API never returns secrets. With no password set, all logins fail; you set the password with `rusthole passwd` only. A semaphore limits parallel Argon2 checks. TOTP and API-token failures count in the ban machine. A TOTP code cannot be used twice. The UI does not overwrite a config file that changed on disk since it was read. | M11 |
+| A8 | Engineering hardening: lints `indexing_slicing`, `string_slice`, `unreachable`; `Instant::now`/`SystemTime::now` are not allowed in `rusthole-core`; CI checks that `rusthole-core` has no tokio. Pinned nightly for fuzz; no `-D warnings` on the fuzz job; cargo-deny also checks `fuzz/Cargo.lock`. Off-net UDP clients get no REFUSED answer (drop, no reflection). Warning when a local subnet is not private. List fetch limits (size, time, decompression, http/https only). Regex size limit. IDN names are changed to punycode at the input edge. TLS roots: system roots, then bundled `webpki-roots`. | m3–m6, m8–m10 |
+| A9 | Pi-hole features added to scope: enable or disable blocking with a timer (a state machine); list refresh schedule, "update now" and status per list; "which list blocks this domain" search (scan of list files on disk); subscribed allow lists and regex allow rules; statistics (queries over time, query types, upstream share, top domains, top blocked, top clients); audit log of admin actions; start with list files on disk when the network is down; config reload without restart (a bad config keeps the old one). | M12 |
+| A10 | New part split (see below). P1 adds `config_version` and a key-by-key import mapping table (translated, ignored, reported). Client identity uses a `NeighborTable` trait: the pure core gets a snapshot; a bounded cache refreshes on a period; no lookup on the hot path; an unknown MAC uses the default group; IPv6 neighbors come from netlink. Memory: compact set (arena or `fst`) with a list bitmask per domain and a list mask per group; 64 MB is the peak during a refresh. | M7, M8, M10, m1, m2 |
+
+Proposed part split (A10):
+
+```mermaid
+flowchart TD
+    P0[P0 Skeleton + CI] --> P1[P1 Config schema + Teleporter import + musl CI]
+    P1 --> P2[P2 DNS forwarder + ACL + cache + upstream hardening]
+    P2 --> P3a[P3a Policy engine + list parsers + compact set + CNAME check]
+    P3a --> P3b[P3b List refresher + schedule + disk cache]
+    P3a --> P3c[P3c Client identity MAC + local DNS + conditional forwarding]
+    P3b --> P4[P4 Query log + stats + audit log]
+    P3c --> P4
+    P4 --> P5a[P5a TLS: file, self-signed, local CA]
+    P5a --> P5[P5 Admin API + auth + config reload]
+    P5 --> P6[P6 Svelte UI]
+    P5a --> P7[P7 DoH server + DoH/DoT upstreams]
+    P6 --> P8[P8 Packaging: systemd, install script, checksums]
+    P7 --> P8
+```

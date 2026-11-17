@@ -1,0 +1,12 @@
+[package]
+name = "rusthole-web"
+description = "Admin API, auth and embedded UI of rusthole."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true

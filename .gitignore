@@ -1,1 +1,11 @@
 /target
+/fuzz/target
+/fuzz/corpus
+/fuzz/artifacts
+/fuzz/coverage
+/web/node_modules
+/web/dist
+*.profraw
+# Real Pi-hole exports hold private data. Never commit them.
+*teleporter*.zip
+/data

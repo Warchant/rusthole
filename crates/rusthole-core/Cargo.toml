@@ -1,0 +1,18 @@
+[package]
+name = "rusthole-core"
+description = "Pure policy core of rusthole: config model, matching, ACL, state machines. No I/O."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+
+[lints]
+workspace = true

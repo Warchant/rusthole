@@ -36,6 +36,8 @@ regex = "1.13"
 # `limits` and `hooks` let the import cap value sizes and VM steps for an untrusted file.
 rusqlite = { version = "0.43", default-features = false, features = ["bundled", "serialize", "limits", "hooks"] }
 serde = { version = "1", features = ["derive"] }
+# Keyed SipHash-1-3 for the compiled domain set of the policy engine (a seed for each engine).
+siphasher = { version = "1.0.4", default-features = false }
 tempfile = "3.27"
 thiserror = "2"
 toml = "1.2"
@@ -43,6 +45,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 
 # Dev
+# Counts heap bytes in the memory test of the policy engine (tests only).
+peak_alloc = "0.3"
 proptest = "1"
 
 [workspace.lints.rust]

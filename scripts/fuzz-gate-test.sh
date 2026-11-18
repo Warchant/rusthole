@@ -76,6 +76,7 @@ echo "$name" >>"$FAKE_RUNS"
 BIN
 
 export PATH="$work/bin:$PATH" FUZZ_TOOLCHAIN=nightly-test FAKE_NAMES="${all_names[*]}"
+export FUZZ_HOST=x86_64-unknown-linux-gnu
 export FAKE_RUNS="$work/runs" FAKE_MERGES="$work/merges" FAKE_BIN="$work/fake-fuzz-bin"
 export FUZZ_BIN_DIR="$work/fuzzbin" FUZZ_CORPUS_DIR="$work/corpus"
 export FUZZ_ARTIFACT_DIR="$work/artifacts"

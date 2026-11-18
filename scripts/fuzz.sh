@@ -24,6 +24,7 @@
 #                     <corpus>/<target>. The nightly CI job stores it on the branch
 #                     "fuzz-corpus".
 #   FUZZ_ARTIFACT_DIR The folder for crash inputs (default fuzz/artifacts).
+#   FUZZ_HOST         The target triple (default: the host of FUZZ_TOOLCHAIN).
 #   FUZZ_BIN_DIR      The folder of the built binaries (default: <target dir>/<host>/release).
 #
 # Each run also reads fuzz/seeds/<target> (in git). libFuzzer does not write to it.
@@ -38,7 +39,11 @@ set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 toolchain="${FUZZ_TOOLCHAIN:?set FUZZ_TOOLCHAIN to the pinned nightly}"
-cargo_args=()
+# The target triple: the host of the toolchain. cargo-fuzz takes its own host as the
+# default target, and a prebuilt cargo-fuzz can be a musl build. AddressSanitizer does not
+# work with the static libc of musl.
+host="${FUZZ_HOST:-$(rustc "+$toolchain" -vV | sed -n 's/^host: //p')}"
+cargo_args=(--target "$host")
 if [[ -n "${FUZZ_TARGET_DIR:-}" ]]; then
     cargo_args+=(--target-dir "$FUZZ_TARGET_DIR")
 fi
@@ -87,8 +92,6 @@ bin_dir() {
         printf '%s\n' "$FUZZ_BIN_DIR"
         return
     fi
-    local host
-    host="$(rustc "+$toolchain" -vV | sed -n 's/^host: //p')"
     printf '%s\n' "${FUZZ_TARGET_DIR:-$repo/fuzz/target}/$host/release"
 }
 

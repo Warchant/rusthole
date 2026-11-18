@@ -860,10 +860,21 @@ async fn placeholder_page_without_a_built_ui() {
 async fn large_body_gives_413() {
     let h = harness(Options::default()).await;
     let s = h.login().await;
-    let big = json!({"name": "x".repeat(70 * 1024)});
-    let r = h.req(Method::POST, "/api/v1/groups", Some(big), &s).await;
-    assert_eq!(r.status, StatusCode::PAYLOAD_TOO_LARGE);
-    assert_eq!(r.code(), "payload_too_large");
+    // The server refuses the body from its Content-Length, before it reads the body. Send
+    // only the head: with a real 70 KiB body, the client can get "broken pipe" before it
+    // reads the 413 (a race that failed in CI).
+    let head = format!(
+        "POST /api/v1/groups HTTP/1.1\r\nHost: {}\r\ncookie: __Host-rusthole_session={}\r\n\
+         x-csrf-token: {}\r\ncontent-type: application/json\r\ncontent-length: {}\r\n\
+         connection: close\r\n\r\n",
+        h.addr,
+        s.cookie.as_deref().unwrap(),
+        s.csrf.as_deref().unwrap(),
+        70 * 1024,
+    );
+    let answer = h.raw_head(&head).await;
+    assert!(answer.starts_with("HTTP/1.1 413 "), "answer: {answer}");
+    assert!(answer.contains("\"payload_too_large\""), "answer: {answer}");
     h.stop().await;
 }
 

@@ -224,6 +224,41 @@ pub struct Creds {
 }
 
 impl Harness {
+    /// Sends `head` (the request line and the headers, with no body) over a new TLS
+    /// connection, and gives the full answer as text. The read stops at EOF or after 10 s.
+    ///
+    /// Use it for a request whose body the server refuses before it reads the body. reqwest
+    /// (hyper) writes the body first; when the server answers and closes early, the write
+    /// can fail with "broken pipe" before reqwest reads the answer.
+    pub async fn raw_head(&self, head: &str) -> String {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+        let ca = CertificateDer::from_pem_slice(&self.ca_pem).unwrap();
+        let mut roots = rustls::RootCertStore::empty();
+        roots.add(ca).unwrap();
+        let mut cfg = rustls::ClientConfig::builder_with_provider(rusthole_tls::provider())
+            .with_safe_default_protocol_versions()
+            .unwrap()
+            .with_root_certificates(roots)
+            .with_no_client_auth();
+        cfg.alpn_protocols = vec![b"http/1.1".to_vec()];
+        let connector = tokio_rustls::TlsConnector::from(Arc::new(cfg));
+        let name = rustls_pki_types::ServerName::IpAddress(self.addr.ip().into());
+        let io = async {
+            let tcp = tokio::net::TcpStream::connect(self.addr).await.unwrap();
+            let mut tls = connector.connect(name, tcp).await.unwrap();
+            tls.write_all(head.as_bytes()).await.unwrap();
+            tls.flush().await.unwrap();
+            let mut out = Vec::new();
+            // The server can close with no TLS close_notify: keep what came before.
+            let _ = tls.read_to_end(&mut out).await;
+            String::from_utf8_lossy(&out).into_owned()
+        };
+        tokio::time::timeout(Duration::from_secs(10), io)
+            .await
+            .unwrap()
+    }
+
     pub async fn req(
         &self,
         method: Method,

@@ -174,10 +174,12 @@ function makeAudit(): T.AuditEntry[] {
 }
 
 let state = initialState();
+refreshGroupCounts();
 
 /** Resets the mock state. For tests. */
 export function resetMock(): void {
   state = initialState();
+  refreshGroupCounts();
 }
 
 function audit(action: string, target: string | null, detail: string | null = null, result: 'ok' | 'error' = 'ok') {

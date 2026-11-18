@@ -4,6 +4,7 @@ A DNS ad blocker for home and small office networks, written in Rust.
 It does a job like Pi-hole, but it is not a Pi-hole rewrite.
 
 Status: early development. See [docs/PLAN.md](docs/PLAN.md) for the plan and the order of work.
+The admin REST API contract is in [docs/API.md](docs/API.md).
 
 ## Goals
 

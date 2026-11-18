@@ -4,23 +4,23 @@ This folder has the admin web UI of rusthole. It uses Svelte 5, Vite and TypeScr
 The REST API contract is in [docs/API.md](../docs/API.md).
 
 The Rust binary embeds the build output (`web/dist`) with `rust-embed`. `cargo build`
-does not run Node. If `web/dist` is missing, the binary embeds a placeholder page.
+does not run bun or Node. If `web/dist` is missing, the binary embeds a placeholder page.
 
 ## Requirements
 
-- Node.js 22.12 or later, and npm.
+- [bun](https://bun.sh) 1.4 or later. bun installs the packages and runs the scripts.
 
 ## Install
 
 ```bash
 cd web
-npm ci
+bun install --frozen-lockfile
 ```
 
 ## Run the dev server with mock data
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Then open http://localhost:5173.
@@ -35,7 +35,7 @@ Then open http://localhost:5173.
 ## Run the dev server with a real backend
 
 ```bash
-npm run dev:api
+bun run dev:api
 ```
 
 The dev server sends `/api` requests to `https://127.0.0.1:8443`. To use a different
@@ -44,19 +44,19 @@ address, change `RUSTHOLE_API` in `.env.api`.
 ## Build
 
 ```bash
-npm run build
+bun run build
 ```
 
 The output goes to `web/dist`. The production build does not contain the mock.
 
-To see the build with the strict CSP of the admin listener, run `npm run preview`.
+To see the build with the strict CSP of the admin listener, run `bun run preview`.
 The preview server sends the same `Content-Security-Policy` header.
 
 ## Checks
 
 ```bash
-npm run check   # svelte-check and tsc
-npm test        # vitest unit tests
+bun run check   # svelte-check and tsc
+bun run test    # vitest unit tests (not `bun test`, which is a different test runner)
 ```
 
 ## Rules for UI code

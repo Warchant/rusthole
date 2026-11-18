@@ -6,7 +6,7 @@ import type { FetchFn } from './lib/api/client';
 import { formatDuration } from './lib/format';
 import { applyTheme, clearSession, go, session, startRouter, theme, toast } from './lib/state.svelte';
 
-// The mock is in the bundle only when VITE_MOCK is "1" (npm run dev).
+// The mock is in the bundle only when VITE_MOCK is "1" (bun run dev).
 // In a production build this branch is removed.
 let fetchFn: FetchFn = (url, init) => fetch(url, init);
 if (import.meta.env.VITE_MOCK === '1') {

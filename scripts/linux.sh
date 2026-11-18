@@ -25,4 +25,13 @@ if [[ "${1:-}" == "fuzz" ]]; then
         -max_total_time="$seconds" -rss_limit_mb=2048
 fi
 
+# Test binaries (and `cargo run`) get their temp directory on a RAM file system. On drive D
+# (a Windows drive), each fsync can take seconds when other programs write to the disk, and
+# tests with a time limit then fail. rustc and the linker keep TMPDIR on drive D.
+test_tmp="/dev/shm/rusthole-test"
+if mkdir -p "$test_tmp" 2>/dev/null; then
+    host="$(rustc -vV | sed -n 's/^host: //p' | tr 'a-z-' 'A-Z_')"
+    export "CARGO_TARGET_${host}_RUNNER=env TMPDIR=$test_tmp"
+fi
+
 exec cargo "$@"

@@ -3,6 +3,7 @@
 mod engine;
 mod fsutil;
 mod run;
+mod stats_observer;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};

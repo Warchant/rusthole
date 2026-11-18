@@ -20,10 +20,10 @@ pub mod filter;
 pub mod handler;
 pub mod identity;
 pub mod interfaces;
-pub mod resolve;
 pub mod local;
 pub mod neighbors;
 pub mod policy_filter;
+pub mod resolve;
 pub mod server;
 mod sync;
 pub mod upstream;
@@ -37,9 +37,9 @@ pub use filter::{
 pub use handler::{Front, Handler, HandlerSettings, Pending, Reply, Route};
 pub use identity::{ClientResolver, IdentityService, IdentitySettings};
 pub use interfaces::{InterfaceSource, StaticInterfaces, SystemInterfaces};
-pub use resolve::{HostResolver, ResolveError};
 pub use neighbors::{NeighborSource, NeighborTable, StaticNeighbors, SystemNeighbors};
 pub use policy_filter::{BlockingControl, EngineHandle, PolicyFilter, ToggleError, engine_handle};
+pub use resolve::{HostResolver, ResolveError};
 pub use server::{
     BoundListener, DnsServer, DnsSettings, ListenMode, ServerDeps, SettingsError, StartError,
     TcpLimits, start,

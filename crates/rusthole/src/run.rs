@@ -13,6 +13,7 @@
 //!     M->>S: shutdown (stop accept, finish in-flight queries, hard stop after grace)
 //!     M->>P: shutdown (neighbor and PTR tasks)
 //!     M->>M: stop the runtime (time limit)
+//!     M->>M: stop the statistics store (final flush, time limit)
 //! ```
 
 use std::future::Future;
@@ -51,17 +52,24 @@ pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode>
         .thread_name("rusthole")
         .build()
         .context("cannot start the async runtime")?;
+    // The statistics store (part P4). It stops after the DNS server, with a final flush.
+    let stats = crate::stats_observer::start(&config);
+    let deps = ServerDeps {
+        observer: crate::stats_observer::observer(stats.as_ref()),
+        ..ServerDeps::default()
+    };
     let loader = DiskLists::for_config(&config);
     let result = runtime.block_on(serve_with_policy(
         &config,
         settings,
-        ServerDeps::default(),
+        deps,
         &loader,
         Arc::new(SystemNeighbors),
         stop_signal(),
         |_, _| {},
     ));
     runtime.shutdown_timeout(RUNTIME_STOP);
+    crate::stats_observer::stop(stats);
     result?;
     Ok(ExitCode::SUCCESS)
 }

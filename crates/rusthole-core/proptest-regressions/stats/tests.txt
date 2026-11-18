@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 0f20ae1a3ba234a1070b77f4315c923d751fe7603865329da922cad6cd66a74a # shrinks to events = [StatsEvent { at: 1794873600, client: 192.0.2.3, name: "www.example.com", qtype: 1, status: Forwarded, reason: None, upstream: Some("192.0.2.53:53"), duration_us: 1500 }, StatsEvent { at: 1794873600, client: 192.0.2.4, name: "www.example.com", qtype: 1, status: Forwarded, reason: None, upstream: Some("192.0.2.53:53"), duration_us: 1500 }, StatsEvent { at: 1794873600, client: 192.0.2.0, name: "www.example.com", qtype: 1, status: Forwarded, reason: None, upstream: Some("192.0.2.53:53"), duration_us: 1500 }, StatsEvent { at: 1794873600, client: 192.0.2.1, name: "www.example.com", qtype: 1, status: Forwarded, reason: None, upstream: Some("192.0.2.53:53"), duration_us: 1500 }, StatsEvent { at: 1794873600, client: 192.0.2.2, name: "www.example.com", qtype: 1, status: Forwarded, reason: None, upstream: Some("192.0.2.53:53"), duration_us: 1500 }], limit = 1, sort = Queries, blocked_only = false

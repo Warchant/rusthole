@@ -19,6 +19,7 @@ getrandom = { workspace = true }
 rusthole-core = { workspace = true }
 rusthole-dns = { workspace = true }
 rusthole-import = { workspace = true }
+rusthole-store = { workspace = true }
 tempfile = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }

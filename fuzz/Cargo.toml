@@ -102,3 +102,10 @@ path = "fuzz_targets/arp_parse.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "stats_events"
+path = "fuzz_targets/stats_events.rs"
+test = false
+doc = false
+bench = false

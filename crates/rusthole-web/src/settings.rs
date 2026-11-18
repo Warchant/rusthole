@@ -253,6 +253,9 @@ pub fn apply_patch(cfg: &mut Config, p: SettingsPatch) -> ApiResult<()> {
     }
 }
 
+/// The 422 message for a DoT or DoH server with a host name that the API cannot add (m19).
+pub const NEEDS_BOOTSTRAP: &str = "A DoT or DoH server with a host name needs bootstrap IP addresses. The API cannot set them: use an IP address in the URL, or add the server with `bootstrap` in rusthole.toml.";
+
 fn patch_upstreams(cfg: &mut Config, u: &UpstreamsS, e: &mut Errs) {
     if u.servers.is_empty() || u.servers.len() > 8 {
         e.add("upstreams.servers", "Give 1 to 8 servers.");
@@ -262,6 +265,17 @@ fn patch_upstreams(cfg: &mut Config, u: &UpstreamsS, e: &mut Errs) {
             Ok(url) => {
                 if matches!(url.host, UpstreamHost::Ip(ip) if ip.is_ipv6()) {
                     e.add(&format!("upstreams.servers[{i}]"), IPV6_LATER);
+                }
+                // m19: the API has no bootstrap field. A DoT or DoH server with a host name
+                // that is not in the config now has no bootstrap address. Name the API field
+                // (not the TOML path) in the 422.
+                let known = cfg
+                    .upstreams
+                    .servers
+                    .iter()
+                    .any(|o| o.url == s.trim() && !o.bootstrap.is_empty());
+                if matches!(url.host, UpstreamHost::Name(_)) && !known {
+                    e.add(&format!("upstreams.servers[{i}]"), NEEDS_BOOTSTRAP);
                 }
             }
             Err(err) => e.add(&format!("upstreams.servers[{i}]"), err.to_string()),
@@ -399,6 +413,37 @@ mod tests {
         )
         .unwrap();
         assert_eq!(c2, cfg);
+    }
+
+    /// m19: a DoT or DoH server with a host name and no known bootstrap gets a 422 on the
+    /// API field `upstreams.servers[i]`. A server that stays keeps its bootstrap and passes.
+    #[test]
+    fn a_host_name_upstream_needs_a_known_bootstrap() {
+        let mut cfg = Config::default();
+        cfg.upstreams.servers = vec![Upstream {
+            url: "tls://dns.example:853".to_owned(),
+            bootstrap: vec!["192.0.2.53".to_owned()],
+        }];
+        let patch = |servers: &[&str]| SettingsPatch {
+            upstreams: Some(UpstreamsS {
+                servers: servers.iter().map(|s| (*s).to_owned()).collect(),
+                timeout_ms: 2000,
+            }),
+            ..SettingsPatch::default()
+        };
+        let mut c = cfg.clone();
+        apply_patch(&mut c, patch(&["tls://dns.example:853", "192.0.2.1"])).unwrap();
+        assert!(c.validate().is_empty(), "{:?}", c.validate());
+        let mut c = cfg.clone();
+        let err = apply_patch(
+            &mut c,
+            patch(&["192.0.2.1", "https://doh.example/dns-query"]),
+        )
+        .unwrap_err();
+        let text = format!("{err:?}");
+        assert!(text.contains("upstreams.servers[1]"), "{text}");
+        assert!(text.contains("bootstrap"), "{text}");
+        assert!(!text.contains(".bootstrap"), "{text}");
     }
 
     #[test]

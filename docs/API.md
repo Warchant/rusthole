@@ -112,13 +112,14 @@ Every error response has a JSON body with this shape:
 | 401 | `totp_required` | Login: TOTP is on and the body has no `totp` code. |
 | 401 | `password_not_set` | Login: the config has no password hash. Set it with `rusthole passwd`. |
 | 403 | `csrf_failed` | A write with a session cookie has no valid `X-CSRF-Token`. |
-| 403 | `forbidden` | An API token uses a path for sessions only (`POST /tokens`, `/auth/totp*`, `/auth/logout`). |
+| 403 | `forbidden` | An API token uses a path for sessions only (`POST /tokens`, `/auth/totp*`, `/auth/logout`). Or a write (not `GET` or `HEAD`) comes from another site: `Sec-Fetch-Site: cross-site`, or an `Origin` that is not this server (section 3.4). |
 | 421 | `misdirected_request` | The `Host` header does not name this server (DNS rebinding defence). A client outside the ACL gets no answer: the server closes the connection at once. |
 | 404 | `not_found` | The path or the resource does not exist. |
 | 405 | `method_not_allowed` | The path exists, but not with this method. |
 | 409 | `config_conflict` | The config file changed on disk after rusthole read it (A7). The server does not write. The UI must reload the data and try again. |
 | 409 | `conflict` | The write breaks a rule, for example a duplicate name, or delete of the default group. |
 | 413 | `payload_too_large` | The body is larger than 64 KiB. |
+| 415 | `bad_request` | A request with a JSON body has no `Content-Type: application/json` (parameters such as `charset` are allowed). |
 | 422 | `validation_failed` | A field is not valid. `details` tells which. |
 | 429 | `rate_limited` | Login ban (D10) or too many requests. The `Retry-After` header and `retry_after_seconds` give the wait time in seconds. |
 | 500 | `internal` | Server fault. The message does not show internal data. |
@@ -169,7 +170,8 @@ Request:
 - A TOTP code cannot be used two times (A7).
 - With no password set in the config, every login fails with 401 `password_not_set` (A7).
   You set the password with `rusthole passwd`. The API has no endpoint to set or change the
-  password. A running server reads the changed file at the next login.
+  password. A running server reads the changed file at the next login or API request (at
+  most once in 2 s), and then ends all open sessions.
 - Each failure counts in the ban state machine (per IPv4 address). During a
   ban the server returns 429 `rate_limited` with `Retry-After`, and it does not check the
   password.
@@ -224,6 +226,9 @@ endpoint to get the token again.
   Else the server returns 403 `csrf_failed`.
 - The token is fixed for the life of the session.
 - `POST /auth/login` does not need the header.
+- A change of the password or the TOTP secret ends all sessions (m13). A TOTP change
+  through the API keeps the session that made it. A change with `rusthole passwd` keeps
+  no session: the next API request (at most 2 s later) gets 401. API tokens stay.
 
 ### 3.3 API tokens (scripts)
 
@@ -248,6 +253,13 @@ These rules are not visible in the JSON, but the UI depends on them:
   `Strict-Transport-Security: max-age=31536000`, `Permissions-Policy` (all features off),
   `Cross-Origin-Opener-Policy: same-origin`.
 - API responses have `Cache-Control: no-store`.
+- Cross-site writes (m12): a request that is not `GET` or `HEAD` gets 403 `forbidden` when
+  `Sec-Fetch-Site` is `cross-site`, or when an `Origin` header is not `https://` and a host
+  that the `Host` check accepts (`null` too). This check runs before the auth, so such a
+  request never counts in the login ban. A request with no `Origin` and no
+  `Sec-Fetch-Site` (curl, scripts) passes.
+- A JSON body needs `Content-Type: application/json`, else 415. A page of another site
+  can send `text/plain` or a form with no CORS preflight, but not JSON.
 - The UI uses no inline scripts, no inline styles, no `eval` and no external resources.
 
 ## 4. Blocking
@@ -978,7 +990,7 @@ stateDiagram-v2
 
 | Field | Rule |
 |---|---|
-| `upstreams.servers` | 1 to 8 items. Plain IPv4 `IP` or `IP:port`. IPv6 gives 422 (A11). P7 adds `tls://` and `https://` forms. |
+| `upstreams.servers` | 1 to 8 items. Plain IPv4 `IP` or `IP:port`. IPv6 gives 422 (A11). `tls://` and `https://` forms are allowed. The API has no bootstrap field (m19): a DoT or DoH server with a host name (for example `tls://dns.example:853`) is allowed only when the config already has it with `bootstrap` addresses (it keeps them). Else 422 on the field `upstreams.servers[i]`. Use an IP address in the URL, or add the server with `bootstrap` in `rusthole.toml`. |
 | `upstreams.timeout_ms` | 100 to 10000. |
 | `blocking.mode` | `null` (`0.0.0.0` and `::`, the default), `nxdomain`, `nodata`, `custom_ip` (config mode `ip`). There is no `refused` mode. |
 | `blocking.custom_ipv4`, `custom_ipv6` | Used only with `custom_ip`. Else `null`. |
@@ -1077,6 +1089,9 @@ Parameters: `limit`, `cursor`, `action` (a prefix, for example `list.`).
 }
 ```
 
+- `listeners`: read at request time (m18). The DNS addresses (`dns`, the UDP address of
+  each bound listener; the list follows the interface rescan), the DoH addresses (`doh`,
+  only when DoH is on) and the bound admin addresses (`admin`, fixed after the start).
 - `memory_rss_bytes`: `null` if the OS does not give it.
 - `list_entries`: unique domains in the compiled block and allow sets.
 

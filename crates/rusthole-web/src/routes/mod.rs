@@ -21,8 +21,9 @@ use crate::error::ApiError;
 use crate::router::MAX_BODY;
 use crate::state::AppState;
 
-/// A JSON request body: 400 for bad JSON, 422 for an unknown, read-only or wrong field,
-/// 413 for a body over 64 KiB.
+/// A JSON request body: 415 with no `Content-Type: application/json` (m12: a page of another
+/// site can send other types with no preflight), 400 for bad JSON, 422 for an unknown,
+/// read-only or wrong field, 413 for a body over 64 KiB.
 pub(crate) struct ApiJson<T>(pub(crate) T);
 
 impl<T: DeserializeOwned, S: Send + Sync> FromRequest<S> for ApiJson<T> {
@@ -33,7 +34,7 @@ impl<T: DeserializeOwned, S: Send + Sync> FromRequest<S> for ApiJson<T> {
             .headers()
             .get(header::CONTENT_TYPE)
             .and_then(|v| v.to_str().ok())
-            .is_none_or(|v| v.starts_with("application/json"));
+            .is_some_and(is_json_type);
         let bytes = Bytes::from_request(req, state).await.map_err(|e| {
             if e.status() == http::StatusCode::PAYLOAD_TOO_LARGE {
                 ApiError::for_status(http::StatusCode::PAYLOAD_TOO_LARGE)
@@ -51,6 +52,14 @@ impl<T: DeserializeOwned, S: Send + Sync> FromRequest<S> for ApiJson<T> {
         }
         parse_json(&bytes).map(ApiJson)
     }
+}
+
+/// True for the media type `application/json`, with or without parameters (any case).
+pub(crate) fn is_json_type(value: &str) -> bool {
+    value
+        .split(';')
+        .next()
+        .is_some_and(|t| t.trim().eq_ignore_ascii_case("application/json"))
 }
 
 /// Parses a JSON body like [`ApiJson`].
@@ -230,6 +239,28 @@ mod tests {
                 ("k".into(), "02:00".into()),
             ]
         );
+    }
+
+    #[test]
+    fn json_media_type() {
+        for v in [
+            "application/json",
+            "Application/JSON",
+            "application/json; charset=utf-8",
+            " application/json ;x=y",
+        ] {
+            assert!(is_json_type(v), "{v}");
+        }
+        for v in [
+            "",
+            "text/plain",
+            "application/jsonx",
+            "application/x-www-form-urlencoded",
+            "multipart/form-data",
+            "application/json-seq",
+        ] {
+            assert!(!is_json_type(v), "{v}");
+        }
     }
 
     #[test]

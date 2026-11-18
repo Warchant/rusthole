@@ -131,6 +131,65 @@ async fn host_name_from_local_records() {
     assert!(svc.shutdown(Duration::from_secs(2)).await);
 }
 
+/// m10: a config change clears the PTR cache. The old address of a moved local record
+/// loses the name at once; the new address gets it.
+#[tokio::test]
+async fn a_config_change_clears_the_ptr_cache() {
+    let record = |value: &str| LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
+        name: "nas.lan".to_owned(),
+        record_type: CfgType::A,
+        value: value.to_owned(),
+    };
+    let mut cfg = config(&[("nas.lan", &["kids"])]);
+    cfg.local_dns.records = vec![record("192.0.2.10")];
+    let svc = start(&cfg, Arc::new(StaticNeighbors::default()));
+    let r = svc.resolver();
+    let _ = r.identify(ip("192.0.2.10"));
+    eventually(|| r.hostname_of(ip("192.0.2.10")).is_some()).await;
+    // The record moves to a new address.
+    cfg.local_dns.records = vec![record("192.0.2.11")];
+    assert!(r.set_config(
+        ClientTable::from_config(&cfg).0,
+        Arc::new(LocalZone::from_config(&cfg).0)
+    ));
+    assert!(r.hostname_of(ip("192.0.2.10")).is_none());
+    assert_eq!(r.zone().names_of(ip("192.0.2.11")).len(), 1);
+    let _ = r.identify(ip("192.0.2.11"));
+    eventually(|| r.identify(ip("192.0.2.11")).matched == Some(MatchedBy::Hostname)).await;
+    assert_eq!(
+        r.identify(ip("192.0.2.10")).matched,
+        Some(MatchedBy::Default),
+        "the old address must not keep the group"
+    );
+    assert!(svc.shutdown(Duration::from_secs(2)).await);
+}
+
+/// m10: a name from a local record is kept for the local record TTL (300 s), not 1 hour.
+#[tokio::test]
+async fn a_local_name_has_the_local_record_ttl() {
+    let mut cfg = config(&[("nas.lan", &["kids"])]);
+    cfg.local_dns.records = vec![LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
+        name: "nas.lan".to_owned(),
+        record_type: CfgType::A,
+        value: "192.0.2.10".to_owned(),
+    }];
+    let r = ClientResolver::new(
+        ClientTable::from_config(&cfg).0,
+        Arc::new(LocalZone::from_config(&cfg).0),
+        Arc::new(NeighborTable::default()),
+        IdentitySettings::default(),
+    );
+    let (entry, ttl) = r.lookup_ptr(ip("192.0.2.10")).await;
+    assert!(matches!(entry, PtrEntry::Known(_)), "{entry:?}");
+    assert_eq!(ttl, Duration::from_secs(u64::from(DEFAULT_LOCAL_TTL)));
+}
+
 /// A fake conditional forwarding server: it answers each PTR query with `printer.lan`.
 async fn fake_ptr_server() -> (SocketAddr, Arc<AtomicUsize>) {
     let sock = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();

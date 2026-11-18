@@ -516,8 +516,8 @@ fn rss_bytes() -> Option<u64> {
 /// `GET /system`.
 pub(crate) async fn system(State(state): State<AppState>) -> Json<Value> {
     let s = &state.deps().system;
-    let listeners: Vec<Value> = s
-        .listeners
+    let listeners: Vec<Value> = state
+        .listeners()
         .iter()
         .map(|(k, a)| json!({ "kind": k, "address": a.to_string() }))
         .collect();

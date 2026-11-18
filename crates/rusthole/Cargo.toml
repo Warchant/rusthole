@@ -35,6 +35,7 @@ tracing-subscriber = { workspace = true }
 [dev-dependencies]
 hickory-proto = { workspace = true }
 rusthole-import = { workspace = true, features = ["testkit"] }
+tokio-rustls = { workspace = true }
 
 [lints]
 workspace = true

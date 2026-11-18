@@ -22,7 +22,7 @@ use rusthole_tls::CertStore;
 use crate::assets::AssetSource;
 use crate::auth::Auth;
 use crate::clock::Clock;
-use crate::config_edit::{ConfigStore, WriteError, Written};
+use crate::config_edit::{ConfigStore, WRITE_LOCK_TIMEOUT, WriteError, Written};
 use crate::error::{ApiError, ApiResult};
 use crate::host::HostAllow;
 
@@ -30,12 +30,35 @@ use crate::host::HostAllow;
 pub const STATS_TIMEOUT: Duration = Duration::from_secs(15);
 /// Time limit for one audit write.
 pub const AUDIT_TIMEOUT: Duration = Duration::from_secs(5);
+/// The time that a request waits for its config write task. The task goes on after this
+/// time; it is shorter than the request time limit, so the client gets a clear error.
+pub const WRITE_TASK_WAIT: Duration = Duration::from_secs(25);
+
+/// Waits for a config task with [`WRITE_TASK_WAIT`]. The task goes on when the wait ends.
+async fn join_config_task<R>(task: tokio::task::JoinHandle<ApiResult<R>>) -> ApiResult<R> {
+    match tokio::time::timeout(WRITE_TASK_WAIT, task).await {
+        Ok(Ok(r)) => r,
+        Ok(Err(e)) => {
+            tracing::error!(error = %e, "a config write task failed");
+            Err(ApiError::internal())
+        }
+        Err(_) => Err(ApiError::unavailable(
+            "The config write takes too long. It goes on in the background; load the data again.",
+        )),
+    }
+}
 
 /// What the bin applies after a config change (the DNS server, the client identity, the
 /// statistics reason map). The web crate applies the list refresher itself.
 pub trait LiveApply: Send + Sync + fmt::Debug {
     /// Applies a new, valid config. Returns true when a part of the change needs a restart.
     fn apply(&self, old: &Config, new: &Arc<Config>) -> bool;
+
+    /// The DNS and DoH addresses that are bound now: kind (`dns`, `doh`) and address.
+    /// `None`: use [`SystemStatic::listeners`] (tests, tools).
+    fn listeners(&self) -> Option<Vec<(String, SocketAddr)>> {
+        None
+    }
 }
 
 /// A [`LiveApply`] that applies nothing (tests, tools).
@@ -219,19 +242,45 @@ impl AppState {
         self.refresh_net();
     }
 
+    /// The listeners for `GET /system`, read now: the DNS and DoH addresses of
+    /// [`LiveApply::listeners`], then the bound admin addresses (m18).
+    pub(crate) fn listeners(&self) -> Vec<(String, SocketAddr)> {
+        let fixed = &self.0.deps.system.listeners;
+        let mut out = self.0.deps.live.listeners().unwrap_or_else(|| {
+            fixed
+                .iter()
+                .filter(|(k, _)| k != "admin")
+                .cloned()
+                .collect()
+        });
+        let bound = self.0.bound.load();
+        if bound.is_empty() {
+            out.extend(fixed.iter().filter(|(k, _)| k == "admin").cloned());
+        } else {
+            out.extend(bound.iter().map(|a| ("admin".to_owned(), *a)));
+        }
+        out
+    }
+
     /// True when a change since the start needs a restart.
     pub fn restart_required(&self) -> bool {
         self.0.restart_required.load(Ordering::Acquire)
     }
 
     /// Applies a new config to the running parts. Returns true when a restart is needed.
-    pub(crate) fn apply_config(&self, old: &Config, new: &Arc<Config>) -> bool {
+    /// `keep`: the session that made the change (see [`crate::auth::Auth::set_config`]).
+    pub(crate) fn apply_config(
+        &self,
+        old: &Config,
+        new: &Arc<Config>,
+        keep: Option<[u8; 32]>,
+    ) -> bool {
         if let Some(lists) = &self.0.deps.lists
             && let Err(e) = lists.set_config(Arc::clone(new))
         {
             tracing::error!(error = %e, "the list refresher did not take the new config");
         }
-        self.0.auth.set_config(old, new);
+        self.0.auth.set_config(old, new, keep, self.clock().mono());
         self.refresh_net();
         let restart = self.0.deps.live.apply(old, new) || restart_fields_changed(old, new);
         if restart {
@@ -240,57 +289,116 @@ impl AppState {
         restart
     }
 
-    /// Changes the config and writes the file (see [`ConfigStore::update`]), then applies
-    /// the new config. A hand edit of the file gives 409 `config_conflict`.
+    /// Changes the config and writes the file (see [`ConfigStore::update_and_apply`]), then
+    /// applies the new config. A hand edit of the file gives 409 `config_conflict`.
+    ///
+    /// Cancel safe: the read, the change, the file write, the new config in memory and the
+    /// live apply run in a spawned task that holds the writer lock. A dropped request does
+    /// not stop it, so the file and the memory state cannot differ.
     pub(crate) async fn write<T: Send + 'static>(
         &self,
-        change: impl FnOnce(&mut Config) -> Result<T, ApiError> + Send,
+        change: impl FnOnce(&mut Config) -> Result<T, ApiError> + Send + 'static,
     ) -> ApiResult<(T, Arc<Config>, bool)> {
-        match self.0.deps.config.update(change).await {
-            Ok(Written { value, old, new }) => {
-                let restart = self.apply_config(&old, &new);
-                Ok((value, new, restart))
+        self.write_keeping(None, change).await
+    }
+
+    /// Like [`AppState::write`]. When the change ends the sessions (a TOTP change), the
+    /// session `keep` stays (see [`crate::auth::Auth::set_config`]).
+    pub(crate) async fn write_keeping<T: Send + 'static>(
+        &self,
+        keep: Option<[u8; 32]>,
+        change: impl FnOnce(&mut Config) -> Result<T, ApiError> + Send + 'static,
+    ) -> ApiResult<(T, Arc<Config>, bool)> {
+        let this = self.clone();
+        let task = tokio::spawn(async move {
+            let applier = this.clone();
+            let result = this
+                .0
+                .deps
+                .config
+                .update_and_apply(WRITE_LOCK_TIMEOUT, change, move |old, new, ours| {
+                    // A file that changed on disk keeps no session.
+                    applier.apply_config(old, new, if ours { keep } else { None })
+                })
+                .await;
+            match result {
+                Ok(Written {
+                    value,
+                    new,
+                    restart,
+                    ..
+                }) => Ok((value, new, restart)),
+                Err(WriteError::Api(e)) => Err(e),
+                Err(WriteError::Conflict { .. }) => Err(ApiError::config_conflict()),
             }
-            Err(WriteError::Api(e)) => Err(e),
-            Err(WriteError::Conflict { reloaded }) => {
-                if let Some((old, new)) = reloaded {
-                    self.apply_config(&old, &new);
-                }
-                Err(ApiError::config_conflict())
-            }
-        }
+        });
+        join_config_task(task).await
     }
 
     /// Reads the config file again when it changed on disk (for example after
-    /// `rusthole passwd`), and applies it. Errors are logged.
-    pub(crate) async fn refresh_config(&self) {
-        // An empty change: the store reads the file and compares the hash first.
-        match self
-            .0
-            .deps
-            .config
-            .update(|_| Err::<(), _>(ApiError::not_found()))
-            .await
-        {
-            Err(WriteError::Conflict {
-                reloaded: Some((old, new)),
-            }) => {
-                tracing::info!("the config file changed on disk; rusthole uses the new file");
-                self.apply_config(&old, &new);
+    /// `rusthole passwd`), and applies it. Errors are logged. It runs in a spawned task, like
+    /// [`AppState::write`]. `lock_wait` is the time limit for the writer lock; a write that
+    /// runs reads the file itself.
+    pub(crate) async fn refresh_config_with(&self, lock_wait: Duration) {
+        let this = self.clone();
+        let task = tokio::spawn(async move {
+            let applier = this.clone();
+            // An empty change: the store reads the file and compares the hash first.
+            let result = this
+                .0
+                .deps
+                .config
+                .update_and_apply(
+                    lock_wait,
+                    |_| Err::<(), _>(ApiError::not_found()),
+                    move |old, new, _ours| {
+                        tracing::info!(
+                            "the config file changed on disk; rusthole uses the new file"
+                        );
+                        applier.apply_config(old, new, None)
+                    },
+                )
+                .await;
+            match result {
+                Err(WriteError::Api(_) | WriteError::Conflict { .. }) | Ok(_) => Ok(()),
             }
-            Err(WriteError::Api(_) | WriteError::Conflict { reloaded: None }) | Ok(_) => {}
-        }
+        });
+        let _ = join_config_task(task).await;
+    }
+
+    /// Like [`AppState::refresh_config_with`], with the normal lock time limit.
+    pub(crate) async fn refresh_config(&self) {
+        self.refresh_config_with(WRITE_LOCK_TIMEOUT).await;
     }
 
     /// Like [`AppState::refresh_config`], at most once in 2 s (logins call it).
     pub(crate) async fn refresh_config_throttled(&self) {
+        if self.refresh_due() {
+            self.refresh_config().await;
+        }
+    }
+
+    /// Like [`AppState::refresh_config_throttled`], but it does not wait for the writer
+    /// lock: a write that runs reads the file itself. The auth middleware and the session
+    /// probe call it before they check a session or a token.
+    pub(crate) async fn refresh_config_soon(&self) {
+        if self.refresh_due() {
+            self.refresh_config_with(Duration::ZERO).await;
+        }
+    }
+
+    /// True at most once in 2 s (monotonic clock): the next config refresh is due.
+    fn refresh_due(&self) -> bool {
         let now = u64::try_from(self.clock().mono().as_duration().as_millis()).unwrap_or(u64::MAX);
         let last = self.0.last_refresh_ms.load(Ordering::Acquire);
         if last != u64::MAX && now.saturating_sub(last) < 2000 {
-            return;
+            return false;
         }
-        self.0.last_refresh_ms.store(now, Ordering::Release);
-        self.refresh_config().await;
+        // Only one caller gets the slot.
+        self.0
+            .last_refresh_ms
+            .compare_exchange(last, now, Ordering::AcqRel, Ordering::Acquire)
+            .is_ok()
     }
 
     /// The next id for a new item: one more than the highest id that the collection has or
@@ -420,3 +528,6 @@ pub fn build_net(
         local_subnets,
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -31,7 +31,7 @@ flowchart LR
 
 | Item | Rule |
 |---|---|
-| Addresses | `server.admin.listen`, IPv4 only (A11). `"auto"` is each local IPv4 address on Linux, and `127.0.0.1` on other systems (development mode). The listener does not rebind when the interfaces change; a restart does. |
+| Addresses | `server.admin.listen`, IPv4 only (A11). `"auto"` is each local IPv4 address on Linux, and `127.0.0.1` on other systems (development mode). The listener binds one time, at the start. It does not bind again when the interfaces change; a restart does. An address that cannot be bound gives an ERROR log, and the listener uses the other addresses. When the admin listener cannot start at all (no address bound, or no TLS certificate), rusthole logs an ERROR and DNS runs without the admin UI (m16). |
 | Client ACL (D7) | The same ACL as DNS: loopback, the local subnets, `acl.allow`. A client outside it is closed at accept, before TLS. The ACL and the Host list are rebuilt each 30 s from the interfaces, and after each config change. |
 | TLS | `rusthole-tls::admin_server_config`: the ring provider, TLS 1.3 and 1.2, ALPN `h2` and `http/1.1`. All three TLS modes work (`file`, `self-signed`, `local-ca`). |
 | Limits | 256 connections, 32 for one client address, 64 HTTP/2 streams on one connection, TLS handshake 10 s, request header 10 s (HTTP/1.1), idle 10 s, request 30 s, stalled response 40 s, request body 64 KiB. |
@@ -85,8 +85,8 @@ without credentials and expects 401.
   times from the terminal, with no echo; at least 10 bytes; when stdin is not a terminal,
   for example in a script, it reads two lines from stdin; never from the command line or
   the environment, where other users can see it). A running rusthole reads the
-  changed file at the next login (a login reads the file at most once in 2 s, after the ban
-  check).
+  changed file at the next login (after the ban check) or the next API request that needs
+  auth (at most one read in 2 s), and ends all open sessions (section 5.3).
 
 ### 5.2 TOTP
 
@@ -113,6 +113,19 @@ without credentials and expects 401.
   session pushes out the expired sessions, then the one with the oldest request. Sessions are
   in memory only: a restart logs everybody out.
 - A request with a stale cookie gets 401 and does not count in the ban.
+- A credential change ends the sessions (m13). When `admin.password_hash` or
+  `admin.totp_secret` changes, all open sessions end:
+  - A change through the API keeps only the session that made it. TOTP disable checks the
+    password and a code of the current secret. TOTP confirm checks a code of the new
+    secret, and only the caller of the TOTP setup (which checks the password) saw that
+    secret. Thus a leaked cookie alone cannot make the change and keep its session. The
+    kept session gets a new lifetime, as after a login.
+  - A change on disk (`rusthole passwd`) keeps no session. The server reads the file again
+    before it checks a session or a token (at most one read in 2 s), so the old sessions
+    end at the next API request.
+  - A login that checked the old credentials while the change came in gets 401, not a
+    session.
+  - API tokens stay. Revoke a token with `DELETE /tokens/{id}`.
 
 ### 5.4 CSRF
 
@@ -120,6 +133,16 @@ Each session has a CSRF token (32 random bytes, base64url). The login response a
 `GET /auth/session` give it. Every request that is not `GET` or `HEAD` and uses the session
 cookie must have `X-CSRF-Token` with the same value, else 403 `csrf_failed`. The compare is
 constant-time (`subtle`).
+
+Cross-site writes (m12). A page of another site can send a form or a `text/plain` request
+with no CORS preflight. Each such failed login counts in the ban and can lock the address of
+the admin's browser. Two checks stop this before the auth and the ban see the request:
+
+- A JSON body needs `Content-Type: application/json` (parameters are allowed), else 415.
+- A request that is not `GET` or `HEAD` gets 403 `forbidden` when `Sec-Fetch-Site` is
+  `cross-site`, or when an `Origin` header is not `https://` and a host that the `Host`
+  check accepts (`Origin: null` too). A request with no `Origin` and no `Sec-Fetch-Site`
+  (curl, scripts with a token) passes.
 
 ### 5.5 API tokens
 

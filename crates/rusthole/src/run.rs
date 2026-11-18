@@ -13,10 +13,12 @@
 //!     M->>P: neighbor task, client resolver, filter with the refresher engine
 //!     M->>S: start with the filter (bind, upstream pool, rescan)
 //!     M->>L: start downloads (names through the upstream pool)
-//!     M->>A: TLS store, HTTPS listener, API
+//!     M->>A: HTTPS listener, API (one TLS store with DoH; a failed start is an ERROR, DNS goes on)
+//!     M->>M: certificate reload task (each minute: file stamps, new local addresses; each hour: renewal)
 //!     M->>M: systemd READY=1 (notify.rs)
 //!     M->>M: wait for SIGTERM / SIGINT / Ctrl+C
 //!     M->>M: systemd STOPPING=1
+//!     M->>M: stop the certificate reload task
 //!     M->>A: shutdown (graceful, then hard stop)
 //!     M->>L: shutdown (deadline)
 //!     M->>S: shutdown (finish in-flight queries, hard stop after grace)
@@ -62,6 +64,15 @@ const ADMIN_STOP: Duration = Duration::from_secs(3);
 const IDENTITY_SYNC: Duration = Duration::from_secs(60);
 /// The largest number of clients that one identity sync updates.
 const IDENTITY_SYNC_MAX: usize = 4096;
+/// The period of the certificate check (M2): the file stamps (mode `file`) and the local
+/// addresses (modes `self-signed` and `local-ca`).
+pub(crate) const CERT_CHECK: Duration = Duration::from_secs(60);
+/// A full certificate check (renewal) is due at least this often.
+const CERT_RELOAD: Duration = Duration::from_secs(3600);
+/// Time limit for one certificate check or open (it can make a new key).
+const CERT_TIMEOUT: Duration = Duration::from_secs(60);
+/// Time limit for a background task to stop.
+const TASK_STOP: Duration = Duration::from_secs(2);
 
 /// Runs the server until a stop signal.
 pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
@@ -78,8 +89,9 @@ pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode>
         .thread_name("rusthole")
         .build()
         .context("cannot start the async runtime")?;
-    // The DoH listener (part P7) needs its TLS config before the start.
-    let doh_tls = crate::doh::server_tls(&config)?;
+    // The DoH listener (part P7) needs its TLS config before the start. The admin listener
+    // uses the same certificate store (M2).
+    let (certs, doh_tls) = crate::doh::server_tls(&config)?.unzip();
     let store = Arc::new(ConfigStore::new(path.to_path_buf(), text, &config));
     let cfg = store.get();
     // The statistics store (part P4). It stops after the DNS server, with a final flush.
@@ -98,6 +110,8 @@ pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode>
         stats: stats.as_ref().map(rusthole_store::StatsService::stats),
         rule_ids,
         config_path: path.display().to_string(),
+        certs,
+        cert_check: CERT_CHECK,
     };
     // systemd (`Type=notify`): READY=1 after all listeners are bound, STOPPING=1 at the stop
     // signal. Without NOTIFY_SOCKET both calls do nothing.
@@ -133,6 +147,10 @@ pub(crate) struct RunEnv {
     pub(crate) stats: Option<rusthole_store::Stats>,
     pub(crate) rule_ids: RuleIds,
     pub(crate) config_path: String,
+    /// The certificate store of the DoH listener. `None`: the admin listener opens it.
+    pub(crate) certs: Option<Arc<rusthole_tls::CertStore>>,
+    /// The period of the certificate check ([`CERT_CHECK`]; tests use less).
+    pub(crate) cert_check: Duration,
 }
 
 /// The policy parts of a running server (part P3c): the client identity tasks and the
@@ -196,6 +214,9 @@ pub(crate) struct Running<'a> {
     /// Only tests read it.
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) refresher: &'a Arc<Refresher>,
+    /// Only tests read it.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(crate) server: &'a Arc<DnsServer>,
 }
 
 /// The started parts. [`Parts::stop`] stops the parts that are there, in the reverse order
@@ -207,19 +228,23 @@ struct Parts {
     server: Option<Arc<DnsServer>>,
     admin: Option<AdminServer>,
     sync: Option<(CancellationToken, tokio::task::JoinHandle<()>)>,
+    certs: Option<(CancellationToken, tokio::task::JoinHandle<()>)>,
+}
+
+/// Cancels a background task and waits for its end, with a time limit.
+async fn stop_task(task: Option<(CancellationToken, tokio::task::JoinHandle<()>)>, name: &str) {
+    if let Some((cancel, task)) = task {
+        cancel.cancel();
+        if tokio::time::timeout(TASK_STOP, task).await.is_err() {
+            tracing::warn!("the {name} task did not stop in time");
+        }
+    }
 }
 
 impl Parts {
     async fn stop(self) {
-        if let Some((cancel, task)) = self.sync {
-            cancel.cancel();
-            if tokio::time::timeout(Duration::from_secs(2), task)
-                .await
-                .is_err()
-            {
-                tracing::warn!("the identity sync task did not stop in time");
-            }
-        }
+        stop_task(self.sync, "identity sync").await;
+        stop_task(self.certs, "certificate reload").await;
         if let Some(admin) = &self.admin
             && !admin.shutdown(ADMIN_STOP).await
         {
@@ -269,6 +294,7 @@ pub(crate) async fn serve_all(
                 .map_or_else(Vec::new, |a| a.bound().to_vec()),
             policy,
             refresher,
+            server,
         });
     }
     stop.await;
@@ -314,11 +340,11 @@ async fn start_parts(
         let task = tokio::spawn(identity_sync(
             stats.clone(),
             Arc::clone(&resolver),
-            Arc::clone(&settings.local),
             cancel.clone(),
         ));
         parts.sync = Some((cancel, task));
     }
+    let mut certs = env.certs;
     if cfg.server.admin.enabled {
         let live = Arc::new(BinLive {
             server: Arc::clone(&server),
@@ -326,22 +352,130 @@ async fn start_parts(
             current: Mutex::new(settings),
             rule_ids: env.rule_ids.clone(),
         });
-        let admin = start_admin(
-            store,
-            &cfg,
-            &env.interfaces,
-            env.admin_listen,
-            env.stats,
-            &refresher,
-            &filter,
-            live,
-            &server,
-            env.config_path,
-        )
-        .await?;
-        parts.admin = Some(admin);
+        // m16: a failed admin start (TLS or bind) does not stop DNS (owner decision). The
+        // admin UI is then not reachable until a restart.
+        let started = async {
+            let store_tls = match &certs {
+                Some(c) => Arc::clone(c),
+                None => open_certs(&cfg, Arc::clone(&env.interfaces)).await?,
+            };
+            certs = Some(Arc::clone(&store_tls));
+            start_admin(
+                store,
+                &cfg,
+                &env.interfaces,
+                env.admin_listen,
+                env.stats,
+                &refresher,
+                &filter,
+                live,
+                &server,
+                env.config_path,
+                store_tls,
+            )
+            .await
+        };
+        match started.await {
+            Ok(admin) => parts.admin = Some(admin),
+            Err(e) => tracing::error!(
+                error = format!("{e:#}"),
+                "the admin listener did not start; DNS runs without the admin UI"
+            ),
+        }
+    }
+    if let Some(c) = certs {
+        let cancel = CancellationToken::new();
+        let task = tokio::spawn(cert_reload(
+            c,
+            Arc::clone(&env.interfaces),
+            env.cert_check,
+            cancel.clone(),
+        ));
+        parts.certs = Some((cancel, task));
     }
     Ok(())
+}
+
+/// Opens the certificate store on a blocking thread, with a time limit.
+async fn open_certs(
+    cfg: &Config,
+    interfaces: Arc<dyn InterfaceSource>,
+) -> anyhow::Result<Arc<rusthole_tls::CertStore>> {
+    let tls_settings = rusthole_tls::TlsSettings::from_config(cfg);
+    let open = tokio::task::spawn_blocking(move || {
+        let ips = crate::doh::local_ips(interfaces.as_ref());
+        rusthole_tls::CertStore::open(tls_settings, &ips, rusthole_tls::now_unix())
+    });
+    let (certs, _notices) = tokio::time::timeout(CERT_TIMEOUT, open)
+        .await
+        .context("the TLS certificate setup timed out")?
+        .context("the TLS certificate task failed")?
+        .context("cannot set up the TLS certificate of the admin listener")?;
+    Ok(certs)
+}
+
+/// True when a certificate check is due (M2). Pure.
+///
+/// - Mode `file`: at each round. The check only compares the size and the time stamp of
+///   the two files, so a new certificate from an ACME client is used in one round.
+/// - Other modes: when the local addresses changed (a new LAN address must get into the
+///   certificate), and at least each [`CERT_RELOAD`] (renewal before the end of validity).
+pub(crate) fn cert_check_due(file_mode: bool, addrs_changed: bool, since_last: Duration) -> bool {
+    file_mode || addrs_changed || since_last >= CERT_RELOAD
+}
+
+/// Checks the certificate each `period` and uses a new one when necessary (M2). The admin
+/// listener and the DoH listener read the store at each handshake, so a new certificate
+/// applies to the next connection.
+///
+/// Service loop: unbounded on purpose. It runs for the life of the server and ends when
+/// `cancel` is cancelled. Each check runs on a blocking thread with a time limit.
+async fn cert_reload(
+    certs: Arc<rusthole_tls::CertStore>,
+    interfaces: Arc<dyn InterfaceSource>,
+    period: Duration,
+    cancel: CancellationToken,
+) {
+    let file_mode = certs.mode() == rusthole_core::config::TlsMode::File;
+    let mut last_addrs: Option<Vec<IpAddr>> = None;
+    let mut last_check = tokio::time::Instant::now();
+    loop {
+        tokio::select! {
+            () = cancel.cancelled() => break,
+            () = tokio::time::sleep(period) => {}
+        }
+        let c = Arc::clone(&certs);
+        let ifs = Arc::clone(&interfaces);
+        let prev = last_addrs.clone();
+        let since = last_check.elapsed();
+        let job = tokio::task::spawn_blocking(move || {
+            let addrs = crate::doh::local_ips(ifs.as_ref());
+            let changed = prev.as_ref() != Some(&addrs);
+            let result = cert_check_due(file_mode, changed, since)
+                .then(|| c.reload(&addrs, rusthole_tls::now_unix()));
+            (addrs, result)
+        });
+        match tokio::time::timeout(CERT_TIMEOUT, job).await {
+            Ok(Ok((addrs, result))) => {
+                last_addrs = Some(addrs);
+                match result {
+                    None => {}
+                    Some(Ok(outcome)) => {
+                        last_check = tokio::time::Instant::now();
+                        if matches!(outcome, rusthole_tls::ReloadOutcome::Reloaded(_)) {
+                            tracing::info!("a new TLS certificate is in use for new connections");
+                        }
+                    }
+                    Some(Err(e)) => {
+                        last_check = tokio::time::Instant::now();
+                        tracing::error!(error = %e, "the TLS certificate check failed; the current certificate stays");
+                    }
+                }
+            }
+            Ok(Err(e)) => tracing::error!(error = %e, "the TLS certificate task failed"),
+            Err(_) => tracing::warn!("the TLS certificate check timed out; it runs again later"),
+        }
+    }
 }
 
 #[allow(clippy::too_many_arguments)] // The wiring of one listener; a struct would only rename the list.
@@ -356,22 +490,8 @@ async fn start_admin(
     live: Arc<BinLive>,
     server: &Arc<DnsServer>,
     config_path: String,
+    certs: Arc<rusthole_tls::CertStore>,
 ) -> anyhow::Result<AdminServer> {
-    let local_ips: Vec<IpAddr> = interfaces
-        .scan()
-        .unwrap_or_default()
-        .iter()
-        .map(|n| IpAddr::V4(n.addr))
-        .collect();
-    let tls_settings = rusthole_tls::TlsSettings::from_config(cfg);
-    let open = tokio::task::spawn_blocking(move || {
-        rusthole_tls::CertStore::open(tls_settings, &local_ips, rusthole_tls::now_unix())
-    });
-    let (certs, _notices) = tokio::time::timeout(Duration::from_secs(60), open)
-        .await
-        .context("the TLS certificate setup timed out")?
-        .context("the TLS certificate task failed")?
-        .context("cannot set up the TLS certificate of the admin listener")?;
     let tls = rusthole_tls::admin_server_config(&certs).context("cannot make the TLS config")?;
     let listen = match listen {
         Some(l) => l,
@@ -427,6 +547,10 @@ impl std::fmt::Debug for BinLive {
 }
 
 impl LiveApply for BinLive {
+    fn listeners(&self) -> Option<Vec<(String, SocketAddr)>> {
+        Some(live_listeners(&self.server))
+    }
+
     fn apply(&self, _old: &Config, new: &Arc<Config>) -> bool {
         self.rule_ids.set(new);
         let (settings, warnings) = match DnsSettings::from_config(new) {
@@ -454,15 +578,37 @@ impl LiveApply for BinLive {
     }
 }
 
+/// m18: the DNS and DoH addresses that are bound now, for `GET /system`.
+pub(crate) fn live_listeners(server: &DnsServer) -> Vec<(String, SocketAddr)> {
+    let mut out: Vec<(String, SocketAddr)> = server
+        .bound()
+        .iter()
+        .map(|b| ("dns".to_owned(), b.udp))
+        .collect();
+    out.extend(
+        server
+            .doh_bound()
+            .into_iter()
+            .map(|a| ("doh".to_owned(), a)),
+    );
+    out
+}
+
 /// Copies the MAC address and the local name of each client address into the statistics
 /// store, so that a client has its MAC as key (docs/API.md section 5.6). A service loop
 /// until the stop.
+///
+/// m11: each round reads the local zone of the resolver now, so a live apply of new local
+/// records reaches the statistics in one round. See [`next_identity`] for when a stored
+/// name is cleared.
 async fn identity_sync(
     stats: rusthole_store::Stats,
     resolver: Arc<rusthole_dns::ClientResolver>,
-    zone: Arc<rusthole_core::localdns::LocalZone>,
     cancel: CancellationToken,
 ) {
+    // The zone of the last round: a stored name that came from it and that the new zone
+    // does not give any more is cleared.
+    let mut prev: Option<Arc<rusthole_core::localdns::LocalZone>> = None;
     loop {
         tokio::select! {
             () = cancel.cancelled() => break,
@@ -470,24 +616,48 @@ async fn identity_sync(
         }
         let s = stats.clone();
         let r = Arc::clone(&resolver);
-        let z = Arc::clone(&zone);
-        let task = tokio::task::spawn_blocking(move || sync_once(&s, &r, &z));
-        if tokio::time::timeout(Duration::from_secs(30), task)
-            .await
-            .is_err()
-        {
-            tracing::warn!("the client identity sync timed out");
+        let p = prev.clone();
+        let task = tokio::task::spawn_blocking(move || sync_once(&s, &r, p.as_deref()));
+        match tokio::time::timeout(Duration::from_secs(30), task).await {
+            // Only a full round moves `prev` on: else a removed name never clears.
+            Ok(Ok(Some(zone))) => prev = Some(zone),
+            Ok(Ok(None)) => {}
+            Ok(Err(e)) => tracing::warn!(error = %e, "the client identity sync task failed"),
+            Err(_) => tracing::warn!("the client identity sync timed out"),
         }
     }
 }
 
-fn sync_once(
+/// The identity to store for one client, or `None` when the stored one stays. Pure.
+///
+/// - The MAC address: the neighbor table now, else the stored MAC.
+/// - The name: the local zone now, else the PTR cache, else the stored name. A stored name
+///   that the last zone gave to this address (`was_local`) is cleared when the zone and the
+///   PTR cache give no name now: the record was removed. A name from a PTR lookup stays
+///   when its cache entry ends.
+pub(crate) fn next_identity(
+    stored: &rusthole_store::Identity,
+    mac: Option<String>,
+    name: Option<String>,
+    was_local: bool,
+) -> Option<rusthole_store::Identity> {
+    let next = rusthole_store::Identity {
+        mac: mac.or_else(|| stored.mac.clone()),
+        name: name.or_else(|| if was_local { None } else { stored.name.clone() }),
+    };
+    (next != *stored).then_some(next)
+}
+
+/// One identity sync round with the local zone of the resolver now (m11). Returns that zone
+/// when the round ended, or `None` when it stopped early (a store error).
+pub(crate) fn sync_once(
     stats: &rusthole_store::Stats,
     resolver: &rusthole_dns::ClientResolver,
-    zone: &rusthole_core::localdns::LocalZone,
-) {
+    prev: Option<&rusthole_core::localdns::LocalZone>,
+) -> Option<Arc<rusthole_core::localdns::LocalZone>> {
+    let zone = resolver.zone();
     let Ok(index) = stats.clients_index() else {
-        return;
+        return None;
     };
     for meta in index.all().take(IDENTITY_SYNC_MAX) {
         let mac = resolver.neighbors().get_ip(meta.ip).map(|m| m.to_string());
@@ -497,21 +667,22 @@ fn sync_once(
             .cloned()
             .or_else(|| resolver.hostname_of(meta.ip))
             .map(|n| n.as_str().to_owned());
-        if mac.is_none() && name.is_none() {
+        let stored = rusthole_store::Identity {
+            mac: meta.mac.clone(),
+            name: meta.name.clone(),
+        };
+        let was_local = stored.name.as_deref().is_some_and(|n| {
+            prev.is_some_and(|z| z.names_of(meta.ip).iter().any(|d| d.as_str() == n))
+        });
+        let Some(identity) = next_identity(&stored, mac, name, was_local) else {
             continue;
-        }
-        if mac == meta.mac && name == meta.name {
-            continue;
-        }
-        let identity = rusthole_store::Identity {
-            mac: mac.or_else(|| meta.mac.clone()),
-            name: name.or_else(|| meta.name.clone()),
         };
         if let Err(e) = stats.set_client_identity(meta.ip, identity) {
             tracing::debug!(error = %e, "cannot record a client identity");
-            return;
+            return None;
         }
     }
+    Some(zone)
 }
 
 /// Waits for SIGTERM or SIGINT (Unix), or Ctrl+C (all systems).

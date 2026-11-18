@@ -9,7 +9,7 @@
 //! flowchart LR
 //!     req[request] --> sec[security headers] --> host[Host check: 421]
 //!     host --> to[time limit]
-//!     to -->|/api/v1| api[no-store, JSON errors, secret filter, body limit 64 KiB] --> auth[auth: 401 / 403 / 429] --> h[handler]
+//!     to -->|/api/v1| api[no-store, JSON errors, secret filter, cross-site writes: 403, body limit 64 KiB] --> auth[auth: 401 / 403 / 429] --> h[handler]
 //!     to -->|other paths| ui[embedded UI]
 //! ```
 
@@ -25,7 +25,7 @@ use http::{HeaderValue, Method, StatusCode, header};
 use tower_http::limit::RequestBodyLimitLayer;
 
 use crate::error::{ApiError, misdirected};
-use crate::host::host_allowed;
+use crate::host::{cross_site, host_allowed};
 use crate::routes;
 use crate::state::AppState;
 
@@ -169,6 +169,7 @@ pub fn build(state: AppState) -> Router {
         .route_layer(from_fn_with_state(state.clone(), crate::auth::require_auth))
         .fallback(api_not_found)
         .layer(RequestBodyLimitLayer::new(MAX_BODY))
+        .layer(from_fn_with_state(state.clone(), cross_site_guard))
         .layer(from_fn_with_state(state.clone(), secret_filter))
         .layer(from_fn(api_responses));
     Router::new()
@@ -234,6 +235,22 @@ async fn host_check(State(state): State<AppState>, req: Request, next: Next) -> 
         tracing::debug!(host = %host.chars().take(64).collect::<String>(), "Host header refused");
         no_store(misdirected().into_response())
     }
+}
+
+/// The cross-site guard of the API (m12): 403 for a write with the `Origin` of another site
+/// or with `Sec-Fetch-Site: cross-site` ([`cross_site`]). It runs before the auth, so such a
+/// request never counts in the login ban.
+async fn cross_site_guard(State(state): State<AppState>, req: Request, next: Next) -> Response {
+    let h = req.headers();
+    let site = h
+        .get("sec-fetch-site")
+        .map(|v| v.to_str().unwrap_or("cross-site"));
+    let origins = h.get_all(header::ORIGIN).iter().map(|v| v.to_str().ok());
+    if cross_site(req.method().as_str(), site, origins, &state.net().hosts) {
+        tracing::debug!(method = %req.method(), "cross-site write refused");
+        return ApiError::forbidden("A write from another site is not allowed.").into_response();
+    }
+    next.run(req).await
 }
 
 /// The time limit of a request.

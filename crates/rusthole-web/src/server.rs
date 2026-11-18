@@ -184,23 +184,32 @@ fn admit(
 }
 
 /// Binds the listeners and starts the accept loops.
+///
+/// An address that cannot be bound is logged at ERROR, and the listener runs on the other
+/// addresses (m16). The function fails only when no address is bound. The listener binds
+/// once: it does not bind again when the interfaces change (docs/SECURITY.md).
 pub async fn start(
     settings: AdminSettings,
     tls: Arc<rustls::ServerConfig>,
     state: AppState,
 ) -> io::Result<AdminServer> {
     let mut listeners = Vec::new();
+    let mut first_error = None;
     for addr in &settings.listen {
-        let l = TcpListener::bind(addr).await.map_err(|e| {
-            io::Error::new(e.kind(), format!("cannot listen on {addr} (admin): {e}"))
-        })?;
-        listeners.push(l);
+        match TcpListener::bind(addr).await {
+            Ok(l) => listeners.push(l),
+            Err(e) => {
+                tracing::error!(address = %addr, error = %e, "cannot listen on an admin address; the admin listener uses the other addresses");
+                first_error.get_or_insert_with(|| {
+                    io::Error::new(e.kind(), format!("cannot listen on {addr} (admin): {e}"))
+                });
+            }
+        }
     }
     if listeners.is_empty() {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "no admin listen address",
-        ));
+        return Err(first_error.unwrap_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, "no admin listen address")
+        }));
     }
     let bound: Vec<SocketAddr> = listeners
         .iter()

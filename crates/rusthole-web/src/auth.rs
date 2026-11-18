@@ -88,6 +88,9 @@ pub(crate) struct AuthInner {
     pub(crate) totp_pending: Option<PendingTotp>,
     pub(crate) totp_last_step: Option<i64>,
     pub(crate) token_use: HashMap<u32, (i64, IpAddr)>,
+    /// Goes up by one each time the password hash or the TOTP secret changes. A login
+    /// that checked the old credentials does not get a session (see [`new_session`]).
+    pub(crate) generation: u64,
 }
 
 /// The auth state.
@@ -107,6 +110,7 @@ impl Auth {
                 totp_pending: None,
                 totp_last_step: None,
                 token_use: HashMap::new(),
+                generation: 0,
             }),
             verify: Arc::new(Semaphore::new(MAX_PARALLEL_VERIFY)),
         }
@@ -122,7 +126,21 @@ impl Auth {
     /// Uses the session lifetime of a new config. When the TOTP secret changed, the TOTP
     /// replay record and the pending TOTP setup are cleared: the steps of the old secret do
     /// not apply to the new secret.
-    pub(crate) fn set_config(&self, old: &Config, cfg: &Config) {
+    ///
+    /// When the password hash or the TOTP secret changed, all sessions end (m13): a session
+    /// cookie that leaked must not outlive a credential change. `keep` is the session that
+    /// made the change through the API. It stays, with a new lifetime from `now` as after a
+    /// login. A leaked cookie alone cannot make such a change: TOTP disable checks the
+    /// password and a code, and TOTP confirm checks a code of the new secret that only the
+    /// caller of the setup (a password check) saw. A change on disk (`rusthole passwd`)
+    /// keeps no session.
+    pub(crate) fn set_config(
+        &self,
+        old: &Config,
+        cfg: &Config,
+        keep: Option<[u8; 32]>,
+        now: rusthole_core::blocking_state::MonoTime,
+    ) {
         match self.lock() {
             Ok(mut a) => {
                 a.sessions.set_policy(SessionPolicy::from_ttl_seconds(
@@ -130,19 +148,56 @@ impl Auth {
                 ));
                 let ids: Vec<u32> = cfg.admin.api_tokens.iter().filter_map(|t| t.id).collect();
                 a.token_use.retain(|id, _| ids.contains(id));
-                if !ct_eq(
+                let totp_changed = !ct_eq(
                     old.admin.totp_secret.as_bytes(),
                     cfg.admin.totp_secret.as_bytes(),
-                ) {
+                );
+                if totp_changed {
                     a.totp_last_step = None;
                     a.totp_pending = None;
                 }
+                let password_changed = !ct_eq(
+                    old.admin.password_hash.as_bytes(),
+                    cfg.admin.password_hash.as_bytes(),
+                );
+                if totp_changed || password_changed {
+                    end_sessions(&mut a, keep, now);
+                }
             }
             Err(_) => {
-                tracing::error!("the auth lock timed out; the new auth config is not applied");
+                // The lock is not free. The old sessions stay until the next credential
+                // change or their end of life. This is a known limit; the lock has a time
+                // limit only to prevent a deadlock.
+                tracing::error!(
+                    "the auth lock timed out; the new auth config is not applied, and open sessions stay"
+                );
             }
         }
     }
+
+    /// The session generation now (see [`AuthInner::generation`]).
+    pub(crate) fn generation(&self) -> ApiResult<u64> {
+        Ok(self.lock()?.generation)
+    }
+}
+
+/// Ends all sessions except `keep`, and moves the generation on.
+fn end_sessions(
+    a: &mut AuthInner,
+    keep: Option<[u8; 32]>,
+    now: rusthole_core::blocking_state::MonoTime,
+) {
+    let kept = keep.and_then(|k| a.sessions.touch(&k, now).map(|(d, _)| (k, d.clone())));
+    let ended = a.sessions.len().saturating_sub(usize::from(kept.is_some()));
+    a.sessions.clear();
+    if let Some((k, data)) = kept {
+        a.sessions.insert(k, data, now);
+    }
+    a.generation = a.generation.wrapping_add(1);
+    tracing::info!(
+        ended,
+        "the admin password or the TOTP secret changed; open sessions ended"
+    );
 }
 
 /// The client address of a request (from the server). A request with no address (only in
@@ -261,6 +316,15 @@ impl Drop for Attempt {
 /// [`MAX_PARALLEL_VERIFY`] checks at a time.
 pub(crate) async fn verify_password(state: &AppState, password: String) -> ApiResult<bool> {
     let hash = state.config().admin.password_hash.clone();
+    verify_password_hash(state, password, hash).await
+}
+
+/// Like [`verify_password`], with a given hash.
+pub(crate) async fn verify_password_hash(
+    state: &AppState,
+    password: String,
+    hash: String,
+) -> ApiResult<bool> {
     if hash.is_empty() {
         return Ok(false);
     }
@@ -297,11 +361,19 @@ async fn run_verify(
 }
 
 /// Makes a new session. Returns the cookie value and the CSRF token.
-pub(crate) fn new_session(state: &AppState) -> ApiResult<(String, String, i64)> {
+///
+/// `generation` is [`Auth::generation`] from before the login read the credentials. When the
+/// credentials changed since then, the login checked old credentials: no session (401).
+pub(crate) fn new_session(state: &AppState, generation: u64) -> ApiResult<(String, String, i64)> {
     let id = b64url(&random_bytes::<32>().map_err(|_| ApiError::internal())?);
     let csrf = b64url(&random_bytes::<32>().map_err(|_| ApiError::internal())?);
     let now = state.clock().mono();
     let mut a = state.0.auth.lock()?;
+    if a.generation != generation {
+        drop(a);
+        tracing::info!("the credentials changed during a login; no session");
+        return Err(ApiError::invalid_credentials());
+    }
     a.sessions.insert(
         sha256(id.as_bytes()),
         SessionData { csrf: csrf.clone() },
@@ -455,6 +527,9 @@ pub(crate) async fn require_auth(
     if access == Some(Access::Public) {
         return next.run(req).await;
     }
+    // `rusthole passwd` changes the file. Read it again (at most once in 2 s) before the
+    // credentials are checked, so that a credential change ends the old sessions at once.
+    state.refresh_config_soon().await;
     let headers = req.headers().clone();
     let method = req.method().clone();
     let ip = client_ip(req.extensions());
@@ -629,12 +704,13 @@ mod tests {
             });
         }
         // A config change with the same secret keeps the record.
-        auth.set_config(&old, &old);
+        let t0 = rusthole_core::blocking_state::MonoTime::from_duration(Duration::ZERO);
+        auth.set_config(&old, &old, None, t0);
         assert_eq!(auth.lock().unwrap().totp_last_step, Some(step));
         // A new secret clears the record and the pending setup.
         let mut new = old.clone();
         new.admin.totp_secret.clone_from(&new_secret);
-        auth.set_config(&old, &new);
+        auth.set_config(&old, &new, None, t0);
         let a = auth.lock().unwrap();
         assert_eq!(a.totp_last_step, None);
         assert!(a.totp_pending.is_none());
@@ -642,6 +718,54 @@ mod tests {
             crate::totp::verify(&new_secret, &code_of(&new_secret), now, a.totp_last_step),
             Some(step)
         );
+    }
+
+    fn session_data() -> SessionData {
+        SessionData {
+            csrf: "c".to_owned(),
+        }
+    }
+
+    /// m13: a new password hash or TOTP secret ends every session except `keep`, and moves
+    /// the generation on. Other changes keep the sessions.
+    #[test]
+    fn a_credential_change_ends_the_sessions() {
+        let t =
+            |s: u64| rusthole_core::blocking_state::MonoTime::from_duration(Duration::from_secs(s));
+        let mut old = Config::default();
+        old.admin.password_hash = "$argon2id$old".to_owned();
+        let auth = Auth::new(&old);
+        let (k1, k2) = ([1u8; 32], [2u8; 32]);
+        {
+            let mut a = auth.lock().unwrap();
+            a.sessions.insert(k1, session_data(), t(0));
+            a.sessions.insert(k2, session_data(), t(0));
+        }
+        // No credential change: both stay.
+        let mut other = old.clone();
+        other.admin.session_ttl_seconds = 600;
+        auth.set_config(&old, &other, None, t(1));
+        assert_eq!(auth.lock().unwrap().sessions.len(), 2);
+        assert_eq!(auth.generation().unwrap(), 0);
+        // A new password: only the kept session stays.
+        let mut new = other.clone();
+        new.admin.password_hash = "$argon2id$new".to_owned();
+        auth.set_config(&other, &new, Some(k1), t(2));
+        {
+            let mut a = auth.lock().unwrap();
+            assert!(a.sessions.touch(&k1, t(3)).is_some());
+            assert!(a.sessions.touch(&k2, t(3)).is_none());
+        }
+        assert_eq!(auth.generation().unwrap(), 1);
+        // A new TOTP secret with no kept session: none stays.
+        let mut totp = new.clone();
+        totp.admin.totp_secret = crate::totp::base32_encode(&[3u8; 20]);
+        auth.set_config(&new, &totp, None, t(4));
+        assert!(auth.lock().unwrap().sessions.is_empty());
+        assert_eq!(auth.generation().unwrap(), 2);
+        // A kept key with no live session adds nothing.
+        auth.set_config(&totp, &new, Some(k2), t(5));
+        assert!(auth.lock().unwrap().sessions.is_empty());
     }
 
     proptest! {

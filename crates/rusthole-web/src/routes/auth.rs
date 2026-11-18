@@ -9,7 +9,7 @@ use serde::Serialize;
 use super::{ApiJson, Caller, audit};
 use crate::auth::{
     Attempt, PendingTotp, Principal, TOTP_SETUP_TTL, clear_cookie, expires_at, new_session,
-    session_cookie, session_of, verify_password,
+    session_cookie, session_of, verify_password, verify_password_hash,
 };
 use crate::error::{ApiError, ApiResult};
 use crate::model::{CodeReq, DisableTotpReq, LoginReq, PasswordReq};
@@ -89,6 +89,9 @@ pub(crate) async fn login(
     // `rusthole passwd` changes the file; read it again when it changed (at most once in 2 s,
     // and only after the ban check).
     state.refresh_config_throttled().await;
+    // The generation before the credentials are read: a change after this point gives no
+    // session (m13).
+    let generation = state.0.auth.generation()?;
     let cfg = state.config();
     if cfg.admin.password_hash.is_empty() {
         // No audit line: a new install has no password, and this path must not write to
@@ -102,7 +105,7 @@ pub(crate) async fn login(
         attempt.cancel();
         return Err(totp_required());
     }
-    match verify_password(&state, req.password).await {
+    match verify_password_hash(&state, req.password, cfg.admin.password_hash.clone()).await {
         Ok(true) => {}
         Ok(false) => return Err(attempt.fail("anonymous", "password").await),
         Err(e) => {
@@ -117,7 +120,7 @@ pub(crate) async fn login(
         }
     }
     attempt.succeed()?;
-    let (id, csrf, expires) = new_session(&state)?;
+    let (id, csrf, expires) = new_session(&state, generation)?;
     audit(&state, &caller, "auth.login", None, true, None).await;
     let body = SessionInfo {
         csrf_token: csrf,
@@ -136,6 +139,8 @@ pub(crate) async fn session(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> ApiResult<Json<impl Serialize>> {
+    // A credential change on disk ends the sessions (m13); see it before the answer.
+    state.refresh_config_soon().await;
     let Some((_, csrf, expires)) = session_of(&state, &headers)? else {
         return Err(ApiError::unauthorized());
     };
@@ -231,7 +236,7 @@ pub(crate) async fn totp_confirm(
     attempt.succeed()?;
     let secret = pending.secret.clone();
     state
-        .write(move |c| {
+        .write_keeping(session_key(&caller), move |c| {
             c.admin.totp_secret = secret;
             Ok(())
         })
@@ -261,7 +266,7 @@ pub(crate) async fn totp_disable(
     }
     attempt.succeed()?;
     state
-        .write(|c| {
+        .write_keeping(session_key(&caller), |c| {
             c.admin.totp_secret.clear();
             Ok(())
         })
@@ -269,6 +274,14 @@ pub(crate) async fn totp_disable(
     state.0.auth.lock()?.totp_last_step = None;
     audit(&state, &caller, "totp.disable", None, true, None).await;
     Ok(Json(totp_state_of(&state)?))
+}
+
+/// The session key of the caller (`None` for a token).
+fn session_key(caller: &Caller) -> Option<[u8; 32]> {
+    match &caller.principal {
+        Some(Principal::Session { key }) => Some(*key),
+        Some(Principal::Token { .. }) | None => None,
+    }
 }
 
 /// Checks the password again for `POST /tokens`.

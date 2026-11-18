@@ -38,6 +38,10 @@ pub const MAX_CONFIG_BYTES: u64 = 16 * 1024 * 1024;
 pub const WRITE_LOCK_TIMEOUT: Duration = Duration::from_secs(10);
 /// Time limit for the file I/O of one write.
 pub const WRITE_IO_TIMEOUT: Duration = Duration::from_secs(30);
+/// A write that did not end in the I/O time limit gets this many times the limit more
+/// (5 minutes in production). The store holds the writer lock during this time, so no
+/// other write can start on a file in an unknown state.
+pub const LATE_WRITE_FACTOR: u32 = 10;
 
 /// Why a config text cannot be rendered.
 #[derive(Debug, thiserror::Error)]
@@ -382,7 +386,13 @@ struct Current {
     hash: [u8; 32],
     /// The config that the text gives (no ids added).
     file: Config,
+    /// SHA-256 of the last file on disk that was not valid (logged one time).
+    bad_hash: Option<[u8; 32]>,
 }
+
+/// The hash of a file that rusthole does not know (after a failed or late write). No text
+/// has this SHA-256, so the next read of the file always loads it again.
+const UNKNOWN_HASH: [u8; 32] = [0; 32];
 
 /// The result of a successful write.
 #[derive(Debug, Clone)]
@@ -393,6 +403,9 @@ pub struct Written<T> {
     pub old: Arc<Config>,
     /// The config after the write.
     pub new: Arc<Config>,
+    /// What the apply function of [`ConfigStore::update_and_apply`] gave: true when a
+    /// restart is needed.
+    pub restart: bool,
 }
 
 /// Why a write through the store failed.
@@ -414,12 +427,26 @@ impl From<ApiError> for WriteError {
     }
 }
 
+/// The function that writes the file. [`write_atomic`] in production; tests replace it to
+/// make a slow or failed write.
+pub type FileWriter = Arc<dyn Fn(&Path, &[u8]) -> io::Result<()> + Send + Sync>;
+
 /// The config file and the config in memory. Reads are lock-free; one writer at a time.
-#[derive(Debug)]
 pub struct ConfigStore {
     path: PathBuf,
     config: ArcSwap<Config>,
     current: tokio::sync::Mutex<Current>,
+    writer: FileWriter,
+    io_timeout: Duration,
+}
+
+impl std::fmt::Debug for ConfigStore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ConfigStore")
+            .field("path", &self.path)
+            .field("io_timeout", &self.io_timeout)
+            .finish_non_exhaustive()
+    }
 }
 
 impl ConfigStore {
@@ -436,8 +463,25 @@ impl ConfigStore {
                 text,
                 hash,
                 file: config.clone(),
+                bad_hash: None,
             }),
+            writer: Arc::new(write_atomic),
+            io_timeout: WRITE_IO_TIMEOUT,
         }
+    }
+
+    /// Uses `writer` for the file writes (tests: a slow or failed write).
+    #[must_use]
+    pub fn with_writer(mut self, writer: FileWriter) -> Self {
+        self.writer = writer;
+        self
+    }
+
+    /// Uses `limit` as the time limit of the file I/O (tests).
+    #[must_use]
+    pub fn with_io_timeout(mut self, limit: Duration) -> Self {
+        self.io_timeout = limit;
+        self
     }
 
     /// Reads and parses a file. Blocks. It does not validate.
@@ -461,17 +505,56 @@ impl ConfigStore {
     }
 
     /// Changes the config with `change` and writes the file. See the module documentation.
+    /// It applies nothing to the running parts; see [`ConfigStore::update_and_apply`].
     pub async fn update<T: Send + 'static>(
         &self,
         change: impl FnOnce(&mut Config) -> Result<T, ApiError> + Send,
     ) -> Result<Written<T>, WriteError> {
-        let mut cur = tokio::time::timeout(WRITE_LOCK_TIMEOUT, self.current.lock())
+        self.update_and_apply(WRITE_LOCK_TIMEOUT, change, |_, _, _| false)
             .await
-            .map_err(|_| ApiError::unavailable("Another config write runs. Try again."))?;
+    }
+
+    /// Changes the config with `change`, writes the file, puts the new config in memory and
+    /// calls `apply`. All steps run while the store holds the writer lock, so two writes
+    /// cannot apply their configs in the wrong order.
+    ///
+    /// - `lock_wait`: the time limit to get the writer lock. `Duration::ZERO` tries once.
+    /// - `apply(old, new, ours)`: applies a new config to the running parts and returns true
+    ///   when a restart is needed. `ours` is true for the config of `change`, and false for
+    ///   a file that changed on disk (the store read it again).
+    ///
+    /// The future is not cancel safe: a caller that can drop it (an HTTP request) runs it in
+    /// a spawned task ([`crate::AppState`] does this).
+    ///
+    /// A file write that takes longer than the I/O time limit gets a longer limit
+    /// ([`LATE_WRITE_FACTOR`]). When it does not end then either, the store marks the file as
+    /// unknown: the next update or refresh reads the file again and uses it.
+    pub async fn update_and_apply<T: Send + 'static>(
+        &self,
+        lock_wait: Duration,
+        change: impl FnOnce(&mut Config) -> Result<T, ApiError> + Send,
+        apply: impl FnOnce(&Arc<Config>, &Arc<Config>, bool) -> bool,
+    ) -> Result<Written<T>, WriteError> {
+        let mut cur = if lock_wait.is_zero() {
+            self.current
+                .try_lock()
+                .map_err(|_| ApiError::unavailable("Another config write runs. Try again."))?
+        } else {
+            tokio::time::timeout(lock_wait, self.current.lock())
+                .await
+                .map_err(|_| ApiError::unavailable("Another config write runs. Try again."))?
+        };
         let path = self.path.clone();
-        let disk = blocking(move || read_limited(&path)).await?;
+        let disk = blocking(self.io_timeout, move || read_limited(&path)).await?;
         if sha256(&disk) != cur.hash {
-            return Err(self.reload(&mut cur, disk));
+            let err = self.reload(&mut cur, disk);
+            if let WriteError::Conflict {
+                reloaded: Some((old, new)),
+            } = &err
+            {
+                apply(old, new, false);
+            }
+            return Err(err);
         }
         let old = self.get();
         let mut new = (*old).clone();
@@ -496,21 +579,74 @@ impl ConfigStore {
             ApiError::internal()
         })?;
         let file = Config::from_toml_str(&text).map_err(|_| ApiError::internal())?;
-        let path = self.path.clone();
-        let data = text.clone();
-        blocking(move || write_atomic(&path, data.as_bytes())).await?;
+        if let Err(e) = self.write_file(text.clone()).await {
+            // The write can be on disk (for example a rename that worked and a directory
+            // fsync that failed), or it can still land. The next update or refresh reads the
+            // file again.
+            cur.hash = UNKNOWN_HASH;
+            return Err(e.into());
+        }
         cur.hash = sha256(text.as_bytes());
         cur.text = text;
         cur.file = file;
+        cur.bad_hash = None;
         let new = Arc::new(new);
         self.config.store(Arc::clone(&new));
         tracing::info!(path = %self.path.display(), "config file written");
-        Ok(Written { value, old, new })
+        let restart = apply(&old, &new, true);
+        Ok(Written {
+            value,
+            old,
+            new,
+            restart,
+        })
+    }
+
+    /// Writes `text` with the writer on a blocking thread. A write that does not end in the
+    /// I/O time limit gets a longer limit: the blocking write cannot be stopped, and the store
+    /// must know if it landed.
+    async fn write_file(&self, text: String) -> Result<(), ApiError> {
+        let path = self.path.clone();
+        let writer = Arc::clone(&self.writer);
+        let mut job = tokio::task::spawn_blocking(move || writer(&path, text.as_bytes()));
+        let result = if let Ok(r) = tokio::time::timeout(self.io_timeout, &mut job).await {
+            r
+        } else {
+            tracing::error!(
+                "the config file write did not end in the time limit; rusthole waits longer for it"
+            );
+            let late = self.io_timeout.saturating_mul(LATE_WRITE_FACTOR);
+            let Ok(r) = tokio::time::timeout(late, &mut job).await else {
+                tracing::error!(
+                    "the config file write did not end; rusthole reads the file again at the next change"
+                );
+                return Err(ApiError::unavailable("The config file I/O took too long."));
+            };
+            r
+        };
+        match result {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => {
+                tracing::error!(error = %e, "config file I/O failed");
+                Err(ApiError::internal())
+            }
+            Err(e) => {
+                tracing::error!(error = %e, "config file task failed");
+                Err(ApiError::internal())
+            }
+        }
     }
 
     /// The file on disk differs from the last read or write: read it again. A valid file
     /// becomes the new config.
     fn reload(&self, cur: &mut Current, disk: Vec<u8>) -> WriteError {
+        let disk_hash = sha256(&disk);
+        if cur.bad_hash == Some(disk_hash) {
+            // The same bad file as at the last read: it was logged then.
+            return WriteError::Conflict { reloaded: None };
+        }
+        // A bad file is logged one time, not at each refresh.
+        cur.bad_hash = Some(disk_hash);
         tracing::warn!(path = %self.path.display(), "the config file changed on disk; reading it again");
         let Ok(text) = String::from_utf8(disk) else {
             tracing::error!("the changed config file is not UTF-8; the old config stays");
@@ -535,9 +671,10 @@ impl ConfigStore {
         mem.assign_ids();
         let old = self.get();
         let new = Arc::new(mem);
-        cur.hash = sha256(text.as_bytes());
+        cur.hash = disk_hash;
         cur.text = text;
         cur.file = config;
+        cur.bad_hash = None;
         self.config.store(Arc::clone(&new));
         WriteError::Conflict {
             reloaded: Some((old, new)),
@@ -547,9 +684,10 @@ impl ConfigStore {
 
 /// Runs blocking file I/O with a time limit.
 async fn blocking<R: Send + 'static>(
+    limit: Duration,
     f: impl FnOnce() -> io::Result<R> + Send + 'static,
 ) -> Result<R, ApiError> {
-    match tokio::time::timeout(WRITE_IO_TIMEOUT, tokio::task::spawn_blocking(f)).await {
+    match tokio::time::timeout(limit, tokio::task::spawn_blocking(f)).await {
         Ok(Ok(Ok(r))) => Ok(r),
         Ok(Ok(Err(e))) => {
             tracing::error!(error = %e, "config file I/O failed");

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DomainGroup } from './api/types';
 import { areaPath, bucketAt, niceStep, niceTicks } from './chart';
-import { allowedSeries, groupByBase, groupNames, mergeGroupPages, peakHour, shareOf, withOther } from './grouping';
+import { allowedSeries, groupByBase, groupNames, mergeByKey, mergeGroupPages, peakHour, shareOf, withOther } from './grouping';
 import { href, parseHash } from './routes';
 
 function group(base: string, queries: number): DomainGroup {
@@ -41,6 +41,42 @@ describe('groupByBase', () => {
     ]);
     expect(groups.map((g) => g.base)).toEqual(['a.example', 'b.example']);
     expect(groupByBase([])).toEqual([]);
+  });
+});
+
+/** A small seeded random generator (mulberry32), so a failed case can run again. */
+function rng(seed: number): () => number {
+  let t = seed >>> 0;
+  return () => {
+    t = (t + 0x6d2b79f5) >>> 0;
+    let x = Math.imul(t ^ (t >>> 15), 1 | t);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+describe('mergeByKey (m26)', () => {
+  type Row = { key: string; v: number };
+  const key = (r: Row) => r.key;
+
+  it('replaces an item that comes again at its old position', () => {
+    const merged = mergeByKey([{ key: 'a', v: 1 }, { key: 'b', v: 2 }], [{ key: 'b', v: 3 }, { key: 'c', v: 4 }], key);
+    expect(merged).toEqual([{ key: 'a', v: 1 }, { key: 'b', v: 3 }, { key: 'c', v: 4 }]);
+  });
+
+  it('property: unique keys, all keys kept, the last copy wins, first-seen order', () => {
+    for (let seed = 1; seed <= 500; seed++) {
+      const r = rng(seed);
+      const page = () => Array.from({ length: Math.floor(r() * 8) }, () => ({ key: `k${Math.floor(r() * 10)}`, v: Math.floor(r() * 1000) }));
+      const loaded = page();
+      const next = page();
+      const merged = mergeByKey(loaded, next, key);
+      const all = [...loaded, ...next];
+      const keys = merged.map(key);
+      expect(new Set(keys).size, `seed ${seed}`).toBe(keys.length);
+      expect(keys, `seed ${seed}`).toEqual([...new Set(all.map(key))]);
+      for (const m of merged) expect(m, `seed ${seed}`).toBe([...all].reverse().find((x) => x.key === m.key));
+    }
   });
 });
 

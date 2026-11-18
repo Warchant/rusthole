@@ -4,6 +4,7 @@
   import { api, errorText } from '../lib/api';
   import type { ClientSort, StatsClient } from '../lib/api/types';
   import { formatCount, formatPercent, formatRelative } from '../lib/format';
+  import { mergeByKey } from '../lib/grouping';
   import { href } from '../lib/routes';
   import { go, nav, prefs } from '../lib/state.svelte';
   import ClientsConfigured from './ClientsConfigured.svelte';
@@ -40,7 +41,8 @@
         cursor: reset ? null : cursor,
       });
       if (gen !== generation) return;
-      items = reset ? page.items : [...items, ...page.items];
+      // Merge by key: a client can come again on the next page (keyed each block).
+      items = mergeByKey(reset ? [] : items, page.items, (c) => c.key);
       cursor = page.next_cursor;
       error = null;
     } catch (e) {

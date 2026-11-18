@@ -3,11 +3,11 @@
   // Listener addresses, TLS files and the password are not here: they are in
   // rusthole.toml and `rusthole passwd`.
   import Status from '../components/Status.svelte';
+  import SystemInfoList from '../components/SystemInfoList.svelte';
   import { api, ApiError, errorText } from '../lib/api';
   import type { Settings, SettingsPatch } from '../lib/api/types';
-  import { formatBytes, formatCount, formatDateTime, formatDuration } from '../lib/format';
   import { resource, toast } from '../lib/state.svelte';
-  import { checkCidrs, checkServers, IPV6_HINT, isIPv4, splitList } from '../lib/validate';
+  import { checkCidrs, checkUpstreams, IPV6_HINT, isIPv4, splitList } from '../lib/validate';
   import SettingsSecurity from './SettingsSecurity.svelte';
 
   const system = resource(() => api.system.get());
@@ -58,7 +58,7 @@
         if (section === 'upstreams') upstreamText = next.upstreams.servers.join('\n');
         if (section === 'acl') cidrText = next.acl.extra_cidrs.join('\n');
       }
-      toast('ok', `${label} saved.`, 3000);
+      toast('ok', next.restart_required ? `${label} saved. Restart rusthole to use all changes.` : `${label} saved.`, 3000);
     } catch (e) {
       errors[section] = errorText(e);
       if (e instanceof ApiError && e.code === 'config_conflict') await load();
@@ -69,7 +69,10 @@
     e.preventDefault();
     if (!draft) return;
     const servers = splitList(upstreamText);
-    const err = checkServers(servers, 8);
+    // Only the count is checked here. The server checks each value and gives a 422
+    // with a message for each bad server, so the browser never refuses a value that
+    // the server accepts (udp://, tcp://, tls://, https://, IP and IP:port).
+    const err = checkUpstreams(servers);
     if (err) {
       errors.upstreams = err;
       return;
@@ -119,12 +122,18 @@
   <Status loading={!loadError} error={loadError} retry={load} />
 {:else}
   <div class="stack">
+    {#if saved?.restart_required}
+      <p class="notice warn restart-notice" role="status">
+        A saved change needs a restart of rusthole (for example upstreams or statistics). Until the restart, the DNS
+        server uses the old values. To restart, run <code>systemctl restart rusthole</code> on the server as root.
+      </p>
+    {/if}
     <div class="grid-2">
       <section class="card">
         <h2>Upstream DNS servers</h2>
         <form class="form" onsubmit={saveUpstreams}>
           <label class="field wide">
-            Servers (one per line, IPv4 with an optional port)
+            Servers (one per line)
             <textarea rows="3" bind:value={upstreamText}></textarea>
           </label>
           <label class="field">
@@ -132,7 +141,12 @@
             <input type="number" min="100" max="10000" bind:value={draft.upstreams.timeout_ms} />
           </label>
           <div class="wide">
-            <p class="hint">{IPV6_HINT} DNS over TLS and DNS over HTTPS upstreams come in a later part.</p>
+            <p class="hint">
+              Forms: <code>192.0.2.53</code>, <code>192.0.2.53:53</code>, <code>udp://192.0.2.53:53</code>,
+              <code>tcp://192.0.2.53:53</code>, <code>tls://dns.example:853</code> (DNS over TLS) and
+              <code>https://dns.example/dns-query</code> (DNS over HTTPS). Use IPv4 addresses. A new DoT or DoH
+              server with a host name needs bootstrap addresses: add it in <code>rusthole.toml</code>.
+            </p>
             {#if errors.upstreams}<p class="field-error">{errors.upstreams}</p>{/if}
             <button type="submit" class="primary">Save</button>
           </div>
@@ -255,18 +269,7 @@
     <section class="card">
       <h2>System</h2>
       {#if system.data}
-        {@const s = system.data}
-        <dl class="sys">
-          <dt>Version</dt><dd>{s.version}{s.commit ? ` (${s.commit})` : ''}</dd>
-          <dt>Uptime</dt><dd>{formatDuration(s.uptime_seconds)} (since {formatDateTime(s.started_at)})</dd>
-          <dt>Memory (RSS)</dt><dd>{formatBytes(s.memory_rss_bytes)}</dd>
-          <dt>List entries</dt><dd>{formatCount(s.list_entries)}</dd>
-          <dt>Config file</dt><dd class="mono">{s.config_path}</dd>
-          <dt>Data folder</dt><dd class="mono">{s.data_dir}</dd>
-          <dt>Platform</dt><dd>{s.os} / {s.arch}</dd>
-          <dt>Listeners</dt>
-          <dd>{#each s.listeners as l (l.kind)}<div><span class="badge">{l.kind}</span> <span class="mono">{l.address}</span></div>{/each}</dd>
-        </dl>
+        <SystemInfoList info={system.data} />
         <p class="hint">To change the password, run <code>rusthole passwd</code> on the server.</p>
       {:else}
         <Status loading={system.loading} error={system.error} retry={system.reload} />
@@ -278,18 +281,5 @@
 <style>
   p {
     margin: 0 0 0.5rem;
-  }
-  .sys {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 0.35rem 1rem;
-    margin: 0 0 0.75rem;
-  }
-  dt {
-    color: var(--muted);
-  }
-  dd {
-    margin: 0;
-    min-width: 0;
   }
 </style>

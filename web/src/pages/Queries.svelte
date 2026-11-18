@@ -1,6 +1,7 @@
 <script lang="ts">
   // The last queries from the RAM ring buffer (docs/API.md 6).
   import Status from '../components/Status.svelte';
+  import { poll } from '../lib/activity';
   import { api } from '../lib/api';
   import { QUERY_STATUSES, type QueryStatus } from '../lib/api/types';
   import { href } from '../lib/routes';
@@ -25,8 +26,8 @@
 
   $effect(() => {
     if (!live) return;
-    const t = setInterval(() => recent.reload(), REFRESH_MS);
-    return () => clearInterval(t);
+    // The poll stops while the tab is hidden or the user is away (lib/activity.ts).
+    return poll(() => recent.reload(), REFRESH_MS);
   });
 
   const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });

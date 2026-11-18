@@ -939,7 +939,7 @@ stateDiagram-v2
 ```json
 {
   "upstreams": {
-    "servers": ["192.0.2.53", "198.51.100.53"],
+    "servers": ["udp://192.0.2.53:53", "udp://198.51.100.53:53", "tls://dns.example:853"],
     "timeout_ms": 2000
   },
   "blocking": {
@@ -978,7 +978,7 @@ stateDiagram-v2
 
 | Field | Rule |
 |---|---|
-| `upstreams.servers` | 1 to 8 items. Plain IPv4 `IP` or `IP:port`. IPv6 gives 422 (A11). P7 adds `tls://` and `https://` forms. |
+| `upstreams.servers` | 1 to 8 items. `GET` sends the text of each `url` in the config, with no change (the default config and `rusthole import` write `udp://IP:PORT`). `PATCH` accepts each form of `upstreams.servers[].url` in [CONFIG.md](CONFIG.md): `IP`, `IP:port`, `udp://IP:port`, `tcp://IP:port`, `tls://host:port` (DoT) and `https://host/path` (DoH). A plain DNS upstream (`udp://`, `tcp://`, no scheme) must use an IP address. An IPv6 address gives 422 (A11). The API has no `bootstrap` field: a DoT or DoH server with a host name keeps the bootstrap addresses of the config when its text does not change, but a new one gives 422 with the field `upstreams.servers[N].bootstrap`. Add a new host-name server in `rusthole.toml`. Each bad server gives one 422 detail with the field `upstreams.servers[N]`. |
 | `upstreams.timeout_ms` | 100 to 10000. |
 | `blocking.mode` | `null` (`0.0.0.0` and `::`, the default), `nxdomain`, `nodata`, `custom_ip` (config mode `ip`). There is no `refused` mode. |
 | `blocking.custom_ipv4`, `custom_ipv6` | Used only with `custom_ip`. Else `null`. |

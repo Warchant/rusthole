@@ -3,7 +3,7 @@
   import Status from '../components/Status.svelte';
   import { api } from '../lib/api';
   import type { Forwarder, LocalCname, LocalRecord } from '../lib/api/types';
-  import { act, resource } from '../lib/state.svelte';
+  import { act, actToggle, resource } from '../lib/state.svelte';
   import { checkForwardDomain, checkServers, IPV6_HINT, isHostname, isIPv4, looksLikeIPv6, splitList } from '../lib/validate';
 
   const records = resource(() => api.dns.records.list());
@@ -86,10 +86,12 @@
     await act(() => api.dns[kind].remove(id), 'Deleted.', after);
   }
 
-  const toggleRecord = (r: LocalRecord) => act(() => api.dns.records.update(r.id, { enabled: !r.enabled }), null, records.reload);
-  const toggleCname = (c: LocalCname) => act(() => api.dns.cnames.update(c.id, { enabled: !c.enabled }), null, cnames.reload);
-  const toggleForwarder = (f: Forwarder) =>
-    act(() => api.dns.forwarders.update(f.id, { enabled: !f.enabled }), null, forwarders.reload);
+  const toggleRecord = (e: Event, r: LocalRecord) =>
+    actToggle(e, () => api.dns.records.update(r.id, { enabled: !r.enabled }), records.reload);
+  const toggleCname = (e: Event, c: LocalCname) =>
+    actToggle(e, () => api.dns.cnames.update(c.id, { enabled: !c.enabled }), cnames.reload);
+  const toggleForwarder = (e: Event, f: Forwarder) =>
+    actToggle(e, () => api.dns.forwarders.update(f.id, { enabled: !f.enabled }), forwarders.reload);
 </script>
 
 <div class="page-head"><h1>Local DNS</h1></div>
@@ -121,7 +123,7 @@
           <tbody>
             {#each records.data.items as r (r.id)}
               <tr class:off={!r.enabled}>
-                <td><input type="checkbox" checked={r.enabled} aria-label="Enabled" onchange={() => toggleRecord(r)} /></td>
+                <td><input type="checkbox" checked={r.enabled} aria-label="Enabled" onchange={(e) => toggleRecord(e, r)} /></td>
                 <td class="mono">{r.name}</td>
                 <td><span class="badge">{r.type}</span></td>
                 <td class="mono">{r.address}</td>
@@ -161,7 +163,7 @@
           <tbody>
             {#each cnames.data.items as c (c.id)}
               <tr class:off={!c.enabled}>
-                <td><input type="checkbox" checked={c.enabled} aria-label="Enabled" onchange={() => toggleCname(c)} /></td>
+                <td><input type="checkbox" checked={c.enabled} aria-label="Enabled" onchange={(e) => toggleCname(e, c)} /></td>
                 <td class="mono">{c.name}</td>
                 <td class="mono">{c.target}</td>
                 <td>{c.comment}</td>
@@ -204,7 +206,7 @@
           <tbody>
             {#each forwarders.data.items as f (f.id)}
               <tr class:off={!f.enabled}>
-                <td><input type="checkbox" checked={f.enabled} aria-label="Enabled" onchange={() => toggleForwarder(f)} /></td>
+                <td><input type="checkbox" checked={f.enabled} aria-label="Enabled" onchange={(e) => toggleForwarder(e, f)} /></td>
                 <td class="mono">{f.domain}</td>
                 <td class="mono">{f.servers.join(', ')}</td>
                 <td>{f.comment}</td>

@@ -13,22 +13,34 @@ export function allowedSeries(queries: number[], blocked: number[]): number[] {
 }
 
 /**
+ * Adds the next page of a list to the loaded items. A keyed `{#each}` block needs
+ * unique keys. The server can send an item again on the next page, for example
+ * when its count changed between two requests. Then the new copy replaces the old
+ * one at its old position. The result has each key one time only, also when a page
+ * itself has the same key two times.
+ */
+export function mergeByKey<T>(loaded: T[], next: T[], key: (item: T) => string): T[] {
+  const index = new Map<string, number>();
+  const out: T[] = [];
+  for (const item of [...loaded, ...next]) {
+    const k = key(item);
+    const at = index.get(k);
+    if (at === undefined) {
+      index.set(k, out.length);
+      out.push(item);
+    } else {
+      out[at] = item;
+    }
+  }
+  return out;
+}
+
+/**
  * Adds the next page of groups to the loaded groups. The server never splits a
  * group between pages; if a base comes again, the new copy replaces the old one.
  */
 export function mergeGroupPages(loaded: DomainGroup[], next: DomainGroup[]): DomainGroup[] {
-  const index = new Map(loaded.map((g, i) => [g.base, i]));
-  const out = loaded.slice();
-  for (const g of next) {
-    const at = index.get(g.base);
-    if (at === undefined) {
-      index.set(g.base, out.length);
-      out.push(g);
-    } else {
-      out[at] = g;
-    }
-  }
-  return out;
+  return mergeByKey(loaded, next, (g) => g.base);
 }
 
 export interface BaseGroup<T> {

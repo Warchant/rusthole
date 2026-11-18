@@ -140,6 +140,69 @@ describe('createClient', () => {
     await expect(client.get('/system')).rejects.toMatchObject({ status: 0, code: 'network' });
   });
 
+  describe('a stale CSRF token (m25)', () => {
+    const csrfFailed = () => jsonResponse(403, { code: 'csrf_failed', message: 'The CSRF token is missing or not valid.' });
+
+    function staleSetup(answers: (() => Response)[], refreshed: string | null = 'tok-2') {
+      const calls: { url: string; init: RequestInit }[] = [];
+      let token = 'tok-1';
+      const fetchFn: FetchFn = async (url, init) => {
+        calls.push({ url, init });
+        const next = answers.shift();
+        if (!next) throw new Error('No more answers.');
+        return next();
+      };
+      const refreshCsrfToken = vi.fn(async () => {
+        if (refreshed !== null) token = refreshed;
+        return refreshed;
+      });
+      const client = createClient({ fetch: fetchFn, getCsrfToken: () => token, refreshCsrfToken });
+      return { client, calls, refreshCsrfToken };
+    }
+
+    it('gets a new token and tries the write again one time', async () => {
+      const t = staleSetup([csrfFailed, () => jsonResponse(200, { id: 1 })]);
+      await expect(t.client.patch('/lists/1', { enabled: false })).resolves.toEqual({ id: 1 });
+      expect(t.refreshCsrfToken).toHaveBeenCalledTimes(1);
+      expect(t.calls.map((c) => header(c.init, 'X-CSRF-Token'))).toEqual(['tok-1', 'tok-2']);
+      expect(t.calls[1]?.init.body).toBe('{"enabled":false}');
+    });
+
+    it('tries only one time again (a second 403 is the error)', async () => {
+      const t = staleSetup([csrfFailed, csrfFailed, () => jsonResponse(200, {})]);
+      await expect(t.client.post('/lists/update')).rejects.toMatchObject({ status: 403, code: 'csrf_failed' });
+      expect(t.refreshCsrfToken).toHaveBeenCalledTimes(1);
+      expect(t.calls).toHaveLength(2);
+    });
+
+    it('does not try again when there is no new token', async () => {
+      const t = staleSetup([csrfFailed, () => jsonResponse(200, {})], null);
+      await expect(t.client.del('/rules/1')).rejects.toMatchObject({ status: 403, code: 'csrf_failed' });
+      expect(t.calls).toHaveLength(1);
+    });
+
+    it('gives the 403 when the token refresh fails', async () => {
+      const t = staleSetup([csrfFailed]);
+      t.refreshCsrfToken.mockRejectedValueOnce(new Error('offline'));
+      await expect(t.client.put('/blocking', { enabled: true })).rejects.toMatchObject({ status: 403, code: 'csrf_failed' });
+      expect(t.calls).toHaveLength(1);
+    });
+
+    it('does not try a GET or another 403 again', async () => {
+      const t = staleSetup([csrfFailed, () => jsonResponse(403, { code: 'forbidden', message: 'No.' })]);
+      await expect(t.client.get('/system')).rejects.toMatchObject({ code: 'csrf_failed' });
+      await expect(t.client.post('/tokens', {})).rejects.toMatchObject({ code: 'forbidden' });
+      expect(t.refreshCsrfToken).not.toHaveBeenCalled();
+      expect(t.calls).toHaveLength(2);
+    });
+
+    it('does not try a login again', async () => {
+      const t = staleSetup([csrfFailed, () => jsonResponse(200, {})]);
+      await expect(t.client.post('/auth/login', { password: 'x' })).rejects.toMatchObject({ code: 'csrf_failed' });
+      expect(t.refreshCsrfToken).not.toHaveBeenCalled();
+    });
+  });
+
   it('stops a request after the time limit', async () => {
     vi.useFakeTimers();
     try {

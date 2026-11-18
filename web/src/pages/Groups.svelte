@@ -2,7 +2,7 @@
   import Status from '../components/Status.svelte';
   import { api } from '../lib/api';
   import type { Group } from '../lib/api/types';
-  import { act, resource } from '../lib/state.svelte';
+  import { act, actToggle, resource } from '../lib/state.svelte';
 
   const groups = resource(() => api.groups.list());
 
@@ -35,7 +35,7 @@
     if (ok) reset();
   }
 
-  const toggle = (g: Group) => act(() => api.groups.update(g.id, { enabled: !g.enabled }), null, groups.reload);
+  const toggle = (e: Event, g: Group) => actToggle(e, () => api.groups.update(g.id, { enabled: !g.enabled }), groups.reload);
 
   async function remove(g: Group) {
     if (!confirm(`Delete the group "${g.name}"? Lists, rules and clients lose this group.`)) return;
@@ -57,6 +57,7 @@
         Comment
         <input bind:value={comment} />
       </label>
+      <p class="hint wide">Name: lower-case letters a-z, digits, '-', '_' and '.'. Start with a letter or a digit.</p>
       <div class="row">
         <button type="submit" class="primary">{editing ? 'Save' : 'Add group'}</button>
         {#if editing}<button type="button" onclick={reset}>Cancel</button>{/if}
@@ -66,7 +67,7 @@
 
   <section class="card">
     <p class="hint">
-      Lists, rules and clients attach to groups. A client that matches no configured client uses the Default group.
+      Lists, rules and clients attach to groups. A client that matches no configured client uses the default group.
     </p>
     {#if groups.data}
       <div class="table-wrap">
@@ -77,7 +78,7 @@
           <tbody>
             {#each groups.data.items as g (g.id)}
               <tr class:off={!g.enabled}>
-                <td><input type="checkbox" checked={g.enabled} aria-label="Enabled" onchange={() => toggle(g)} /></td>
+                <td><input type="checkbox" checked={g.enabled} aria-label="Enabled" onchange={(e) => toggle(e, g)} /></td>
                 <td>
                   {g.name}
                   {#if g.id === 0}<span class="badge info">default</span>{/if}

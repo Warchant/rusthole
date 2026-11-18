@@ -3,7 +3,7 @@
   import Toasts from './components/Toasts.svelte';
   import { api } from './lib/api';
   import type { RouteName } from './lib/routes';
-  import { act, applyTheme, clearSession, go, nav, session, setSession, theme, type Theme } from './lib/state.svelte';
+  import { act, applyTheme, clearSession, go, nav, session, setSession, theme, toast, type Theme } from './lib/state.svelte';
   import Audit from './pages/Audit.svelte';
   import ClientDetail from './pages/ClientDetail.svelte';
   import Clients from './pages/Clients.svelte';
@@ -65,7 +65,13 @@
   });
 
   async function logout() {
-    await act(() => api.auth.logout(), null);
+    const ok = await act(() => api.auth.logout(), null);
+    // A 401 means that the session already ended: the client then shows the login page.
+    // On another failure the session can still be valid, so stay and tell the user.
+    if (!ok && session.status === 'authed') {
+      toast('error', 'The server did not end the session. You are still logged in. Try again.', 8000);
+      return;
+    }
     clearSession();
     go('#/login');
   }

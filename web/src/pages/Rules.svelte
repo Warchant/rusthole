@@ -7,7 +7,7 @@
   import type { Rule, RuleAction, RuleKind, RuleTestResult } from '../lib/api/types';
   import { formatRelative } from '../lib/format';
   import { groupNames } from '../lib/grouping';
-  import { act, resource } from '../lib/state.svelte';
+  import { act, actToggle, resource } from '../lib/state.svelte';
 
   const rules = resource(() => api.rules.list());
   const groups = resource(() => api.groups.list());
@@ -88,7 +88,7 @@
     if (ok) reset();
   }
 
-  const toggle = (r: Rule) => act(() => api.rules.update(r.id, { enabled: !r.enabled }), null, rules.reload);
+  const toggle = (e: Event, r: Rule) => actToggle(e, () => api.rules.update(r.id, { enabled: !r.enabled }), rules.reload);
 
   async function remove(r: Rule) {
     if (!confirm(`Delete the rule ${r.pattern}?`)) return;
@@ -178,7 +178,7 @@
             <tbody>
               {#each shown as r (r.id)}
                 <tr class:off={!r.enabled}>
-                  <td><input type="checkbox" checked={r.enabled} aria-label="Enabled" onchange={() => toggle(r)} /></td>
+                  <td><input type="checkbox" checked={r.enabled} aria-label="Enabled" onchange={(e) => toggle(e, r)} /></td>
                   <td>
                     <div class="mono">{r.pattern}</div>
                     {#if r.comment}<div class="muted small">{r.comment}</div>{/if}

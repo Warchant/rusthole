@@ -727,7 +727,9 @@ fn client_groups() -> impl Strategy<Value = Vec<String>> {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(128))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(128, |env: u32| env.max(128))
+    ))]
 
     /// An allow match beats any deny for the same client and name.
     #[test]

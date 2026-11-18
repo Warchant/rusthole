@@ -96,7 +96,9 @@ fn clients_none() -> Clients {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(200))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(200, |env: u32| env.max(200))
+    ))]
 
     /// The totals equal the number of events: overall, per client, per name and blocked.
     #[test]

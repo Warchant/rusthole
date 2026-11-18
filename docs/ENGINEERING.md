@@ -115,6 +115,31 @@ one fsync can take seconds when other programs write to the disk. The refresher 
 atomic writes with fsync in a row and then fail their 10 s limit. A RAM file system does not
 keep data after a reboot, so no test can check durability there; no test does.
 
+The runner sets two variables: `TMPDIR` (for `tempfile` and `std::env::temp_dir()`) and
+`RUSTHOLE_TEST_TMP`. Some test helpers do not use the system temp directory, because on
+Windows it is on drive C. These helpers find their base directory in this order:
+
+1. `RUSTHOLE_TEST_TMP`.
+2. `TMPDIR` (only `scratch_base` in `rusthole-store`).
+3. `$CARGO_TARGET_DIR/test-tmp` (only `scratch_base` in `rusthole-store`). A relative
+   `CARGO_TARGET_DIR` is relative to the repository root.
+4. `<repo>/target/test-tmp`.
+
+The helpers are `scratch_base` in `crates/rusthole-store` (`src/tests.rs` and
+`tests/size.rs`), and `scratch` in `crates/rusthole-tls/src/fsio.rs` and
+`crates/rusthole/src/fsutil.rs`. Thus all of them use `/dev/shm/rusthole-test` under
+`scripts/linux.sh`.
+
+`scripts/linux.sh fuzz TARGET SECONDS` uses the pinned nightly of the CI fuzz job
+(`FUZZ_NIGHTLY` in `.github/workflows/ci.yml`). It runs `scripts/fuzz.sh`, which also gives
+the committed seeds in `fuzz/seeds/TARGET` to libFuzzer. To change the seeds, edit and run
+`scripts/make-fuzz-seeds.py`. libFuzzer writes crash inputs to `fuzz/artifacts/TARGET`. The
+CI fuzz job uploads this folder as the artifact `fuzz-artifacts` when it fails.
+
+Property tests: CI sets `PROPTEST_CASES=1024`. A `proptest!` block that sets its own case
+count uses the larger of the two values. Only the slow blocks (each case writes a SQLite file
+or a zip) keep a fixed low count.
+
 ## Network in tests (no Windows firewall prompt)
 
 On Windows, a program that listens on a non-loopback address opens the Windows Defender

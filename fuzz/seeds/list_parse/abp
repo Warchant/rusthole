@@ -1,0 +1,8 @@
+[Adblock Plus 2.0]
+! comment
+||ads.example.com^
+||tracker.example.net^$third-party
+@@||ok.example.com^
+/regex/
+||sub.example.org^$important
+example.com##.banner

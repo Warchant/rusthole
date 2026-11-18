@@ -56,9 +56,16 @@ pub(crate) fn write_atomic(path: &Path, data: &[u8], overwrite: bool) -> io::Res
 mod tests {
     use super::*;
 
-    /// A temp directory under the target directory, not under the system temp directory.
+    /// A temp directory under `RUSTHOLE_TEST_TMP` (`scripts/linux.sh` sets a RAM file
+    /// system), else under `target/test-tmp`. Not under the system temp directory: on Windows
+    /// it is on drive C, and drive C is nearly full.
     fn scratch() -> tempfile::TempDir {
-        let base = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/test-tmp");
+        let base = std::env::var_os("RUSTHOLE_TEST_TMP")
+            .filter(|v| !v.is_empty())
+            .map_or_else(
+                || Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/test-tmp"),
+                std::path::PathBuf::from,
+            );
         std::fs::create_dir_all(&base).unwrap();
         tempfile::tempdir_in(base).unwrap()
     }

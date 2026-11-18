@@ -150,7 +150,27 @@ jobs:
           bash scripts/smoke-test.sh out/rusthole
       - name: shellcheck of the scripts
         run: |
-          shellcheck packaging/install.sh packaging/uninstall.sh scripts/release-build.sh scripts/smoke-test.sh
+          shellcheck packaging/install.sh packaging/uninstall.sh scripts/*.sh
+      # DESTDIR mode with a fake binary: no real host change, the config check before the
+      # binary replace, the symbolic link refusal and the passwd hint.
+      - name: Install script tests
+        run: bash scripts/install-test.sh
+
+  # The aarch64 binary (Raspberry Pi) on qemu-user: --version, check-config of the packaged
+  # config, and the smoke test (scripts/aarch64-check.sh).
+  smoke-aarch64:
+    needs: musl
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: rusthole-aarch64-unknown-linux-musl
+          path: out
+      - name: Install qemu-user and dig
+        run: sudo apt-get update && sudo apt-get install -y qemu-user-static dnsutils
+      - name: Run the aarch64 binary under qemu-user
+        run: bash scripts/aarch64-check.sh out/rusthole
 
   # The install script and the hardened systemd unit on a real Ubuntu host (part P8). The
   # runner has root and systemd; a development machine often has neither.
@@ -233,22 +253,43 @@ jobs:
           workspaces: |
             .
             fuzz
+      # The corpus is in the cache, not in git. Restore and save are two steps: the save
+      # also runs when a target fails, so the new corpus entries are kept.
       - name: Restore the fuzz corpus
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: fuzz/corpus
           key: fuzz-corpus-${{ github.run_id }}
           restore-keys: fuzz-corpus-
-      # fuzz/corpus is not in git. Without valid seeds, random bytes almost never make a zip
-      # with a valid gravity.db, so the fuzzer would not reach the SQLite reader or the mapping.
-      - name: Write the fuzz seeds
+      # The committed seeds are in fuzz/seeds/<target> (scripts/make-fuzz-seeds.py writes
+      # them); scripts/fuzz.sh gives them to each run. Random bytes almost never make a zip
+      # with a valid gravity.db, so the Teleporter, pihole.toml and config seeds come from the
+      # synthetic fixture of rusthole-import.
+      - name: Write the fixture seeds
         run: |
           cargo run --locked -p rusthole-import --features testkit --example write_fixture -- --seeds fuzz/corpus
           ls -lR fuzz/corpus | head -20
       - run: cargo "+$FUZZ_NIGHTLY" install cargo-fuzz --locked
+      - name: Test the target list gate of scripts/fuzz.sh
+        run: bash scripts/fuzz-gate-test.sh
+      # scripts/fuzz.sh fails when `cargo fuzz list` fails or does not list each target of
+      # fuzz/Cargo.toml. It runs all targets, then fails when one or more failed.
       - name: Run each fuzz target for 60 s
-        working-directory: fuzz
-        run: |
-          for t in $(cargo "+$FUZZ_NIGHTLY" fuzz list); do
-            cargo "+$FUZZ_NIGHTLY" fuzz run "$t" -- -max_total_time=60 -rss_limit_mb=2048
-          done
+        env:
+          FUZZ_TOOLCHAIN: ${{ env.FUZZ_NIGHTLY }}
+        run: bash scripts/fuzz.sh all 60
+      - name: Save the fuzz corpus
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: fuzz/corpus
+          key: fuzz-corpus-${{ github.run_id }}
+      # libFuzzer writes the input of a crash, a leak or a timeout to fuzz/artifacts/<target>.
+      # Reproduce: cargo +nightly fuzz run <target> <file>.
+      - name: Upload the crash inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-artifacts
+          path: fuzz/artifacts
+          if-no-files-found: warn

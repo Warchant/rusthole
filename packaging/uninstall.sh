@@ -10,7 +10,8 @@
 # When install.sh turned off the systemd-resolved stub listener, this script turns it on
 # again and restores the /etc/resolv.conf link.
 #
-# DESTDIR (tests only): remove from a staging tree, for example DESTDIR=/tmp/root.
+# DESTDIR (tests only): remove from a staging tree, for example DESTDIR=/tmp/root. This
+# mode does not touch the real host: no root, no systemctl, no userdel.
 set -eu
 
 DESTDIR="${DESTDIR:-}"
@@ -37,17 +38,25 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         -h | --help)
-            sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
+            sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *) die "unknown option: $1 (see --help)" ;;
     esac
 done
 
-[ "$(id -u)" -eq 0 ] || die "run this script as root (sudo sh uninstall.sh)"
+staging=0
+[ -n "$DESTDIR" ] && staging=1
+
+if [ "$staging" -eq 0 ]; then
+    [ "$(id -u)" -eq 0 ] || die "run this script as root (sudo sh uninstall.sh)"
+fi
 
 systemd=0
-[ -d /run/systemd/system ] && systemd=1
+# In DESTDIR mode, the real service stays as it is.
+if [ "$staging" -eq 0 ] && [ -d /run/systemd/system ]; then
+    systemd=1
+fi
 
 # 1. The service.
 if [ "$systemd" -eq 1 ]; then
@@ -86,7 +95,9 @@ fi
 if [ "$purge" -eq 1 ]; then
     rm -rf "$CONF_DIR" "$DATA_DIR"
     say "Removed $CONF_DIR and $DATA_DIR"
-    if getent passwd "$SERVICE_USER" >/dev/null 2>&1; then
+    if [ "$staging" -eq 1 ]; then
+        say "DESTDIR mode: the user $SERVICE_USER stays"
+    elif getent passwd "$SERVICE_USER" >/dev/null 2>&1; then
         userdel "$SERVICE_USER" >/dev/null 2>&1 || say "Remove the user $SERVICE_USER by hand"
         say "Removed the user $SERVICE_USER"
     fi

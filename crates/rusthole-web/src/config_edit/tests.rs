@@ -320,7 +320,9 @@ fn apply(c: &mut Config, op: &Op, high: &mut u32) {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(128))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(128, |env: u32| env.max(128))
+    ))]
 
     /// For any chain of edits, each written text parses to the wanted config, and the
     /// comments of items that still exist stay in the text.
@@ -472,7 +474,9 @@ fn apply_api(c: &mut Config, op: &ApiOp, high: &mut u32) -> Result<(), crate::er
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(96))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(96, |env: u32| env.max(96))
+    ))]
 
     /// For any chain of edits through the API model, each written text parses to the same
     /// config, and the comments that are not part of an edited item stay.

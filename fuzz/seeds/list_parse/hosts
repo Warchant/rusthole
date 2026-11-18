@@ -1,0 +1,6 @@
+# hosts format
+0.0.0.0 ads.example.com
+127.0.0.1 tracker.example.net # inline
+::1 v6.example.org
+0.0.0.0 a.example.com b.example.com
+192.0.2.1 localhost

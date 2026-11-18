@@ -13,13 +13,16 @@
 #   --disable-resolved-stub  turn off the systemd-resolved stub listener on 127.0.0.53:53
 #                            and point /etc/resolv.conf at the upstream list of
 #                            systemd-resolved. Read docs/INSTALL.md first.
-#   --no-start               install and enable the service, but do not start it
+#   --no-start               install and enable the service, but do not start it (an
+#                            upgrade stops a running service and does not start it)
 #   -h, --help               show this help
 #
 # The script is idempotent: run it again with a new binary to upgrade. It keeps the config
-# and the data. It never overwrites an existing config.
+# and the data. It never overwrites an existing config. An upgrade checks the existing config
+# with the new binary before it replaces the old binary.
 #
-# DESTDIR (tests only): install into a staging tree, for example DESTDIR=/tmp/root.
+# DESTDIR (tests only): install into a staging tree, for example DESTDIR=/tmp/root. This
+# mode does not touch the real host: no root, no user, no chown, no systemctl.
 set -eu
 
 DESTDIR="${DESTDIR:-}"
@@ -49,7 +52,27 @@ die() {
 }
 
 usage() {
-    sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+# DESTDIR mode (staging) or the real host.
+staging=0
+[ -n "$DESTDIR" ] && staging=1
+
+# Refuse a path that is a symbolic link. Root changes the owner and the mode of these paths,
+# and the service user can write in their parent folders. A link could point root at another
+# file (for example /etc/shadow).
+refuse_link() {
+    if [ -L "$1" ]; then
+        die "$1 is a symbolic link; rusthole needs a real file or folder there. Remove the link, then run the script again."
+    fi
+}
+
+# Give a path to the service user. -h: never follow a symbolic link. Not in DESTDIR mode: the
+# staging tree is not the real host.
+give_to_service() {
+    [ "$staging" -eq 1 ] && return 0
+    chown -h "$SERVICE_USER:$SERVICE_USER" "$1"
 }
 
 while [ $# -gt 0 ]; do
@@ -80,7 +103,9 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-[ "$(id -u)" -eq 0 ] || die "run this script as root (sudo sh install.sh)"
+if [ "$staging" -eq 0 ]; then
+    [ "$(id -u)" -eq 0 ] || die "run this script as root (sudo sh install.sh)"
+fi
 
 # 1. The CPU type. Release binaries exist for x86_64 and aarch64 only.
 machine="$(uname -m)"
@@ -109,14 +134,53 @@ fi
 # not changed in place, and a binary that does not run is never installed.
 mkdir -p "$(dirname "$BIN")"
 tmp_bin="$BIN.new.$$"
-trap 'rm -f "$tmp_bin"' EXIT
+# stopped=1: step 6 stopped the running service. When the script then fails, the exit handler
+# starts the service again, so the LAN keeps its DNS.
+stopped=0
+on_exit() {
+    rc=$?
+    rm -f "$tmp_bin"
+    if [ "$rc" -ne 0 ] && [ "$stopped" -eq 1 ]; then
+        warn "the install failed after the service stopped; starting rusthole.service again"
+        systemctl start rusthole.service || warn "rusthole.service did not start; see: journalctl -u rusthole"
+    fi
+}
+trap on_exit EXIT
 cp "$binary" "$tmp_bin"
 chmod 0755 "$tmp_bin"
 version="$("$tmp_bin" --version 2>/dev/null)" || die "$binary does not run on this host (wrong CPU type?)"
 say "Installing $version"
 
-# 3. The system user (no login, no home directory).
-if getent passwd "$SERVICE_USER" >/dev/null 2>&1; then
+# 3. No symbolic links in the paths of the service. -e is false for a link to nothing, so the
+# config test is also -L.
+for p in "$CONF_DIR" "$DATA_DIR" "$CONF"; do
+    refuse_link "$p"
+done
+if [ -e "$CONF" ] && [ ! -f "$CONF" ]; then
+    die "$CONF is not a regular file"
+fi
+if [ -e "$CONF" ] && [ -n "$import_file" ]; then
+    die "$CONF exists; move it away to import $import_file, then run the script again"
+fi
+# The files of the release must exist before the script changes the host.
+[ -f "$here/rusthole.service" ] || die "the unit $here/rusthole.service is missing"
+if [ ! -e "$CONF" ] && [ -z "$import_file" ] && [ ! -f "$here/rusthole.toml" ]; then
+    die "the default config $here/rusthole.toml is missing"
+fi
+
+# 4. An upgrade: check the existing config with the new binary, before the old binary is
+# replaced. When the check fails, the old binary and the service stay as they are.
+if [ -e "$CONF" ] && [ -z "$import_file" ]; then
+    if ! "$tmp_bin" check-config -c "$CONF"; then
+        die "the new binary refuses $CONF (see above); the old binary and the service are not changed"
+    fi
+    say "The new binary accepts $CONF"
+fi
+
+# 5. The system user (no login, no home directory).
+if [ "$staging" -eq 1 ]; then
+    say "DESTDIR mode: no system user"
+elif getent passwd "$SERVICE_USER" >/dev/null 2>&1; then
     say "User $SERVICE_USER exists"
 else
     nologin=/usr/sbin/nologin
@@ -126,19 +190,29 @@ else
     say "Made the system user $SERVICE_USER"
 fi
 
-# 4. The binary.
+# 6. Stop a running service before root changes the owner and the mode of its files. Then the
+# service user cannot replace a file with a link between the link test and the change. The
+# last step starts the service again.
+if [ "$staging" -eq 0 ] && [ -d /run/systemd/system ] &&
+    systemctl is-active --quiet rusthole.service; then
+    stopped=1
+    systemctl stop rusthole.service
+    say "Stopped rusthole.service for the upgrade"
+fi
+
+# 7. The binary.
 mv -f "$tmp_bin" "$BIN"
-trap - EXIT
 say "Installed $BIN"
 
-# 5. The directories: only the rusthole user can read them.
+# 8. The directories: only the rusthole user can read them.
 for d in "$CONF_DIR" "$DATA_DIR"; do
     mkdir -p "$d"
-    chown "$SERVICE_USER:$SERVICE_USER" "$d"
+    refuse_link "$d"
+    give_to_service "$d"
     chmod 0750 "$d"
 done
 
-# 6. The config. Never overwrite an existing one.
+# 9. The config. Never overwrite an existing one.
 if [ -e "$CONF" ]; then
     if [ -n "$import_file" ]; then
         die "$CONF exists; move it away to import $import_file, then run the script again"
@@ -152,15 +226,20 @@ else
     cp "$here/rusthole.toml" "$CONF"
     say "Wrote the default config $CONF"
 fi
-chown "$SERVICE_USER:$SERVICE_USER" "$CONF"
+refuse_link "$CONF"
+[ -f "$CONF" ] || die "$CONF is not a regular file"
+give_to_service "$CONF"
 chmod 0600 "$CONF"
 if ! "$BIN" check-config -c "$CONF"; then
     die "$CONF has problems (see above); fix them, then run the script again"
 fi
 
-# 7. The systemd-resolved stub listener on 127.0.0.53:53.
+# 10. The systemd-resolved stub listener on 127.0.0.53:53. In DESTDIR mode, the script
+# changes only the files in the staging tree.
 stub_active=0
-if command -v ss >/dev/null 2>&1 && ss -Hlnu 2>/dev/null | grep -q '127\.0\.0\.53[:%]'; then
+if [ "$staging" -eq 1 ]; then
+    stub_active=1
+elif command -v ss >/dev/null 2>&1 && ss -Hlnu 2>/dev/null | grep -q '127\.0\.0\.53[:%]'; then
     stub_active=1
 fi
 if [ "$disable_stub" -eq 1 ]; then
@@ -180,7 +259,9 @@ if [ "$disable_stub" -eq 1 ]; then
                 say "DNSStubListener=no"
             } >"$RESOLVED_DROPIN"
         fi
-        systemctl restart systemd-resolved
+        if [ "$staging" -eq 0 ]; then
+            systemctl restart systemd-resolved
+        fi
         if [ -L "$RESOLV_CONF" ] || [ ! -e "$RESOLV_CONF" ]; then
             ln -sfn "$RESOLVED_UPSTREAM" "$RESOLV_CONF"
             say "Turned off the stub listener; $RESOLV_CONF now points to $RESOLVED_UPSTREAM"
@@ -188,13 +269,13 @@ if [ "$disable_stub" -eq 1 ]; then
             warn "$RESOLV_CONF is a file, not a link; it stays as it is. Make sure that it does not name 127.0.0.53."
         fi
     fi
-elif [ "$stub_active" -eq 1 ]; then
+elif [ "$stub_active" -eq 1 ] && [ "$staging" -eq 0 ]; then
     say "Note: systemd-resolved listens on 127.0.0.53:53. rusthole binds each address on its own,"
     say "      so they do not clash. To replace the stub, see docs/INSTALL.md (--disable-resolved-stub)."
 fi
 
 # Another DNS server on port 53 (for example dnsmasq or Pi-hole) stops rusthole from binding.
-if command -v ss >/dev/null 2>&1; then
+if [ "$staging" -eq 0 ] && command -v ss >/dev/null 2>&1; then
     others="$(ss -Hlnup 'sport = :53' 2>/dev/null | grep -v -e '127\.0\.0\.53[:%]' -e '127\.0\.0\.54[:%]' -e '"rusthole"' || true)"
     if [ -n "$others" ]; then
         warn "another program listens on port 53; rusthole cannot bind these addresses:"
@@ -202,7 +283,16 @@ if command -v ss >/dev/null 2>&1; then
     fi
 fi
 
-# 8. The systemd unit.
+# The password command must run as the user rusthole. As root, it writes a config that only
+# root can read, and the service cannot start.
+passwd_hint() {
+    say "Next step:       set the admin password, as the user rusthole:"
+    say "                 sudo -u rusthole rusthole passwd -c /etc/rusthole/rusthole.toml"
+    say "                 Do not run it as root: then the config belongs to root, the service"
+    say "                 cannot read it, and rusthole does not start."
+}
+
+# 11. The systemd unit.
 mkdir -p "$(dirname "$UNIT")"
 if [ -f "$here/rusthole.service" ]; then
     cp "$here/rusthole.service" "$UNIT.new.$$"
@@ -210,6 +300,11 @@ if [ -f "$here/rusthole.service" ]; then
     mv -f "$UNIT.new.$$" "$UNIT"
 else
     die "the unit $here/rusthole.service is missing"
+fi
+if [ "$staging" -eq 1 ]; then
+    say "DESTDIR mode: installed into $DESTDIR; no systemctl"
+    passwd_hint
+    exit 0
 fi
 if [ ! -d /run/systemd/system ]; then
     warn "systemd does not run on this host; start rusthole by hand: $BIN run -c $CONF"
@@ -223,6 +318,8 @@ if [ "$start" -eq 0 ]; then
 fi
 # Type=notify: systemctl returns when rusthole sent READY=1 (all listeners are bound), or
 # when the start failed.
+# From here, a failed start is the result of this step, not of an earlier failure.
+stopped=0
 if ! systemctl restart rusthole.service; then
     systemctl --no-pager status rusthole.service >&2 || true
     die "rusthole did not start; see: journalctl -u rusthole"
@@ -256,6 +353,5 @@ if [ -n "$fingerprint" ]; then
 else
     say "TLS fingerprint: see journalctl -u rusthole | grep fingerprint"
 fi
-say "Next step:       set the admin password:"
-say "                 sudo -u rusthole rusthole passwd -c /etc/rusthole/rusthole.toml"
+passwd_hint
 say "Then point the DNS server of your router (DHCP) or of your devices at $addr."

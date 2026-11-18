@@ -59,13 +59,26 @@ impl Model {
     }
 }
 
-/// The base of the test temp directories: `RUSTHOLE_TEST_TMP`, else `target/test-tmp`. Not
-/// the system temp directory (drive C is nearly full on the development host).
+/// The base of the test temp directories. The first variable that is set wins:
+/// `RUSTHOLE_TEST_TMP`, then `TMPDIR` (`scripts/linux.sh` sets a RAM file system), then
+/// `CARGO_TARGET_DIR/test-tmp`, then `<repo>/target/test-tmp`. A copy of `scratch_base` in
+/// `src/tests.rs`; its unit test covers the order. The function does not use
+/// `std::env::temp_dir()`: on Windows it is on drive C, and drive C is nearly full on the
+/// development host.
 fn scratch_base() -> std::path::PathBuf {
-    let base = std::env::var_os("RUSTHOLE_TEST_TMP").map_or_else(
-        || std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/test-tmp"),
-        std::path::PathBuf::from,
-    );
+    let var = |name| std::env::var_os(name).filter(|v| !v.is_empty());
+    let base = var("RUSTHOLE_TEST_TMP")
+        .or_else(|| var("TMPDIR"))
+        .map_or_else(
+            || {
+                let target = var("CARGO_TARGET_DIR").unwrap_or_else(|| "target".into());
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../..")
+                    .join(target)
+                    .join("test-tmp")
+            },
+            std::path::PathBuf::from,
+        );
     std::fs::create_dir_all(&base).unwrap();
     base
 }

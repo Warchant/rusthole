@@ -1,0 +1,7 @@
+# domains format
+ads.example.com
+*.wild.example.net
+telemetry.example.org
+bad_name..example
+xn--bcher-kva.example
+single

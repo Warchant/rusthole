@@ -341,7 +341,9 @@ fn reference(cfg: &Config, f: &ClientFacts<'_>) -> (MatchedBy, Option<usize>, Ve
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(512))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(512, |env: u32| env.max(512))
+    ))]
 
     /// For any config and any facts, the table gives the result of the reference model.
     /// No group comes from an entry that did not match, and no disabled or unknown group

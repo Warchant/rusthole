@@ -152,10 +152,10 @@ Resolved:
 Open:
 
 1. Custom features: the owner defines them later. The policy engine stays open for them.
-2. Flaky refresher test in WSL (postponed to the end by the owner, 2026-11-18):
-   `corrupt_cache_files_give_a_refetch` can time out when other programs write to drive D,
-   because the test temp files are on `/mnt/d` and one fsync there can take seconds. A
-   candidate fix (test temp files on `/dev/shm`) is on branch `flaky-refresher`, not merged.
+2. RESOLVED (2026-11-18): flaky refresher test in WSL. `corrupt_cache_files_give_a_refetch`
+   timed out when other programs wrote to drive D, because the test temp files were on
+   `/mnt/d` and one fsync there can take seconds. `scripts/linux.sh` now gives test binaries
+   a temp directory on `/dev/shm`. Not a product bug.
 3. IPv6 transport (A11): next version.
 
 ## 7. Assumptions

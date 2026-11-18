@@ -376,7 +376,9 @@ fn run(p: &RefreshPolicy, id: u32, events: &[(u8, u64)]) -> ListRefresh {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(512))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(512, |env: u32| env.max(512))
+    ))]
 
     /// Any event sequence keeps a valid state. An invalid event always gives `Idle`.
     #[test]

@@ -792,7 +792,9 @@ fn client_groups() -> impl Strategy<Value = Vec<String>> {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(128))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(128, |env: u32| env.max(128))
+    ))]
 
     /// Pi-hole v6 order: an exact or regex allow rule beats any deny. An allow-kind list beats
     /// any deny except an exact deny rule.

@@ -107,6 +107,11 @@ With no password, no login is possible. Set the password as the user `rusthole`:
 sudo -u rusthole rusthole passwd -c /etc/rusthole/rusthole.toml
 ```
 
+Run the command as the user `rusthole`, not as root. Reason: the command writes the
+config file again. As root, the new file belongs to root with mode 0600. Then the service
+(the user `rusthole`) cannot read its config, and rusthole does not start at the next
+restart. `install.sh` prints the same command.
+
 The command reads the password two times, with no echo. In a script, give the two lines on
 stdin (never on the command line). The running service uses the new password at the next
 login. A restart is not necessary.
@@ -216,7 +221,19 @@ rusthole also has its own client ACL: it answers only loopback and the local sub
    ```
 
 The script replaces the binary and the unit, keeps the config and the data, and restarts
-the service. Read the release notes first: a new config version is changed by rusthole
+the service. The steps:
+
+1. The script checks the existing config with the new binary (from a temp path). When the
+   new binary refuses the config, the script stops. The old binary and the running service
+   stay as they are.
+2. The script stops the service. Then it replaces the binary and sets the owner and the mode
+   of `/etc/rusthole`, `/var/lib/rusthole` and the config. When a later step fails, the
+   script starts the service again.
+3. The script refuses a symbolic link at these paths. Reason: root changes the owner and the
+   mode, and a link could point root at another file. `chown -h` is a second guard.
+4. The script starts the service again (not with `--no-start`).
+
+Read the release notes first: a new config version is changed by rusthole
 itself at the start.
 
 ## 8. Uninstall

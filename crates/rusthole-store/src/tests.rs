@@ -58,15 +58,69 @@ fn ev(at: i64, client: u8, name: &str, status: Status) -> StatsEvent {
     }
 }
 
-/// The base of the test temp directories: `RUSTHOLE_TEST_TMP`, else `target/test-tmp`. Not
-/// the system temp directory (drive C is nearly full on the development host).
+/// The base of the test temp directories. [`scratch_base_from`] gives the order of the
+/// environment variables.
 pub(crate) fn scratch_base() -> PathBuf {
-    let base = std::env::var_os("RUSTHOLE_TEST_TMP").map_or_else(
-        || Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/test-tmp"),
-        PathBuf::from,
+    let var = |name| std::env::var_os(name).filter(|v| !v.is_empty());
+    let base = scratch_base_from(
+        var("RUSTHOLE_TEST_TMP"),
+        var("TMPDIR"),
+        var("CARGO_TARGET_DIR"),
     );
     std::fs::create_dir_all(&base).unwrap();
     base
+}
+
+/// The first value that is set wins: `RUSTHOLE_TEST_TMP`, then `TMPDIR` (`scripts/linux.sh`
+/// sets a RAM file system), then `CARGO_TARGET_DIR/test-tmp`, then `<repo>/target/test-tmp`.
+/// A relative `CARGO_TARGET_DIR` is relative to the repo root. The function does not use
+/// `std::env::temp_dir()`: on Windows it is on drive C, and drive C is nearly full on the
+/// development host.
+fn scratch_base_from(
+    own: Option<std::ffi::OsString>,
+    tmpdir: Option<std::ffi::OsString>,
+    target_dir: Option<std::ffi::OsString>,
+) -> PathBuf {
+    if let Some(dir) = own.or(tmpdir) {
+        return PathBuf::from(dir);
+    }
+    let target = target_dir.map_or_else(|| PathBuf::from("target"), PathBuf::from);
+    // `join` keeps an absolute `target` as it is.
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(target)
+        .join("test-tmp")
+}
+
+#[test]
+fn scratch_base_honors_the_environment() {
+    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let os = |s: &str| Some(std::ffi::OsString::from(s));
+    assert_eq!(
+        scratch_base_from(os("/own"), os("/shm"), os("/t")),
+        PathBuf::from("/own")
+    );
+    assert_eq!(
+        scratch_base_from(None, os("/dev/shm/rusthole-test"), os("/t")),
+        PathBuf::from("/dev/shm/rusthole-test")
+    );
+    let abs = if cfg!(windows) {
+        "D:/tmp/target"
+    } else {
+        "/mnt/d/tmp/target"
+    };
+    assert_eq!(
+        scratch_base_from(None, None, os(abs)),
+        Path::new(abs).join("test-tmp")
+    );
+    assert_eq!(
+        scratch_base_from(None, None, os("rel-target")),
+        repo.join("rel-target").join("test-tmp")
+    );
+    assert_eq!(
+        scratch_base_from(None, None, None),
+        repo.join("target").join("test-tmp")
+    );
 }
 
 fn tempdir() -> tempfile::TempDir {

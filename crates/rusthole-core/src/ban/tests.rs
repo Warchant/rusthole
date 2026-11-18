@@ -219,7 +219,9 @@ fn event(op: Op) -> BanEvent {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(512))]
+    #![proptest_config(ProptestConfig::with_cases(
+        std::env::var("PROPTEST_CASES").ok().and_then(|v| v.parse().ok()).map_or(512, |env: u32| env.max(512))
+    ))]
 
     /// With no success and no cancel, no event sequence lets more than `threshold` attempts
     /// start in any window of `base_lockout` (half-open). Invalid events are in the

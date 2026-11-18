@@ -100,6 +100,13 @@ Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `
 
 Temporary files go to `D:\tmp`, not to drive C.
 
+`scripts/linux.sh` gives the test binaries (and `cargo run`) the temp directory
+`/dev/shm/rusthole-test`, a RAM file system, through the cargo runner of the host target.
+rustc and the linker keep `TMPDIR` on drive D. Reason: on drive D (a Windows drive in WSL),
+one fsync can take seconds when other programs write to the disk. The refresher tests do many
+atomic writes with fsync in a row and then fail their 10 s limit. A RAM file system does not
+keep data after a reboot, so no test can check durability there; no test does.
+
 ## Network in tests (no Windows firewall prompt)
 
 On Windows, a program that listens on a non-loopback address opens the Windows Defender

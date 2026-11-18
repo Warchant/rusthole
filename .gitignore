@@ -12,3 +12,4 @@
 /.claude/
 # The default data directory of a Windows development build.
 /rusthole-data
+/.cargo/

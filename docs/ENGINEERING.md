@@ -118,7 +118,7 @@ Use one build folder per platform, and reuse it, so incremental builds work:
 
 | Platform | Build folder |
 |---|---|
-| Windows | `target\` in the repo (the default) |
+| Windows | `target\` in the repo by default. On the owner's machine an untracked `.cargo/config.toml` moves it to `D:/tmp/rusthole-target-win` (drive E is nearly full); worktrees under `.claude/worktrees` use the same file. |
 | Linux (WSL) | `/mnt/d/tmp/rusthole-target-linux` (set by `scripts/linux.sh`) |
 | Fuzz (WSL, nightly) | `/mnt/d/tmp/rusthole-target-linux/fuzz` (set by `scripts/linux.sh fuzz`) |
 

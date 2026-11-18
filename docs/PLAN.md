@@ -190,6 +190,13 @@ Owner answers:
 | A9 | Pi-hole features added to scope: enable or disable blocking with a timer (a state machine); list refresh schedule, "update now" and status per list; "which list blocks this domain" search (scan of list files on disk); subscribed allow lists and regex allow rules; statistics (queries over time, query types, upstream share, top domains, top blocked, top clients); audit log of admin actions; start with list files on disk when the network is down; config reload without restart (a bad config keeps the old one). | M12 |
 | A10 | New part split (see below). P1 adds `config_version` and a key-by-key import mapping table (translated, ignored, reported). Client identity uses a `NeighborTable` trait: the pure core gets a snapshot; a bounded cache refreshes on a period; no lookup on the hot path; an unknown MAC uses the default group; IPv6 neighbors come from netlink. Memory: compact set (arena or `fst`) with a list bitmask per domain and a list mask per group; 64 MB is the peak during a refresh. | M7, M8, M10, m1, m2 |
 
+### A12. Memory target raised (owner decision, 2026-11-18)
+
+The measured peak of the list refresher is 128.6 MB for 1M blocked domains (82 MB at the
+engine swap, old + new engine). The owner accepts this. New target: less than 150 MB peak
+for 1M blocked domains. This replaces the 64 MB target of D6 and A10. A home setup with
+about 370k domains needs about 45–50 MB.
+
 ### A11. IPv4 only in v1 (owner decision, 2026-11-17)
 
 v1 supports IPv4 transport only. IPv6 transport is a feature for the next version.

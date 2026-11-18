@@ -243,8 +243,9 @@ function findClient(key: string): MockClient {
 
 function configuredFor(c: MockClient): T.Client | null {
   return (
-    state.clients.find((x) => x.match === c.mac) ??
+    // The order of the server (docs/CLIENTS.md): IP, MAC, then the CIDR.
     state.clients.find((x) => x.match === c.ip) ??
+    state.clients.find((x) => x.match === c.mac) ??
     state.clients.find((x) => x.kind === 'cidr' && inCidr(c.ip, x.match)) ??
     null
   );

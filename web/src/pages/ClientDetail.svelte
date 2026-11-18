@@ -1,6 +1,7 @@
 <script lang="ts">
   // One client: totals, hour-of-day histogram, queries over time, and the
   // domains it resolved, grouped by registrable domain (docs/API.md 5.6).
+  import ClientName from '../components/ClientName.svelte';
   import HourHistogram from '../components/HourHistogram.svelte';
   import RangePicker from '../components/RangePicker.svelte';
   import Status from '../components/Status.svelte';
@@ -105,6 +106,7 @@
       <div><span class="muted small">First seen</span><br />{formatDateTime(d.first_seen_at)}</div>
       <div><span class="muted small">Last seen</span><br />{formatRelative(d.last_seen_at, Date.now())}</div>
     </div>
+    <ClientName detail={d} onsaved={detail.reload} />
     <div class="stats">
       <div class="stat"><div class="label">Queries</div><div class="value">{formatCount(d.queries)}</div></div>
       <div class="stat">

@@ -70,6 +70,17 @@ The first row that matches gives the groups. The rows are tested in this order:
 - An entry that does not parse, or a second entry with the same `id`, is skipped. The log
   shows it at start (`check-config` refuses it before).
 
+### Client name
+
+The name of a client is the `comment` of its configured client. The "Name" card on the
+client page of the admin UI (`#/clients/{key}`) sets it:
+
+- A configured IP, MAC or host-name client matches: the card changes its `comment`.
+- No configured client matches, or only a CIDR client (a network, not a device): the card
+  adds a configured client for the MAC or one IPv4 address of the device (you select
+  which). The new client gets the groups that the device has now (the CIDR groups, or
+  `default`), so the blocking does not change. The CIDR client and its comment stay.
+
 ### Client cache
 
 `identify` runs on each query and reads only memory. It keeps the result for each client

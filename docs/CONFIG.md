@@ -41,7 +41,7 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `dns_listen` | list of text | `["auto"]` | DNS addresses (UDP and TCP). `"auto"` means each IPv4 address on each local interface. Or give IPv4 addresses. `"auto"` cannot be mixed with addresses. |
+| `dns_listen` | list of text | `["auto"]` | DNS addresses (UDP and TCP). `"auto"` means each IPv4 address on each local interface; rusthole scans the interfaces each 30 seconds and rebinds. On an OS other than Linux, `"auto"` binds `127.0.0.1` only (development mode). Or give IPv4 addresses. `"auto"` cannot be mixed with addresses. See [DEPLOY.md](DEPLOY.md) for the systemd-resolved stub. |
 | `dns_port` | integer | `53` | DNS port. 0 is not allowed. |
 | `doh.enabled` | bool | `false` | DNS-over-HTTPS listener (`/dns-query`). DoH clients need a certificate that they trust, so turn it on after you set up TLS. |
 | `doh.listen` | list of text | `["auto"]` | Like `dns_listen`. |
@@ -54,11 +54,11 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `servers` | list of tables | `udp://9.9.9.9:53` and `udp://1.1.1.1:53` | The upstream servers. At least one is necessary. |
+| `servers` | list of tables | `udp://9.9.9.9:53` and `udp://1.1.1.1:53` | The upstream servers. At least one is necessary. rusthole tries them by health, then in this order, at most 3 for one query. This version forwards to `udp://` and `tcp://` upstreams only: it skips a DoT or DoH upstream with a warning, and `rusthole run` stops when no plain upstream is left. |
 | `servers[].url` | text | | `8.8.8.8`, `8.8.8.8:53`, `udp://8.8.8.8:53`, `tcp://8.8.8.8:53`, `tls://dns.example:853` (DoT) or `https://dns.example/dns-query` (DoH). A plain DNS upstream must use an IP address. An IP address must be IPv4. A DoH URL without a path gets `/dns-query`. |
 | `servers[].bootstrap` | list of IPv4 addresses | `[]` | Addresses of a DoT or DoH host name. Required for a host name, so that rusthole needs no DNS to find its own upstream. Only for `tls://` and `https://`. |
 | `fallback_plain` | list of text | `[]` | Plain DNS upstreams (`udp://` or `tcp://` with an IPv4 address). rusthole uses them only while the clock is not valid (TLS needs a valid clock, and a Pi has no RTC). |
-| `timeout_ms` | integer | `2000` | Time limit for one upstream query, 1 to 60000 ms. |
+| `timeout_ms` | integer | `2000` | Time limit for one upstream query, 1 to 60000 ms. A timeout makes the query go to the next upstream. A retry over TCP (after a truncated UDP reply) gets its own time limit. |
 
 ### `[blocking]`
 
@@ -76,23 +76,23 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `max_entries` | integer | `10000` | Maximum number of answers, at most 1000000. 0 turns the cache off. |
+| `max_entries` | integer | `10000` | Maximum number of answers, at most 1000000. 0 turns the cache off. A full cache drops the least recently used answer. The key is the name (case does not matter), the type, the class and the DNSSEC OK bit. SERVFAIL and truncated answers are not cached. An answer longer than 4096 bytes goes to the client but is not cached, so the cache holds at most `max_entries` x 4 KiB of DNS data (about 40 MB for the default; the parsed form in memory is larger). On a small host, keep this value low. |
 | `min_ttl` | integer | `0` | Lowest TTL in seconds. Not more than `max_ttl`. |
 | `max_ttl` | integer | `86400` | Highest TTL in seconds. |
-| `negative_ttl` | integer | `300` | TTL of NXDOMAIN and NODATA answers without an SOA record. |
+| `negative_ttl` | integer | `300` | TTL of NXDOMAIN and NODATA answers without an SOA record. With an SOA record, the TTL is the lower of the SOA TTL and the SOA minimum field, but not more than this value. |
 
 ### `[acl]`
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
 | `auto_local` | bool | `true` | Allow loopback and each IPv4 subnet on a local interface. |
-| `allow` | list of IPv4 CIDR blocks | `[]` | More allowed networks, for example `192.0.2.0/24`. Other clients get no answer. |
+| `allow` | list of IPv4 CIDR blocks | `[]` | More allowed networks, for example `192.0.2.0/24`. Other clients get no answer over UDP (no reflection) and REFUSED over TCP. Off-net TCP clients have their own small connection pool (16) and a time limit of 1 second, so they cannot use the TCP connection slots of allowed clients. |
 
 ### `[rate_limit]`
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `queries` | integer | `1000` | Queries that one client can send in one interval. 0 turns the limit off. |
+| `queries` | integer | `1000` | Queries that one client can send in one interval (a token bucket: this is also the burst). 0 turns the limit off. A query over the limit gets no answer over UDP and REFUSED over TCP. |
 | `interval_seconds` | integer | `60` | Interval length. Must be more than 0 when `queries` is set. |
 
 ### `[stats]`

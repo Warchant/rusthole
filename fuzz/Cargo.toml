@@ -12,6 +12,7 @@ cargo-fuzz = true
 libfuzzer-sys = "0.4"
 rusthole-core = { path = "../crates/rusthole-core" }
 rusthole-import = { path = "../crates/rusthole-import" }
+rusthole-dns = { path = "../crates/rusthole-dns" }
 
 # Not a member of the main workspace: it needs nightly and libFuzzer.
 [workspace]
@@ -40,6 +41,20 @@ bench = false
 [[bin]]
 name = "pihole_toml"
 path = "fuzz_targets/pihole_toml.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "dns_request"
+path = "fuzz_targets/dns_request.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "cache_ops"
+path = "fuzz_targets/cache_ops.rs"
 test = false
 doc = false
 bench = false

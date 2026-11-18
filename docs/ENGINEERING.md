@@ -90,7 +90,8 @@ Static musl build (amendment A2). The script installs zig and cargo-zigbuild on 
 wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
-Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`.
+Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `dns_request`,
+`cache_ops`.
 
 Temporary files go to `D:\tmp`, not to drive C.
 

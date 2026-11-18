@@ -126,3 +126,35 @@ fn import_of_garbage_fails_cleanly() {
     assert_eq!(o.status.code(), Some(1));
     assert!(!out.exists());
 }
+
+#[test]
+fn run_refuses_a_bad_config_with_exit_code_1() {
+    let dir = scratch("run_refuses_a_bad_config");
+    let path = dir.join("bad.toml");
+    std::fs::write(
+        &path,
+        "config_version = 1\n[server]\ndns_listen = [\"2001:db8::1\"]\n",
+    )
+    .unwrap();
+    let o = rusthole(&["run", "-c", path.to_str().unwrap()]);
+    assert_eq!(o.status.code(), Some(1));
+    assert!(stdout(&o).contains("server.dns_listen"), "{}", stdout(&o));
+
+    // Only a DoH upstream: this version cannot forward, so it does not start.
+    std::fs::write(
+        &path,
+        "config_version = 1\n[[upstreams.servers]]\nurl = \"https://doh.example/dns-query\"\nbootstrap = [\"192.0.2.81\"]\n",
+    )
+    .unwrap();
+    let o = Command::new(env!("CARGO_BIN_EXE_rusthole"))
+        .args(["run", "-c", path.to_str().unwrap()])
+        .env("RUSTHOLE_LOG", "error")
+        .output()
+        .unwrap();
+    assert_eq!(o.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&o.stderr).contains("no plain DNS upstream"),
+        "{}",
+        String::from_utf8_lossy(&o.stderr)
+    );
+}

@@ -23,9 +23,22 @@ publish = false
 # Our crates. Add each one here when another crate first uses it.
 rusthole-core = { path = "crates/rusthole-core" }
 rusthole-import = { path = "crates/rusthole-import" }
+rusthole-dns = { path = "crates/rusthole-dns" }
 
 # Third-party crates. Add new ones here, then use `x = { workspace = true }` in a member.
 anyhow = "1"
+# CSPRNG for DNS query IDs and source ports.
+getrandom = "0.4"
+# DNS wire format only (decision D11). Default features: no DNSSEC crypto, no aws-lc.
+hickory-proto = "0.26.3"
+# Local interface addresses for the "auto" listeners and the client ACL.
+if-addrs = "0.15"
+# Bounded LRU maps (cache, rate limiter). Pure: no I/O.
+lru = "0.19"
+# Locks with a time limit (`try_lock_for`).
+parking_lot = "0.13"
+tokio = { version = "1.54", features = ["rt-multi-thread", "net", "time", "sync", "macros", "signal", "io-util"] }
+tokio-util = { version = "0.7.20", features = ["rt"] }
 clap = { version = "4", features = ["derive", "env"] }
 idna = "1.1"
 # Pure-Rust deflate only. The default features pull in C and crypto crates.

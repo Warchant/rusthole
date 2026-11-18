@@ -304,6 +304,48 @@ async fn blocks_by_type_and_checks_cname_targets() {
     h.stop().await;
 }
 
+/// The Pi-hole CNAME rule: an exact allow rule on the query name allows the full answer,
+/// also when a CNAME target is on a block list.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn an_allow_on_the_query_name_allows_a_blocked_cname_target() {
+    let up = fake(1).await;
+    let cf = fake(50).await;
+    let mut cfg = base_config(cf.addr);
+    cfg.rules.push(Rule {
+        id: None,
+        created_at: None,
+        updated_at: None,
+        kind: RuleKind::Exact,
+        action: RuleAction::Allow,
+        value: "cname.example".to_owned(),
+        enabled: true,
+        groups: vec!["default".to_owned()],
+        comment: None,
+    });
+    let h = harness(&cfg, &up, Arc::new(StaticNeighbors::default())).await;
+    let target = Name::from_ascii("blocked.example.").unwrap();
+    for source in [AnswerSource::Upstream, AnswerSource::Cache] {
+        let m = ask(h.addr, "cname.example.", RecordType::A).await;
+        assert_eq!(
+            data(&m),
+            vec![
+                RData::CNAME(CNAME(target.clone())),
+                RData::A(A(Ipv4Addr::new(192, 0, 2, 1)))
+            ]
+        );
+        let ev = h.events.last();
+        assert_eq!((ev.verdict, ev.source), (Verdict::Allowed, source));
+        assert_eq!(ev.policy.cname_target, None);
+        let decision = ev.policy.decision.unwrap();
+        assert_eq!(decision.action, Action::Allow);
+        assert_eq!(decision.reason, Reason::ExactAllow { rule: 1 });
+    }
+    // The target alone is still blocked.
+    let m = ask(h.addr, "blocked.example.", RecordType::A).await;
+    assert_eq!(data(&m), vec![RData::A(A(Ipv4Addr::UNSPECIFIED))]);
+    h.stop().await;
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn group_without_lists_and_mac_clients_are_not_blocked() {
     let up = fake(1).await;

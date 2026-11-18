@@ -29,16 +29,16 @@ The order follows Pi-hole v6. The first step that matches gives the decision.
 flowchart TD
     q[name, client groups, blocking state] --> s1{blocking on?}
     s1 -->|no| allow0[Allow: BlockingDisabled]
-    s1 -->|yes| s2{special domain?}
-    s2 -->|yes| special[Special: NXDOMAIN]
-    s2 -->|no| s3{exact allow rule?}
-    s3 -->|yes| allow1[Allow: ExactAllow]
-    s3 -->|no| s4{regex allow rule?}
-    s4 -->|yes| allow2[Allow: RegexAllow]
-    s4 -->|no| s5{allow-kind list?}
-    s5 -->|yes| allow3[Allow: AllowList]
-    s5 -->|no| s6{exact deny rule?}
-    s6 -->|yes| block1[Block: ExactDeny]
+    s1 -->|yes| s2{exact allow rule?}
+    s2 -->|yes| allow1[Allow: ExactAllow]
+    s2 -->|no| s3{regex allow rule?}
+    s3 -->|yes| allow2[Allow: RegexAllow]
+    s3 -->|no| s4{special domain?}
+    s4 -->|yes| special[Special: NXDOMAIN]
+    s4 -->|no| s5{exact deny rule?}
+    s5 -->|yes| block1[Block: ExactDeny]
+    s5 -->|no| s6{allow-kind list?}
+    s6 -->|yes| allow3[Allow: AllowList]
     s6 -->|no| s7{block list?}
     s7 -->|yes| block2[Block: BlockList]
     s7 -->|no| s8{regex deny rule?}
@@ -48,15 +48,17 @@ flowchart TD
 
 1. **Blocking off.** The caller gives the state of the blocking toggle. When blocking is
    off, each name is allowed.
-2. **Special domains** (amendment A3): `blocking.special_domains` get NXDOMAIN for all clients,
+2. **Exact allow rule**, then **regex allow rule** → allow. These rules beat all other steps.
+3. **Special domains** (amendment A3): `blocking.special_domains` get NXDOMAIN for all clients,
    also for clients with no group. The match is exact (not subdomains). An empty list turns
-   this step off.
-3. **Allow**: an exact allow rule, a regex allow rule, or an entry of an allow-kind list. Any
-   allow beats any deny.
-4. **Exact deny rule** → block.
-5. **Block list entry** → block.
-6. **Regex deny rule** → block.
-7. Else → allow.
+   this step off. An exact or regex allow rule of the client (step 2) comes first, as in
+   Pi-hole v6. Thus an exact allow rule for `mask.icloud.com` lets the name resolve.
+4. **Exact deny rule** → block. It wins over an allow-kind list (owner decision 2026-11-18,
+   as in Pi-hole v6).
+5. **Allow-kind list entry** → allow. It wins over a block list and a regex deny rule.
+6. **Block list entry** → block.
+7. **Regex deny rule** → block.
+8. Else → allow.
 
 The result is a `Decision`:
 
@@ -144,11 +146,32 @@ Limits (constants in `lists`, given in `ParseLimits`):
 ## CNAME chain (amendment A4)
 
 `check_chain(groups, blocking, &[query, target1, target2, ...])` checks each name with the
-same decision order. The first blocked name blocks the whole answer, and
-`Decision::name_index` names it. An allow on the query name does **not** allow a blocked
-CNAME target: the target needs its own allow. This is the deep CNAME inspection of Pi-hole.
-A special domain as a CNAME target also decides (NXDOMAIN). When
-`blocking.deep_cname_check` is false, only the query name is checked.
+same decision order, in chain order. This is the Pi-hole rule (owner decision 2026-11-18):
+
+- The walk stops at the first name that has an allow match (exact allow rule, regex allow
+  rule or allow-kind list) or that is blocked. That decision is the decision of the full
+  answer, and `Decision::name_index` names the name.
+- Thus an allow on the query name allows the full answer, also when a CNAME target is on a
+  block list. This is the usual Pi-hole fix for a blocked CNAME target.
+- An allow on a CNAME target before the blocked target also allows the full answer. A
+  blocked name before the allowed name blocks the answer.
+- A special domain as a CNAME target also decides (NXDOMAIN).
+- When no name decides, the answer is allowed with the decision of the query name. An empty
+  chain is allowed.
+- When `blocking.deep_cname_check` is false, only the query name is checked.
+
+```mermaid
+flowchart LR
+    q[query name] -->|no match| t1[CNAME target 1]
+    t1 -->|no match| t2[CNAME target 2]
+    q -->|allow match| A[allow the full answer]
+    t1 -->|allow match| A
+    t2 -->|allow match| A
+    q -->|blocked| B[block the full answer]
+    t1 -->|blocked| B
+    t2 -->|blocked| B
+    t2 -->|no match| N[allow: NoMatch]
+```
 
 ## Which list or rule matches (A9)
 
@@ -309,7 +332,9 @@ These choices are not fixed by the P3a spec. The owner can change them.
 
 - Unit tests for each list format and edge case, the decision order, groups, CNAME chains,
   `explain`, the build report and the toggle.
-- Property tests: allow beats any deny; group isolation (the decision for a client equals
+- Property tests: an allow rule beats any deny, and an allow-kind list beats any deny but an
+  exact deny rule; the CNAME chain takes the decision of the first deciding name; an allow on
+  the query name allows the chain; group isolation (the decision for a client equals
   the decision of an engine with only the client's groups); the decision does not depend on
   the order of rules, entries or lists; parse(render(entries)) round trip for hosts, domain
   and ABP formats; a subtree entry matches every subdomain and no lookalike; a chain is
@@ -320,13 +345,17 @@ These choices are not fixed by the P3a spec. The owner can change them.
 
 | Fault | Tests that failed |
 |---|---|
-| Exact deny rule before the allow steps | `decision_order`, `allow_beats_any_deny` |
+| Exact deny rule before the allow rules | `decision_order`, `allow_beats_any_deny` |
 | Regex deny before block list | `decision_order` |
 | Allow-kind list ignored | `decision_order`, `allow_beats_any_deny`, `abp_allow_entries_need_an_allow_kind_list` |
 | Group mask test always true | `groups_isolate_rules_and_lists`, `group_isolation`, `explain_lists_every_match`, `many_lists` |
 | Disabled group counts (mask and `GroupSet`) | `groups_isolate_rules_and_lists`, `group_isolation` |
 | Exact list entry matches its parent's subdomains | `subtree_and_exact_matching` |
-| Chain check skips a CNAME target | `chain_blocked_iff_some_name_blocked` |
+| Chain check skips a CNAME target | `chain_follows_the_first_deciding_name` |
+| Chain walk does not stop at an allow on a CNAME target | `cname_chain`, `chain_follows_the_first_deciding_name` |
+| Chain walk does not stop at an allow on the query name | `allow_on_query_name_allows_the_chain`, e2e `an_allow_on_the_query_name_allows_a_blocked_cname_target` |
+| Special domain before the allow rules | `decision_order` |
+| Allow-kind list before the exact deny rule | `decision_order`, `allow_beats_any_deny` |
 | Timer ends one step after the deadline | `timer_ends_exactly_at_deadline`, `timer_expires_exactly`, `new_disable_replaces_timer` |
 | Invalid toggle event keeps the state | `invalid_events_go_to_enabled`, `any_sequence_keeps_valid_state` |
 | Block list before the allow-kind list | `decision_order`, `allow_beats_any_deny` |

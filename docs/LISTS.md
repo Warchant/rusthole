@@ -106,8 +106,9 @@ stateDiagram-v2
 | Conditional GET | `If-None-Match` (ETag) and `If-Modified-Since` (Last-Modified), only when a good body is on disk. |
 | Proxy | None. Proxy variables in the environment are not used. |
 | TLS | rustls with the ring provider from `rusthole-tls` (system roots, then the bundled Mozilla roots). HTTP/1.1 only. |
-| Name lookup | rusthole's own upstream pool (see below), 15 s time limit. |
+| Name lookup | The local zone first, then rusthole's own upstream pool (see below), 15 s time limit. |
 | Parse | The limits of `rusthole_core::lists` (4 000 000 entries, 4096 bytes for each line). A list over a limit is a failure; the old copy stays. |
+| Not a list | A 200 answer that is not a list is a failure; the old copy stays (see "Body that is not a list"). |
 | Stored header values | An ETag or Last-Modified value longer than 512 bytes, or with control characters, is not kept. |
 | Stored error text | At most 300 bytes. |
 
@@ -118,6 +119,46 @@ rusthole itself must still fetch its lists at start. `rusthole_dns::HostResolver
 `DnsServer::host_resolver()`) asks the upstream pool for A records only (amendment A11). The
 lookup does not pass the client ACL, the filter or the DNS cache. A URL with an IP address
 needs no lookup.
+
+Before the upstream pool, `LocalFirstLookup` looks in the local zone of the current config
+(local records and local CNAMEs). Thus a list URL with a local host name (for example
+`http://nas.lan/list.txt`) works, as in Pi-hole. The refresher keeps the zone in an
+`ArcSwap`. `Refresher::set_config` stores the new zone, and the next lookup uses it.
+
+```mermaid
+flowchart LR
+    h[host of the list URL] --> z{local zone}
+    z -->|local A records| a[these addresses, at most 16]
+    z -->|local CNAME to a name that is not local| u2[upstream lookup of the target]
+    z -->|local name with no A record| e[error: no IPv4 address]
+    z -->|not local| u[upstream lookup]
+```
+
+Why this choice: the lookup is injected (`HostLookup`), and the local zone is pure code in
+`rusthole-core`. Thus the change stays in `rusthole-lists`, and no change in the DNS crate
+is necessary.
+
+Limit: conditional forwarding is not used for downloads. A host name that only a
+conditional forwarding server knows (for example `nas.corp` with a forward rule for `corp`)
+goes to the upstream pool, and the fetch fails. Use a local record for such a host, or a
+URL with an IP address.
+
+## Body that is not a list
+
+A 200 answer can be an HTML error page, a JSON error or an empty body. Such a body must not
+replace a good list. After the parse, `check_list_body` (pure) decides:
+
+- More invalid names and lines than valid entries: a failure ("the body is not a list").
+  An HTML page or a JSON error gives this. A list with some bad lines still passes.
+- No valid entry and no comment line, while the last good copy for the same URL has
+  entries: a failure ("the body has no entries and no comment line"). An empty answer gives
+  this.
+- A list that its owner emptied on purpose keeps a comment line (`#` or `!`). It passes, and
+  the list then has zero entries.
+- With no good copy, an empty body passes.
+
+A failure keeps the old body and the old engine. The status shows `error` with the reason,
+and the machine goes to backoff, as for each other failed fetch.
 
 ## Disk layout
 
@@ -216,6 +257,9 @@ flowchart LR
 - A "not modified" answer or the same body does not start a build.
 - A build checks the cancel token between lists and before the swap. After a shutdown or
   after its time limit (10 min), a build never swaps.
+- A build that waits for the work permit longer than its time limit is not lost. The build
+  loop logs an ERROR and asks for the build again. (A build that took too long can still
+  hold the permit.) Each wait has the time limit, and the loop ends at shutdown.
 
 ## Status (for the API)
 
@@ -360,6 +404,9 @@ Each fault was put in by hand, the tests ran, and the fault was removed (not com
 | Body limit: the chunk check ignores the size of the new chunk | `body_limit_is_exact_without_content_length` |
 | Swap: no swap (second run, after the concurrency changes) | 11 of 20 refresher tests |
 | Swap: no cancel check after the hook (second run) | `shutdown_during_a_build_never_swaps`, `a_build_that_took_too_long_blocks_the_next_build` |
+| Build: a build that waited too long for the permit is lost (the product bug of PLAN section 6, item 4) | `a_build_that_took_too_long_blocks_the_next_build` |
+| Store: no `check_list_body` call | `a_body_that_is_not_a_list_keeps_the_old_copy`, `a_first_body_that_is_not_a_list_is_a_failure` |
+| Lookup: the local zone is not read | `local_first_lookup`, `a_list_url_with_a_local_host_name_is_downloaded` |
 
 ## Interpretations
 

@@ -1,0 +1,9 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc eb3c022662f1122dd6488dfe3e02ec5309c5417ca81cfd87915eb299f27530a1 # shrinks to items = [], lists = [(false, []), (false, []), (false, []), (false, [])], target = "example.com", allow_kind = 2, exact_deny_too = true
+cc b8900f495b8e88a861e216096bb677d73e6f2125760c2d26b0313490fd7001c0 # shrinks to items = [Entry { list: 2, subtree: false, name: "example.net" }], lists = [(false, []), (false, []), (true, ["default"]), (false, [])], chain = ["a.example.com", "example.net"]
+cc 4d6fa0dea1ff1e94aabac4efb93ff5303778c62d0d817c61454fdba303829297 # shrinks to items = [Rule { regex: false, allow: false, name: "example.com", groups: ["default"] }], lists = [(false, []), (false, []), (false, []), (false, [])], query = "example.net", targets = ["example.com"], allow_kind = 0

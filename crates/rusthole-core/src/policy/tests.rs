@@ -107,17 +107,39 @@ fn order_engine() -> PolicyEngine {
             "exact-allow.example",
             &["default"],
         ),
+        // Pi-hole v6: an exact deny rule wins over an allow-kind list.
         rule(
             RuleKind::Exact,
             RuleAction::Deny,
             "list-allow.example",
             &["default"],
         ),
+        // Pi-hole v6: the exact and regex allow rules come before the special domains.
+        rule(
+            RuleKind::Exact,
+            RuleAction::Allow,
+            "mask.icloud.com",
+            &["default"],
+        ),
+        rule(
+            RuleKind::Regex,
+            RuleAction::Allow,
+            "^mask-h2\\.icloud\\.com$",
+            &["default"],
+        ),
+        // An allow rule of the group "kids" only.
+        rule(
+            RuleKind::Exact,
+            RuleAction::Allow,
+            "use-application-dns.net",
+            &["kids"],
+        ),
     ];
     let block = parsed(
-        "exact-allow.example\nregex-allow.example\nlist-allow.example\nexact-deny.example\nlisted.example\n",
+        "exact-allow.example\nregex-allow.example\nlist-allow.example\nboth-lists.example\nexact-deny.example\nlisted.example\n",
     );
-    let allow = parsed("list-allow.example\n");
+    // The allow-kind list holds a special domain: it does not win over the special step.
+    let allow = parsed("list-allow.example\nboth-lists.example\nuse-application-dns.net\n");
     let (e, report) = PolicyEngine::build(&c, [(1, block), (2, allow)]);
     assert!(report.issues.is_empty(), "{:?}", report.issues);
     e
@@ -136,8 +158,21 @@ fn decision_order() {
     let d = check("use-application-dns.net");
     assert_eq!(d.action, Action::Special(SpecialReply::Nxdomain));
     assert_eq!(d.reason, Reason::SpecialDomain);
-    assert_eq!(check("mask.icloud.com").reason, Reason::SpecialDomain);
     assert_eq!(check("x.mask.icloud.com").reason, Reason::NoMatch);
+    // An exact or a regex allow rule wins over a special domain (Pi-hole v6).
+    let d = check("mask.icloud.com");
+    assert_eq!(d.action, Action::Allow);
+    assert_eq!(d.reason, Reason::ExactAllow { rule: 6 });
+    assert_eq!(
+        check("mask-h2.icloud.com").reason,
+        Reason::RegexAllow { rule: 7 }
+    );
+    let kids = e.groups_named(["default", "kids"]);
+    assert_eq!(
+        e.check(&kids, true, &name("use-application-dns.net"))
+            .reason,
+        Reason::ExactAllow { rule: 8 }
+    );
 
     assert_eq!(
         check("exact-allow.example").reason,
@@ -147,9 +182,14 @@ fn decision_order() {
         check("regex-allow.example").reason,
         Reason::RegexAllow { rule: 1 }
     );
-    let d = check("list-allow.example");
+    // An allow-kind list wins over a block list and a regex deny rule.
+    let d = check("both-lists.example");
     assert_eq!(d.action, Action::Allow);
     assert!(matches!(d.reason, Reason::AllowList { lists } if lists.first() == Some(2)));
+    // An exact deny rule wins over an allow-kind list (Pi-hole v6).
+    let d = check("list-allow.example");
+    assert_eq!(d.action, Action::Block(BlockReply::Null));
+    assert_eq!(d.reason, Reason::ExactDeny { rule: 5 });
 
     let d = check("exact-deny.example");
     assert_eq!(d.action, Action::Block(BlockReply::Null));
@@ -287,8 +327,9 @@ fn cname_chain() {
     ];
     let (e, _) = PolicyEngine::build(&c, [(1, parsed("||tracker.example^\n"))]);
     let g = e.default_groups();
+    // A blocked CNAME target blocks the answer.
     let chain = [
-        name("shop.example"),
+        name("www.example"),
         name("cdn.example"),
         name("x.tracker.example"),
     ];
@@ -296,12 +337,36 @@ fn cname_chain() {
     assert!(d.is_blocked());
     assert_eq!(d.name_index, 2);
     assert!(matches!(d.reason, Reason::BlockList { .. }));
-    // The target itself is allowed: the answer is allowed.
-    let chain2 = [name("shop.example"), name("ok.tracker.example")];
-    let d = e.check_chain(&g, true, &chain2);
+    // The Pi-hole rule: an allow on the query name allows the full answer, also a blocked
+    // CNAME target.
+    let allowed = [
+        name("shop.example"),
+        name("cdn.example"),
+        name("x.tracker.example"),
+    ];
+    let d = e.check_chain(&g, true, &allowed);
     assert_eq!(d.action, Action::Allow);
     assert_eq!(d.reason, Reason::ExactAllow { rule: 0 });
     assert_eq!(d.name_index, 0);
+    // An allow on a CNAME target before the blocked target also allows the full answer.
+    let via_target = [
+        name("www.example"),
+        name("ok.tracker.example"),
+        name("x.tracker.example"),
+    ];
+    let d = e.check_chain(&g, true, &via_target);
+    assert_eq!(d.action, Action::Allow);
+    assert_eq!(d.reason, Reason::ExactAllow { rule: 1 });
+    assert_eq!(d.name_index, 1);
+    // The walk is in chain order: a blocked target before the allowed target blocks.
+    let blocked_first = [
+        name("www.example"),
+        name("x.tracker.example"),
+        name("ok.tracker.example"),
+    ];
+    let d = e.check_chain(&g, true, &blocked_first);
+    assert!(d.is_blocked());
+    assert_eq!(d.name_index, 1);
     // Blocking off, or an empty chain: allowed.
     assert!(!e.check_chain(&g, false, &chain).is_blocked());
     assert_eq!(e.check_chain(&g, true, &[]).reason, Reason::NoMatch);
@@ -729,17 +794,22 @@ fn client_groups() -> impl Strategy<Value = Vec<String>> {
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(128))]
 
-    /// An allow match beats any deny for the same client and name.
+    /// Pi-hole v6 order: an exact or regex allow rule beats any deny. An allow-kind list beats
+    /// any deny except an exact deny rule.
     #[test]
     fn allow_beats_any_deny(
         items in prop::collection::vec(item(), 0..24),
         lists in list_setup(),
         target in pool_name(),
         allow_kind in 0u8..4,
+        exact_deny_too in any::<bool>(),
     ) {
         let mut items = items;
         let mut lists = lists;
         let all = vec!["default".to_owned()];
+        if exact_deny_too {
+            items.push(Item::Rule { regex: false, allow: false, name: target.clone(), groups: all.clone() });
+        }
         // Add one allow source for `target` in the group "default".
         match allow_kind {
             0 => items.push(Item::Rule { regex: false, allow: true, name: target.clone(), groups: all.clone() }),
@@ -757,7 +827,21 @@ proptest! {
         }
         let e = engine_from(&items, &lists, &[0, 1, 2, 3]);
         let d = e.check(&e.default_groups(), true, &name(&target));
-        prop_assert_eq!(d.action, Action::Allow, "{:?}", d);
+        let in_default = |g: &[String]| g.iter().any(|x| x == "default");
+        let allow_rule = items.iter().any(|it| matches!(it,
+            Item::Rule { regex, allow: true, name, groups }
+                if in_default(groups)
+                    && (name == &target || (*regex && target.ends_with(&format!(".{name}"))))));
+        let exact_deny = items.iter().any(|it| matches!(it,
+            Item::Rule { regex: false, allow: false, name, groups }
+                if in_default(groups) && name == &target));
+        if allow_rule || !exact_deny {
+            prop_assert_eq!(d.action, Action::Allow, "{:?}", d);
+        } else {
+            prop_assert!(allow_kind >= 2);
+            prop_assert_eq!(d.action, Action::Block(BlockReply::Null), "{:?}", d);
+            prop_assert!(matches!(d.reason, Reason::ExactDeny { .. }), "{:?}", d);
+        }
     }
 
     /// A client sees only the rules and lists of its enabled groups. The decision for a
@@ -854,10 +938,12 @@ proptest! {
         }
     }
 
-    /// A chain is blocked if and only if some name in it is blocked (and not allowed), and
-    /// the decision names the first such name.
+    /// The Pi-hole CNAME rule. The chain takes the decision of the first name, in chain
+    /// order, that an allow match (exact allow, regex allow, allow-kind list) or a block
+    /// decides. Thus a chain is blocked if and only if some name in it is blocked and no
+    /// name before it has an allow match. The decision names that name.
     #[test]
-    fn chain_blocked_iff_some_name_blocked(
+    fn chain_follows_the_first_deciding_name(
         items in prop::collection::vec(item(), 0..24),
         lists in list_setup(),
         chain in prop::collection::vec(pool_name(), 1..5),
@@ -866,11 +952,55 @@ proptest! {
         let g = e.default_groups();
         let chain: Vec<DomainName> = chain.iter().map(|s| name(s)).collect();
         let d = e.check_chain(&g, true, &chain);
-        let first_blocked = chain.iter().position(|n| e.check(&g, true, n).is_blocked());
-        prop_assert_eq!(d.is_blocked(), first_blocked.is_some());
-        if let Some(i) = first_blocked {
+        let each: Vec<Decision> = chain.iter().map(|n| e.check(&g, true, n)).collect();
+        let first = each
+            .iter()
+            .position(|x| x.is_blocked() || x.reason.is_allow_match());
+        if let Some(i) = first {
+            prop_assert_eq!(d.action, each[i].action);
+            prop_assert_eq!(d.reason, each[i].reason);
             prop_assert_eq!(d.name_index, i);
+        } else {
+            prop_assert_eq!(d.action, Action::Allow);
+            prop_assert_eq!(d.name_index, 0);
         }
+        let blocked_without_allow_before = each.iter().position(Decision::is_blocked).is_some_and(
+            |b| !each.iter().take(b + 1).any(|x| x.reason.is_allow_match()),
+        );
+        prop_assert_eq!(d.is_blocked(), blocked_without_allow_before);
+    }
+
+    /// The Pi-hole CNAME rule: an allow match on the query name allows the full answer,
+    /// whatever the CNAME targets are.
+    #[test]
+    fn allow_on_query_name_allows_the_chain(
+        items in prop::collection::vec(item(), 0..24),
+        lists in list_setup(),
+        query in pool_name(),
+        targets in prop::collection::vec(pool_name(), 0..4),
+        allow_kind in 0u8..3,
+    ) {
+        let mut items = items;
+        let mut lists = lists;
+        let all = vec!["default".to_owned()];
+        match allow_kind {
+            0 => items.push(Item::Rule { regex: false, allow: true, name: query.clone(), groups: all.clone() }),
+            1 => items.push(Item::Rule { regex: true, allow: true, name: query.clone(), groups: all.clone() }),
+            _ => {
+                // An exact deny rule wins over an allow-kind list: leave it out here.
+                items.retain(|it| !matches!(it, Item::Rule { regex: false, allow: false, name, .. } if *name == query));
+                lists[3] = (true, all.clone());
+                items.push(Item::Entry { list: 3, subtree: false, name: query.clone() });
+            }
+        }
+        let e = engine_from(&items, &lists, &[0, 1, 2, 3]);
+        let g = e.default_groups();
+        let mut chain = vec![name(&query)];
+        chain.extend(targets.iter().map(|t| name(t)));
+        let d = e.check_chain(&g, true, &chain);
+        prop_assert_eq!(d.action, Action::Allow, "{:?}", d);
+        prop_assert!(d.reason.is_allow_match(), "{:?}", d);
+        prop_assert_eq!(d.name_index, 0);
     }
 }
 

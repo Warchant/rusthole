@@ -489,15 +489,19 @@ fn map_blocking(root: &Table, config: &mut Config, report: &mut ImportReport) {
             b.mode = BlockingMode::Null;
             report.translate("dns.blocking.mode NULL -> blocking.mode \"null\"");
         }
-        "NXDOMAIN" => {
+        // Pi-hole v6 writes `NX`. `NXDOMAIN` is the spelling of older versions (an alias).
+        "NX" | "NXDOMAIN" => {
             b.mode = BlockingMode::Nxdomain;
-            report.translate("dns.blocking.mode NXDOMAIN -> blocking.mode \"nxdomain\"");
+            report.translate(format!(
+                "dns.blocking.mode {mode} -> blocking.mode \"nxdomain\""
+            ));
         }
         "NODATA" => {
             b.mode = BlockingMode::Nodata;
             report.translate("dns.blocking.mode NODATA -> blocking.mode \"nodata\"");
         }
-        "IP-NODATA-AAAA" | "IP" => {
+        // Pi-hole v6 writes `IP_NODATA_AAAA`. `IP-NODATA-AAAA` is an alias.
+        "IP_NODATA_AAAA" | "IP-NODATA-AAAA" | "IP" => {
             let want_v6 = mode == "IP";
             let v6 = if want_v6 { ipv6 } else { None };
             if ipv4.is_none() && v6.is_none() {
@@ -891,6 +895,76 @@ revServers = [
         assert_eq!(r.reported, Vec::<String>::new());
         let (_, r) = run("[dns.blocking]\nmode = \"WEIRD\"\n");
         assert_eq!(r.reported.len(), 1);
+    }
+
+    /// The fixed addresses of `dns.reply.blocking` for the IP modes.
+    const FIXED: &str = "[dns.reply.blocking]\nforce4 = true\nIPv4 = \"192.0.2.1\"\nforce6 = true\nIPv6 = \"2001:db8::1\"\n";
+
+    fn mode(value: &str) -> (Config, ImportReport) {
+        run(&format!("[dns.blocking]\nmode = \"{value}\"\n{FIXED}"))
+    }
+
+    #[test]
+    fn v6_mode_null() {
+        let (c, r) = mode("NULL");
+        assert_eq!(c.blocking.mode, BlockingMode::Null);
+        assert_eq!(r.reported, Vec::<String>::new());
+        assert_eq!(c.validate(), []);
+    }
+
+    #[test]
+    fn v6_mode_nx() {
+        let (c, r) = mode("NX");
+        assert_eq!(c.blocking.mode, BlockingMode::Nxdomain);
+        assert_eq!(r.reported, Vec::<String>::new());
+        assert!(
+            r.translated
+                .iter()
+                .any(|l| l.contains("NX -> blocking.mode \"nxdomain\""))
+        );
+        assert_eq!(c.validate(), []);
+    }
+
+    #[test]
+    fn v6_mode_nodata() {
+        let (c, r) = mode("NODATA");
+        assert_eq!(c.blocking.mode, BlockingMode::Nodata);
+        assert_eq!(r.reported, Vec::<String>::new());
+        assert_eq!(c.validate(), []);
+    }
+
+    #[test]
+    fn v6_mode_ip() {
+        let (c, r) = mode("IP");
+        assert_eq!(c.blocking.mode, BlockingMode::Ip);
+        assert_eq!(c.blocking.ipv4.as_deref(), Some("192.0.2.1"));
+        assert_eq!(c.blocking.ipv6.as_deref(), Some("2001:db8::1"));
+        assert_eq!(r.reported, Vec::<String>::new());
+        assert_eq!(c.validate(), []);
+    }
+
+    #[test]
+    fn v6_mode_ip_nodata_aaaa() {
+        let (c, r) = mode("IP_NODATA_AAAA");
+        assert_eq!(c.blocking.mode, BlockingMode::Ip);
+        assert_eq!(c.blocking.ipv4.as_deref(), Some("192.0.2.1"));
+        // AAAA gets NODATA: no IPv6 address, also when force6 is set.
+        assert_eq!(c.blocking.ipv6, None);
+        assert_eq!(r.reported, Vec::<String>::new());
+        assert_eq!(c.validate(), []);
+    }
+
+    /// The spellings of older versions stay as aliases.
+    #[test]
+    fn old_mode_spellings_are_aliases() {
+        let (c, r) = mode("NXDOMAIN");
+        assert_eq!(c.blocking.mode, BlockingMode::Nxdomain);
+        assert_eq!(r.reported, Vec::<String>::new());
+        let (c, r) = mode("IP-NODATA-AAAA");
+        assert_eq!(c.blocking.mode, BlockingMode::Ip);
+        assert_eq!(c.blocking.ipv4.as_deref(), Some("192.0.2.1"));
+        assert_eq!(c.blocking.ipv6, None);
+        assert_eq!(r.reported, Vec::<String>::new());
     }
 
     #[test]

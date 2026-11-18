@@ -202,16 +202,21 @@ fn mac_clients_get_their_group() {
 fn cname_chain_check_and_query_name_first() {
     let fx = fixture(&config());
     let f = &fx.filter;
-    // An allowed query name with a CNAME to a blocked target is blocked.
+    // A query name with no match and a CNAME to a blocked target is blocked.
+    let o = answer(f, LAN, "fine.example", &["fine.example", "blocked.example"]);
+    assert_eq!(o.verdict, null(2));
+    assert_eq!(o.decision.unwrap().name_index, 1);
+    assert_eq!(o.cname_target, Some(d("blocked.example")));
+    // The Pi-hole rule: an allow rule on the query name allows the full answer.
     let o = answer(
         f,
         LAN,
         "www.example.com",
         &["www.example.com", "blocked.example"],
     );
-    assert_eq!(o.verdict, null(2));
-    assert_eq!(o.decision.unwrap().name_index, 1);
-    assert_eq!(o.cname_target, Some(d("blocked.example")));
+    assert_eq!(o.verdict, FilterVerdict::Allow);
+    assert_eq!(o.decision.unwrap().name_index, 0);
+    assert_eq!(o.cname_target, None);
     // The query name is checked also when the answer does not name it.
     let o = answer(f, LAN, "tracker.example", &["other.example"]);
     assert_eq!(o.verdict, null(2));

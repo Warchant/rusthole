@@ -7,12 +7,16 @@
 //! The decision order follows Pi-hole v6. docs/POLICY.md has the full description:
 //!
 //! 1. Blocking is off (the toggle) → allow.
-//! 2. Special domain (amendment A3) → its fixed answer (NXDOMAIN).
-//! 3. Exact allow rule, regex allow rule, or an allow-kind list → allow.
+//! 2. Exact allow rule, then regex allow rule → allow.
+//! 3. Special domain (amendment A3) → its fixed answer (NXDOMAIN).
 //! 4. Exact deny rule → block.
-//! 5. Block list entry → block.
-//! 6. Regex deny rule → block.
-//! 7. Else → allow.
+//! 5. Allow-kind list → allow.
+//! 6. Block list entry → block.
+//! 7. Regex deny rule → block.
+//! 8. Else → allow.
+//!
+//! In a CNAME chain, the first name with an allow match (steps 2 and 5) or a block decides
+//! the full answer (the Pi-hole rule, see [`PolicyEngine::check_chain`]).
 //!
 //! A rule or a list applies to a client only through a shared, enabled group.
 
@@ -180,6 +184,18 @@ pub enum Reason {
     BlockList { lists: ListIds },
     /// A regex deny rule matched.
     RegexDeny { rule: usize },
+}
+
+impl Reason {
+    /// True for an allow match: an exact allow rule, a regex allow rule or an allow-kind
+    /// list. In a CNAME chain, such a match allows the full answer (the Pi-hole rule).
+    /// [`Reason::NoMatch`] and [`Reason::BlockingDisabled`] are not allow matches.
+    pub fn is_allow_match(&self) -> bool {
+        matches!(
+            self,
+            Self::ExactAllow { .. } | Self::RegexAllow { .. } | Self::AllowList { .. }
+        )
+    }
 }
 
 /// The result of a check.
@@ -623,12 +639,16 @@ impl PolicyEngine {
         self.decide(groups, blocking, name, 0)
     }
 
-    /// Checks a CNAME chain: the query name first, then each CNAME target (amendment A4).
+    /// Checks a CNAME chain: the query name first, then each CNAME target in chain order
+    /// (amendment A4).
     ///
-    /// The first name that is blocked blocks the whole answer, and
-    /// [`Decision::name_index`] tells which name. An allow on the query name does not allow a
-    /// blocked CNAME target: each name needs its own allow. When `blocking.deep_cname_check`
-    /// is false, only the query name is checked. An empty chain is allowed.
+    /// This is the Pi-hole rule. The walk stops at the first name that has an allow match
+    /// ([`Reason::is_allow_match`]) or that is blocked, and that decision is the decision of
+    /// the full answer. Thus an allow on the query name, or on a CNAME target before the
+    /// blocked target, allows the full answer. [`Decision::name_index`] tells which name
+    /// decided. When no name decides, the answer is allowed with the decision of the query
+    /// name. When `blocking.deep_cname_check` is false, only the query name is checked. An
+    /// empty chain is allowed.
     pub fn check_chain(&self, groups: &GroupSet, blocking: bool, chain: &[DomainName]) -> Decision {
         let Some(first) = chain.first() else {
             return Decision {
@@ -638,13 +658,13 @@ impl PolicyEngine {
             };
         };
         let d0 = self.decide(groups, blocking, first, 0);
-        if d0.is_blocked() || !blocking || !self.deep_cname_check {
+        if d0.is_blocked() || d0.reason.is_allow_match() || !blocking || !self.deep_cname_check {
             return d0;
         }
         // Bounded by the length of the chain.
         for (i, name) in chain.iter().enumerate().skip(1) {
             let d = self.decide(groups, blocking, name, i);
-            if d.is_blocked() {
+            if d.is_blocked() || d.reason.is_allow_match() {
                 return d;
             }
         }
@@ -667,25 +687,27 @@ impl PolicyEngine {
             return d(Action::Allow, Reason::BlockingDisabled);
         }
         let s = name.as_str();
-        if self.special.contains(s) {
-            return d(
-                Action::Special(SpecialReply::Nxdomain),
-                Reason::SpecialDomain,
-            );
-        }
+        // Pi-hole v6: the exact and regex allow rules come before the special domains.
         if let Some(rule) = self.exact_hit(&self.exact_allow, groups, s) {
             return d(Action::Allow, Reason::ExactAllow { rule });
         }
         if let Some(rule) = self.regex_hit(&self.regex_allow, groups, s) {
             return d(Action::Allow, Reason::RegexAllow { rule });
         }
+        if self.special.contains(s) {
+            return d(
+                Action::Special(SpecialReply::Nxdomain),
+                Reason::SpecialDomain,
+            );
+        }
+        let block = Action::Block(self.reply);
+        // Pi-hole v6: an exact deny rule wins over an allow-kind list.
+        if let Some(rule) = self.exact_hit(&self.exact_deny, groups, s) {
+            return d(block, Reason::ExactDeny { rule });
+        }
         let (allow_lists, block_lists) = self.list_hits(groups, name);
         if !allow_lists.is_empty() {
             return d(Action::Allow, Reason::AllowList { lists: allow_lists });
-        }
-        let block = Action::Block(self.reply);
-        if let Some(rule) = self.exact_hit(&self.exact_deny, groups, s) {
-            return d(block, Reason::ExactDeny { rule });
         }
         if !block_lists.is_empty() {
             return d(block, Reason::BlockList { lists: block_lists });

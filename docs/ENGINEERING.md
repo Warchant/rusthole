@@ -134,7 +134,38 @@ The helpers are `scratch_base` in `crates/rusthole-store` (`src/tests.rs` and
 (`FUZZ_NIGHTLY` in `.github/workflows/ci.yml`). It runs `scripts/fuzz.sh`, which also gives
 the committed seeds in `fuzz/seeds/TARGET` to libFuzzer. To change the seeds, edit and run
 `scripts/make-fuzz-seeds.py`. libFuzzer writes crash inputs to `fuzz/artifacts/TARGET`. The
-CI fuzz job uploads this folder as the artifact `fuzz-artifacts` when it fails.
+CI fuzz jobs upload this folder as the artifact `fuzz-artifacts` when they fail.
+
+Fuzzing in CI has two jobs:
+
+| Job | When | What |
+|-----|------|------|
+| `fuzz` in `ci.yml` | Each push to main and each PR | Builds all targets, then runs each for 10 s, 4 at a time. It reads the stored corpus but does not change it. |
+| `fuzz` in `fuzz-nightly.yml` | Each night at 02:17 UTC, or by hand (`workflow_dispatch`, with the seconds for each target) | Runs each target for 5 min, 4 at a time. Then `scripts/fuzz.sh cmin` minimizes the corpus, and the job commits it to the branch `fuzz-corpus`. |
+
+```mermaid
+flowchart LR
+  seeds["fuzz/seeds (main)"] --> push["CI fuzz: 10 s each"]
+  branch["branch fuzz-corpus"] --> push
+  seeds --> nightly["nightly fuzz: 5 min each"]
+  branch --> nightly
+  nightly --> cmin["fuzz.sh cmin"] --> branch
+```
+
+The branch `fuzz-corpus` has no common history with main. It has one folder for each
+target. The nightly job also saves the corpus when a target fails. To fuzz locally with the
+stored corpus:
+
+```bash
+git fetch origin fuzz-corpus
+mkdir -p fuzz/corpus && git archive FETCH_HEAD | tar -x -C fuzz/corpus
+```
+
+`scripts/fuzz.sh all SECONDS` builds all targets with one `cargo fuzz build` and then starts
+the built binaries directly (`FUZZ_JOBS` of them at the same time). It does not use
+`cargo fuzz run` there: each `cargo fuzz run` starts cargo again, and the cargo lock lets
+only one of them work at a time. `scripts/fuzz-gate-test.sh` tests the target list gate,
+the parallel runs and `cmin` with a fake cargo.
 
 Property tests: CI sets `PROPTEST_CASES=1024`. A `proptest!` block that sets its own case
 count uses the larger of the two values. Only the slow blocks (each case writes a SQLite file

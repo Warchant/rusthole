@@ -156,20 +156,21 @@ jobs:
       - name: Install script tests
         run: bash scripts/install-test.sh
 
-  # The aarch64 binary (Raspberry Pi) on qemu-user: --version, check-config of the packaged
-  # config, and the smoke test (scripts/aarch64-check.sh).
+  # The aarch64 binary (Raspberry Pi) on a native arm64 runner (free for public repos):
+  # --version, check-config of the packaged config, and the smoke test
+  # (scripts/aarch64-check.sh). No qemu is necessary.
   smoke-aarch64:
     needs: musl
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
           name: rusthole-aarch64-unknown-linux-musl
           path: out
-      - name: Install qemu-user and dig
-        run: sudo apt-get update && sudo apt-get install -y qemu-user-static dnsutils
-      - name: Run the aarch64 binary under qemu-user
+      - name: Install dig
+        run: sudo apt-get update && sudo apt-get install -y dnsutils
+      - name: Run the aarch64 binary
         run: bash scripts/aarch64-check.sh out/rusthole
 
   # The install script and the hardened systemd unit on a real Ubuntu host (part P8). The
@@ -235,11 +236,15 @@ jobs:
         with:
           manifest-path: fuzz/Cargo.toml
 
+  # A short fuzz run on each push and PR: build all targets, then run each for 10 s, 4 at a
+  # time, on the committed seeds and on the stored corpus. It finds a broken target and
+  # replays the known inputs. The long run is the nightly job (fuzz-nightly.yml).
   fuzz:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       # A pinned nightly (the one that ran the fuzz targets locally): a new nightly must not
-      # break CI by surprise.
+      # break CI by surprise. fuzz-nightly.yml and scripts/linux.sh read this line.
       FUZZ_NIGHTLY: nightly-2026-11-17
       # Nightly gives new warnings; they must not fail the fuzz job (amendment A8).
       RUSTFLAGS: ""
@@ -253,37 +258,38 @@ jobs:
           workspaces: |
             .
             fuzz
-      # The corpus is in the cache, not in git. Restore and save are two steps: the save
-      # also runs when a target fails, so the new corpus entries are kept.
-      - name: Restore the fuzz corpus
-        uses: actions/cache/restore@v4
-        with:
-          path: fuzz/corpus
-          key: fuzz-corpus-${{ github.run_id }}
-          restore-keys: fuzz-corpus-
+      # The nightly job stores the minimized corpus on the branch "fuzz-corpus" (one folder
+      # for each target). This job only reads it.
+      - name: Get the stored fuzz corpus
+        run: |
+          mkdir -p fuzz/corpus
+          if git ls-remote --exit-code --heads origin fuzz-corpus >/dev/null; then
+            git fetch --depth=1 origin fuzz-corpus
+            git archive FETCH_HEAD | tar -x -C fuzz/corpus
+          else
+            echo "no branch fuzz-corpus yet: only the seeds"
+          fi
+          find fuzz/corpus -type f | wc -l
       # The committed seeds are in fuzz/seeds/<target> (scripts/make-fuzz-seeds.py writes
       # them); scripts/fuzz.sh gives them to each run. Random bytes almost never make a zip
       # with a valid gravity.db, so the Teleporter, pihole.toml and config seeds come from the
       # synthetic fixture of rusthole-import.
       - name: Write the fixture seeds
-        run: |
-          cargo run --locked -p rusthole-import --features testkit --example write_fixture -- --seeds fuzz/corpus
-          ls -lR fuzz/corpus | head -20
-      - run: cargo "+$FUZZ_NIGHTLY" install cargo-fuzz --locked
+        run: cargo run --locked -p rusthole-import --features testkit --example write_fixture -- --seeds fuzz/corpus
+      # A prebuilt cargo-fuzz: a build from source takes minutes.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-fuzz
       - name: Test the target list gate of scripts/fuzz.sh
         run: bash scripts/fuzz-gate-test.sh
       # scripts/fuzz.sh fails when `cargo fuzz list` fails or does not list each target of
-      # fuzz/Cargo.toml. It runs all targets, then fails when one or more failed.
-      - name: Run each fuzz target for 60 s
+      # fuzz/Cargo.toml. It builds all targets once, runs 4 at the same time (the runner has
+      # 4 CPUs and 16 GB; each run has -rss_limit_mb=2048), and fails when one or more failed.
+      - name: Run each fuzz target for 10 s
         env:
           FUZZ_TOOLCHAIN: ${{ env.FUZZ_NIGHTLY }}
-        run: bash scripts/fuzz.sh all 60
-      - name: Save the fuzz corpus
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: fuzz/corpus
-          key: fuzz-corpus-${{ github.run_id }}
+          FUZZ_JOBS: 4
+        run: bash scripts/fuzz.sh all 10
       # libFuzzer writes the input of a crash, a leak or a timeout to fuzz/artifacts/<target>.
       # Reproduce: cargo +nightly fuzz run <target> <file>.
       - name: Upload the crash inputs

@@ -1,0 +1,135 @@
+# The long fuzz run: each night, each fuzz target runs for 5 min (4 at the same time). Then
+# the job minimizes the corpus (scripts/fuzz.sh cmin) and commits it to the branch
+# "fuzz-corpus" (one folder for each target). The CI fuzz job reads that branch.
+#
+# The corpus is also saved when a target fails, so the inputs of that night are not lost.
+# The crash inputs are an artifact of the run ("fuzz-artifacts"). A failed scheduled run
+# sends an e-mail to the repository owner (GitHub default).
+name: Fuzz nightly
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: Seconds for each target
+        default: "300"
+
+permissions:
+  contents: read
+
+# Two runs must not push to the corpus branch at the same time.
+concurrency:
+  group: fuzz-nightly
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  # Nightly gives new warnings; they must not fail the fuzz job (amendment A8).
+  RUSTFLAGS: ""
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      # Push the corpus to the branch fuzz-corpus.
+      contents: write
+    env:
+      SECONDS_PER_TARGET: ${{ inputs.seconds || '300' }}
+      CORPUS: ${{ github.workspace }}/fuzz-corpus-branch
+    steps:
+      - uses: actions/checkout@v5
+      # One pinned nightly for all fuzz runs: the FUZZ_NIGHTLY line of ci.yml.
+      - name: Read the pinned nightly
+        run: |
+          pinned="$(sed -n 's/^[[:space:]]*FUZZ_NIGHTLY:[[:space:]]*//p' .github/workflows/ci.yml |
+            head -n 1 | tr -d "\"' \r")"
+          if [[ ! "$pinned" =~ ^nightly-[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "no pinned FUZZ_NIGHTLY in ci.yml (got '$pinned')" >&2
+            exit 1
+          fi
+          echo "FUZZ_TOOLCHAIN=$pinned" >>"$GITHUB_ENV"
+      # The pinned stable toolchain builds the seed tool below.
+      - run: rustup show
+      - run: rustup toolchain install "$FUZZ_TOOLCHAIN" --profile minimal
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            fuzz
+      # The corpus branch in a separate worktree. The first run makes the branch with no
+      # parent commit (an orphan branch), so it has no files of main.
+      - name: Get the corpus branch
+        id: branch
+        run: |
+          if git ls-remote --exit-code --heads origin fuzz-corpus >/dev/null; then
+            git fetch --depth=1 origin fuzz-corpus:fuzz-corpus
+            git worktree add "$CORPUS" fuzz-corpus
+            echo "new=false" >>"$GITHUB_OUTPUT"
+          else
+            git worktree add --orphan -b fuzz-corpus "$CORPUS"
+            echo "new=true" >>"$GITHUB_OUTPUT"
+          fi
+          find "$CORPUS" -path "$CORPUS/.git" -prune -o -type f -print | wc -l
+      # Before the first commit to the branch, the corpus was in the Actions cache. Use it
+      # once, if the cache still has it.
+      - name: Restore the old cached corpus (first run only)
+        if: steps.branch.outputs.new == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: fuzz/corpus
+          key: fuzz-corpus-none
+          restore-keys: fuzz-corpus-
+      - name: Move the old cached corpus to the branch
+        run: |
+          if [[ -d fuzz/corpus ]]; then
+            cp -rn fuzz/corpus/. "$CORPUS/"
+            rm -rf fuzz/corpus
+          fi
+      # Random bytes almost never make a zip with a valid gravity.db, so the Teleporter,
+      # pihole.toml and config inputs come from the synthetic fixture of rusthole-import.
+      # cmin keeps them only when they add coverage.
+      - name: Write the fixture seeds
+        run: cargo run --locked -p rusthole-import --features testkit --example write_fixture -- --seeds "$CORPUS"
+      # A prebuilt cargo-fuzz: a build from source takes minutes.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-fuzz
+      - name: Run each fuzz target for ${{ env.SECONDS_PER_TARGET }} s
+        env:
+          FUZZ_JOBS: 4
+          FUZZ_CORPUS_DIR: ${{ env.CORPUS }}
+        run: bash scripts/fuzz.sh all "$SECONDS_PER_TARGET"
+      # Keep only the inputs that add coverage, so the branch stays small.
+      - name: Minimize the corpus
+        id: cmin
+        if: always()
+        env:
+          FUZZ_JOBS: 4
+          FUZZ_CORPUS_DIR: ${{ env.CORPUS }}
+        run: bash scripts/fuzz.sh cmin
+      - name: Commit the corpus to the branch fuzz-corpus
+        if: always() && steps.cmin.outcome == 'success'
+        working-directory: ${{ env.CORPUS }}
+        run: |
+          git add -A .
+          if git diff --cached --quiet; then
+            echo "the corpus did not change"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898297+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Fuzz corpus of run ${GITHUB_RUN_ID} (main ${GITHUB_SHA::12})"
+          git push origin fuzz-corpus
+          find . -path ./.git -prune -o -type f -print | wc -l
+      # libFuzzer writes the input of a crash, a leak or a timeout to fuzz/artifacts/<target>.
+      # Reproduce: cargo +nightly fuzz run <target> <file>.
+      - name: Upload the crash inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-artifacts
+          path: fuzz/artifacts
+          if-no-files-found: warn

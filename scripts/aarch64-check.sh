@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Run the aarch64 binary on an x86_64 host with qemu-user (CI jobs "smoke-aarch64").
+# Run the aarch64 binary: natively on an aarch64 host (CI jobs "smoke-aarch64" use an arm64
+# runner), or with qemu-user on an x86_64 host (local runs).
 #
 # Use:
 #   bash scripts/aarch64-check.sh path/to/rusthole-aarch64
@@ -12,7 +13,7 @@
 #
 # The script calls qemu-aarch64-static (or qemu-aarch64) directly through a small wrapper,
 # so it does not need a binfmt_misc entry. QEMU sets another qemu binary. On an aarch64
-# host, the script runs the binary directly. On Ubuntu: sudo apt-get install qemu-user-static.
+# host, the script runs the binary directly. On Ubuntu: sudo apt-get install qemu-user (qemu-user-static on 22.04).
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
@@ -44,7 +45,7 @@ if [[ "$(uname -m)" != "aarch64" ]]; then
         qemu="$(command -v qemu-aarch64-static || command -v qemu-aarch64 || true)"
     fi
     if [[ -z "$qemu" || ! -x "$qemu" ]]; then
-        echo "FAIL: no qemu-aarch64; install qemu-user-static" >&2
+        echo "FAIL: no qemu-aarch64; install qemu-user or qemu-user-static" >&2
         exit 1
     fi
     # A wrapper with exec: the smoke test sends SIGTERM to this process, which is then qemu.

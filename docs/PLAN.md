@@ -183,7 +183,7 @@ Open:
    - docs/INSTALL.md describes only the build-time clock rule, not the new date-error fallback.
    - Docs: amendment A4 still says that each CNAME target goes through the policy.
      The Pi-hole stop rule (owner decision) replaces it; see docs/POLICY.md.
-   - CI: the aarch64 qemu check, the release gates and the new install-test steps run first
+   - CI: the aarch64 check, the release gates and the new install-test steps run first
      in CI. No local run of them was possible.
 
 ## 7. Assumptions

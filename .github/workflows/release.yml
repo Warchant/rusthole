@@ -3,7 +3,7 @@
 #
 # The release job runs only when all gates pass: the tag commit is on main, the tests and
 # cargo-deny pass (the same checks as the CI jobs test and deny), the x86_64 smoke test
-# passes, and the aarch64 binary runs under qemu-user (--version, check-config, smoke test).
+# passes, and the aarch64 binary runs on a native arm64 runner (--version, check-config, smoke test).
 #
 # Actions are pinned by full commit SHA (the tag is in the comment). The release job is the
 # only job that can write to the repository. Release builds use no cache.
@@ -142,11 +142,11 @@ jobs:
           chmod +x out/rusthole-x86_64-linux-musl
           bash scripts/smoke-test.sh out/rusthole-x86_64-linux-musl
 
-  # The aarch64 binary on qemu-user: --version, check-config of the packaged config, and
-  # the smoke test (scripts/aarch64-check.sh).
+  # The aarch64 binary on a native arm64 runner (free for public repos): --version,
+  # check-config of the packaged config, and the smoke test (scripts/aarch64-check.sh).
   smoke-aarch64:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -155,9 +155,9 @@ jobs:
         with:
           name: rusthole-aarch64-unknown-linux-musl
           path: out
-      - name: Install qemu-user and dig
-        run: sudo apt-get update && sudo apt-get install -y qemu-user-static dnsutils
-      - name: Run the aarch64 binary under qemu-user
+      - name: Install dig
+        run: sudo apt-get update && sudo apt-get install -y dnsutils
+      - name: Run the aarch64 binary
         run: bash scripts/aarch64-check.sh out/rusthole-aarch64-linux-musl
 
   release:

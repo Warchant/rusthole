@@ -147,7 +147,7 @@
             <select bind:value={draft.blocking.mode}>
               <option value="null">0.0.0.0 and :: (default)</option>
               <option value="nxdomain">NXDOMAIN</option>
-              <option value="refused">REFUSED</option>
+              <option value="nodata">NODATA (no answer)</option>
               <option value="custom_ip">Custom IP</option>
             </select>
           </label>

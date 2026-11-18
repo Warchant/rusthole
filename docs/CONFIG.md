@@ -22,6 +22,9 @@ rusthole reads one TOML file. The default path is `/etc/rusthole/rusthole.toml`.
   Unicode name. This applies to exact rule values, `blocking.special_domains`, local record
   names, CNAME names and targets, conditional forwarding domains, and clients that are host
   names. Regex rules do not change. `rusthole import` writes the canonical form.
+- The admin API changes the file with `toml_edit`: comments, key order and formatting stay,
+  and the write is atomic (mode 0600). A hand edit while rusthole runs is detected: the next
+  API write gets 409 and rusthole reads the file again. See [SECURITY.md](SECURITY.md).
 - v1 uses IPv4 transport only (amendment A11). `check-config` refuses an IPv6 address or
   block in a listen address, an upstream, a bootstrap address, a fallback, `acl.allow`, a
   client, or a conditional forwarding rule, with the issue "IPv6 is not supported in v1".
@@ -120,21 +123,38 @@ A list can use the hosts format, the domain-only format or the ABP subset (`||na
 mixed. rusthole finds the format of each line. An `@@||name^` entry allows a name only in an
 allow-kind list. [POLICY.md](POLICY.md) has the details and the decision order.
 
+### Stable ids
+
+The admin API names items by an integer id ([API.md](API.md) section 16). Each list, rule,
+group, client, local record, CNAME, conditional forwarding rule and API token can have one.
+The key is `id`, except for clients: their `id` is the match text, so the number has the key
+`uid`.
+
+- An id is optional and unique in its collection. The group `default` has id 0 (when it
+  has an id); no other group can have id 0.
+- At load, an item without an id gets one in memory: the highest id of its collection plus
+  one, in file order. The first write of the API writes all ids to the file.
+- `lists.adlists[].id` stays required, as before.
+- The config version stays 1: the ids are additive.
+
 ### `[[rules]]`
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
+| `id` | integer | none | The stable id (see "Stable ids"). |
 | `kind` | text | | `exact`: the value is one domain name. `regex`: the value is a pattern in the syntax of the Rust `regex` crate. The match is case-insensitive. The pattern has a size limit. Pi-hole extensions (`;querytype=`, `;invert`, `;reply=`) are not supported. |
 | `action` | text | | `deny` or `allow`. Allow beats deny. |
 | `value` | text | | The domain name or the pattern. |
 | `enabled` | bool | `true` | |
 | `groups` | list of group names | `["default"]` | `[]` means no group. |
 | `comment` | text | none | Free text. |
+| `created_at`, `updated_at` | text | none | RFC 3339 time stamps that the API writes when it makes or changes the rule. |
 
 ### `[[groups]]`
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
+| `id` | integer | none | The stable id. The group `default` has id 0. |
 | `name` | text | | A unique name: 1 to 64 characters from `a-z`, `0-9`, `-`, `_`, `.`. The first character is a letter or a digit. The group `default` must exist. |
 | `enabled` | bool | `true` | A disabled group applies no list and no rule. |
 | `comment` | text | none | Free text. |
@@ -145,6 +165,7 @@ When the file has no `[[groups]]`, rusthole uses one group: `default`.
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
+| `uid` | integer | none | The stable id of the API (the key `id` is the match text). |
 | `id` | text | | An IPv4 address, an IPv4 CIDR block, a MAC address (`02:00:00:00:00:01`) or a host name. Each client only once. rusthole finds a MAC address in the kernel neighbor table. |
 | `groups` | list of group names | `["default"]` | `[]` means no group: no list and no rule applies to the client. |
 | `comment` | text | none | Free text. |
@@ -157,16 +178,24 @@ rusthole finds the MAC address and the host name.
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
+| `records[].id` | integer | none | The stable id. |
 | `records[].name` | domain | | Name of an A or AAAA record. |
 | `records[].type` | text | | `A` or `AAAA`. |
 | `records[].value` | IP address | | Its family must match the type. |
+| `records[].enabled` | bool | `true` | A disabled record is not answered. |
+| `records[].comment` | text | none | Free text. |
+| `cnames[].id` | integer | none | The stable id. |
 | `cnames[].name` | domain | | The alias. |
 | `cnames[].target` | domain | | The target name. |
 | `cnames[].ttl` | integer | none | TTL in seconds. |
+| `cnames[].enabled` | bool | `true` | A disabled CNAME is not answered. |
+| `cnames[].comment` | text | none | Free text. |
+| `conditional_forwarding[].id` | integer | none | The stable id. |
 | `conditional_forwarding[].enabled` | bool | `true` | |
-| `conditional_forwarding[].cidr` | IPv4 CIDR block | | Reverse lookups (PTR) for this network go to `server`. |
+| `conditional_forwarding[].cidr` | IPv4 CIDR block | none | Reverse lookups (PTR) for this network go to `server`. A rule needs `cidr`, `domain` or both. |
 | `conditional_forwarding[].server` | text | | An IPv4 address with an optional port: `IP` or `IP:PORT`. |
 | `conditional_forwarding[].domain` | domain | none | Queries for this domain and its subdomains also go to `server`. |
+| `conditional_forwarding[].comment` | text | none | Free text. |
 
 Local records are answered with the AA bit before the cache and the upstreams, and they are
 not blocked. A private reverse lookup that no conditional forwarding rule covers gets
@@ -177,12 +206,15 @@ NXDOMAIN. [CLIENTS.md](CLIENTS.md) has the details.
 | Field | Type | Default | Meaning |
 |---|---|---|---|
 | `password_hash` | text | empty | Argon2id PHC string (`$argon2id$v=19$m=...,t=...,p=...$SALT$HASH`). Empty means that no login is possible. Set it with `rusthole passwd`. |
-| `totp_secret` | text | empty | Base32 TOTP secret (A-Z, 2-7, at least 16 characters). Empty turns TOTP off. |
-| `session_ttl_seconds` | integer | `28800` | Session lifetime. More than 0. |
+| `totp_secret` | text | empty | Base32 TOTP secret (A-Z, 2-7, at least 16 characters). Empty turns TOTP off. Set it up with `rusthole passwd --totp` or in the UI; `rusthole passwd --disable-totp` turns it off. |
+| `session_ttl_seconds` | integer | `28800` | The absolute session lifetime (from the login). More than 0. A session also ends 1 hour after its last request (or after this time, when it is shorter). |
 | `tls_cert_path` | text | none | The older form of `tls.cert_path`. It stays valid: with both admin paths and no `tls.mode`, the mode is `file`. Do not set it together with `tls.cert_path`. |
 | `tls_key_path` | text | none | The older form of `tls.key_path`. Set both paths or neither. |
+| `api_tokens[].id` | integer | none | The stable id. |
 | `api_tokens[].name` | text | | A unique name. It must not be empty. |
 | `api_tokens[].hash` | text | | Hash of the token: an Argon2id PHC string, or `sha256:` and 64 hex digits. |
+| `api_tokens[].prefix` | text | none | The first characters of the token (`rh_` and 4 more), so that people can see which token it is. Not a secret. |
+| `api_tokens[].created_at` | text | none | RFC 3339 time stamp that the API writes. |
 
 rusthole never shows a secret in a log, an error message or the API.
 

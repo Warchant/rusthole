@@ -12,7 +12,7 @@ use std::path::Path;
 use std::time::Duration;
 
 use rusqlite::{Connection, OpenFlags, OptionalExtension, Transaction, params, params_from_iter};
-use rusthole_core::stats::agg::Snapshot;
+use rusthole_core::stats::agg::{MAX_TIMELINE_BUCKETS, Snapshot};
 use rusthole_core::stats::policy::{day_of, retention_cutoff_hour, retention_due};
 use rusthole_core::stats::query::{
     ClientMeta, Filter, HourMap, NameFilter, PairMap, ReasonMap, TimelineMap, TypeMap, UpstreamMap,
@@ -23,7 +23,7 @@ use crate::audit::{AuditEntry, NewAudit};
 use crate::{Identity, StoreError};
 
 /// The schema version that this code writes (`PRAGMA user_version`).
-pub const SCHEMA_VERSION: i64 = 1;
+pub const SCHEMA_VERSION: i64 = 2;
 
 /// Time that SQLite waits for a lock of another connection.
 const BUSY_TIMEOUT: Duration = Duration::from_secs(5);
@@ -42,7 +42,8 @@ pub(crate) const MAX_FILTER_CLIENTS: usize = 256;
 pub const MAX_QUERY_PAIRS: usize = 250_000;
 
 /// The migrations. Item `i` changes the schema from version `i` to version `i + 1`.
-const MIGRATIONS: [&str; 1] = [r"
+pub(crate) const MIGRATIONS: [&str; 2] = [
+    r"
 CREATE TABLE meta (
     key   TEXT PRIMARY KEY,
     value INTEGER NOT NULL
@@ -119,7 +120,21 @@ CREATE TABLE audit (
     detail    TEXT
 );
 CREATE INDEX audit_at ON audit (at);
-"];
+",
+    r"
+CREATE TABLE timeline_pairs (
+    bucket    INTEGER NOT NULL,
+    client_id INTEGER NOT NULL,
+    domain_id INTEGER NOT NULL,
+    total     INTEGER NOT NULL,
+    blocked   INTEGER NOT NULL,
+    cached    INTEGER NOT NULL,
+    forwarded INTEGER NOT NULL,
+    local     INTEGER NOT NULL,
+    PRIMARY KEY (bucket, client_id, domain_id)
+) WITHOUT ROWID;
+",
+];
 
 /// What one flush wrote.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -301,8 +316,10 @@ impl Db {
         let run_retention = retention_due(self.last_retention_day, now);
         let tx = self.conn.transaction()?;
         let client_ids = upsert_clients(&tx, snap, identities)?;
-        report.hourly_rows = write_hours(&tx, snap, &client_ids)?;
+        let domain_ids = domain_ids(&tx, snap)?;
+        report.hourly_rows = write_hours(&tx, snap, &client_ids, &domain_ids)?;
         write_timeline(&tx, snap)?;
+        write_pair_timeline(&tx, snap, &client_ids, &domain_ids, now)?;
         if run_retention {
             report.deleted_rows = delete_old(&tx, now, retention_days)?;
             report.retention_ran = true;
@@ -625,11 +642,66 @@ impl Db {
         Ok(rows.collect::<Result<_, _>>()?)
     }
 
+    /// The 10-minute counts of the pairs in the filter. The filter bounds (`from_hour`,
+    /// `to_hour`) are 10-minute bucket numbers here. The result has at most one item for
+    /// each bucket, so it needs no row cap.
+    pub fn pair_timeline(&self, f: &Filter) -> Result<TimelineMap, StoreError> {
+        let mut out = TimelineMap::new();
+        for (where_sql, args) in Self::filter_sqls(f) {
+            let where_sql = where_sql.replace("h.hour_utc", "h.bucket");
+            let sql = format!(
+                "SELECT h.bucket, {name_col}, SUM(h.total), SUM(h.blocked), SUM(h.cached), \
+                 SUM(h.forwarded), SUM(h.local) \
+                 FROM timeline_pairs h JOIN clients c ON c.id = h.client_id \
+                 JOIN domains d ON d.id = h.domain_id \
+                 WHERE {where_sql} GROUP BY h.bucket{group_name}",
+                name_col = if matches!(f.name, Some(NameFilter::Base(_))) {
+                    "d.name"
+                } else {
+                    "''"
+                },
+                group_name = if matches!(f.name, Some(NameFilter::Base(_))) {
+                    ", h.domain_id"
+                } else {
+                    ""
+                },
+            );
+            let mut stmt = self.conn.prepare(&sql)?;
+            let mut rows = stmt.query(params_from_iter(args))?;
+            while let Some(r) = rows.next()? {
+                if matches!(f.name, Some(NameFilter::Base(_))) {
+                    let name: String = r.get(1)?;
+                    if !f.matches_name(&name) {
+                        continue;
+                    }
+                }
+                let c = Counts {
+                    total: to_u64(r.get(2)?),
+                    blocked: to_u64(r.get(3)?),
+                    cached: to_u64(r.get(4)?),
+                    forwarded: to_u64(r.get(5)?),
+                    local: to_u64(r.get(6)?),
+                };
+                out.entry(r.get(0)?).or_default().add(&c);
+            }
+        }
+        Ok(out)
+    }
+
     /// The number of rows in `hourly` (for tests and the size report).
     pub fn hourly_rows(&self) -> Result<u64, StoreError> {
         let n: i64 = self
             .conn
             .query_row("SELECT count(*) FROM hourly", [], |r| r.get(0))?;
+        Ok(to_u64(n))
+    }
+
+    /// The number of rows of a table (tests only).
+    #[cfg(test)]
+    pub(crate) fn count_rows(&self, table: &str) -> Result<u64, StoreError> {
+        let n: i64 = self
+            .conn
+            .query_row(&format!("SELECT count(*) FROM {table}"), [], |r| r.get(0))?;
         Ok(to_u64(n))
     }
 
@@ -695,9 +767,9 @@ fn write_hours(
     tx: &Transaction<'_>,
     snap: &Snapshot,
     client_ids: &HashMap<IpAddr, i64>,
+    domain_ids: &HashMap<&str, i64>,
 ) -> Result<usize, StoreError> {
     let mut rows = 0;
-    let domain_ids = domain_ids(tx, snap)?;
     let mut hourly = tx.prepare(
         "INSERT INTO hourly (hour_utc, client_id, domain_id, total, blocked, cached, \
          forwarded, local, first_seen, last_seen) \
@@ -758,6 +830,51 @@ fn write_hours(
         }
     }
     Ok(rows)
+}
+
+/// Upserts the 10-minute buckets of each (client, name), and deletes the buckets that are
+/// older than the 24 h timeline needs (the last [`MAX_TIMELINE_BUCKETS`] buckets stay).
+fn write_pair_timeline(
+    tx: &Transaction<'_>,
+    snap: &Snapshot,
+    client_ids: &HashMap<IpAddr, i64>,
+    domain_ids: &HashMap<&str, i64>,
+    now: i64,
+) -> Result<(), StoreError> {
+    let mut up = tx.prepare(
+        "INSERT INTO timeline_pairs (bucket, client_id, domain_id, total, blocked, cached, \
+         forwarded, local) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) \
+         ON CONFLICT (bucket, client_id, domain_id) DO UPDATE SET \
+         total = total + excluded.total, blocked = blocked + excluded.blocked, \
+         cached = cached + excluded.cached, forwarded = forwarded + excluded.forwarded, \
+         local = local + excluded.local",
+    )?;
+    for (&bucket, b) in &snap.pair_timeline {
+        for (client, names) in b {
+            let Some(&client_id) = client_ids.get(client) else {
+                continue;
+            };
+            for (name, c) in names {
+                let Some(&domain_id) = domain_ids.get(&**name) else {
+                    continue;
+                };
+                up.execute(params![
+                    bucket,
+                    client_id,
+                    domain_id,
+                    to_i64(c.total),
+                    to_i64(c.blocked),
+                    to_i64(c.cached),
+                    to_i64(c.forwarded),
+                    to_i64(c.local)
+                ])?;
+            }
+        }
+    }
+    let keep = i64::try_from(MAX_TIMELINE_BUCKETS).unwrap_or(i64::MAX);
+    let cutoff = rusthole_core::stats::ten_minutes_of(now).saturating_sub(keep);
+    tx.execute("DELETE FROM timeline_pairs WHERE bucket < ?1", [cutoff])?;
+    Ok(())
 }
 
 /// Upserts the 10-minute buckets of a snapshot.

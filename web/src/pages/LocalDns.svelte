@@ -69,7 +69,7 @@
   async function saveForwarder(e: SubmitEvent) {
     e.preventDefault();
     const servers = splitList(fw.servers);
-    fwError = checkForwardDomain(fw.domain) ?? checkServers(servers, 4);
+    fwError = checkForwardDomain(fw.domain) ?? checkServers(servers, 1);
     if (fwError) return;
     const body = { domain: fw.domain.trim(), servers, comment: fw.comment.trim() };
     const id = fw.id;
@@ -189,7 +189,7 @@
     </p>
     <form class="form" onsubmit={saveForwarder}>
       <label class="field">Domain<input bind:value={fw.domain} placeholder="lan" required /></label>
-      <label class="field">Servers (IPv4, up to 4)<input class="mono" bind:value={fw.servers} placeholder="192.0.2.1" required /></label>
+      <label class="field">Server (IPv4, optional port)<input class="mono" bind:value={fw.servers} placeholder="192.0.2.1" required /></label>
       <label class="field">Comment<input bind:value={fw.comment} /></label>
       <div class="row">
         <button type="submit" class="primary">{fw.id !== null ? 'Save' : 'Add forwarding'}</button>

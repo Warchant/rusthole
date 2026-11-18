@@ -13,6 +13,7 @@
 //!
 //! docs/CONFIG.md has a full example file and the meaning of each field.
 
+mod ids;
 mod validate;
 
 #[cfg(test)]
@@ -22,6 +23,7 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
+pub use ids::{DEFAULT_GROUP_ID, IdKind, next_free_id};
 pub use validate::{
     ConfigIssue, IPV6_NOT_SUPPORTED, MAX_CACHE_ENTRIES, MAX_GROUP_NAME_LEN, MAX_RECENT_QUERIES,
     MAX_TLS_NAMES, MAX_UPSTREAM_TIMEOUT_MS, check_list_url, is_argon2id_phc, is_valid_group_name,
@@ -306,6 +308,7 @@ pub fn migrate(table: toml::Table, from_version: i64) -> Result<toml::Table, Con
 
 fn default_groups() -> Vec<Group> {
     vec![Group {
+        id: None,
         name: DEFAULT_GROUP.to_owned(),
         enabled: true,
         comment: None,
@@ -322,6 +325,12 @@ fn auto_listen() -> Vec<String> {
 
 fn yes() -> bool {
     true
+}
+
+// serde gives the value by reference.
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_true(b: &bool) -> bool {
+    *b
 }
 
 /// The listen keyword for "every local IPv4 address".
@@ -682,6 +691,10 @@ pub enum RuleAction {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Rule {
+    /// The stable id of the rule (docs/API.md). The API writes it. A rule without an id gets
+    /// one in memory at load (see [`Config::assign_ids`]).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<u32>,
     /// `exact` or `regex`.
     pub kind: RuleKind,
     /// `deny` or `allow`.
@@ -697,12 +710,21 @@ pub struct Rule {
     /// Free text.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
+    /// When the API made the rule (RFC 3339, UTC). The API writes it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+    /// When the API last changed the rule (RFC 3339, UTC). The API writes it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
 }
 
 /// One group.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Group {
+    /// The stable id of the group (docs/API.md). The group `default` has id 0.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<u32>,
     /// A unique name: 1 to 64 characters from `a-z`, `0-9`, `-`, `_`, `.`; the first one is a
     /// letter or a digit. The group `default` must exist.
     pub name: String,
@@ -718,6 +740,10 @@ pub struct Group {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Client {
+    /// The stable number of the client in the API (docs/API.md). The key `id` holds the
+    /// match text, so this number has the key `uid`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uid: Option<u32>,
     /// An IPv4 address, an IPv4 CIDR block, a MAC address or a host name. v1 refuses an
     /// IPv6 address or block (amendment A11).
     pub id: String,
@@ -756,6 +782,9 @@ pub enum RecordType {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LocalRecord {
+    /// The stable id of the record (docs/API.md).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<u32>,
     /// The domain name.
     pub name: String,
     /// `A` or `AAAA`.
@@ -763,12 +792,21 @@ pub struct LocalRecord {
     pub record_type: RecordType,
     /// The IP address. Its family must match the type.
     pub value: String,
+    /// Default: true. A disabled record is not answered.
+    #[serde(default = "yes", skip_serializing_if = "is_true")]
+    pub enabled: bool,
+    /// Free text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
 }
 
 /// One local CNAME record.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LocalCname {
+    /// The stable id of the CNAME (docs/API.md).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<u32>,
     /// The alias.
     pub name: String,
     /// The target name.
@@ -776,22 +814,36 @@ pub struct LocalCname {
     /// TTL in seconds. Default: the cache rules apply.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ttl: Option<u32>,
+    /// Default: true. A disabled CNAME is not answered.
+    #[serde(default = "yes", skip_serializing_if = "is_true")]
+    pub enabled: bool,
+    /// Free text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
 }
 
 /// One conditional forwarding rule.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ConditionalForward {
+    /// The stable id of the rule (docs/API.md).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<u32>,
     /// Default: true.
     #[serde(default = "yes")]
     pub enabled: bool,
-    /// Reverse lookups (PTR) for addresses in this network go to `server`.
+    /// Reverse lookups (PTR) for addresses in this network go to `server`. An empty text
+    /// means no network: then `domain` is required.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub cidr: String,
     /// The local DNS server: an IPv4 address with an optional port (`IP` or `IP:PORT`).
     pub server: String,
     /// Queries for this domain and its subdomains also go to `server`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub domain: Option<String>,
+    /// Free text.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<String>,
 }
 
 /// Admin login and API access (decision D10, amendment A7).
@@ -856,17 +908,30 @@ impl fmt::Debug for Admin {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ApiToken {
+    /// The stable id of the token (docs/API.md).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<u32>,
     /// A unique name.
     pub name: String,
     /// The hash of the token: an Argon2id PHC string, or `sha256:` and 64 hex digits.
     pub hash: String,
+    /// The first characters of the token (for example `rh_Ab3d`), so that people can see
+    /// which token it is. It is not a secret.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prefix: Option<String>,
+    /// When the API made the token (RFC 3339, UTC).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
 }
 
 impl fmt::Debug for ApiToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ApiToken")
+            .field("id", &self.id)
             .field("name", &self.name)
             .field("hash", &redact(&self.hash))
+            .field("prefix", &self.prefix)
+            .field("created_at", &self.created_at)
             .finish()
     }
 }

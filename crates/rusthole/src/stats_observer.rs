@@ -9,6 +9,8 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 
+use arc_swap::ArcSwap;
+
 use rusthole_core::Config;
 use rusthole_core::stats::{StatsEvent, Status};
 use rusthole_dns::{AnswerSource, NoopObserver, QueryEvent, QueryObserver, Verdict};
@@ -20,16 +22,51 @@ pub(crate) const STATS_SHUTDOWN_DEADLINE: Duration = Duration::from_secs(5);
 /// DNS response code REFUSED.
 const RCODE_REFUSED: u16 = 5;
 
+/// The stable id of each rule, by its index in `rules` of the config (the engine names a
+/// rule by its index). A config change of the API stores a new map. Lock-free.
+#[derive(Debug, Clone)]
+pub(crate) struct RuleIds(Arc<ArcSwap<Vec<Option<u32>>>>);
+
+impl RuleIds {
+    /// The map of a config (after `Config::assign_ids`).
+    pub(crate) fn new(config: &Config) -> Self {
+        Self(Arc::new(ArcSwap::from_pointee(ids_of(config))))
+    }
+
+    /// Uses the rules of a new config.
+    pub(crate) fn set(&self, config: &Config) {
+        self.0.store(Arc::new(ids_of(config)));
+    }
+
+    /// The stable id of the rule at `index`, or the index when the rule has no id.
+    pub(crate) fn id_of(&self, index: usize) -> String {
+        match self.0.load().get(index).copied().flatten() {
+            Some(id) => id.to_string(),
+            None => index.to_string(),
+        }
+    }
+}
+
+fn ids_of(config: &Config) -> Vec<Option<u32>> {
+    let mut c = config.clone();
+    c.assign_ids();
+    c.rules.iter().map(|r| r.id).collect()
+}
+
 /// The observer that sends each answered query to the statistics store.
 #[derive(Debug)]
 pub(crate) struct StatsObserver {
     recorder: Recorder,
+    rules: RuleIds,
 }
 
 impl QueryObserver for StatsObserver {
     fn on_event(&self, event: &QueryEvent) {
-        self.recorder
-            .record(to_stats_event(event, rusthole_store::wall_now()));
+        self.recorder.record(to_stats_event(
+            event,
+            rusthole_store::wall_now(),
+            &self.rules,
+        ));
     }
 }
 
@@ -50,23 +87,24 @@ pub(crate) fn status_of(e: &QueryEvent) -> Status {
 /// Changes a DNS event to a statistics event. `at` is the wall-clock time (Unix seconds).
 ///
 /// The reason comes from the policy decision of part P3c (see [`reason_of`]).
-pub(crate) fn to_stats_event(e: &QueryEvent, at: i64) -> StatsEvent {
+pub(crate) fn to_stats_event(e: &QueryEvent, at: i64, rules: &RuleIds) -> StatsEvent {
     StatsEvent {
         at,
         client: e.client,
         name: e.qname.to_ascii_lowercase(),
         qtype: e.qtype,
         status: status_of(e),
-        reason: reason_of(e),
+        reason: reason_of(e, rules),
         upstream: e.upstream.map(|a| a.to_string()),
         duration_us: u64::try_from(e.duration.as_micros()).unwrap_or(u64::MAX),
     }
 }
 
 /// The reason text of a blocked query for the statistics store: `cname:{target}` when a
-/// CNAME target decided, else `list:{id}` (first matching list), `rule:{index}` or
-/// `special`. Allowed queries and queries with no engine decision have no reason.
-pub(crate) fn reason_of(e: &QueryEvent) -> Option<String> {
+/// CNAME target decided, else `list:{id}` (first matching list), `rule:{id}` (the stable
+/// rule id of the API) or `special`. Allowed queries and queries with no engine decision
+/// have no reason.
+pub(crate) fn reason_of(e: &QueryEvent, rules: &RuleIds) -> Option<String> {
     use rusthole_core::policy::Reason;
     if !matches!(e.verdict, Verdict::BlockedQuery | Verdict::BlockedAnswer) {
         return None;
@@ -76,7 +114,9 @@ pub(crate) fn reason_of(e: &QueryEvent) -> Option<String> {
     }
     match e.policy.decision?.reason {
         Reason::BlockList { lists } => lists.first().map(|id| format!("list:{id}")),
-        Reason::ExactDeny { rule } | Reason::RegexDeny { rule } => Some(format!("rule:{rule}")),
+        Reason::ExactDeny { rule } | Reason::RegexDeny { rule } => {
+            Some(format!("rule:{}", rules.id_of(rule)))
+        }
         Reason::SpecialDomain => Some("special".to_owned()),
         Reason::NoMatch
         | Reason::BlockingDisabled
@@ -110,10 +150,11 @@ pub(crate) fn start(config: &Config) -> Option<StatsService> {
 }
 
 /// The observer for the DNS server.
-pub(crate) fn observer(service: Option<&StatsService>) -> Arc<dyn QueryObserver> {
+pub(crate) fn observer(service: Option<&StatsService>, rules: RuleIds) -> Arc<dyn QueryObserver> {
     match service {
         Some(s) => Arc::new(StatsObserver {
             recorder: s.recorder(),
+            rules,
         }),
         None => Arc::new(NoopObserver),
     }
@@ -184,21 +225,49 @@ mod tests {
             });
             e
         };
+        // Rule index 3 has the stable id 12; index 9 has none (the index is kept).
+        let mut cfg = Config::default();
+        for (i, id) in [1, 5, 7, 12].into_iter().enumerate() {
+            cfg.rules.push(rusthole_core::config::Rule {
+                id: Some(id),
+                kind: rusthole_core::config::RuleKind::Exact,
+                action: rusthole_core::config::RuleAction::Deny,
+                value: format!("r{i}.example"),
+                enabled: true,
+                groups: vec!["default".to_owned()],
+                comment: None,
+                created_at: None,
+                updated_at: None,
+            });
+        }
+        let rules = RuleIds::new(&cfg);
         let deny = decided(Verdict::BlockedQuery, Reason::ExactDeny { rule: 3 });
-        assert_eq!(reason_of(&deny).as_deref(), Some("rule:3"));
+        assert_eq!(reason_of(&deny, &rules).as_deref(), Some("rule:12"));
+        let far = decided(Verdict::BlockedQuery, Reason::ExactDeny { rule: 9 });
+        assert_eq!(reason_of(&far, &rules).as_deref(), Some("rule:9"));
+        cfg.rules.remove(0);
+        rules.set(&cfg);
+        // Index 3 is gone now: the index is kept.
+        assert_eq!(reason_of(&deny, &rules).as_deref(), Some("rule:3"));
         let special = decided(Verdict::BlockedQuery, Reason::SpecialDomain);
-        assert_eq!(reason_of(&special).as_deref(), Some("special"));
+        assert_eq!(reason_of(&special, &rules).as_deref(), Some("special"));
         // An allowed query has no reason, even with a deny reason attached.
         let allowed = decided(Verdict::Allowed, Reason::RegexDeny { rule: 1 });
-        assert_eq!(reason_of(&allowed), None);
+        assert_eq!(reason_of(&allowed, &rules), None);
         // A CNAME target that decided wins over the rule.
         let mut cname = decided(Verdict::BlockedAnswer, Reason::RegexDeny { rule: 1 });
         cname.policy.cname_target =
             Some(rusthole_core::DomainName::parse("ads.example.net").unwrap());
-        assert_eq!(reason_of(&cname).as_deref(), Some("cname:ads.example.net"));
+        assert_eq!(
+            reason_of(&cname, &rules).as_deref(),
+            Some("cname:ads.example.net")
+        );
         // No engine decision: no reason.
         assert_eq!(
-            reason_of(&event(Verdict::BlockedQuery, AnswerSource::Filter, 0)),
+            reason_of(
+                &event(Verdict::BlockedQuery, AnswerSource::Filter, 0),
+                &rules
+            ),
             None
         );
         // Local DNS answers count as local.
@@ -210,7 +279,11 @@ mod tests {
 
     #[test]
     fn event_fields_are_copied() {
-        let e = to_stats_event(&event(Verdict::Allowed, AnswerSource::Upstream, 0), 1234);
+        let e = to_stats_event(
+            &event(Verdict::Allowed, AnswerSource::Upstream, 0),
+            1234,
+            &RuleIds::new(&Config::default()),
+        );
         assert_eq!(e.at, 1234);
         assert_eq!(e.name, "www.example.com");
         assert_eq!(e.qtype, 28);
@@ -222,7 +295,7 @@ mod tests {
     #[test]
     fn observer_feeds_the_store_and_does_not_block() {
         let service = StatsService::start(&StatsSettings::ram_only()).unwrap();
-        let obs = observer(Some(&service));
+        let obs = observer(Some(&service), RuleIds::new(&Config::default()));
         let started = Instant::now();
         for _ in 0..1000 {
             obs.on_event(&event(Verdict::Allowed, AnswerSource::Cache, 0));

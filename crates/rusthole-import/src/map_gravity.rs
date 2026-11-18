@@ -99,6 +99,7 @@ fn map_groups(g: &Gravity, config: &mut Config, report: &mut ImportReport) -> Ha
         }
         used.insert(name.clone());
         config.groups.push(Group {
+            id: None,
             name: name.clone(),
             enabled: row.enabled,
             comment: row.description.clone(),
@@ -292,6 +293,9 @@ fn map_domainlist(
                     config.rules.len(),
                 ));
                 config.rules.push(Rule {
+                    id: None,
+                    created_at: None,
+                    updated_at: None,
                     kind,
                     action,
                     value,
@@ -354,6 +358,7 @@ fn map_clients(
             config.clients.len()
         ));
         config.clients.push(Client {
+            uid: None,
             id,
             groups: client_groups,
             comment: row.comment.clone(),

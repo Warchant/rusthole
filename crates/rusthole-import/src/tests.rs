@@ -28,6 +28,7 @@ fn expected_home_config() -> Config {
         .collect();
     e.groups[0].comment = Some("The default group".into());
     e.groups.push(Group {
+        id: None,
         name: "kids".into(),
         enabled: true,
         comment: Some("Tablets".into()),
@@ -43,6 +44,9 @@ fn expected_home_config() -> Config {
         })
         .collect();
     let rule = |kind, action, value: String, comment: Option<&str>| Rule {
+        id: None,
+        created_at: None,
+        updated_at: None,
         kind,
         action,
         value,
@@ -72,6 +76,7 @@ fn expected_home_config() -> Config {
     }
     e.clients = (1..=13)
         .map(|i| Client {
+            uid: None,
             id: if i == 13 {
                 "192.0.2.13".into()
             } else {
@@ -82,6 +87,9 @@ fn expected_home_config() -> Config {
         })
         .collect();
     e.local_dns.records = vec![LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "nas.lan".into(),
         record_type: RecordType::A,
         value: "192.0.2.10".into(),

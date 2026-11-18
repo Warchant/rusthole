@@ -54,7 +54,9 @@ For each UTC hour, the aggregate keeps:
 - for each upstream: a count and the sum of the answer times (for `avg_ms`);
 - for each reason (`list:{id}`, `rule:{id}`, ...): a count.
 
-A separate timeline keeps totals in 10-minute buckets (for the 24 h timeline).
+A separate timeline keeps totals in 10-minute buckets (for the 24 h timeline), and the
+counts of each (client IP, full name) in 10-minute buckets for the last 160 buckets (for
+the 24 h timeline with a `client` or `domain` filter, part P5).
 
 Client totals, domain totals and all top lists come from the (client, name) rows at query
 time.
@@ -65,6 +67,7 @@ time.
 |---|---|---|
 | Keys in the hour buckets (pairs, types, upstreams, reasons) | 100,000 (`DEFAULT_MAX_KEYS`) | At 3/4 of the bound the store flushes early (at most once in 5 s). At the bound the oldest hour bucket is evicted and counted (`evicted_buckets`, `evicted_events`). |
 | 10-minute buckets | 160 | The oldest bucket goes out. |
+| (10-minute bucket, client, name) keys | 100,000 (`MAX_PAIR_TIMELINE_KEYS`), and 160 buckets | At 3/4 of the bound the store flushes early. At the bound the oldest 10-minute bucket goes out. |
 | Event channel | 65,536 events | The event is dropped and counted (`dropped_events`). A WARN is logged at most once in 10 s. |
 | Recent queries | `stats.recent_queries` | The oldest query goes out. No memory is reserved at the start. |
 | Client identities (MAC, name) | 4,096 | One old identity goes out. |
@@ -78,7 +81,7 @@ old hours when needed.
 ## 4. Database schema
 
 File: `<data_dir>/stats.db`. Mode: WAL, `synchronous=NORMAL`, busy timeout 5 s. The schema
-version is in `PRAGMA user_version` (now 1). At open, the store runs the missing migrations in
+version is in `PRAGMA user_version` (now 2; version 2 adds `timeline_pairs`). At open, the store runs the missing migrations in
 one transaction. A file from a newer version is an error (the store then runs in RAM-only
 mode and logs an ERROR). An empty file is a valid start.
 
@@ -96,6 +99,7 @@ Names and clients are stored one time and referenced by integer ids. The big tab
 | `hourly_upstreams` | `hour_utc`, `upstream`, `count`, `sum_us` | (`hour_utc`, `upstream`) |
 | `hourly_reasons` | `hour_utc`, `reason`, `count` | (`hour_utc`, `reason`) |
 | `timeline` | `bucket` (Unix seconds / 600), `total`, `blocked`, `cached`, `forwarded`, `local` | `bucket` |
+| `timeline_pairs` | `bucket`, `client_id`, `domain_id`, `total`, `blocked`, `cached`, `forwarded`, `local` | (`bucket`, `client_id`, `domain_id`) |
 | `audit` | `id`, `at`, `action`, `target`, `actor`, `client_ip`, `ok`, `detail` | `id` (AUTOINCREMENT); index on `at` |
 
 `hour_utc` is Unix seconds / 3600. Times are Unix seconds (UTC). The store keeps full names.
@@ -145,7 +149,8 @@ sequenceDiagram
     alt nothing to write and no retention due
         W-->>D: unlock, no write
     else
-        W->>D: BEGIN; upsert clients, domains, hourly, types, upstreams, reasons, timeline
+        W->>D: BEGIN; upsert clients, domains, hourly, types, upstreams, reasons, timeline, timeline_pairs
+        W->>D: delete timeline_pairs older than 160 buckets
         W->>D: retention (once a day); COMMIT
         alt error
             W->>R: put the data back (key bound still holds)
@@ -222,10 +227,11 @@ Rules:
   count the 0 to 50 minutes between `from` and the first full hour, but the 10-minute
   timeline counts them. So the sum of the `24h` timeline can be a little larger than the
   `24h` summary.
-- **Timeline with a filter.** Without a filter, the 24 h timeline has 144 buckets of 10
-  minutes. With a `client` or `domain` filter, the 24 h timeline has 24 buckets of 1 hour
-  (`bucket_seconds = 3600`), because the database keeps per-client and per-name counts by
-  hour only. API.md must get this rule (P5).
+- **Timeline with a filter.** The 24 h timeline has 144 buckets of 10 minutes, also with a
+  `client` or `domain` filter (API.md section 5.2). The filtered timeline reads
+  `timeline_pairs` and the RAM pair buckets. Each flush writes the pair buckets of the
+  snapshot and deletes the rows older than 160 buckets, so the table holds about one day.
+  The `7d` and `30d` timelines read the hour buckets as before.
 - **UTC offset.** The offset is clamped to -840..840 and rounded down to a whole hour:
   +5:30 gives +5, -3:30 gives -4. The response gives the offset that was used.
 - **Registrable domain.** The `psl` crate (the Public Suffix List is compiled into the code)
@@ -287,18 +293,17 @@ reads all of `hourly` while it holds the database lock, so queries wait for it o
 
 ## 9. Known gaps (follow-ups)
 
-- **Owner decision needed: the 24 h timeline with a filter.** API.md sections 1.3 and 5.2 say
-  that `24h` gives `bucket_seconds = 600` and 144 buckets, also with the `client` and `domain`
-  filters. The store gives 24 buckets of 3600 s with a filter, because the database keeps
-  per-client and per-name counts by hour only. Option one: accept 24 x 3600 for a filtered
-  24 h timeline, and P5 changes API.md section 5.2. Option two: add a table of 10-minute
-  counts for each (client, name) for the last 24 h only, to keep the documented contract
-  (more rows and more writes in each flush). The code now does option one. The owner did not
-  decide yet.
-
-- `QueryEvent` (P2) has no block reason (list or rule id) and no MAC. So `reason` is empty in
-  the statistics and in recent queries until P3c adds it, and the client key is the IP until
-  P3c calls `Stats::set_client_identity`.
-- The `[stats]` setting is `recent_queries` ([CONFIG.md](CONFIG.md)). API.md section 6 says
-  `recent_queries_size`. P5 must use the config name and fix API.md.
+- **Resolved (P5): the 24 h timeline with a filter.** The contract of API.md wins (option two
+  of the earlier text): the store keeps 10-minute counts of each (client, name) for the last
+  160 buckets in `timeline_pairs` (schema version 2). The cost: one more upsert for each
+  (bucket, client, name) in each flush, and about one day of these rows on disk.
+- The reason of a blocked query comes from the policy decision (P3c). A rule reason is
+  `rule:{id}` with the stable rule id of the API (P5); the bin keeps a map from the rule
+  index of the engine to the id and swaps it at each config change. Between a config change
+  and the next engine build, a rule reason can name the id of the old index.
+- The bin copies the MAC address (neighbor table) and the local name of each client address
+  into the store once a minute (`Stats::set_client_identity`), so a client with a known MAC
+  has its MAC as key.
+- The `[stats]` setting is `recent_queries` ([CONFIG.md](CONFIG.md)). The API field
+  `stats.recent_queries_size` maps to it (API.md section 12).
 - The key bound (100,000) is a constant, not a config setting.

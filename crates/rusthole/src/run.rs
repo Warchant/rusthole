@@ -1,45 +1,69 @@
-//! The `run` command: load the config, start the policy and the DNS server, wait for a stop
-//! signal, stop.
+//! The `run` command: load the config, start the list refresher, the policy, the DNS server
+//! and the admin listener, wait for a stop signal, stop.
 //!
 //! ```mermaid
 //! sequenceDiagram
 //!     participant M as main
-//!     participant P as policy (part P3c)
+//!     participant L as list refresher (P3b)
+//!     participant P as policy (P3c)
 //!     participant S as DNS server
+//!     participant A as admin listener (P5)
 //!     M->>M: load and validate config (exit 1 on a problem)
-//!     M->>P: neighbor task, client resolver, engine (lists on disk), filter
+//!     M->>L: load: first engine from the disk cache (no network)
+//!     M->>P: neighbor task, client resolver, filter with the refresher engine
 //!     M->>S: start with the filter (bind, upstream pool, rescan)
+//!     M->>L: start downloads (names through the upstream pool)
+//!     M->>A: TLS store, HTTPS listener, API
 //!     M->>M: wait for SIGTERM / SIGINT / Ctrl+C
-//!     M->>S: shutdown (stop accept, finish in-flight queries, hard stop after grace)
+//!     M->>A: shutdown (graceful, then hard stop)
+//!     M->>L: shutdown (deadline)
+//!     M->>S: shutdown (finish in-flight queries, hard stop after grace)
 //!     M->>P: shutdown (neighbor and PTR tasks)
-//!     M->>M: stop the runtime (time limit)
-//!     M->>M: stop the statistics store (final flush, time limit)
+//!     M->>M: stop the runtime, then the statistics store (final flush)
 //! ```
+//!
+//! Each exit path (a start error of any part, or the stop signal) stops the parts that
+//! started before, in the reverse order. Tests prove both paths.
 
 use std::future::Future;
 use std::io::Write;
+use std::net::{IpAddr, SocketAddr};
 use std::path::Path;
 use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context;
+use parking_lot::Mutex;
 use rusthole_core::Config;
 use rusthole_core::clients::ClientTable;
 use rusthole_dns::server::SHUTDOWN_GRACE;
 use rusthole_dns::{
-    BlockingControl, BoundListener, DnsSettings, IdentityService, IdentitySettings, NeighborSource,
-    PolicyFilter, ServerDeps, SystemNeighbors, engine_handle,
+    BlockingControl, BoundListener, DnsServer, DnsSettings, EngineHandle, IdentityService,
+    IdentitySettings, InterfaceSource, NeighborSource, PolicyFilter, ServerDeps, SystemInterfaces,
+    SystemNeighbors,
 };
+use rusthole_lists::{ListsSettings, Refresher};
+use rusthole_web::config_edit::ConfigStore;
+use rusthole_web::{AdminDeps, AdminServer, AdminSettings, AppState, LiveApply, SystemStatic};
+use tokio_util::sync::CancellationToken;
 
-use crate::engine::{DiskLists, EngineLoader};
+use crate::stats_observer::RuleIds;
 
 /// Time limit for the runtime to stop after the server stopped.
 const RUNTIME_STOP: Duration = Duration::from_secs(2);
+/// Time limit for the list refresher to stop.
+const LISTS_STOP: Duration = Duration::from_secs(5);
+/// Time limit for the admin listener to stop gracefully.
+const ADMIN_STOP: Duration = Duration::from_secs(3);
+/// The period of the client identity sync (MAC and name into the statistics store).
+const IDENTITY_SYNC: Duration = Duration::from_secs(60);
+/// The largest number of clients that one identity sync updates.
+const IDENTITY_SYNC_MAX: usize = 4096;
 
 /// Runs the server until a stop signal.
 pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
-    let Some(config) = crate::load_config(path, out)? else {
+    let Some((config, text)) = crate::load_config_text(path, out)? else {
         return Ok(ExitCode::FAILURE);
     };
     let (settings, warnings) = DnsSettings::from_config(&config)
@@ -54,49 +78,44 @@ pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode>
         .context("cannot start the async runtime")?;
     // The DoH listener (part P7) needs its TLS config before the start.
     let doh_tls = crate::doh::server_tls(&config)?;
+    let store = Arc::new(ConfigStore::new(path.to_path_buf(), text, &config));
+    let cfg = store.get();
     // The statistics store (part P4). It stops after the DNS server, with a final flush.
-    let stats = crate::stats_observer::start(&config);
+    let stats = crate::stats_observer::start(&cfg);
+    let rule_ids = RuleIds::new(&cfg);
     let deps = ServerDeps {
-        observer: crate::stats_observer::observer(stats.as_ref()),
+        observer: crate::stats_observer::observer(stats.as_ref(), rule_ids.clone()),
         doh_tls,
         ..ServerDeps::default()
     };
-    let loader = DiskLists::for_config(&config);
-    let result = runtime.block_on(serve_with_policy(
-        &config,
-        settings,
-        deps,
-        &loader,
-        Arc::new(SystemNeighbors),
-        stop_signal(),
-        |_, _| {},
-    ));
+    let env = RunEnv {
+        neighbors: Arc::new(SystemNeighbors),
+        interfaces: Arc::new(SystemInterfaces),
+        lists: ListsSettings::from_config(&cfg),
+        admin_listen: None,
+        stats: stats.as_ref().map(rusthole_store::StatsService::stats),
+        rule_ids,
+        config_path: path.display().to_string(),
+    };
+    let result = runtime.block_on(serve_all(store, settings, deps, env, stop_signal(), |r| {
+        tracing::info!(dns = ?r.dns, admin = ?r.admin, "listeners are bound");
+    }));
     runtime.shutdown_timeout(RUNTIME_STOP);
     crate::stats_observer::stop(stats);
     result?;
     Ok(ExitCode::SUCCESS)
 }
 
-/// Starts the DNS server, gives the bound listeners to `ready`, waits for `stop`, then
-/// stops the server and all its tasks.
-///
-/// Each exit path stops the tasks: a start error stops them inside `start`, and after
-/// `stop` the shutdown stops them (with a hard stop after the grace time).
-pub(crate) async fn serve(
-    settings: DnsSettings,
-    deps: ServerDeps,
-    stop: impl Future<Output = ()>,
-    ready: impl FnOnce(Vec<BoundListener>),
-) -> anyhow::Result<()> {
-    let server = rusthole_dns::start(settings, deps)
-        .await
-        .context("cannot start the DNS server")?;
-    tracing::info!("rusthole is running");
-    ready(server.bound());
-    stop.await;
-    tracing::info!("stop signal received; stopping");
-    server.shutdown(SHUTDOWN_GRACE).await;
-    Ok(())
+/// The parts of the process environment that tests replace.
+pub(crate) struct RunEnv {
+    pub(crate) neighbors: Arc<dyn NeighborSource>,
+    pub(crate) interfaces: Arc<dyn InterfaceSource>,
+    pub(crate) lists: ListsSettings,
+    /// Admin listen addresses that replace the config (tests: `127.0.0.1:0`).
+    pub(crate) admin_listen: Option<Vec<SocketAddr>>,
+    pub(crate) stats: Option<rusthole_store::Stats>,
+    pub(crate) rule_ids: RuleIds,
+    pub(crate) config_path: String,
 }
 
 /// The policy parts of a running server (part P3c): the client identity tasks and the
@@ -108,18 +127,14 @@ pub(crate) struct Policy {
 }
 
 impl Policy {
-    /// Builds the engine with `loader`, starts the neighbor and PTR tasks, and makes the
-    /// filter. A loader error stops nothing, because no task started yet. Call it inside a
-    /// tokio runtime.
+    /// Starts the neighbor and PTR tasks and makes the filter with `engine` (the engine
+    /// handle of the list refresher). Call it inside a tokio runtime.
     pub(crate) fn start(
         config: &Config,
         settings: &DnsSettings,
-        loader: &dyn EngineLoader,
+        engine: EngineHandle,
         neighbors: Arc<dyn NeighborSource>,
     ) -> anyhow::Result<Self> {
-        let (engine, _report) = loader
-            .load(config)
-            .context("cannot build the policy engine")?;
         let (table, issues) = ClientTable::from_config(config);
         for issue in &issues {
             tracing::warn!("clients: {issue}");
@@ -134,15 +149,14 @@ impl Policy {
             .context("cannot start the client identity tasks")?,
         );
         let filter = Arc::new(PolicyFilter::new(
-            engine_handle(engine),
+            engine,
             Arc::new(BlockingControl::new(config.blocking.enabled)),
             identity.resolver(),
         ));
         Ok(Self { identity, filter })
     }
 
-    /// The filter (the engine handle and the blocking toggle are in it). Part P5 gives the
-    /// toggle to the API; until then only tests use it.
+    /// The filter (the engine handle and the blocking toggle are in it).
     #[cfg(test)]
     pub(crate) fn filter(&self) -> &Arc<PolicyFilter> {
         &self.filter
@@ -155,27 +169,332 @@ impl Policy {
     }
 }
 
-/// Starts the policy, then the DNS server with the policy filter ([`serve`]). Each exit
-/// path (start error of the server, stop signal) stops the policy tasks too.
-pub(crate) async fn serve_with_policy(
-    config: &Config,
+/// What the `ready` callback of [`serve_all`] sees.
+pub(crate) struct Running<'a> {
+    pub(crate) dns: Vec<BoundListener>,
+    pub(crate) admin: Vec<SocketAddr>,
+    /// Only tests read it.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(crate) policy: &'a Policy,
+    /// Only tests read it.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(crate) refresher: &'a Arc<Refresher>,
+}
+
+/// The started parts. [`Parts::stop`] stops the parts that are there, in the reverse order
+/// of the start.
+#[derive(Default)]
+struct Parts {
+    refresher: Option<Arc<Refresher>>,
+    policy: Option<Policy>,
+    server: Option<Arc<DnsServer>>,
+    admin: Option<AdminServer>,
+    sync: Option<(CancellationToken, tokio::task::JoinHandle<()>)>,
+}
+
+impl Parts {
+    async fn stop(self) {
+        if let Some((cancel, task)) = self.sync {
+            cancel.cancel();
+            if tokio::time::timeout(Duration::from_secs(2), task)
+                .await
+                .is_err()
+            {
+                tracing::warn!("the identity sync task did not stop in time");
+            }
+        }
+        if let Some(admin) = &self.admin
+            && !admin.shutdown(ADMIN_STOP).await
+        {
+            tracing::warn!("admin connections did not end in time");
+        }
+        if let Some(r) = &self.refresher
+            && !r.shutdown(LISTS_STOP).await
+        {
+            tracing::warn!("list refresher tasks did not stop in time");
+        }
+        if let Some(s) = &self.server {
+            s.shutdown(SHUTDOWN_GRACE).await;
+        }
+        if let Some(p) = &self.policy
+            && !p.identity.shutdown(SHUTDOWN_GRACE).await
+        {
+            tracing::warn!("client identity tasks did not stop in time");
+        }
+    }
+}
+
+/// Starts all parts, gives them to `ready`, waits for `stop`, then stops all parts. Each
+/// exit path stops every part that started.
+pub(crate) async fn serve_all(
+    store: Arc<ConfigStore>,
     settings: DnsSettings,
     base: ServerDeps,
-    loader: &dyn EngineLoader,
-    neighbors: Arc<dyn NeighborSource>,
+    env: RunEnv,
     stop: impl Future<Output = ()>,
-    ready: impl FnOnce(Vec<BoundListener>, &Policy),
+    ready: impl FnOnce(&Running<'_>),
 ) -> anyhow::Result<()> {
-    let policy = Policy::start(config, &settings, loader, neighbors)?;
+    let mut parts = Parts::default();
+    let result = start_parts(&mut parts, &store, settings, base, env).await;
+    if let Err(e) = result {
+        parts.stop().await;
+        return Err(e);
+    }
+    if let (Some(policy), Some(refresher), Some(server)) =
+        (&parts.policy, &parts.refresher, &parts.server)
+    {
+        tracing::info!("rusthole is running");
+        ready(&Running {
+            dns: server.bound(),
+            admin: parts
+                .admin
+                .as_ref()
+                .map_or_else(Vec::new, |a| a.bound().to_vec()),
+            policy,
+            refresher,
+        });
+    }
+    stop.await;
+    tracing::info!("stop signal received; stopping");
+    parts.stop().await;
+    Ok(())
+}
+
+async fn start_parts(
+    parts: &mut Parts,
+    store: &Arc<ConfigStore>,
+    settings: DnsSettings,
+    base: ServerDeps,
+    env: RunEnv,
+) -> anyhow::Result<()> {
+    let cfg = store.get();
+    let refresher = Arc::new(
+        Refresher::load(Arc::clone(&cfg), env.lists)
+            .await
+            .context("cannot load the lists")?,
+    );
+    parts.refresher = Some(Arc::clone(&refresher));
+    let policy = Policy::start(&cfg, &settings, refresher.engine().shared(), env.neighbors)?;
+    let filter = Arc::clone(&policy.filter);
+    let resolver = policy.identity.resolver();
+    parts.policy = Some(policy);
     let deps = ServerDeps {
-        filter: Arc::clone(&policy.filter) as Arc<dyn rusthole_dns::QueryFilter>,
+        filter: Arc::clone(&filter) as Arc<dyn rusthole_dns::QueryFilter>,
+        interfaces: Arc::clone(&env.interfaces),
         ..base
     };
-    let result = serve(settings, deps, stop, |bound| ready(bound, &policy)).await;
-    if !policy.identity.shutdown(SHUTDOWN_GRACE).await {
-        tracing::warn!("client identity tasks did not stop in time");
+    let server = Arc::new(
+        rusthole_dns::start(settings.clone(), deps)
+            .await
+            .context("cannot start the DNS server")?,
+    );
+    parts.server = Some(Arc::clone(&server));
+    refresher
+        .start(Arc::new(server.host_resolver()))
+        .context("cannot start the list downloads")?;
+    if let Some(stats) = &env.stats {
+        let cancel = CancellationToken::new();
+        let task = tokio::spawn(identity_sync(
+            stats.clone(),
+            Arc::clone(&resolver),
+            Arc::clone(&settings.local),
+            cancel.clone(),
+        ));
+        parts.sync = Some((cancel, task));
     }
-    result
+    if cfg.server.admin.enabled {
+        let live = Arc::new(BinLive {
+            server: Arc::clone(&server),
+            resolver,
+            current: Mutex::new(settings),
+            rule_ids: env.rule_ids.clone(),
+        });
+        let admin = start_admin(
+            store,
+            &cfg,
+            &env.interfaces,
+            env.admin_listen,
+            env.stats,
+            &refresher,
+            &filter,
+            live,
+            &server,
+            env.config_path,
+        )
+        .await?;
+        parts.admin = Some(admin);
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)] // The wiring of one listener; a struct would only rename the list.
+async fn start_admin(
+    store: &Arc<ConfigStore>,
+    cfg: &Config,
+    interfaces: &Arc<dyn InterfaceSource>,
+    listen: Option<Vec<SocketAddr>>,
+    stats: Option<rusthole_store::Stats>,
+    refresher: &Arc<Refresher>,
+    filter: &Arc<PolicyFilter>,
+    live: Arc<BinLive>,
+    server: &Arc<DnsServer>,
+    config_path: String,
+) -> anyhow::Result<AdminServer> {
+    let local_ips: Vec<IpAddr> = interfaces
+        .scan()
+        .unwrap_or_default()
+        .iter()
+        .map(|n| IpAddr::V4(n.addr))
+        .collect();
+    let tls_settings = rusthole_tls::TlsSettings::from_config(cfg);
+    let open = tokio::task::spawn_blocking(move || {
+        rusthole_tls::CertStore::open(tls_settings, &local_ips, rusthole_tls::now_unix())
+    });
+    let (certs, _notices) = tokio::time::timeout(Duration::from_secs(60), open)
+        .await
+        .context("the TLS certificate setup timed out")?
+        .context("the TLS certificate task failed")?
+        .context("cannot set up the TLS certificate of the admin listener")?;
+    let tls = rusthole_tls::admin_server_config(&certs).context("cannot make the TLS config")?;
+    let listen = match listen {
+        Some(l) => l,
+        None => rusthole_web::listen_addrs(cfg, interfaces.as_ref())
+            .context("cannot find the admin listen addresses")?,
+    };
+    let mut listeners: Vec<(String, SocketAddr)> = server
+        .bound()
+        .iter()
+        .map(|b| ("dns".to_owned(), b.udp))
+        .collect();
+    listeners.extend(listen.iter().map(|a| ("admin".to_owned(), *a)));
+    let deps = AdminDeps {
+        config: Arc::clone(store),
+        clock: Arc::new(rusthole_web::clock::SystemClock::new()),
+        stats,
+        lists: Some(Arc::clone(refresher)),
+        engine: Arc::clone(filter.engine()),
+        blocking: Arc::clone(filter.blocking()),
+        live,
+        tls: Some(certs),
+        system: SystemStatic {
+            version: env!("CARGO_PKG_VERSION").to_owned(),
+            commit: option_env!("RUSTHOLE_COMMIT").map(str::to_owned),
+            started_at: rusthole_store::wall_now(),
+            config_path,
+            data_dir: cfg.server.data_dir.clone(),
+            listeners,
+        },
+        interfaces: Arc::clone(interfaces),
+        assets: Arc::new(rusthole_web::assets::EmbeddedAssets),
+    };
+    let app = AppState::new(deps);
+    rusthole_web::start(AdminSettings::new(listen), tls, app)
+        .await
+        .context("cannot start the admin listener")
+}
+
+/// Applies a config change of the API to the DNS server, the client identity and the
+/// statistics reason map. The web crate applies the list refresher (lists, rules, groups,
+/// blocking mode: one engine build).
+struct BinLive {
+    server: Arc<DnsServer>,
+    resolver: Arc<rusthole_dns::ClientResolver>,
+    current: Mutex<DnsSettings>,
+    rule_ids: RuleIds,
+}
+
+impl std::fmt::Debug for BinLive {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BinLive").finish_non_exhaustive()
+    }
+}
+
+impl LiveApply for BinLive {
+    fn apply(&self, _old: &Config, new: &Arc<Config>) -> bool {
+        self.rule_ids.set(new);
+        let (settings, warnings) = match DnsSettings::from_config(new) {
+            Ok(s) => s,
+            Err(e) => {
+                tracing::error!(error = %e, "the new config has no usable DNS settings; a restart is needed");
+                return true;
+            }
+        };
+        for w in &warnings {
+            tracing::warn!("{w}");
+        }
+        let (table, issues) = ClientTable::from_config(new);
+        for issue in &issues {
+            tracing::warn!("clients: {issue}");
+        }
+        let mut restart = !self.resolver.set_config(table, Arc::clone(&settings.local));
+        let Some(mut current) = self.current.try_lock_for(Duration::from_secs(2)) else {
+            tracing::error!("the live settings lock timed out; a restart is needed");
+            return true;
+        };
+        restart |= self.server.apply_live(&current, &settings);
+        *current = settings;
+        restart
+    }
+}
+
+/// Copies the MAC address and the local name of each client address into the statistics
+/// store, so that a client has its MAC as key (docs/API.md section 5.6). A service loop
+/// until the stop.
+async fn identity_sync(
+    stats: rusthole_store::Stats,
+    resolver: Arc<rusthole_dns::ClientResolver>,
+    zone: Arc<rusthole_core::localdns::LocalZone>,
+    cancel: CancellationToken,
+) {
+    loop {
+        tokio::select! {
+            () = cancel.cancelled() => break,
+            () = tokio::time::sleep(IDENTITY_SYNC) => {}
+        }
+        let s = stats.clone();
+        let r = Arc::clone(&resolver);
+        let z = Arc::clone(&zone);
+        let task = tokio::task::spawn_blocking(move || sync_once(&s, &r, &z));
+        if tokio::time::timeout(Duration::from_secs(30), task)
+            .await
+            .is_err()
+        {
+            tracing::warn!("the client identity sync timed out");
+        }
+    }
+}
+
+fn sync_once(
+    stats: &rusthole_store::Stats,
+    resolver: &rusthole_dns::ClientResolver,
+    zone: &rusthole_core::localdns::LocalZone,
+) {
+    let Ok(index) = stats.clients_index() else {
+        return;
+    };
+    for meta in index.all().take(IDENTITY_SYNC_MAX) {
+        let mac = resolver.neighbors().get_ip(meta.ip).map(|m| m.to_string());
+        let name = zone
+            .names_of(meta.ip)
+            .first()
+            .cloned()
+            .or_else(|| resolver.hostname_of(meta.ip))
+            .map(|n| n.as_str().to_owned());
+        if mac.is_none() && name.is_none() {
+            continue;
+        }
+        if mac == meta.mac && name == meta.name {
+            continue;
+        }
+        let identity = rusthole_store::Identity {
+            mac: mac.or_else(|| meta.mac.clone()),
+            name: name.or_else(|| meta.name.clone()),
+        };
+        if let Err(e) = stats.set_client_identity(meta.ip, identity) {
+            tracing::debug!(error = %e, "cannot record a client identity");
+            return;
+        }
+    }
 }
 
 /// Waits for SIGTERM or SIGINT (Unix), or Ctrl+C (all systems).
@@ -209,238 +528,4 @@ async fn stop_signal() {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-    use std::sync::Arc;
-
-    use hickory_proto::op::{Message, MessageType, OpCode, Query};
-    use hickory_proto::rr::rdata::A;
-    use hickory_proto::rr::{Name, RData, RecordType};
-    use rusthole_core::config::{Adlist, ListKind, LocalRecord, RecordType as CfgType};
-    use rusthole_dns::{
-        ListenMode, StaticInterfaces, StaticNeighbors, UpstreamProto, UpstreamServer,
-    };
-    use tokio::net::{TcpListener, UdpSocket};
-
-    use super::*;
-
-    /// Settings for 127.0.0.1 only, with a loopback upstream: no test query leaves the host.
-    fn test_settings(port: u16) -> DnsSettings {
-        let (mut s, _) = DnsSettings::from_config(&Config::default()).unwrap();
-        s.listen = ListenMode::Addrs(vec![IpAddr::V4(Ipv4Addr::LOCALHOST)]);
-        s.port = port;
-        s.pool.servers = vec![UpstreamServer {
-            addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9),
-            proto: UpstreamProto::Udp,
-        }];
-        s
-    }
-
-    fn test_deps() -> ServerDeps {
-        ServerDeps {
-            interfaces: Arc::new(StaticInterfaces::default()),
-            ..ServerDeps::default()
-        }
-    }
-
-    /// A query with opcode STATUS (2). The server answers REFUSED at once, with no upstream.
-    const STATUS_QUERY: [u8; 12] = [0x12, 0x34, 0x10, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    /// True when the server at `addr` answers [`STATUS_QUERY`].
-    async fn answers(addr: SocketAddr) -> bool {
-        let sock = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();
-        sock.send_to(&STATUS_QUERY, addr).await.unwrap();
-        let mut buf = [0u8; 512];
-        // On Windows, an ICMP "port unreachable" gives an error here; that is "no answer".
-        matches!(
-            tokio::time::timeout(Duration::from_secs(2), sock.recv_from(&mut buf)).await,
-            Ok(Ok((n, _))) if n >= 12 && buf[..2] == STATUS_QUERY[..2]
-        )
-    }
-
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn serve_stops_all_tasks_on_the_stop_signal() {
-        let (stop_tx, stop_rx) = tokio::sync::oneshot::channel::<()>();
-        let (ready_tx, ready_rx) = tokio::sync::oneshot::channel::<Vec<BoundListener>>();
-        let task = tokio::spawn(serve(
-            test_settings(0),
-            test_deps(),
-            async move {
-                let _ = stop_rx.await;
-            },
-            move |bound| {
-                let _ = ready_tx.send(bound);
-            },
-        ));
-        let bound = tokio::time::timeout(Duration::from_secs(10), ready_rx)
-            .await
-            .unwrap()
-            .unwrap();
-        let [listener] = bound[..] else {
-            panic!("one listener expected: {bound:?}");
-        };
-        // The server answers while it runs.
-        assert!(answers(listener.udp).await);
-        stop_tx.send(()).unwrap();
-        tokio::time::timeout(Duration::from_secs(10), task)
-            .await
-            .unwrap()
-            .unwrap()
-            .unwrap();
-        // All sockets are closed after the stop.
-        assert!(!answers(listener.udp).await);
-        assert!(UdpSocket::bind(listener.udp).await.is_ok());
-        assert!(TcpListener::bind(listener.tcp).await.is_ok());
-    }
-
-    /// A config with list 1 on disk (it blocks `blocked.example`) and a local record.
-    fn policy_config(data_dir: &Path) -> Config {
-        let mut cfg = Config::default();
-        cfg.server.data_dir = data_dir.display().to_string();
-        cfg.lists.adlists = vec![Adlist {
-            id: 1,
-            url: "https://lists.example/hosts.txt".to_owned(),
-            kind: ListKind::Block,
-            enabled: true,
-            groups: vec!["default".to_owned()],
-            comment: None,
-        }];
-        cfg.local_dns.records = vec![LocalRecord {
-            name: "nas.lan".to_owned(),
-            record_type: CfgType::A,
-            value: "192.0.2.10".to_owned(),
-        }];
-        let lists = data_dir.join("lists");
-        std::fs::create_dir_all(&lists).unwrap();
-        std::fs::write(lists.join("1.txt"), "0.0.0.0 blocked.example\n").unwrap();
-        cfg
-    }
-
-    fn settings_for(cfg: &Config, port: u16) -> DnsSettings {
-        let (mut s, _) = DnsSettings::from_config(cfg).unwrap();
-        s.listen = ListenMode::Addrs(vec![IpAddr::V4(Ipv4Addr::LOCALHOST)]);
-        s.port = port;
-        s.pool.servers = vec![UpstreamServer {
-            addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 9),
-            proto: UpstreamProto::Udp,
-        }];
-        s
-    }
-
-    async fn ask(addr: SocketAddr, name: &str) -> Message {
-        let mut m = Message::new(77, MessageType::Query, OpCode::Query);
-        m.add_query(Query::query(Name::from_ascii(name).unwrap(), RecordType::A));
-        let sock = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();
-        sock.send_to(&m.to_vec().unwrap(), addr).await.unwrap();
-        let mut buf = [0u8; 1500];
-        let (n, _) = tokio::time::timeout(Duration::from_secs(3), sock.recv_from(&mut buf))
-            .await
-            .unwrap()
-            .unwrap();
-        Message::from_vec(&buf[..n]).unwrap()
-    }
-
-    /// Waits until only the test holds `src`: the neighbor task ended and dropped its copy.
-    async fn released(src: &Arc<StaticNeighbors>) -> bool {
-        for _ in 0..500 {
-            if Arc::strong_count(src) == 1 {
-                return true;
-            }
-            tokio::time::sleep(Duration::from_millis(10)).await;
-        }
-        false
-    }
-
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn run_blocks_a_listed_name_and_answers_a_local_record() {
-        let dir = tempfile::tempdir().unwrap();
-        let cfg = policy_config(dir.path());
-        let src = Arc::new(StaticNeighbors::default());
-        let (stop_tx, stop_rx) = tokio::sync::oneshot::channel::<()>();
-        let (ready_tx, ready_rx) =
-            tokio::sync::oneshot::channel::<(Vec<BoundListener>, Arc<IdentityService>)>();
-        let loader = DiskLists::for_config(&cfg);
-        let settings = settings_for(&cfg, 0);
-        let neighbors: Arc<dyn NeighborSource> = src.clone();
-        let task = tokio::spawn(async move {
-            serve_with_policy(
-                &cfg,
-                settings,
-                test_deps(),
-                &loader,
-                neighbors,
-                async move {
-                    let _ = stop_rx.await;
-                },
-                move |bound, policy| {
-                    assert!(policy.filter().blocking().is_blocking());
-                    let _ = ready_tx.send((bound, Arc::clone(policy.identity())));
-                },
-            )
-            .await
-        });
-        let (bound, identity) = tokio::time::timeout(Duration::from_secs(10), ready_rx)
-            .await
-            .unwrap()
-            .unwrap();
-        let addr = bound[0].udp;
-        let m = ask(addr, "blocked.example.").await;
-        assert_eq!(m.answers[0].data, RData::A(A(Ipv4Addr::UNSPECIFIED)));
-        let m = ask(addr, "nas.lan.").await;
-        assert!(m.metadata.authoritative);
-        assert_eq!(m.answers[0].data, RData::A(A(Ipv4Addr::new(192, 0, 2, 10))));
-        assert_eq!(identity.task_count(), 1);
-
-        stop_tx.send(()).unwrap();
-        tokio::time::timeout(Duration::from_secs(10), task)
-            .await
-            .unwrap()
-            .unwrap()
-            .unwrap();
-        // Shutdown stopped every task: the server, the neighbor task.
-        assert_eq!(identity.task_count(), 0);
-        assert!(released(&src).await);
-        assert!(UdpSocket::bind(bound[0].udp).await.is_ok());
-    }
-
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn a_start_error_stops_the_policy_tasks() {
-        let dir = tempfile::tempdir().unwrap();
-        let cfg = policy_config(dir.path());
-        let blocker = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();
-        let port = blocker.local_addr().unwrap().port();
-        let src = Arc::new(StaticNeighbors::default());
-        let neighbors: Arc<dyn NeighborSource> = src.clone();
-        let err = serve_with_policy(
-            &cfg,
-            settings_for(&cfg, port),
-            test_deps(),
-            &DiskLists::for_config(&cfg),
-            neighbors,
-            std::future::pending(),
-            |_, _| panic!("the server must not start"),
-        )
-        .await
-        .unwrap_err();
-        assert!(format!("{err:#}").contains("cannot listen"), "{err:#}");
-        assert!(released(&src).await);
-        drop(blocker);
-    }
-
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn serve_returns_the_start_error() {
-        // The port is busy while the blocker lives, so the bind fails.
-        let blocker = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();
-        let port = blocker.local_addr().unwrap().port();
-        let err = serve(
-            test_settings(port),
-            test_deps(),
-            std::future::pending(),
-            |_| panic!("the server must not start"),
-        )
-        .await
-        .unwrap_err();
-        assert!(format!("{err:#}").contains("cannot listen"), "{err:#}");
-        drop(blocker);
-    }
-}
+mod tests;

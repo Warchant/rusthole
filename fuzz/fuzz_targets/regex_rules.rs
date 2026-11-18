@@ -25,6 +25,9 @@ fuzz_target!(|data: &[u8]| {
             }
         }
         config.rules.push(Rule {
+            id: None,
+            created_at: None,
+            updated_at: None,
             kind: RuleKind::Regex,
             action: if i % 2 == 0 {
                 RuleAction::Deny

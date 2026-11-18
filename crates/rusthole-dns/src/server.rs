@@ -473,6 +473,8 @@ struct Shared {
     tcp: TcpAdmission,
     doh: Option<Arc<DohService>>,
     wall_clock: Arc<dyn WallClock>,
+    /// The extra allowed networks (`acl.allow`). A config change can replace them.
+    acl_allow: Mutex<Vec<Cidr>>,
 }
 
 /// A running DNS server. Dropping it stops all tasks without a wait; prefer
@@ -521,6 +523,7 @@ pub async fn start(settings: DnsSettings, deps: ServerDeps) -> Result<DnsServer,
         Vec::new()
     };
     let acl = Acl::build(settings.acl_auto_local, &nets, &settings.acl_allow);
+    let settings_acl_allow = settings.acl_allow.clone();
     let handler = Arc::new(
         Handler::new(&settings.handler, acl, deps.filter, deps.observer, clock)
             .with_local_zone(Arc::clone(&settings.local)),
@@ -557,6 +560,7 @@ pub async fn start(settings: DnsSettings, deps: ServerDeps) -> Result<DnsServer,
         tcp,
         doh,
         wall_clock: deps.wall_clock,
+        acl_allow: Mutex::new(settings_acl_allow),
     });
     // From here, each error path stops the tasks through `server`.
     let server = DnsServer {
@@ -667,6 +671,43 @@ impl DnsServer {
     /// cache). The list refresher uses it for its downloads (part P3b).
     pub fn host_resolver(&self) -> HostResolver {
         HostResolver::new(self.shared.pool.clone(), self.shared.root.clone())
+    }
+
+    /// Applies the parts of new settings that can change while the server runs (part P5):
+    /// cache and TTL rules, the rate limit, local DNS data and the extra ACL networks.
+    /// `old` is the settings that are in use now. Returns true when other parts changed
+    /// (listeners, upstreams, limits): they need a restart.
+    pub fn apply_live(&self, old: &DnsSettings, new: &DnsSettings) -> bool {
+        self.shared
+            .handler
+            .apply_settings(&old.handler, &new.handler);
+        self.shared.handler.set_local_zone(Arc::clone(&new.local));
+        if let Some(mut a) = self.shared.acl_allow.try_lock_for(LOCK_TIMEOUT) {
+            a.clone_from(&new.acl_allow);
+        } else {
+            tracing::error!("the ACL lock timed out; the new acl.allow is not used");
+        }
+        let nets = if self.shared.settings.acl_auto_local {
+            match self.shared.interfaces.scan() {
+                Ok(n) => n,
+                Err(e) => {
+                    tracing::warn!(error = %e, "cannot read the network interfaces; the ACL uses loopback and acl.allow only");
+                    Vec::new()
+                }
+            }
+        } else {
+            Vec::new()
+        };
+        self.shared.handler.set_acl(Acl::build(
+            self.shared.settings.acl_auto_local,
+            &nets,
+            &new.acl_allow,
+        ));
+        old.listen != new.listen
+            || old.port != new.port
+            || old.acl_auto_local != new.acl_auto_local
+            || old.pool != new.pool
+            || old.tcp != new.tcp
     }
 
     /// Scans the interfaces now: updates the ACL and (with `auto`) the listeners.
@@ -903,11 +944,12 @@ impl Shared {
                 return;
             }
         };
-        self.handler.set_acl(Acl::build(
-            self.settings.acl_auto_local,
-            &nets,
-            &self.settings.acl_allow,
-        ));
+        let Some(allow) = self.acl_allow.try_lock_for(LOCK_TIMEOUT).map(|a| a.clone()) else {
+            tracing::error!("the ACL lock timed out; keeping the old ACL");
+            return;
+        };
+        self.handler
+            .set_acl(Acl::build(self.settings.acl_auto_local, &nets, &allow));
         self.warn_public(&nets);
         self.rescan_doh(&nets).await;
         if self.settings.listen != ListenMode::Auto || self.root.is_cancelled() {

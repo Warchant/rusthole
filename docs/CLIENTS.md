@@ -252,7 +252,7 @@ NXDOMAIN for a private reverse name.
 flowchart LR
     cfg[config] --> zone[LocalZone]
     cfg --> table[ClientTable]
-    cfg --> loader["EngineLoader<br/>(DiskLists)"] --> engine[PolicyEngine]
+    cfg --> loader["Refresher::load<br/>(list disk cache, P3b)"] --> engine[PolicyEngine]
     src[SystemNeighbors] --> idsvc["IdentityService<br/>neighbor task, PTR task"]
     table --> idsvc
     zone --> idsvc
@@ -263,10 +263,11 @@ flowchart LR
     zone --> dns
 ```
 
-- `DiskLists` builds the first engine from the list files that are on disk already:
-  `<data_dir>/lists/<id>.txt` (the disk cache layout of part P3b). A missing file is logged
-  and skipped; with no file the engine has the rules only. It downloads nothing. Part P3b
-  replaces it with the list refresher.
+- The list refresher (part P3b) builds the first engine from its disk cache
+  (`<data_dir>/lists/<id>.txt` with its metadata file); it downloads nothing at load. The
+  filter gets `Refresher::engine()`, and each later build swaps in a new engine. After the
+  DNS server starts, `Refresher::start` starts the downloads with the upstream pool as the
+  name lookup (part P5 wires this in `rusthole run`).
 - Each build gets a new hash seed from the OS random source (`getrandom`). No build uses a
   fixed seed (tests only).
 - Shutdown: the DNS server stops first, then the identity tasks. A start error of the

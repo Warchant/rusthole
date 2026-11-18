@@ -35,6 +35,7 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 use std::time::Instant;
 
+use arc_swap::ArcSwap;
 use hickory_proto::op::{Message, ResponseCode};
 use parking_lot::Mutex;
 use rusthole_core::acl::Acl;
@@ -157,11 +158,11 @@ pub struct Handler {
     acl: SharedAcl,
     limiter: Mutex<RateLimiter>,
     cache: Mutex<Cache<Arc<Message>>>,
-    ttl: TtlPolicy,
+    ttl: ArcSwap<TtlPolicy>,
     filter: Arc<dyn QueryFilter>,
     observer: Arc<dyn QueryObserver>,
     clock: Clock,
-    local: Arc<LocalZone>,
+    local: ArcSwap<LocalZone>,
 }
 
 impl Handler {
@@ -181,11 +182,11 @@ impl Handler {
                 settings.rate_max_clients,
             )),
             cache: Mutex::new(Cache::new(settings.cache_entries)),
-            ttl: settings.ttl,
+            ttl: ArcSwap::from_pointee(settings.ttl),
             filter,
             observer,
             clock,
-            local: Arc::new(LocalZone::default()),
+            local: ArcSwap::from_pointee(LocalZone::default()),
         }
     }
 
@@ -193,8 +194,45 @@ impl Handler {
     /// the pipeline has no local data.
     #[must_use]
     pub fn with_local_zone(mut self, zone: Arc<LocalZone>) -> Self {
-        self.local = zone;
+        self.local = ArcSwap::new(zone);
         self
+    }
+
+    /// Uses new local DNS data (a config change, part P5).
+    pub fn set_local_zone(&self, zone: Arc<LocalZone>) {
+        self.local.store(zone);
+    }
+
+    /// Uses new cache and rate limit settings (a config change, part P5). A new cache size
+    /// empties the cache; new rate limit values reset the rate limiter.
+    pub fn apply_settings(&self, old: &HandlerSettings, new: &HandlerSettings) {
+        self.ttl.store(Arc::new(new.ttl));
+        if old.cache_entries != new.cache_entries {
+            if let Some(mut c) = self.cache.try_lock_for(LOCK_TIMEOUT) {
+                *c = Cache::new(new.cache_entries);
+            } else {
+                tracing::error!("the cache lock timed out; the new cache size is not used");
+            }
+        }
+        if (
+            old.rate_queries,
+            old.rate_interval_seconds,
+            old.rate_max_clients,
+        ) != (
+            new.rate_queries,
+            new.rate_interval_seconds,
+            new.rate_max_clients,
+        ) {
+            if let Some(mut l) = self.limiter.try_lock_for(LOCK_TIMEOUT) {
+                *l = RateLimiter::new(
+                    new.rate_queries,
+                    new.rate_interval_seconds,
+                    new.rate_max_clients,
+                );
+            } else {
+                tracing::error!("the rate limiter lock timed out; the new limit is not used");
+            }
+        }
     }
 
     /// Replaces the ACL (after an interface scan).
@@ -320,11 +358,11 @@ impl Handler {
     fn local_step(&self, pending: &mut Pending) -> Option<Reply> {
         let local = match &pending.ctx.domain {
             Some(name) if pending.ctx.qclass == local::LOCAL_CLASS => {
-                self.local.lookup(name, pending.ctx.qtype)
+                self.local.load().lookup(name, pending.ctx.qtype)
             }
             _ => {
                 let labels: Vec<&[u8]> = pending.req.query.name().iter().collect();
-                self.local.lookup_reverse_zone(&labels)
+                self.local.load().lookup_reverse_zone(&labels)
             }
         };
         let msg = match local {
@@ -355,7 +393,7 @@ impl Handler {
     ) -> Reply {
         match outcome {
             Ok(UpstreamAnswer { message, upstream }) => {
-                match wire::prepare_for_cache(message, &self.ttl) {
+                match wire::prepare_for_cache(message, &self.ttl.load()) {
                     Ok(c) => {
                         let msg = Arc::new(c.message);
                         if let Some(mut cache) = self.cache.try_lock_for(LOCK_TIMEOUT) {

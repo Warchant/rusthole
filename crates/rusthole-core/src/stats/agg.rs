@@ -22,6 +22,17 @@ pub const DEFAULT_MAX_KEYS: usize = 100_000;
 pub const MIN_MAX_KEYS: usize = 64;
 /// The largest number of 10-minute buckets in RAM (a little more than 24 hours).
 pub const MAX_TIMELINE_BUCKETS: usize = 160;
+/// The bound on the (10-minute bucket, client, name) keys in RAM. These keys give the 24 h
+/// timeline with a client or name filter (docs/API.md section 5.2). At the bound, the
+/// oldest 10-minute bucket goes out.
+pub const MAX_PAIR_TIMELINE_KEYS: usize = 100_000;
+
+/// The counts of each (client, name) in one 10-minute bucket.
+pub type PairBucket = HashMap<IpAddr, HashMap<Box<str>, Counts>>;
+
+fn pair_bucket_keys(b: &PairBucket) -> usize {
+    b.values().map(HashMap::len).sum()
+}
 
 /// All counters of one UTC hour.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -142,12 +153,14 @@ pub struct Snapshot {
     pub hours: BTreeMap<i64, HourBucket>,
     /// 10-minute buckets by bucket number (Unix seconds / 600).
     pub timeline: BTreeMap<i64, Counts>,
+    /// 10-minute buckets of each (client, name), by bucket number.
+    pub pair_timeline: BTreeMap<i64, PairBucket>,
 }
 
 impl Snapshot {
     /// True when the snapshot has no data.
     pub fn is_empty(&self) -> bool {
-        self.hours.is_empty() && self.timeline.is_empty()
+        self.hours.is_empty() && self.timeline.is_empty() && self.pair_timeline.is_empty()
     }
 
     /// The number of events in the hour buckets.
@@ -164,6 +177,8 @@ impl Snapshot {
 pub struct Aggregator {
     hours: BTreeMap<i64, HourBucket>,
     timeline: BTreeMap<i64, Counts>,
+    pair_timeline: BTreeMap<i64, PairBucket>,
+    pair_keys: usize,
     keys: usize,
     max_keys: usize,
     evicted_buckets: u64,
@@ -182,6 +197,8 @@ impl Aggregator {
         Self {
             hours: BTreeMap::new(),
             timeline: BTreeMap::new(),
+            pair_timeline: BTreeMap::new(),
+            pair_keys: 0,
             keys: 0,
             max_keys: max_keys.max(MIN_MAX_KEYS),
             evicted_buckets: 0,
@@ -201,12 +218,35 @@ impl Aggregator {
 
     /// True when the keys use 3/4 of the bound or more. Then the store flushes early.
     pub fn near_full(&self) -> bool {
-        self.keys >= self.max_keys / 4 * 3
+        self.keys >= self.max_keys / 4 * 3 || self.pair_keys >= MAX_PAIR_TIMELINE_KEYS / 4 * 3
     }
 
     /// True when there is no data.
     pub fn is_empty(&self) -> bool {
-        self.hours.is_empty() && self.timeline.is_empty()
+        self.hours.is_empty() && self.timeline.is_empty() && self.pair_timeline.is_empty()
+    }
+
+    /// The number of (10-minute bucket, client, name) keys now.
+    pub fn pair_keys(&self) -> usize {
+        self.pair_keys
+    }
+
+    /// Drops the oldest 10-minute pair buckets until both bounds hold. Each step drops one
+    /// bucket, so the loop has at most `pair_timeline.len() + 1` steps.
+    fn bound_pair_timeline(&mut self) {
+        for _ in 0..=self.pair_timeline.len() {
+            if self.pair_timeline.len() <= MAX_TIMELINE_BUCKETS
+                && self.pair_keys <= MAX_PAIR_TIMELINE_KEYS
+            {
+                break;
+            }
+            match self.pair_timeline.pop_first() {
+                Some((_, b)) => {
+                    self.pair_keys = self.pair_keys.saturating_sub(pair_bucket_keys(&b));
+                }
+                None => break,
+            }
+        }
     }
 
     /// The number of hour buckets that were evicted.
@@ -256,14 +296,31 @@ impl Aggregator {
         while self.timeline.len() > MAX_TIMELINE_BUCKETS {
             self.timeline.pop_first();
         }
+        let names = self
+            .pair_timeline
+            .entry(ten_minutes_of(ev.at))
+            .or_default()
+            .entry(ev.client)
+            .or_default();
+        if let Some(c) = names.get_mut(ev.name.as_str()) {
+            c.add_status(ev.status);
+        } else {
+            let mut c = Counts::default();
+            c.add_status(ev.status);
+            names.insert(ev.name.as_str().into(), c);
+            self.pair_keys = self.pair_keys.saturating_add(1);
+        }
+        self.bound_pair_timeline();
     }
 
     /// Takes all data out of RAM for a flush.
     pub fn take(&mut self) -> Snapshot {
         self.keys = 0;
+        self.pair_keys = 0;
         Snapshot {
             hours: std::mem::take(&mut self.hours),
             timeline: std::mem::take(&mut self.timeline),
+            pair_timeline: std::mem::take(&mut self.pair_timeline),
         }
     }
 
@@ -284,6 +341,17 @@ impl Aggregator {
         while self.timeline.len() > MAX_TIMELINE_BUCKETS {
             self.timeline.pop_first();
         }
+        for (k, bucket) in snap.pair_timeline {
+            let mine = self.pair_timeline.entry(k).or_default();
+            for (client, names) in bucket {
+                let m = mine.entry(client).or_default();
+                for (name, c) in names {
+                    m.entry(name).or_default().add(&c);
+                }
+            }
+        }
+        self.pair_keys = self.pair_timeline.values().map(pair_bucket_keys).sum();
+        self.bound_pair_timeline();
         self.keys = self.hours.values().map(HourBucket::keys).sum();
         for _ in 0..=self.hours.len() {
             if self.keys <= self.max_keys || !self.evict_oldest() {
@@ -304,6 +372,9 @@ impl Aggregator {
         }
         let kept = self.timeline.split_off(&first_hour.saturating_mul(6));
         self.timeline = kept;
+        let kept = self.pair_timeline.split_off(&first_hour.saturating_mul(6));
+        self.pair_timeline = kept;
+        self.pair_keys = self.pair_timeline.values().map(pair_bucket_keys).sum();
         n
     }
 
@@ -386,6 +457,29 @@ impl Aggregator {
         out
     }
 
+    /// The 10-minute counts of the pairs in the filter. The filter bounds
+    /// (`from_hour`, `to_hour`) are 10-minute bucket numbers here.
+    pub fn pair_timeline(&self, f: &Filter) -> TimelineMap {
+        let mut out = TimelineMap::new();
+        for (&bucket, b) in self.pair_timeline.range(f.span()) {
+            let mut c = Counts::default();
+            for (client, names) in b {
+                if !f.matches_client(*client) {
+                    continue;
+                }
+                for (name, counts) in names {
+                    if f.matches_name(name) {
+                        c.add(counts);
+                    }
+                }
+            }
+            if c.total > 0 {
+                out.entry(bucket).or_default().add(&c);
+            }
+        }
+        out
+    }
+
     /// 10-minute buckets `from..=to`.
     pub fn timeline(&self, from: i64, to: i64) -> TimelineMap {
         self.timeline
@@ -434,4 +528,61 @@ pub fn pairs_of(hours: &BTreeMap<i64, HourBucket>, f: &Filter) -> PairMap {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod pair_tests {
+    use std::net::Ipv4Addr;
+
+    use super::*;
+    use crate::stats::Status;
+    use crate::stats::query::NameFilter;
+
+    fn ev(at: i64, client: u8, name: &str) -> StatsEvent {
+        StatsEvent {
+            at,
+            client: IpAddr::V4(Ipv4Addr::new(192, 0, 2, client)),
+            name: name.to_owned(),
+            qtype: 1,
+            status: Status::Cached,
+            reason: None,
+            upstream: None,
+            duration_us: 1,
+        }
+    }
+
+    #[test]
+    fn pair_timeline_counts_and_filters() {
+        let mut a = Aggregator::default();
+        a.apply(&ev(6000, 1, "a.example"));
+        a.apply(&ev(6001, 1, "a.example"));
+        a.apply(&ev(6600, 2, "b.example"));
+        assert_eq!(a.pair_keys(), 2);
+        let mut f = Filter::hours(0, 100);
+        assert_eq!(
+            a.pair_timeline(&f).values().map(|c| c.total).sum::<u64>(),
+            3
+        );
+        f.name = Some(NameFilter::Exact("a.example".into()));
+        let m = a.pair_timeline(&f);
+        assert_eq!(m.get(&10).map(|c| c.total), Some(2));
+        assert_eq!(m.get(&11), None);
+        let snap = a.take();
+        assert_eq!(a.pair_keys(), 0);
+        a.restore(snap);
+        assert_eq!(a.pair_keys(), 2);
+    }
+
+    #[test]
+    fn pair_timeline_keeps_at_most_160_buckets() {
+        let mut a = Aggregator::default();
+        for i in 0..400 {
+            a.apply(&ev(i * 600, 1, "a.example"));
+            assert!(a.pair_timeline.len() <= MAX_TIMELINE_BUCKETS);
+            assert!(a.pair_keys() <= MAX_PAIR_TIMELINE_KEYS);
+        }
+        assert_eq!(a.pair_keys(), MAX_TIMELINE_BUCKETS);
+        // The newest buckets stay.
+        assert_eq!(a.pair_timeline.last_key_value().map(|(k, _)| *k), Some(399));
+    }
 }

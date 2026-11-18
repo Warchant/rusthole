@@ -9,6 +9,9 @@ fn d(s: &str) -> DomainName {
 
 fn rec(name: &str, t: RecordType, value: &str) -> LocalRecord {
     LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: name.to_owned(),
         record_type: t,
         value: value.to_owned(),
@@ -17,6 +20,9 @@ fn rec(name: &str, t: RecordType, value: &str) -> LocalRecord {
 
 fn cname(name: &str, target: &str, ttl: Option<u32>) -> LocalCname {
     LocalCname {
+        id: None,
+        enabled: true,
+        comment: None,
         name: name.to_owned(),
         target: target.to_owned(),
         ttl,
@@ -25,6 +31,8 @@ fn cname(name: &str, target: &str, ttl: Option<u32>) -> LocalCname {
 
 fn fwd(cidr: &str, server: &str, domain: Option<&str>) -> ConditionalForward {
     ConditionalForward {
+        id: None,
+        comment: None,
         enabled: true,
         cidr: cidr.to_owned(),
         server: server.to_owned(),

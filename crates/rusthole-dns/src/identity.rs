@@ -30,6 +30,7 @@ use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::Duration;
 
+use arc_swap::ArcSwap;
 use hickory_proto::op::{Query, ResponseCode};
 use hickory_proto::rr::{RData, RecordType};
 use parking_lot::Mutex;
@@ -122,8 +123,8 @@ struct PtrState {
 /// Finds the MAC address and the groups of a client. See the module documentation.
 #[derive(Debug)]
 pub struct ClientResolver {
-    table: ClientTable,
-    zone: Arc<LocalZone>,
+    table: ArcSwap<ClientTable>,
+    zone: ArcSwap<LocalZone>,
     neighbors: Arc<NeighborTable>,
     cache: Mutex<TtlLru<IpAddr, ClientInfo>>,
     ptr: Option<PtrState>,
@@ -149,14 +150,29 @@ impl ClientResolver {
             }
         });
         Self {
-            table,
-            zone,
+            table: ArcSwap::from_pointee(table),
+            zone: ArcSwap::new(zone),
             neighbors,
             cache: Mutex::new(TtlLru::new(settings.client_cache_entries)),
             ptr,
             settings,
             clock: Clock::new(),
         }
+    }
+
+    /// Uses a new client table and local zone after a config change (part P5), and clears
+    /// the client cache. Returns false when the new table has host-name clients but the
+    /// resolver has no PTR task: those clients need a restart.
+    pub fn set_config(&self, table: ClientTable, zone: Arc<LocalZone>) -> bool {
+        let needs_ptr = table.has_hostnames() && self.ptr.is_none();
+        self.table.store(Arc::new(table));
+        self.zone.store(zone);
+        if let Some(mut c) = self.cache.try_lock_for(LOCK_TIMEOUT) {
+            c.clear();
+        } else {
+            tracing::warn!("the client cache lock timed out; old client facts stay for up to 10 s");
+        }
+        !needs_ptr
     }
 
     /// The neighbor table that the resolver reads.
@@ -178,7 +194,8 @@ impl ClientResolver {
             mac,
             hostname: None,
         };
-        let mut resolved = self.table.resolve(&facts);
+        let table = self.table.load();
+        let mut resolved = table.resolve(&facts);
         let mut settled = true;
         let host;
         // A host name can only change the result when no IP or MAC entry matched.
@@ -188,7 +205,7 @@ impl ClientResolver {
             host = name;
             if host.is_some() {
                 facts.hostname = host.as_ref();
-                resolved = self.table.resolve(&facts);
+                resolved = table.resolve(&facts);
             }
         }
         let info = ClientInfo {
@@ -260,13 +277,13 @@ impl ClientResolver {
     /// time to live.
     async fn lookup_ptr(&self, ip: IpAddr) -> (PtrEntry, Duration) {
         let s = &self.settings;
-        if let Some(name) = self.zone.names_of(ip).first() {
+        if let Some(name) = self.zone.load().names_of(ip).first() {
             return (PtrEntry::Known(name.clone()), s.ptr_max_ttl);
         }
         let Some(rev) = reverse_name(ip) else {
             return (PtrEntry::Unknown, s.ptr_negative_ttl);
         };
-        let server = match self.zone.lookup(&rev, qtype::PTR) {
+        let server = match self.zone.load().lookup(&rev, qtype::PTR) {
             LocalAnswer::Answer(records) => {
                 let name = records.into_iter().find_map(|r| match r.data {
                     LocalData::Ptr(n) => Some(n),

@@ -22,6 +22,7 @@ fn d(s: &str) -> DomainName {
 
 fn group(name: &str, enabled: bool) -> Group {
     Group {
+        id: None,
         name: name.to_owned(),
         enabled,
         comment: None,
@@ -30,6 +31,7 @@ fn group(name: &str, enabled: bool) -> Group {
 
 fn client(id: &str, groups: &[&str]) -> Client {
     Client {
+        uid: None,
         id: id.to_owned(),
         groups: groups.iter().map(|g| (*g).to_owned()).collect(),
         comment: None,
@@ -38,6 +40,9 @@ fn client(id: &str, groups: &[&str]) -> Client {
 
 fn rule(kind: RuleKind, action: RuleAction, value: &str) -> Rule {
     Rule {
+        id: None,
+        created_at: None,
+        updated_at: None,
         kind,
         action,
         value: value.to_owned(),

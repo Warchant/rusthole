@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rusthole</title>
+<link rel="stylesheet" href="/placeholder.css">
+</head>
+<body>
+<main>
+<h1>rusthole</h1>
+<p>The admin API runs, but this binary has no web UI.</p>
+<p>To add the UI, build it with bun, then build rusthole again:</p>
+<pre>cd web
+bun install --frozen-lockfile
+bun run build
+cd ..
+cargo build --release</pre>
+<p>The REST API is at <code>/api/v1</code>. See docs/API.md.</p>
+</main>
+</body>
+</html>

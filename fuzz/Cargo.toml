@@ -14,6 +14,7 @@ rusthole-core = { path = "../crates/rusthole-core" }
 rusthole-import = { path = "../crates/rusthole-import" }
 rusthole-dns = { path = "../crates/rusthole-dns" }
 rusthole-tls = { path = "../crates/rusthole-tls" }
+rusthole-web = { path = "../crates/rusthole-web" }
 rustls-pki-types = "1.16"
 
 # Not a member of the main workspace: it needs nightly and libFuzzer.
@@ -118,8 +119,22 @@ doc = false
 bench = false
 
 [[bin]]
+name = "api_json"
+path = "fuzz_targets/api_json.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
 name = "dot_frames"
 path = "fuzz_targets/dot_frames.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "host_header"
+path = "fuzz_targets/host_header.rs"
 test = false
 doc = false
 bench = false

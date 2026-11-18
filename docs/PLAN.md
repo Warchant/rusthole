@@ -157,6 +157,11 @@ Open:
    `/mnt/d` and one fsync there can take seconds. `scripts/linux.sh` now gives test binaries
    a temp directory on `/dev/shm`. Not a product bug.
 3. IPv6 transport (A11): next version.
+4. POSTPONED (2026-11-18): flaky refresher test on Windows.
+   `a_build_that_took_too_long_blocks_the_next_build` (`crates/rusthole-lists/tests/refresher.rs`)
+   fails in a full `cargo test --workspace` run on Windows (the test file then takes about 20 s,
+   and one `wait_for` hits its 10 s limit). It passes alone and when only its test file runs
+   (about 2.6 s). Linux passes. The cause is not known yet. Fix it at the end of the project.
 
 ## 7. Assumptions
 

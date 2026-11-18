@@ -34,6 +34,8 @@ pub enum ClientTransport {
     Udp,
     /// DNS over TCP.
     Tcp,
+    /// DNS over HTTPS (part P7). The client address is the TCP peer address.
+    Https,
 }
 
 /// What the filter knows about a query.

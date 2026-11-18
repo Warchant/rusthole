@@ -217,6 +217,7 @@ fn settings(servers: Vec<UpstreamServer>) -> DnsSettings {
         handler: HandlerSettings::default(),
         pool: PoolSettings {
             servers,
+            fallback: Vec::new(),
             timeout: Duration::from_millis(300),
             max_attempts: 3,
             max_inflight: 64,
@@ -225,6 +226,9 @@ fn settings(servers: Vec<UpstreamServer>) -> DnsSettings {
         rescan_interval: Duration::from_secs(30),
         tcp: TcpLimits::default(),
         local: Arc::default(),
+        doh: None,
+        build_time_unix: rusthole_tls::MIN_BUILD_TIME_UNIX,
+        clock_check_interval: Duration::from_secs(60),
     }
 }
 
@@ -233,6 +237,7 @@ fn deps(interfaces: Arc<StaticInterfaces>) -> ServerDeps {
         interfaces,
         filter: Arc::new(AllowAll),
         observer: Arc::new(NoopObserver),
+        ..ServerDeps::default()
     }
 }
 

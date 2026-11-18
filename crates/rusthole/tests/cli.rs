@@ -140,10 +140,18 @@ fn run_refuses_a_bad_config_with_exit_code_1() {
     assert_eq!(o.status.code(), Some(1));
     assert!(stdout(&o).contains("server.dns_listen"), "{}", stdout(&o));
 
-    // Only a DoH upstream: this version cannot forward, so it does not start.
+    // The DoH listener with the default TLS mode (self-signed): DoH clients refuse such a
+    // certificate, so `run` stops before it binds a socket or writes a TLS file (part P7).
+    // Before part P7, this case was a config with only a DoH upstream; such a config is
+    // valid now, so `run` would start.
+    let data = dir.join("data");
     std::fs::write(
         &path,
-        "config_version = 1\n[[upstreams.servers]]\nurl = \"https://doh.example/dns-query\"\nbootstrap = [\"192.0.2.81\"]\n",
+        format!(
+            "config_version = 1\n[server]\ndata_dir = '{}'\ndns_listen = [\"127.0.0.1\"]\n\
+             [server.doh]\nenabled = true\nlisten = [\"127.0.0.1\"]\n",
+            data.display()
+        ),
     )
     .unwrap();
     let o = Command::new(env!("CARGO_BIN_EXE_rusthole"))
@@ -152,9 +160,7 @@ fn run_refuses_a_bad_config_with_exit_code_1() {
         .output()
         .unwrap();
     assert_eq!(o.status.code(), Some(1));
-    assert!(
-        String::from_utf8_lossy(&o.stderr).contains("no plain DNS upstream"),
-        "{}",
-        String::from_utf8_lossy(&o.stderr)
-    );
+    let err = String::from_utf8_lossy(&o.stderr);
+    assert!(err.contains("self-signed"), "{err}");
+    assert!(!data.join("tls").exists());
 }

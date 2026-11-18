@@ -52,10 +52,13 @@ pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode>
         .thread_name("rusthole")
         .build()
         .context("cannot start the async runtime")?;
+    // The DoH listener (part P7) needs its TLS config before the start.
+    let doh_tls = crate::doh::server_tls(&config)?;
     // The statistics store (part P4). It stops after the DNS server, with a final flush.
     let stats = crate::stats_observer::start(&config);
     let deps = ServerDeps {
         observer: crate::stats_observer::observer(stats.as_ref()),
+        doh_tls,
         ..ServerDeps::default()
     };
     let loader = DiskLists::for_config(&config);

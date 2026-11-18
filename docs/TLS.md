@@ -177,7 +177,8 @@ clock.
   the certificate starts at the build time. Thus a CA from the first start is still valid
   after NTP sets the clock.
 - Part P7 uses `clock_plausible` to select the plain DNS fallback (`upstreams.fallback_plain`)
-  for DoT and DoH upstreams until the clock is valid (amendment A6).
+  for DoT and DoH upstreams until the clock is valid (amendment A6). See
+  [DOH.md](DOH.md#clock-fallback).
 
 ## Upstream TLS (DoT and DoH client)
 

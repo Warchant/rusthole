@@ -4,7 +4,9 @@
 //! flowchart LR
 //!     start[start] --> scan[scan interfaces] --> acl[build ACL]
 //!     acl --> bind[bind UDP + TCP per address]
-//!     bind --> tasks[UDP loops, TCP accept loops, rescan loop, prober]
+//!     bind --> clock[first clock check: encrypted or fallback upstreams]
+//!     clock --> doh[bind DoH per address, if on]
+//!     doh --> tasks[UDP loops, TCP and DoH accept loops, rescan loop, prober, clock task]
 //!     tasks --> stop[shutdown: stop accept, finish in-flight, hard stop after grace]
 //! ```
 //!
@@ -27,16 +29,20 @@ use rusthole_core::localdns::LocalZone;
 use rusthole_core::net::{Cidr, Transport, UpstreamHost, UpstreamUrl};
 use rusthole_core::ratelimit;
 use rusthole_core::upstream_health::{HealthConfig, HealthState};
+use rustls::ServerConfig;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream, UdpSocket};
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 use tokio_util::sync::CancellationToken;
 
+use crate::clock::{self, CLOCK_CHECK_INTERVAL, SystemWallClock, UpstreamMode, WallClock};
+use crate::doh::{DohLimits, DohService, DohSettings};
 use crate::filter::{AllowAll, ClientTransport, NoopObserver, QueryFilter, QueryObserver};
 use crate::handler::{Handler, HandlerSettings};
 use crate::interfaces::{self, InterfaceSource, SystemInterfaces};
 use crate::resolve::HostResolver;
 use crate::sync::{Clock, LOCK_TIMEOUT, Spawner};
+use crate::tls_upstream::{TlsTarget, UpstreamTls};
 use crate::upstream::{self, Pool, PoolSettings, UpstreamProto, UpstreamServer};
 use crate::wire::{self, HEADER_LEN, RawHeader};
 
@@ -124,6 +130,12 @@ pub struct DnsSettings {
     pub tcp: TcpLimits,
     /// Local DNS data and conditional forwarding (part P3c).
     pub local: Arc<LocalZone>,
+    /// The DoH listener (part P7). `None` turns it off.
+    pub doh: Option<DohSettings>,
+    /// The build time of the binary in Unix seconds, for the clock check (amendment A6).
+    pub build_time_unix: i64,
+    /// How often the server checks the wall clock when it has DoT or DoH upstreams.
+    pub clock_check_interval: Duration,
 }
 
 /// Why the config cannot give DNS settings.
@@ -137,64 +149,112 @@ pub enum SettingsError {
         /// The problem.
         message: String,
     },
-    /// No upstream that this version can use.
-    #[error(
-        "no plain DNS upstream (udp:// or tcp://) in upstreams.servers; \
-         DoT and DoH upstreams come in a later version"
-    )]
+    /// No upstream in `upstreams.servers`.
+    #[error("upstreams.servers has no upstream")]
     NoUpstream,
 }
 
+/// Parses a listen list: `["auto"]` or IP addresses.
+fn parse_listen(list: &[String], path: &str) -> Result<ListenMode, SettingsError> {
+    if list.iter().any(|s| s.trim() == AUTO) {
+        return Ok(ListenMode::Auto);
+    }
+    let mut addrs = Vec::new();
+    for (i, s) in list.iter().enumerate() {
+        let ip: IpAddr = s.trim().parse().map_err(|_| SettingsError::BadValue {
+            path: format!("{path}[{i}]"),
+            message: "not an IP address".to_owned(),
+        })?;
+        addrs.push(ip);
+    }
+    Ok(ListenMode::Addrs(addrs))
+}
+
+/// Makes the pool entry of a DoT or DoH upstream: the name, the bootstrap addresses (or the
+/// IP address of the URL) and the path.
+fn encrypted_upstream(
+    url: &UpstreamUrl,
+    bootstrap: &[String],
+    path: &str,
+) -> Result<UpstreamServer, SettingsError> {
+    let bad = |message: String| SettingsError::BadValue {
+        path: path.to_owned(),
+        message,
+    };
+    let (name, addrs) = match &url.host {
+        UpstreamHost::Ip(ip) => (ip.to_string(), vec![SocketAddr::new(*ip, url.port)]),
+        UpstreamHost::Name(d) => {
+            let mut addrs = Vec::new();
+            for (j, text) in bootstrap.iter().enumerate() {
+                let ip: IpAddr = text.trim().parse().map_err(|_| SettingsError::BadValue {
+                    path: format!("{path}.bootstrap[{j}]"),
+                    message: "not an IP address".to_owned(),
+                })?;
+                addrs.push(SocketAddr::new(ip, url.port));
+            }
+            if addrs.is_empty() {
+                return Err(bad(
+                    "a DoT or DoH upstream with a host name needs bootstrap IP addresses"
+                        .to_owned(),
+                ));
+            }
+            (d.as_str().to_owned(), addrs)
+        }
+    };
+    let first = addrs
+        .first()
+        .copied()
+        .ok_or_else(|| bad("no address".to_owned()))?;
+    let https = url.transport == Transport::Https;
+    let target = Arc::new(TlsTarget {
+        name,
+        addrs,
+        port: url.port,
+        path: if https {
+            url.path.clone()
+        } else {
+            String::new()
+        },
+    });
+    Ok(UpstreamServer {
+        addr: first,
+        proto: if https {
+            UpstreamProto::Https(target)
+        } else {
+            UpstreamProto::Tls(target)
+        },
+    })
+}
+
 impl DnsSettings {
-    /// Makes the DNS settings from a validated config. Also returns warnings to log (for
-    /// example a DoT or DoH upstream that this version skips).
+    /// Makes the DNS settings from a validated config. Also returns warnings to log. No
+    /// I/O: the TLS configs are made at [`start`].
     pub fn from_config(cfg: &Config) -> Result<(Self, Vec<String>), SettingsError> {
         let mut warnings = Vec::new();
         let bad = |path: String, message: String| SettingsError::BadValue { path, message };
-        let listen = if cfg.server.dns_listen.iter().any(|s| s.trim() == AUTO) {
-            ListenMode::Auto
-        } else {
-            let mut addrs = Vec::new();
-            for (i, s) in cfg.server.dns_listen.iter().enumerate() {
-                let ip: IpAddr = s.trim().parse().map_err(|_| {
-                    bad(
-                        format!("server.dns_listen[{i}]"),
-                        "not an IP address".to_owned(),
-                    )
-                })?;
-                addrs.push(ip);
-            }
-            ListenMode::Addrs(addrs)
-        };
+        let listen = parse_listen(&cfg.server.dns_listen, "server.dns_listen")?;
         let mut acl_allow = Vec::new();
         for (i, s) in cfg.acl.allow.iter().enumerate() {
             acl_allow
                 .push(Cidr::parse(s).map_err(|e| bad(format!("acl.allow[{i}]"), e.to_string()))?);
         }
-        let mut servers = Vec::new();
-        for (i, up) in cfg.upstreams.servers.iter().enumerate() {
-            let url = UpstreamUrl::parse(&up.url)
-                .map_err(|e| bad(format!("upstreams.servers[{i}].url"), e.to_string()))?;
-            match (url.transport, &url.host) {
-                (Transport::Udp | Transport::Tcp, UpstreamHost::Ip(ip)) => {
-                    servers.push(UpstreamServer {
-                        addr: SocketAddr::new(*ip, url.port),
-                        proto: if url.transport == Transport::Udp {
-                            UpstreamProto::Udp
-                        } else {
-                            UpstreamProto::Tcp
-                        },
-                    });
-                }
-                _ => warnings.push(format!(
-                    "upstreams.servers[{i}]: DoT and DoH upstreams come in a later version; \
-                     this upstream is skipped"
-                )),
-            }
+        let servers = parse_servers(cfg)?;
+        let fallback = parse_fallback(cfg)?;
+        if !fallback.is_empty() && !servers.iter().any(|s| s.proto.is_encrypted()) {
+            warnings.push(
+                "upstreams.fallback_plain is set, but no upstream is DoT or DoH; the fallback is never used"
+                    .to_owned(),
+            );
         }
-        if servers.is_empty() {
-            return Err(SettingsError::NoUpstream);
-        }
+        let doh = if cfg.server.doh.enabled {
+            Some(DohSettings {
+                listen: parse_listen(&cfg.server.doh.listen, "server.doh.listen")?,
+                port: cfg.server.doh.port,
+                limits: DohLimits::default(),
+            })
+        } else {
+            None
+        };
         let (local, local_issues) = LocalZone::from_config(cfg);
         warnings.extend(local_issues.iter().map(ToString::to_string));
         let settings = Self {
@@ -215,6 +275,7 @@ impl DnsSettings {
             },
             pool: PoolSettings {
                 servers,
+                fallback,
                 timeout: Duration::from_millis(u64::from(cfg.upstreams.timeout_ms.max(1))),
                 max_attempts: upstream::MAX_ATTEMPTS,
                 max_inflight: upstream::MAX_INFLIGHT,
@@ -223,12 +284,93 @@ impl DnsSettings {
             rescan_interval: RESCAN_INTERVAL,
             tcp: TcpLimits::default(),
             local: Arc::new(local),
+            doh,
+            build_time_unix: rusthole_tls::build_time_unix(),
+            clock_check_interval: CLOCK_CHECK_INTERVAL,
         };
         Ok((settings, warnings))
     }
 
     fn needs_scan(&self) -> bool {
-        self.listen == ListenMode::Auto || self.acl_auto_local
+        self.listen == ListenMode::Auto
+            || self.acl_auto_local
+            || self
+                .doh
+                .as_ref()
+                .is_some_and(|d| d.listen == ListenMode::Auto)
+    }
+}
+
+/// The servers of `upstreams.servers`, in config order.
+fn parse_servers(cfg: &Config) -> Result<Vec<UpstreamServer>, SettingsError> {
+    let bad = |path: String, message: String| SettingsError::BadValue { path, message };
+    let mut servers = Vec::new();
+    for (i, up) in cfg.upstreams.servers.iter().enumerate() {
+        let url = UpstreamUrl::parse(&up.url)
+            .map_err(|e| bad(format!("upstreams.servers[{i}].url"), e.to_string()))?;
+        match (url.transport, &url.host) {
+            (Transport::Udp | Transport::Tcp, UpstreamHost::Ip(ip)) => {
+                servers.push(plain_upstream(
+                    url.transport,
+                    SocketAddr::new(*ip, url.port),
+                ));
+            }
+            (Transport::Udp | Transport::Tcp, UpstreamHost::Name(_)) => {
+                return Err(bad(
+                    format!("upstreams.servers[{i}].url"),
+                    "a plain DNS upstream needs an IP address".to_owned(),
+                ));
+            }
+            (Transport::Tls | Transport::Https, _) => servers.push(encrypted_upstream(
+                &url,
+                &up.bootstrap,
+                &format!("upstreams.servers[{i}]"),
+            )?),
+        }
+    }
+    if servers.is_empty() {
+        return Err(SettingsError::NoUpstream);
+    }
+    Ok(servers)
+}
+
+/// The servers of `upstreams.fallback_plain`: plain DNS with an IP address only.
+fn parse_fallback(cfg: &Config) -> Result<Vec<UpstreamServer>, SettingsError> {
+    let mut fallback = Vec::new();
+    for (i, text) in cfg.upstreams.fallback_plain.iter().enumerate() {
+        let path = format!("upstreams.fallback_plain[{i}]");
+        let url = UpstreamUrl::parse(text).map_err(|e| SettingsError::BadValue {
+            path: path.clone(),
+            message: e.to_string(),
+        })?;
+        match (url.transport, &url.host) {
+            (Transport::Udp | Transport::Tcp, UpstreamHost::Ip(ip)) => {
+                fallback.push(plain_upstream(
+                    url.transport,
+                    SocketAddr::new(*ip, url.port),
+                ));
+            }
+            _ => {
+                return Err(SettingsError::BadValue {
+                    path,
+                    message: "a fallback must be plain DNS (udp:// or tcp://) with an IP address"
+                        .to_owned(),
+                });
+            }
+        }
+    }
+    Ok(fallback)
+}
+
+/// A plain upstream: TCP for `Transport::Tcp`, else UDP.
+fn plain_upstream(transport: Transport, addr: SocketAddr) -> UpstreamServer {
+    UpstreamServer {
+        addr,
+        proto: if transport == Transport::Tcp {
+            UpstreamProto::Tcp
+        } else {
+            UpstreamProto::Udp
+        },
     }
 }
 
@@ -241,6 +383,14 @@ pub struct ServerDeps {
     pub filter: Arc<dyn QueryFilter>,
     /// The statistics hook.
     pub observer: Arc<dyn QueryObserver>,
+    /// The TLS client configs for DoT and DoH upstreams. `None`: the server loads the
+    /// system roots at start when an upstream is DoT or DoH. Tests give a test CA here.
+    pub upstream_tls: Option<UpstreamTls>,
+    /// The TLS server config of the DoH listener (`rusthole_tls::doh_server_config`).
+    /// Necessary when [`DnsSettings::doh`] is set.
+    pub doh_tls: Option<Arc<ServerConfig>>,
+    /// The wall clock for the clock check (amendment A6). Tests use a fake.
+    pub wall_clock: Arc<dyn WallClock>,
 }
 
 impl Default for ServerDeps {
@@ -249,6 +399,9 @@ impl Default for ServerDeps {
             interfaces: Arc::new(SystemInterfaces),
             filter: Arc::new(AllowAll),
             observer: Arc::new(NoopObserver),
+            upstream_tls: None,
+            doh_tls: None,
+            wall_clock: Arc::new(SystemWallClock),
         }
     }
 }
@@ -271,6 +424,24 @@ pub enum StartError {
     /// No address could be bound.
     #[error("no DNS listen address could be bound")]
     NoListener,
+    /// The DoH listener is on, but no TLS server config was given.
+    #[error("the DoH listener needs a TLS certificate (tls.mode \"file\" or \"local-ca\")")]
+    DohNoTls,
+    /// An explicit DoH listen address cannot be bound.
+    #[error("cannot listen for DoH on {addr}: {source}")]
+    DohBind {
+        /// The address and port.
+        addr: SocketAddr,
+        /// The OS error.
+        #[source]
+        source: io::Error,
+    },
+    /// No DoH address could be bound.
+    #[error("no DoH listen address could be bound")]
+    DohNoListener,
+    /// The TLS client config for DoT and DoH upstreams cannot be made.
+    #[error("cannot make the TLS client config for DoT and DoH upstreams: {0}")]
+    UpstreamTls(#[source] rusthole_tls::TlsError),
 }
 
 /// The UDP and TCP addresses of one bound listen address.
@@ -300,6 +471,8 @@ struct Shared {
     warned_public: Mutex<HashSet<Cidr>>,
     udp_permits: Arc<Semaphore>,
     tcp: TcpAdmission,
+    doh: Option<Arc<DohService>>,
+    wall_clock: Arc<dyn WallClock>,
 }
 
 /// A running DNS server. Dropping it stops all tasks without a wait; prefer
@@ -309,10 +482,32 @@ pub struct DnsServer {
     shared: Arc<Shared>,
 }
 
+/// The TLS client configs for the pool: the given ones, or the system roots when an
+/// upstream is DoT or DoH, or none.
+fn upstream_tls(
+    pool: &PoolSettings,
+    given: Option<UpstreamTls>,
+) -> Result<Option<UpstreamTls>, StartError> {
+    if given.is_some() {
+        return Ok(given);
+    }
+    if pool.servers.iter().any(|s| s.proto.is_encrypted()) {
+        return UpstreamTls::system()
+            .map(Some)
+            .map_err(StartError::UpstreamTls);
+    }
+    Ok(None)
+}
+
 /// Starts the DNS server.
 pub async fn start(settings: DnsSettings, deps: ServerDeps) -> Result<DnsServer, StartError> {
     let clock = Clock::new();
     let spawner = Spawner::new();
+    let root = CancellationToken::new();
+    if settings.doh.is_some() && deps.doh_tls.is_none() {
+        return Err(StartError::DohNoTls);
+    }
+    let upstream_tls = upstream_tls(&settings.pool, deps.upstream_tls)?;
     let nets = if settings.needs_scan() {
         match deps.interfaces.scan() {
             Ok(n) => n,
@@ -330,31 +525,64 @@ pub async fn start(settings: DnsSettings, deps: ServerDeps) -> Result<DnsServer,
         Handler::new(&settings.handler, acl, deps.filter, deps.observer, clock)
             .with_local_zone(Arc::clone(&settings.local)),
     );
-    let pool = Pool::new(settings.pool.clone(), clock, spawner.clone());
+    let pool = Pool::new(
+        settings.pool.clone(),
+        clock,
+        spawner.clone(),
+        upstream_tls.as_ref(),
+        &root,
+    );
     let tcp = TcpAdmission::new(&settings.tcp);
+    let doh = match (&settings.doh, deps.doh_tls) {
+        (Some(d), Some(tls)) => Some(Arc::new(DohService::new(
+            d.clone(),
+            Arc::clone(&handler),
+            pool.clone(),
+            spawner.clone(),
+            clock,
+            tls,
+        ))),
+        _ => None,
+    };
     let shared = Arc::new(Shared {
         settings,
         interfaces: deps.interfaces,
         handler,
         pool,
         spawner,
-        root: CancellationToken::new(),
+        root,
         listeners: Mutex::new(BTreeMap::new()),
         warned_public: Mutex::new(HashSet::new()),
         udp_permits: Arc::new(Semaphore::new(MAX_UDP_INFLIGHT)),
         tcp,
+        doh,
+        wall_clock: deps.wall_clock,
     });
     // From here, each error path stops the tasks through `server`.
     let server = DnsServer {
         shared: Arc::clone(&shared),
     };
     shared.warn_public(&nets);
-    match shared.start_listeners(&nets).await {
-        Ok(()) => {}
-        Err(e) => {
-            server.shutdown(Duration::from_millis(500)).await;
-            return Err(e);
-        }
+    // The first clock check comes before the listeners, so the first query uses the right
+    // upstreams.
+    let mode = shared
+        .pool
+        .has_encrypted()
+        .then(|| shared.clock_check(None));
+    let started = match shared.start_listeners(&nets).await {
+        Ok(()) => shared.start_doh(&nets).await,
+        Err(e) => Err(e),
+    };
+    if let Err(e) = started {
+        server.shutdown(Duration::from_millis(500)).await;
+        return Err(e);
+    }
+    if let Some(mode) = mode {
+        let sh = Arc::clone(&shared);
+        let cancel = shared.root.clone();
+        shared
+            .spawner
+            .spawn(async move { sh.clock_loop(cancel, mode).await });
     }
     if shared.settings.needs_scan() {
         let sh = Arc::clone(&shared);
@@ -390,9 +618,39 @@ impl DnsServer {
         self.shared.spawner.len()
     }
 
-    /// The health of each upstream, in config order.
+    /// The health of each upstream: `upstreams.servers` in config order, then
+    /// `upstreams.fallback_plain`.
     pub fn upstream_health(&self) -> Vec<HealthState> {
         self.shared.pool.health()
+    }
+
+    /// The bound DoH addresses.
+    pub fn doh_bound(&self) -> Vec<SocketAddr> {
+        self.shared
+            .doh
+            .as_ref()
+            .map_or_else(Vec::new, |d| d.bound())
+    }
+
+    /// Open DoH connections.
+    pub fn doh_connections(&self) -> usize {
+        self.shared.doh.as_ref().map_or(0, |d| d.open_connections())
+    }
+
+    /// The clock mode: which upstreams the pool uses (amendment A6).
+    pub fn upstream_mode(&self) -> UpstreamMode {
+        self.shared.pool.mode()
+    }
+
+    /// Checks the wall clock now and updates the clock mode.
+    pub fn check_clock(&self) -> UpstreamMode {
+        let prev = self.shared.pool.mode();
+        self.shared.clock_check(Some(prev))
+    }
+
+    /// Live DoT and DoH upstream connections.
+    pub fn upstream_tls_connections(&self) -> usize {
+        self.shared.pool.tls_conns()
     }
 
     /// Number of cache entries.
@@ -424,6 +682,9 @@ impl DnsServer {
         if let Some(mut m) = self.shared.listeners.try_lock_for(LOCK_TIMEOUT) {
             m.clear();
         }
+        if let Some(doh) = &self.shared.doh {
+            doh.clear();
+        }
         if clean {
             tracing::info!("DNS server stopped");
         } else {
@@ -441,6 +702,91 @@ impl Drop for DnsServer {
 }
 
 impl Shared {
+    /// Checks the wall clock, logs a change, and sets the clock mode of the pool.
+    fn clock_check(&self, prev: Option<UpstreamMode>) -> UpstreamMode {
+        let now = self.wall_clock.now_unix();
+        let build = self.settings.build_time_unix;
+        let step = clock::clock_step(prev, now, build, self.pool.has_fallback());
+        if let Some(notice) = step.notice {
+            clock::log_notice(notice, now, build);
+        }
+        self.pool.set_mode(step.mode);
+        step.mode
+    }
+
+    /// Checks the wall clock on a period.
+    ///
+    /// Service loop: unbounded on purpose. It runs for the life of the server and ends when
+    /// `cancel` is cancelled.
+    async fn clock_loop(self: Arc<Self>, cancel: CancellationToken, mut mode: UpstreamMode) {
+        let mut tick = tokio::time::interval(self.settings.clock_check_interval);
+        tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+        // The first tick is at once; the start did the first check.
+        tick.tick().await;
+        loop {
+            tokio::select! {
+                () = cancel.cancelled() => break,
+                _ = tick.tick() => mode = self.clock_check(Some(mode)),
+            }
+        }
+    }
+
+    /// Binds the DoH listeners, if DoH is on.
+    async fn start_doh(self: &Arc<Self>, nets: &[InterfaceNet]) -> Result<(), StartError> {
+        let Some(doh) = &self.doh else {
+            return Ok(());
+        };
+        let port = doh.settings().port;
+        match &doh.settings().listen {
+            ListenMode::Addrs(addrs) => {
+                for ip in addrs {
+                    doh.bind(*ip, &self.root)
+                        .await
+                        .map_err(|source| StartError::DohBind {
+                            addr: SocketAddr::new(*ip, port),
+                            source,
+                        })?;
+                }
+            }
+            ListenMode::Auto => {
+                if !cfg!(target_os = "linux") {
+                    tracing::info!(
+                        "development mode: on this OS, doh.listen = \"auto\" binds 127.0.0.1 only"
+                    );
+                }
+                for ip in auto_listen_addrs(nets) {
+                    if let Err(e) = doh.bind(ip, &self.root).await {
+                        tracing::warn!(addr = %ip, error = %e, "cannot listen for DoH; retry at the next interface scan");
+                    }
+                }
+            }
+        }
+        if doh.bound().is_empty() {
+            return Err(StartError::DohNoListener);
+        }
+        Ok(())
+    }
+
+    /// Rebinds the DoH listeners for `doh.listen = "auto"` after an interface scan.
+    async fn rescan_doh(self: &Arc<Self>, nets: &[InterfaceNet]) {
+        let Some(doh) = &self.doh else {
+            return;
+        };
+        if doh.settings().listen != ListenMode::Auto || self.root.is_cancelled() {
+            return;
+        }
+        let want = auto_listen_addrs(nets);
+        let have = doh.bound_ips();
+        for ip in have.iter().filter(|ip| !want.contains(ip)) {
+            doh.unbind(*ip);
+        }
+        for ip in want.into_iter().filter(|ip| !have.contains(ip)) {
+            if let Err(e) = doh.bind(ip, &self.root).await {
+                tracing::warn!(addr = %ip, error = %e, "cannot listen for DoH; retry at the next interface scan");
+            }
+        }
+    }
+
     /// Logs a warning once for each interface subnet that is not private (amendment A8).
     fn warn_public(&self, nets: &[InterfaceNet]) {
         if !self.settings.acl_auto_local {
@@ -563,6 +909,7 @@ impl Shared {
             &self.settings.acl_allow,
         ));
         self.warn_public(&nets);
+        self.rescan_doh(&nets).await;
         if self.settings.listen != ListenMode::Auto || self.root.is_cancelled() {
             return;
         }
@@ -856,14 +1203,18 @@ impl TcpAdmission {
 }
 
 /// A slot in the per-client TCP connection count. The map holds only clients with an open
-/// connection, so its size is at most `max_connections`.
-struct ClientSlot {
+/// connection, so its size is at most `max_connections`. The DoH listener uses it too.
+pub(crate) struct ClientSlot {
     map: Arc<Mutex<HashMap<IpAddr, usize>>>,
     ip: IpAddr,
 }
 
 impl ClientSlot {
-    fn acquire(map: &Arc<Mutex<HashMap<IpAddr, usize>>>, ip: IpAddr, max: usize) -> Option<Self> {
+    pub(crate) fn acquire(
+        map: &Arc<Mutex<HashMap<IpAddr, usize>>>,
+        ip: IpAddr,
+        max: usize,
+    ) -> Option<Self> {
         let mut m = map.try_lock_for(LOCK_TIMEOUT)?;
         let count = m.entry(ip).or_insert(0);
         if *count >= max {
@@ -910,45 +1261,95 @@ mod tests {
         assert_eq!(warnings.len(), 0);
     }
 
+    /// Part P7: DoT and DoH upstreams are in the pool (in config order, mixed with plain
+    /// upstreams), and the fallback list is parsed. Before P7, this test checked that they
+    /// were skipped.
     #[test]
-    fn settings_skip_encrypted_upstreams() {
+    fn settings_keep_encrypted_upstreams_in_order() {
         let text = r#"
 config_version = 1
 [server]
 dns_listen = ["192.0.2.1"]
 dns_port = 5353
+[server.doh]
+enabled = true
+listen = ["192.0.2.1"]
+port = 8443
+[server.admin]
+enabled = false
 [acl]
 auto_local = false
 allow = ["198.51.100.0/24"]
 [upstreams]
 timeout_ms = 300
+fallback_plain = ["udp://192.0.2.53:53", "tcp://192.0.2.54"]
 [[upstreams.servers]]
 url = "tcp://192.0.2.53"
 [[upstreams.servers]]
 url = "tls://dns.example:853"
-bootstrap = ["192.0.2.80"]
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+[[upstreams.servers]]
+url = "https://doh.example/q"
+bootstrap = ["192.0.2.81"]
+[[upstreams.servers]]
+url = "tls://192.0.2.83"
 "#;
         let cfg = Config::from_toml_str(text).unwrap();
         assert!(cfg.validate().is_empty(), "{:?}", cfg.validate());
         let (s, warnings) = DnsSettings::from_config(&cfg).unwrap();
+        assert!(warnings.is_empty(), "{warnings:?}");
         assert_eq!(
             s.listen,
             ListenMode::Addrs(vec!["192.0.2.1".parse().unwrap()])
         );
+        let servers = &s.pool.servers;
+        assert_eq!(servers.len(), 4);
         assert_eq!(
-            s.pool.servers,
-            vec![UpstreamServer {
+            servers[0],
+            UpstreamServer {
                 addr: "192.0.2.53:53".parse().unwrap(),
                 proto: UpstreamProto::Tcp
-            }]
+            }
         );
-        assert_eq!(warnings.len(), 1);
+        let UpstreamProto::Tls(dot) = &servers[1].proto else {
+            panic!("DoT expected: {:?}", servers[1]);
+        };
+        assert_eq!(dot.name, "dns.example");
+        assert_eq!(
+            dot.addrs,
+            vec![
+                "192.0.2.80:853".parse::<SocketAddr>().unwrap(),
+                "192.0.2.82:853".parse().unwrap()
+            ]
+        );
+        assert_eq!(servers[1].addr, dot.addrs[0]);
+        let UpstreamProto::Https(doh) = &servers[2].proto else {
+            panic!("DoH expected: {:?}", servers[2]);
+        };
+        assert_eq!(doh.name, "doh.example");
+        assert_eq!(doh.path, "/q");
+        assert_eq!(doh.port, 443);
+        let UpstreamProto::Tls(ip) = &servers[3].proto else {
+            panic!("DoT expected: {:?}", servers[3]);
+        };
+        assert_eq!(ip.name, "192.0.2.83");
+        assert_eq!(ip.addrs, vec!["192.0.2.83:853".parse().unwrap()]);
+        assert_eq!(s.pool.fallback.len(), 2);
+        assert_eq!(s.pool.fallback[1].proto, UpstreamProto::Tcp);
+        let doh = s.doh.unwrap();
+        assert_eq!(doh.port, 8443);
+        assert_eq!(
+            doh.listen,
+            ListenMode::Addrs(vec!["192.0.2.1".parse().unwrap()])
+        );
         assert!(!s.acl_auto_local);
         assert_eq!(s.acl_allow, vec![Cidr::parse("198.51.100.0/24").unwrap()]);
     }
 
+    /// Part P7: a config with only a DoH upstream is valid now. Before P7 it gave
+    /// `NoUpstream`.
     #[test]
-    fn settings_need_a_plain_upstream() {
+    fn settings_accept_an_encrypted_only_pool() {
         let text = r#"
 config_version = 1
 [[upstreams.servers]]
@@ -956,10 +1357,28 @@ url = "https://doh.example/dns-query"
 bootstrap = ["192.0.2.81"]
 "#;
         let cfg = Config::from_toml_str(text).unwrap();
+        let (s, _) = DnsSettings::from_config(&cfg).unwrap();
+        assert!(s.pool.servers[0].proto.is_encrypted());
+        assert!(s.doh.is_none());
+        let mut cfg = Config::default();
+        cfg.upstreams.servers.clear();
         assert_eq!(
             DnsSettings::from_config(&cfg).unwrap_err(),
             SettingsError::NoUpstream
         );
+    }
+
+    #[test]
+    fn settings_warn_on_an_unused_fallback() {
+        let mut cfg = Config::default();
+        cfg.upstreams.fallback_plain = vec!["udp://192.0.2.53".to_owned()];
+        let (_, warnings) = DnsSettings::from_config(&cfg).unwrap();
+        assert_eq!(warnings.len(), 1, "{warnings:?}");
+        cfg.upstreams.fallback_plain = vec!["tls://192.0.2.53".to_owned()];
+        assert!(matches!(
+            DnsSettings::from_config(&cfg),
+            Err(SettingsError::BadValue { .. })
+        ));
     }
 
     #[test]

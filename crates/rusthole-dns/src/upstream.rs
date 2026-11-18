@@ -1,7 +1,14 @@
-//! Upstream pool: plain DNS over UDP and TCP, with failover, health, coalescing and the
-//! hardening of amendment A5.
+//! Upstream pool: plain DNS over UDP and TCP, DNS over TLS ([`crate::dot`]) and DNS over
+//! HTTPS ([`crate::doh_client`]), with failover, health, coalescing and the hardening of
+//! amendment A5.
 //!
-//! For each upstream query:
+//! The pool holds the servers of `upstreams.servers` (in config order) and then the servers
+//! of `upstreams.fallback_plain`. Each server has its own health state. The clock mode
+//! ([`crate::clock`]) selects which servers a query can use: while the wall clock is not
+//! plausible, the DoT and DoH servers are skipped (no query, no probe, no health change) and
+//! the fallback servers are used.
+//!
+//! For each plain upstream query:
 //!
 //! - a new UDP socket on a random source port (CSPRNG), connected to the upstream;
 //! - a random query ID (CSPRNG);
@@ -32,7 +39,11 @@ use tokio::sync::{Semaphore, watch};
 use tokio::time::{Instant, timeout_at};
 use tokio_util::sync::CancellationToken;
 
+use crate::clock::{self, ModeCell, ServerRole, UpstreamMode};
+use crate::doh_client::DohClient;
+use crate::dot::DotClient;
 use crate::sync::{Clock, LOCK_TIMEOUT, Spawner};
+use crate::tls_upstream::{TlsTarget, UpstreamTls};
 use crate::wire::{self, ReplyReject};
 
 /// Upstreams tried for one query, at most.
@@ -48,21 +59,33 @@ const UDP_RECV_BUF: usize = 4096;
 /// How often the prober looks for a `Down` upstream with a due probe.
 pub const PROBE_INTERVAL: Duration = Duration::from_millis(500);
 
-/// The transport of a plain upstream.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The transport of an upstream.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UpstreamProto {
     /// UDP, with a TCP retry on truncation.
     Udp,
     /// TCP only.
     Tcp,
+    /// DNS over TLS (RFC 7858).
+    Tls(Arc<TlsTarget>),
+    /// DNS over HTTPS (RFC 8484) over HTTP/2.
+    Https(Arc<TlsTarget>),
 }
 
-/// One plain upstream server.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+impl UpstreamProto {
+    /// True for DoT and DoH.
+    pub fn is_encrypted(&self) -> bool {
+        matches!(self, Self::Tls(_) | Self::Https(_))
+    }
+}
+
+/// One upstream server.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UpstreamServer {
-    /// The address and port.
+    /// The address and port. For DoT and DoH: the first bootstrap address (logs and
+    /// statistics show the address that answered).
     pub addr: SocketAddr,
-    /// UDP or TCP.
+    /// The transport.
     pub proto: UpstreamProto,
 }
 
@@ -71,6 +94,9 @@ pub struct UpstreamServer {
 pub struct PoolSettings {
     /// The servers, in config order.
     pub servers: Vec<UpstreamServer>,
+    /// Plain servers for the time when the wall clock is not plausible
+    /// (`upstreams.fallback_plain`). Only UDP and TCP servers are used here.
+    pub fallback: Vec<UpstreamServer>,
     /// Time limit for one exchange with one upstream (the TCP retry gets its own limit).
     pub timeout: Duration,
     /// Upstreams tried for one query, at most.
@@ -82,8 +108,9 @@ pub struct PoolSettings {
 }
 
 impl PoolSettings {
-    /// The longest time that one query can take in the pool: each attempt can use the UDP
-    /// time limit and the TCP time limit, plus the wait for a semaphore permit.
+    /// The longest time that one query can take in the pool: each attempt can use two time
+    /// limits (UDP and the TCP retry, or a reused DoT/DoH connection and a new one), plus
+    /// the wait for a semaphore permit.
     pub fn query_budget(&self) -> Duration {
         let attempts = u32::try_from(self.max_attempts.max(1)).unwrap_or(u32::MAX);
         self.timeout
@@ -121,6 +148,13 @@ pub enum UpstreamError {
     /// The upstream task stopped (shutdown).
     #[error("the upstream query stopped")]
     Stopped,
+    /// The TLS handshake failed (for example a certificate for another name), or a DoH
+    /// server has no HTTP/2.
+    #[error("TLS handshake failed")]
+    Tls,
+    /// A DoH server answered with an HTTP status that is not 200.
+    #[error("HTTP status {0}")]
+    Http(u16),
 }
 
 /// A valid upstream answer.
@@ -140,9 +174,22 @@ pub(crate) struct Pool {
     inner: Arc<PoolInner>,
 }
 
+/// The client of one encrypted upstream.
+#[derive(Debug)]
+enum EncClient {
+    Dot(DotClient),
+    Doh(DohClient),
+}
+
 #[derive(Debug)]
 struct PoolInner {
     settings: PoolSettings,
+    /// `settings.servers`, then `settings.fallback`.
+    all: Vec<UpstreamServer>,
+    roles: Vec<ServerRole>,
+    /// The DoT or DoH client of each server in `all` (`None` for a plain server).
+    clients: Vec<Option<EncClient>>,
+    mode: ModeCell,
     health: Mutex<Vec<HealthState>>,
     permits: Arc<Semaphore>,
     inflight: Mutex<HashMap<CacheKey, watch::Receiver<Option<Shared>>>>,
@@ -168,12 +215,64 @@ impl Drop for InflightGuard {
 }
 
 impl Pool {
-    pub(crate) fn new(settings: PoolSettings, clock: Clock, spawner: Spawner) -> Self {
-        let n = settings.servers.len();
+    /// Makes the pool. `tls` must be set when a server is DoT or DoH; without it, such a
+    /// server fails each query with [`UpstreamError::Tls`]. `stop` ends the DoT and DoH
+    /// connection tasks at shutdown.
+    pub(crate) fn new(
+        settings: PoolSettings,
+        clock: Clock,
+        spawner: Spawner,
+        tls: Option<&UpstreamTls>,
+        stop: &CancellationToken,
+    ) -> Self {
+        let mut all = settings.servers.clone();
+        let mut roles: Vec<ServerRole> = settings
+            .servers
+            .iter()
+            .map(|s| {
+                if s.proto.is_encrypted() {
+                    ServerRole::Encrypted
+                } else {
+                    ServerRole::Plain
+                }
+            })
+            .collect();
+        for s in &settings.fallback {
+            if s.proto.is_encrypted() {
+                tracing::error!(upstream = %s.addr, "a fallback server must be plain DNS; it is skipped");
+                continue;
+            }
+            all.push(s.clone());
+            roles.push(ServerRole::Fallback);
+        }
+        let clients = all
+            .iter()
+            .map(|s| match (&s.proto, tls) {
+                (UpstreamProto::Tls(t), Some(tls)) => Some(EncClient::Dot(DotClient::new(
+                    Arc::clone(t),
+                    Arc::clone(&tls.dot),
+                    spawner.clone(),
+                    stop.clone(),
+                ))),
+                (UpstreamProto::Https(t), Some(tls)) => Some(EncClient::Doh(DohClient::new(
+                    Arc::clone(t),
+                    Arc::clone(&tls.doh),
+                    spawner.clone(),
+                    stop.clone(),
+                    clock,
+                ))),
+                _ => None,
+            })
+            .collect();
+        let n = all.len();
         let permits = Arc::new(Semaphore::new(settings.max_inflight.max(1)));
         Self {
             inner: Arc::new(PoolInner {
                 settings,
+                all,
+                roles,
+                clients,
+                mode: ModeCell::new(UpstreamMode::Encrypted),
                 health: Mutex::new(vec![HealthState::Healthy; n]),
                 permits,
                 inflight: Mutex::new(HashMap::new()),
@@ -183,7 +282,41 @@ impl Pool {
         }
     }
 
-    /// The health of each upstream, in config order.
+    /// True when a server is DoT or DoH.
+    pub(crate) fn has_encrypted(&self) -> bool {
+        self.inner.roles.contains(&ServerRole::Encrypted)
+    }
+
+    /// True when the pool has a fallback server.
+    pub(crate) fn has_fallback(&self) -> bool {
+        self.inner.roles.contains(&ServerRole::Fallback)
+    }
+
+    /// The clock mode.
+    pub(crate) fn mode(&self) -> UpstreamMode {
+        self.inner.mode.get()
+    }
+
+    /// Sets the clock mode.
+    pub(crate) fn set_mode(&self, mode: UpstreamMode) {
+        self.inner.mode.set(mode);
+    }
+
+    /// Live DoT connections and DoH connections of all upstreams.
+    pub(crate) fn tls_conns(&self) -> usize {
+        self.inner
+            .clients
+            .iter()
+            .map(|c| match c {
+                Some(EncClient::Dot(d)) => d.conn_count(),
+                Some(EncClient::Doh(d)) => usize::from(d.has_conn()),
+                None => 0,
+            })
+            .sum()
+    }
+
+    /// The health of each upstream: `upstreams.servers` in config order, then
+    /// `upstreams.fallback_plain`.
     pub(crate) fn health(&self) -> Vec<HealthState> {
         self.inner
             .health
@@ -278,17 +411,16 @@ impl Pool {
         else {
             return Err(UpstreamError::Overloaded);
         };
-        let server = UpstreamServer {
-            addr: server,
-            proto: UpstreamProto::Udp,
-        };
         let budget = self.inner.settings.query_budget();
-        let message = tokio::time::timeout(budget, exchange(server, query, dnssec_ok, timeout))
-            .await
-            .map_err(|_| UpstreamError::Timeout)??;
+        let message = tokio::time::timeout(
+            budget,
+            exchange_plain(server, false, query, dnssec_ok, timeout),
+        )
+        .await
+        .map_err(|_| UpstreamError::Timeout)??;
         Ok(UpstreamAnswer {
             message,
-            upstream: server.addr,
+            upstream: server,
         })
     }
 
@@ -323,31 +455,30 @@ impl PoolInner {
         else {
             return Err(UpstreamError::Overloaded);
         };
-        let order = match self.health.try_lock_for(LOCK_TIMEOUT) {
-            Some(states) => upstream_health::plan(&states, self.settings.max_attempts),
-            None => (0..self.settings.servers.len().min(self.settings.max_attempts)).collect(),
-        };
+        let order = self.order();
         let mut last: Result<UpstreamAnswer, UpstreamError> = Err(UpstreamError::NoUpstream);
         for idx in order {
-            let Some(server) = self.settings.servers.get(idx).copied() else {
+            let Some(server_addr) = self.all.get(idx).map(|s| s.addr) else {
                 continue;
             };
-            match exchange(server, query, dnssec_ok, self.settings.timeout).await {
-                Ok(message) => {
+            match self.exchange_idx(idx, query, dnssec_ok).await {
+                Ok((message, from)) => {
                     self.report(idx, true);
                     let answer = UpstreamAnswer {
                         message,
-                        upstream: server.addr,
+                        upstream: from,
                     };
                     if !wire::is_server_failure(&answer.message) {
                         return Ok(answer);
                     }
-                    tracing::debug!(upstream = %server.addr, "upstream answered SERVFAIL; trying the next one");
+                    tracing::debug!(upstream = %from, "upstream answered SERVFAIL; trying the next one");
                     last = Ok(answer);
                 }
                 Err(e) => {
-                    self.report(idx, false);
-                    tracing::debug!(upstream = %server.addr, error = %e, "upstream query failed");
+                    if is_upstream_fault(e) {
+                        self.report(idx, false);
+                    }
+                    tracing::debug!(upstream = %server_addr, error = %e, "upstream query failed");
                     if last.is_err() {
                         last = Err(e);
                     }
@@ -355,6 +486,61 @@ impl PoolInner {
             }
         }
         last
+    }
+
+    /// The servers that the current clock mode allows, as indexes into `all`.
+    fn eligible(&self) -> Vec<usize> {
+        clock::eligible(&self.roles, self.mode.get())
+    }
+
+    /// The order of servers for one query: the eligible servers by health, then in order,
+    /// at most `max_attempts`.
+    fn order(&self) -> Vec<usize> {
+        let eligible = self.eligible();
+        let max = self.settings.max_attempts;
+        let Some(states) = self.health.try_lock_for(LOCK_TIMEOUT) else {
+            return eligible.into_iter().take(max).collect();
+        };
+        let sub: Vec<HealthState> = eligible
+            .iter()
+            .filter_map(|&i| states.get(i).copied())
+            .collect();
+        drop(states);
+        upstream_health::plan(&sub, max)
+            .into_iter()
+            .filter_map(|j| eligible.get(j).copied())
+            .collect()
+    }
+
+    /// One exchange with server `idx`. Gives the answer and the address that sent it.
+    async fn exchange_idx(
+        &self,
+        idx: usize,
+        query: &Query,
+        dnssec_ok: bool,
+    ) -> Result<(Message, SocketAddr), UpstreamError> {
+        let server = self.all.get(idx).ok_or(UpstreamError::NoUpstream)?;
+        let timeout = self.settings.timeout;
+        match (
+            &server.proto,
+            self.clients.get(idx).and_then(Option::as_ref),
+        ) {
+            (UpstreamProto::Udp, _) => {
+                exchange_plain(server.addr, false, query, dnssec_ok, timeout)
+                    .await
+                    .map(|m| (m, server.addr))
+            }
+            (UpstreamProto::Tcp, _) => exchange_plain(server.addr, true, query, dnssec_ok, timeout)
+                .await
+                .map(|m| (m, server.addr)),
+            (UpstreamProto::Tls(_), Some(EncClient::Dot(c))) => {
+                c.exchange(query, dnssec_ok, timeout).await
+            }
+            (UpstreamProto::Https(_), Some(EncClient::Doh(c))) => {
+                c.exchange(query, dnssec_ok, timeout).await
+            }
+            (UpstreamProto::Tls(_) | UpstreamProto::Https(_), _) => Err(UpstreamError::Tls),
+        }
     }
 
     /// Feeds a result to the health machine of upstream `idx`.
@@ -381,7 +567,7 @@ impl PoolInner {
         let Some(state) = states.get_mut(idx) else {
             return;
         };
-        let addr = self.settings.servers.get(idx).map(|s| s.addr);
+        let addr = self.all.get(idx).map(|s| s.addr);
         let old = *state;
         let step = upstream_health::step(&self.settings.health, old, event);
         if let Some(invalid) = step.invalid {
@@ -412,11 +598,15 @@ impl PoolInner {
         let Some(mut states) = self.health.try_lock_for(LOCK_TIMEOUT) else {
             return Vec::new();
         };
-        let due: Vec<usize> = states
-            .iter()
-            .enumerate()
-            .filter(|(_, s)| upstream_health::probe_due(s, now_ms))
-            .map(|(i, _)| i)
+        // A server that the clock mode skips gets no probe, so its health does not change.
+        let due: Vec<usize> = self
+            .eligible()
+            .into_iter()
+            .filter(|&i| {
+                states
+                    .get(i)
+                    .is_some_and(|s| upstream_health::probe_due(s, now_ms))
+            })
             .collect();
         for &idx in &due {
             self.step_locked(&mut states, idx, HealthEvent::ProbeStart { now_ms });
@@ -426,19 +616,28 @@ impl PoolInner {
 
     /// Sends a probe query (`. NS`) to upstream `idx`. Any valid answer is a success.
     async fn probe(&self, idx: usize) {
-        let Some(server) = self.settings.servers.get(idx).copied() else {
+        let Some(addr) = self.all.get(idx).map(|s| s.addr) else {
             return;
         };
         let query = Query::query(Name::root(), RecordType::NS);
-        let ok = exchange(server, &query, false, self.settings.timeout)
-            .await
-            .is_ok();
-        tracing::debug!(upstream = %server.addr, ok, "upstream probe done");
+        let ok = self.exchange_idx(idx, &query, false).await.is_ok();
+        tracing::debug!(upstream = %addr, ok, "upstream probe done");
         self.report(idx, ok);
     }
 }
 
-/// One exchange with one upstream: UDP with a TCP retry on truncation, or TCP.
+/// True when a failed query is a fault of the upstream and goes to its health machine.
+/// [`UpstreamError::Overloaded`] is a local limit (for example all DoT connections of the
+/// upstream are full), so the query goes to the next upstream with no health change.
+///
+/// A probe reports each failure, also this one: a skipped report would keep the upstream in
+/// `Probing` with no next probe.
+pub(crate) fn is_upstream_fault(e: UpstreamError) -> bool {
+    e != UpstreamError::Overloaded
+}
+
+/// One exchange with one plain upstream: UDP with a TCP retry on truncation, or TCP. A DoT
+/// or DoH server needs the pool; here it gives [`UpstreamError::Tls`].
 pub(crate) async fn exchange(
     server: UpstreamServer,
     query: &Query,
@@ -447,15 +646,28 @@ pub(crate) async fn exchange(
 ) -> Result<Message, UpstreamError> {
     match server.proto {
         UpstreamProto::Tcp => tcp_exchange(server.addr, query, dnssec_ok, timeout).await,
-        UpstreamProto::Udp => {
-            let msg = udp_exchange(server.addr, query, dnssec_ok, timeout).await?;
-            if msg.metadata.truncation {
-                tracing::debug!(upstream = %server.addr, "truncated reply; retrying over TCP");
-                tcp_exchange(server.addr, query, dnssec_ok, timeout).await
-            } else {
-                Ok(msg)
-            }
-        }
+        UpstreamProto::Udp => exchange_plain(server.addr, false, query, dnssec_ok, timeout).await,
+        UpstreamProto::Tls(_) | UpstreamProto::Https(_) => Err(UpstreamError::Tls),
+    }
+}
+
+/// One plain exchange: TCP when `tcp_only`, else UDP with a TCP retry on truncation.
+async fn exchange_plain(
+    addr: SocketAddr,
+    tcp_only: bool,
+    query: &Query,
+    dnssec_ok: bool,
+    timeout: Duration,
+) -> Result<Message, UpstreamError> {
+    if tcp_only {
+        return tcp_exchange(addr, query, dnssec_ok, timeout).await;
+    }
+    let msg = udp_exchange(addr, query, dnssec_ok, timeout).await?;
+    if msg.metadata.truncation {
+        tracing::debug!(upstream = %addr, "truncated reply; retrying over TCP");
+        tcp_exchange(addr, query, dnssec_ok, timeout).await
+    } else {
+        Ok(msg)
     }
 }
 
@@ -602,9 +814,24 @@ mod tests {
     use super::*;
 
     #[test]
+    fn overloaded_is_not_an_upstream_fault() {
+        assert!(!is_upstream_fault(UpstreamError::Overloaded));
+        for e in [
+            UpstreamError::Timeout,
+            UpstreamError::Io(io::ErrorKind::ConnectionReset),
+            UpstreamError::BadReply,
+            UpstreamError::Tls,
+            UpstreamError::Http(502),
+        ] {
+            assert!(is_upstream_fault(e), "{e}");
+        }
+    }
+
+    #[test]
     fn budget_covers_all_attempts() {
         let s = PoolSettings {
             servers: Vec::new(),
+            fallback: Vec::new(),
             timeout: Duration::from_millis(100),
             max_attempts: 3,
             max_inflight: 4,

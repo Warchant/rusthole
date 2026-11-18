@@ -44,7 +44,7 @@ flowchart LR
 | `dns_listen` | list of text | `["auto"]` | DNS addresses (UDP and TCP). `"auto"` means each IPv4 address on each local interface; rusthole scans the interfaces each 30 seconds and rebinds. On an OS other than Linux, `"auto"` binds `127.0.0.1` only (development mode). Or give IPv4 addresses. `"auto"` cannot be mixed with addresses. See [DEPLOY.md](DEPLOY.md) for the systemd-resolved stub. |
 | `dns_port` | integer | `53` | DNS port. 0 is not allowed. |
 | `data_dir` | text | `/var/lib/rusthole` | Data directory: downloaded lists, the query database and the TLS files (in `tls/`). It must not be empty. A Windows build is for development only; its default is `rusthole-data` in the working directory. |
-| `doh.enabled` | bool | `false` | DNS-over-HTTPS listener (`/dns-query`). DoH clients need a certificate that they trust, so turn it on after you set up TLS. The DoH listener needs `tls.mode` `file` or `local-ca`: the DoH TLS setup refuses `self-signed`. `check-config` does not report this, because a config_version 1 file with DoH on was valid before the `[tls]` section. |
+| `doh.enabled` | bool | `false` | DNS-over-HTTPS listener (`/dns-query`, [DOH.md](DOH.md)). DoH clients need a certificate that they trust, so turn it on after you set up TLS. The DoH listener needs `tls.mode` `file` or `local-ca`: `rusthole run` stops with an error for `self-signed`. `check-config` does not report this, because a config_version 1 file with DoH on was valid before the `[tls]` section. |
 | `doh.listen` | list of text | `["auto"]` | Like `dns_listen`. |
 | `doh.port` | integer | `443` | DoH port. It must not be `dns_port` when DoH is on, because DNS also uses TCP. |
 | `admin.enabled` | bool | `true` | Admin UI and REST API (HTTPS). |
@@ -55,10 +55,10 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `servers` | list of tables | `udp://9.9.9.9:53` and `udp://1.1.1.1:53` | The upstream servers. At least one is necessary. rusthole tries them by health, then in this order, at most 3 for one query. This version forwards to `udp://` and `tcp://` upstreams only: it skips a DoT or DoH upstream with a warning, and `rusthole run` stops when no plain upstream is left. |
+| `servers` | list of tables | `udp://9.9.9.9:53` and `udp://1.1.1.1:53` | The upstream servers. At least one is necessary. Plain, DoT and DoH upstreams can be mixed. rusthole tries them by health, then in this order, at most 3 for one query. [DOH.md](DOH.md) explains DoT and DoH upstreams. |
 | `servers[].url` | text | | `8.8.8.8`, `8.8.8.8:53`, `udp://8.8.8.8:53`, `tcp://8.8.8.8:53`, `tls://dns.example:853` (DoT) or `https://dns.example/dns-query` (DoH). A plain DNS upstream must use an IP address. An IP address must be IPv4. A DoH URL without a path gets `/dns-query`. |
 | `servers[].bootstrap` | list of IPv4 addresses | `[]` | Addresses of a DoT or DoH host name. Required for a host name, so that rusthole needs no DNS to find its own upstream. Only for `tls://` and `https://`. |
-| `fallback_plain` | list of text | `[]` | Plain DNS upstreams (`udp://` or `tcp://` with an IPv4 address). rusthole uses them only while the clock is not valid (TLS needs a valid clock, and a Pi has no RTC). |
+| `fallback_plain` | list of text | `[]` | Plain DNS upstreams (`udp://` or `tcp://` with an IPv4 address). rusthole uses them only while the clock is not valid (TLS needs a valid clock, and a Pi has no RTC). Then the DoT and DoH upstreams are skipped. With no fallback and a clock that is not valid, rusthole logs an ERROR and keeps trying the encrypted upstreams. See [DOH.md](DOH.md#clock-fallback). |
 | `timeout_ms` | integer | `2000` | Time limit for one upstream query, 1 to 60000 ms. A timeout makes the query go to the next upstream. A retry over TCP (after a truncated UDP reply) gets its own time limit. |
 
 ### `[blocking]`

@@ -109,3 +109,17 @@ path = "fuzz_targets/stats_events.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "doh_request"
+path = "fuzz_targets/doh_request.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "dot_frames"
+path = "fuzz_targets/dot_frames.rs"
+test = false
+doc = false
+bench = false

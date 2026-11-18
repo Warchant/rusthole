@@ -4,7 +4,7 @@
 //! within the limit of the transport.
 //!
 //! Input layout: byte 0 = flags (bit 0: TCP, bit 1: off-net client, bit 2: no upstream
-//! answer), bytes 1..3 = query length (big endian), then the query, then the upstream reply.
+//! answer, bit 3: DoH; it wins over bit 0), bytes 1..3 = query length (big endian), then the query, then the upstream reply.
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -64,7 +64,9 @@ fuzz_target!(|data: &[u8]| {
     let query = &rest[..qlen.min(rest.len())];
     let upstream = &rest[qlen.min(rest.len())..];
 
-    let transport = if flags & 1 != 0 {
+    let transport = if flags & 8 != 0 {
+        ClientTransport::Https
+    } else if flags & 1 != 0 {
         ClientTransport::Tcp
     } else {
         ClientTransport::Udp
@@ -96,7 +98,7 @@ fuzz_target!(|data: &[u8]| {
             .map_or(usize::from(wire::MAX_UDP_PAYLOAD), |(req, _)| {
                 req.max_udp_len()
             }),
-        ClientTransport::Tcp => wire::MAX_TCP_MESSAGE,
+        ClientTransport::Tcp | ClientTransport::Https => wire::MAX_TCP_MESSAGE,
     };
 
     // Two rounds: the second one can be a cache hit.
@@ -107,7 +109,7 @@ fuzz_target!(|data: &[u8]| {
             Front::Resolve(p) => {
                 let max_len = match transport {
                     ClientTransport::Udp => p.request().max_udp_len(),
-                    ClientTransport::Tcp => wire::MAX_TCP_MESSAGE,
+                    ClientTransport::Tcp | ClientTransport::Https => wire::MAX_TCP_MESSAGE,
                 };
                 // The fake upstream uses its own ID, so the ID check passes and the
                 // question check and the answer handling run.

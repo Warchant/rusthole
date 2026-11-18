@@ -31,6 +31,16 @@ rusthole-store = { path = "crates/rusthole-store" }
 
 # Third-party crates. Add new ones here, then use `x = { workspace = true }` in a member.
 anyhow = "1"
+# Base64url for the `dns=` parameter of a DoH GET request (RFC 8484, part P7).
+base64 = "0.23"
+# Byte buffers for HTTP bodies (DoH server and DoH upstream, part P7).
+bytes = "1.12"
+# HTTP types and the HTTP/1.1 and HTTP/2 server and client for DoH (part P7). No default
+# features: only the protocol parts that rusthole uses. TLS comes from tokio-rustls (ring).
+http = "1.5"
+http-body-util = "0.1.5"
+hyper = { version = "1.12", default-features = false, features = ["http1", "http2", "server", "client"] }
+hyper-util = { version = "0.1.21", default-features = false, features = ["tokio"] }
 # Lock-free swap of the current TLS certificate (no lock, so no wait without a time limit).
 arc-swap = "1.9"
 # CSPRNG for DNS query IDs and source ports.

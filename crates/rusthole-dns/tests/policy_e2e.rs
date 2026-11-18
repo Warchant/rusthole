@@ -196,6 +196,7 @@ async fn harness(cfg: &Config, upstream: &Fake, neighbors: Arc<StaticNeighbors>)
             interfaces: Arc::new(StaticInterfaces::default()),
             filter: filter.clone(),
             observer: events.clone(),
+            ..ServerDeps::default()
         },
     )
     .await

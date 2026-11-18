@@ -6,10 +6,10 @@
 //!     hdr -->|no| drop[drop]
 //!     hdr --> acl{ACL allows client?}
 //!     acl -->|no, UDP| drop
-//!     acl -->|no, TCP| refused[REFUSED, close]
+//!     acl -->|no, TCP or DoH| refused[REFUSED, close]
 //!     acl --> rl{rate limit OK?}
 //!     rl -->|no, UDP| drop
-//!     rl -->|no, TCP| refused
+//!     rl -->|no, TCP or DoH| refused
 //!     rl --> op{opcode QUERY?}
 //!     op -->|no| ref2[REFUSED]
 //!     op --> parse{parses, 1 question?}
@@ -236,7 +236,7 @@ impl Handler {
         }
         let refuse_or_drop = || match transport {
             ClientTransport::Udp => Front::Drop,
-            ClientTransport::Tcp => Front::Reply(Reply {
+            ClientTransport::Tcp | ClientTransport::Https => Front::Reply(Reply {
                 bytes: wire::header_reply(&h, ResponseCode::Refused),
                 close: true,
             }),
@@ -266,7 +266,7 @@ impl Handler {
         };
         let max_len = match transport {
             ClientTransport::Udp => req.max_udp_len(),
-            ClientTransport::Tcp => MAX_TCP_MESSAGE,
+            ClientTransport::Tcp | ClientTransport::Https => MAX_TCP_MESSAGE,
         };
         let ctx = QueryContext {
             client: client.ip(),

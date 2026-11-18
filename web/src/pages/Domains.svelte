@@ -1,6 +1,7 @@
 <script lang="ts">
   // Search a domain: query counts, which clients asked for it, and which list
   // or rule blocks it (docs/API.md 5.7 and 7.1).
+  import BlockDomain from '../components/BlockDomain.svelte';
   import HourHistogram from '../components/HourHistogram.svelte';
   import RangePicker from '../components/RangePicker.svelte';
   import Status from '../components/Status.svelte';
@@ -92,6 +93,20 @@
     };
   });
 
+  // After a block, load the verdicts again. The counts do not change.
+  function reloadVerdicts() {
+    const name = selected;
+    if (!name) return;
+    api.search
+      .domain(name)
+      .then((v) => {
+        if (selected === name) verdicts = v;
+      })
+      .catch((e: unknown) => {
+        if (selected === name) detailError = errorText(e);
+      });
+  }
+
   function sourceLink(m: { source: string; id: number | null }): string | null {
     if (m.source === 'list') return '#/lists';
     if (m.source === 'rule') return '#/rules';
@@ -123,6 +138,10 @@
           <div class="sub">{formatPercent(shareOf(d.blocked, d.queries))}</div>
         </div>
         <div class="stat"><div class="label">Last seen</div><div class="value small-value">{formatRelative(d.last_seen_at, Date.now())}</div><div class="sub">First: {formatDateTime(d.first_seen_at)}</div></div>
+      </div>
+
+      <div class="row actions">
+        <BlockDomain name={d.name} onblocked={reloadVerdicts} />
       </div>
 
       <section class="card">
@@ -247,6 +266,9 @@
   }
   .small-value {
     font-size: 1.1rem;
+  }
+  .actions {
+    flex-wrap: wrap;
   }
   .matches-title {
     margin-top: 1rem;

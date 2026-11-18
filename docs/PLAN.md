@@ -262,3 +262,32 @@ flowchart TD
     P6 --> P8[P8 Packaging: systemd, install script, checksums]
     P7 --> P8
 ```
+
+## 9. Domain report and Block button (DECIDED 2026-11-18)
+
+Goal (owner): on the Domains page, get the facts to decide whether to block an unknown
+name, and to see what a device talks to. Block the name from the same page.
+
+Owner answers: server-side lookups, all four sources, signals only (no score), one call
+per section, RAM cache with limits, a setting that is on by default, a Block dialog with
+groups. The owner gave the split and the API shape to the implementer.
+
+| ID | Decision |
+|---|---|
+| R-D1 | Parts: R1 Block button. R2 report framework (endpoint, cache, limits, setting, UI) and the DNS section. R3 RDAP. R4 TLS. R5 reputation. One commit for each part. |
+| R-D2 | API: `GET /report/domain/{name}/{section}`, section `dns`, `rdap`, `tls` or `reputation`. 200 with a status `ok`, `failed`, `off` or `unavailable`. 400 for a bad name, 429 when busy. See docs/API.md. |
+| R-D3 | No new section for local data. The panels of the page (counts, lists, rules, clients, hours) show what rusthole knows. |
+| R-D4 | Time limits: dns 5 s, rdap 10 s, tls 8 s, reputation 8 s. In reputation, each source has its own limit and result. |
+| R-D5 | All lookups run on the server. The CSP does not change. Host names go through the upstream pool (docs/LISTS.md, "Name lookup"), never the system resolver. |
+| R-D6 | DNS: A, AAAA, CNAME, NS, MX, TXT, SOA, CAA through the upstream pool (no filter, no cache). At most 32 records for each type, 1 KiB for each TXT. |
+| R-D7 | RDAP: IANA bootstrap file (cache 24 h). Query the registrable domain. HTTPS only, at most 3 redirects, at most 256 KiB body. |
+| R-D8 | TLS: connect to the first public IPv4 address on port 443 with SNI, read the chain, send no HTTP request. A bad certificate is data, not an error. |
+| R-D9 | Reputation: Quad9 (9.9.9.9) and Cloudflare (1.1.1.2) by plain UDP DNS, and the Tranco rank (tranco-list.eu, no key). Signals only, no score. |
+| R-D10 | SSRF guard: TLS and HTTP connections go to public IPv4 addresses only. |
+| R-D11 | Cache: RAM only, at most 1024 entries; `ok` 1 h (RDAP 24 h), `failed` 5 min. At most 4 report jobs at a time, then 429. A refresh skips the cache. |
+| R-D12 | Setting `report.external`, default `true`. When `false`, rdap, tls and reputation give `off` and send nothing. |
+| R-D13 | Block: a dialog with group check boxes (`default` ticked). `POST /rules` with an exact deny rule. 409 shows that the rule exists. |
+
+Out of scope (open for a later version): services that need an API key (VirusTotal,
+Safe Browsing), WHOIS on port 43, IPv6 connections, a disk cache, page content, a Report
+button on other pages.

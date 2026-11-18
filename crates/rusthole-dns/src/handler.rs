@@ -14,11 +14,15 @@
 //!     op -->|no| ref2[REFUSED]
 //!     op --> parse{parses, 1 question?}
 //!     parse -->|no| formerr[FORMERR]
-//!     parse --> fq{filter on_query}
+//!     parse --> id[identify client]
+//!     id --> local{local DNS data?}
+//!     local -->|record, CNAME, PTR, NODATA| aa[authoritative reply, not blocked]
+//!     local -->|private reverse, no forward| nx[NXDOMAIN]
+//!     local -->|conditional forward or not local| fq{filter on_query}
 //!     fq -->|block| block[block reply]
 //!     fq --> cache{cache hit?}
 //!     cache -->|yes| fa{filter on_answer}
-//!     cache -->|no| up[upstream pool] --> store[store in cache] --> fa
+//!     cache -->|no| up[upstream pool or forward server] --> store[store in cache] --> fa
 //!     fa -->|block| block
 //!     fa --> reply[reply, TC if too long]
 //! ```
@@ -35,12 +39,14 @@ use hickory_proto::op::{Message, ResponseCode};
 use parking_lot::Mutex;
 use rusthole_core::acl::Acl;
 use rusthole_core::cache::{Cache, CacheKey, TtlPolicy};
+use rusthole_core::localdns::{LocalAnswer, LocalZone};
 use rusthole_core::ratelimit::{self, RateLimiter};
 
 use crate::filter::{
-    AnswerSource, ClientTransport, FilterVerdict, QueryContext, QueryEvent, QueryFilter,
-    QueryObserver, Verdict,
+    AnswerSource, ClientInfo, ClientTransport, FilterOutcome, FilterVerdict, PolicyInfo,
+    QueryContext, QueryEvent, QueryFilter, QueryObserver, Verdict,
 };
+use crate::local;
 use crate::sync::{Clock, LOCK_TIMEOUT, SharedAcl};
 use crate::upstream::{Pool, UpstreamAnswer, UpstreamError};
 use crate::wire::{self, MAX_TCP_MESSAGE, RawHeader, Request, RequestError};
@@ -96,6 +102,21 @@ pub enum Front {
     Resolve(Box<Pending>),
 }
 
+/// Where a query that is not in the cache goes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Route {
+    /// The public upstream pool.
+    Upstreams,
+    /// A conditional forwarding server (part P3c). `rule` is the index in
+    /// `local_dns.conditional_forwarding` of the config.
+    Forward {
+        /// The server.
+        server: SocketAddr,
+        /// The rule index.
+        rule: usize,
+    },
+}
+
 /// A query that waits for the upstream.
 #[derive(Debug)]
 pub struct Pending {
@@ -104,9 +125,21 @@ pub struct Pending {
     key: CacheKey,
     max_len: usize,
     started: Instant,
+    client: ClientInfo,
+    route: Route,
 }
 
 impl Pending {
+    /// Where the query goes.
+    pub fn route(&self) -> Route {
+        self.route
+    }
+
+    /// What the filter knows about the client.
+    pub fn client(&self) -> &ClientInfo {
+        &self.client
+    }
+
     /// The parsed request.
     pub fn request(&self) -> &Request {
         &self.req
@@ -128,6 +161,7 @@ pub struct Handler {
     filter: Arc<dyn QueryFilter>,
     observer: Arc<dyn QueryObserver>,
     clock: Clock,
+    local: Arc<LocalZone>,
 }
 
 impl Handler {
@@ -151,7 +185,16 @@ impl Handler {
             filter,
             observer,
             clock,
+            local: Arc::new(LocalZone::default()),
         }
+    }
+
+    /// Uses `zone` for local DNS data and conditional forwarding (part P3c). Without it,
+    /// the pipeline has no local data.
+    #[must_use]
+    pub fn with_local_zone(mut self, zone: Arc<LocalZone>) -> Self {
+        self.local = zone;
+        self
     }
 
     /// Replaces the ACL (after an interface scan).
@@ -234,14 +277,22 @@ impl Handler {
             qclass: u16::from(req.query.query_class()),
         };
         let key = req.cache_key();
-        let pending = Pending {
+        let client_info = self.filter.identify(ctx.client);
+        let mut pending = Pending {
             req,
             ctx,
             key,
             max_len,
             started,
+            client: client_info,
+            route: Route::Upstreams,
         };
-        if let FilterVerdict::Block(b) = self.filter.on_query(&pending.ctx) {
+        // Local DNS data comes before the policy, the cache and the upstreams (part P3c).
+        if let Some(reply) = self.local_step(&mut pending) {
+            return Front::Reply(reply);
+        }
+        let outcome = self.filter.decide_query(&pending.ctx, &pending.client);
+        if let FilterVerdict::Block(b) = outcome.verdict {
             let msg = wire::block_response(&pending.req, &b);
             return Front::Reply(self.finish(
                 &pending,
@@ -249,6 +300,7 @@ impl Handler {
                 Verdict::BlockedQuery,
                 AnswerSource::Filter,
                 None,
+                Some(outcome),
             ));
         }
         let hit = self.cache.try_lock_for(LOCK_TIMEOUT).and_then(|mut c| {
@@ -259,6 +311,39 @@ impl Handler {
             return Front::Reply(self.respond(&pending, &msg, age, AnswerSource::Cache, None));
         }
         Front::Resolve(Box::new(pending))
+    }
+
+    /// The local DNS step (part P3c): a reply from local data, or `None` to go on. A
+    /// conditional forward sets the route of `pending`. A name that is not a valid domain
+    /// name, or a class that is not IN, still gets the reverse-zone checks: a private
+    /// reverse lookup never goes to the public upstreams.
+    fn local_step(&self, pending: &mut Pending) -> Option<Reply> {
+        let local = match &pending.ctx.domain {
+            Some(name) if pending.ctx.qclass == local::LOCAL_CLASS => {
+                self.local.lookup(name, pending.ctx.qtype)
+            }
+            _ => {
+                let labels: Vec<&[u8]> = pending.req.query.name().iter().collect();
+                self.local.lookup_reverse_zone(&labels)
+            }
+        };
+        let msg = match local {
+            LocalAnswer::Answer(records) => local::local_response(&pending.req, &records),
+            LocalAnswer::PrivateReverse => local::private_reverse_response(&pending.req),
+            LocalAnswer::Forward { server, rule } => {
+                pending.route = Route::Forward { server, rule };
+                return None;
+            }
+            LocalAnswer::NotLocal => return None,
+        };
+        Some(self.finish(
+            pending,
+            &msg,
+            Verdict::Allowed,
+            AnswerSource::LocalDns,
+            None,
+            None,
+        ))
     }
 
     /// The second, synchronous part: stores the upstream answer in the cache and builds
@@ -291,7 +376,14 @@ impl Handler {
             Err(e) => {
                 tracing::debug!(qname = %pending.ctx.qname, error = %e, "no upstream answer");
                 let msg = wire::error_response(&pending.req, ResponseCode::ServFail);
-                self.finish(pending, &msg, Verdict::Allowed, AnswerSource::Local, None)
+                self.finish(
+                    pending,
+                    &msg,
+                    Verdict::Allowed,
+                    AnswerSource::Local,
+                    None,
+                    None,
+                )
             }
         }
     }
@@ -306,14 +398,31 @@ impl Handler {
         upstream: Option<SocketAddr>,
     ) -> Reply {
         let names = wire::answer_names(answer);
-        match self.filter.on_answer(&pending.ctx, &names) {
+        let outcome = self
+            .filter
+            .decide_answer(&pending.ctx, &pending.client, &names);
+        match outcome.verdict {
             FilterVerdict::Allow => {
                 let msg = wire::answer_response(&pending.req, answer, age);
-                self.finish(pending, &msg, Verdict::Allowed, source, upstream)
+                self.finish(
+                    pending,
+                    &msg,
+                    Verdict::Allowed,
+                    source,
+                    upstream,
+                    Some(outcome),
+                )
             }
             FilterVerdict::Block(b) => {
                 let msg = wire::block_response(&pending.req, &b);
-                self.finish(pending, &msg, Verdict::BlockedAnswer, source, upstream)
+                self.finish(
+                    pending,
+                    &msg,
+                    Verdict::BlockedAnswer,
+                    source,
+                    upstream,
+                    Some(outcome),
+                )
             }
         }
     }
@@ -326,8 +435,22 @@ impl Handler {
         verdict: Verdict,
         source: AnswerSource,
         upstream: Option<SocketAddr>,
+        outcome: Option<FilterOutcome>,
     ) -> Reply {
         let bytes = wire::encode(msg, pending.max_len);
+        let (decision, cname_target) =
+            outcome.map_or((None, None), |o| (o.decision, o.cname_target));
+        let policy = PolicyInfo {
+            client_mac: pending.client.mac,
+            groups: Arc::clone(&pending.client.groups),
+            matched: pending.client.matched,
+            decision,
+            cname_target,
+            forward_rule: match pending.route {
+                Route::Forward { rule, .. } => Some(rule),
+                Route::Upstreams => None,
+            },
+        };
         self.observer.on_event(&QueryEvent {
             client: pending.ctx.client,
             transport: pending.ctx.transport,
@@ -338,6 +461,7 @@ impl Handler {
             upstream,
             rcode: u16::from(msg.metadata.response_code),
             duration: pending.started.elapsed(),
+            policy,
         });
         Reply {
             bytes,
@@ -357,9 +481,16 @@ impl Handler {
             Front::Drop => None,
             Front::Reply(r) => Some(r),
             Front::Resolve(pending) => {
-                let outcome = pool
-                    .resolve(&pending.key, &pending.req.query, pending.req.dnssec_ok())
-                    .await;
+                let outcome = match pending.route {
+                    Route::Upstreams => {
+                        pool.resolve(&pending.key, &pending.req.query, pending.req.dnssec_ok())
+                            .await
+                    }
+                    Route::Forward { server, .. } => {
+                        pool.forward(server, &pending.req.query, pending.req.dnssec_ok())
+                            .await
+                    }
+                };
                 Some(self.complete(&pending, outcome))
             }
         }

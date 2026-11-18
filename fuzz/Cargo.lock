@@ -991,6 +991,7 @@ dependencies = [
 name = "rusthole-dns"
 version = "0.1.0"
 dependencies = [
+ "arc-swap",
  "getrandom 0.4.3",
  "hickory-proto",
  "if-addrs",

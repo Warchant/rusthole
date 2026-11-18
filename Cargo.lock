@@ -1387,6 +1387,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "getrandom 0.4.3",
+ "hickory-proto",
  "rusthole-core",
  "rusthole-dns",
  "rusthole-import",
@@ -1417,6 +1419,7 @@ dependencies = [
 name = "rusthole-dns"
 version = "0.1.0"
 dependencies = [
+ "arc-swap",
  "getrandom 0.4.3",
  "hickory-proto",
  "if-addrs",

@@ -334,7 +334,7 @@ pub fn answer_names(msg: &Message) -> Vec<DomainName> {
 
 /// A response header for `req`: its ID, RD and CD, QR=1, RA=1, and the question as the
 /// client sent it.
-fn response_for(req: &Request, rcode: ResponseCode) -> Message {
+pub(crate) fn response_for(req: &Request, rcode: ResponseCode) -> Message {
     let mut m = Message::new(req.id, MessageType::Response, OpCode::Query);
     m.metadata.recursion_desired = req.rd;
     m.metadata.checking_disabled = req.cd;

@@ -1,5 +1,6 @@
 //! rusthole command-line entry point.
 
+mod engine;
 mod fsutil;
 mod run;
 

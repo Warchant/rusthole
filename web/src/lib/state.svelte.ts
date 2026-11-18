@@ -145,7 +145,6 @@ export function resource<T>(fn: () => Promise<T>): Resource<T> {
       .catch((e: unknown) => {
         if (!live) return;
         r.error = errorText(e);
-        if (e instanceof ApiError && e.code === 'config_conflict') r.reload();
       })
       .finally(() => {
         if (live) r.loading = false;

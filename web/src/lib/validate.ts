@@ -82,6 +82,14 @@ export function checkCidrs(list: string[], max: number): string | null {
   return null;
 }
 
+/** Checks a conditional-forwarding domain. v1 rejects ip6.arpa zones (A11). */
+export function checkForwardDomain(domain: string): string | null {
+  const d = domain.trim().toLowerCase().replace(/\.$/, '');
+  if (d === 'ip6.arpa' || d.endsWith('.ip6.arpa')) return IPV6_HINT.replace('IPv4 address', 'IPv4 reverse zone');
+  if (!isHostname(d)) return 'Enter a domain or a reverse zone.';
+  return null;
+}
+
 /** Splits a text box value on commas, spaces and new lines. */
 export function splitList(text: string): string[] {
   return text

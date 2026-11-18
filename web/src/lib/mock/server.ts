@@ -4,7 +4,7 @@
 // Mock password: "rusthole". Any 6-digit code is a valid TOTP code.
 
 import type * as T from '../api/types';
-import { classifyClientMatch, checkCidrs, checkServers, isHttpUrl, isIPv4, looksLikeIPv6 } from '../validate';
+import { classifyClientMatch, checkCidrs, checkForwardDomain, checkServers, isHttpUrl, isIPv4, looksLikeIPv6 } from '../validate';
 import {
   clientNames,
   clientTotals,
@@ -925,6 +925,8 @@ crudRoutes<T.Forwarder>('/dns/forwarders', () => state.forwarders, (b, old) => {
   const servers = (b.servers ?? old?.servers) as string[];
   const err = Array.isArray(servers) ? checkServers(servers, 4) : 'Use a list of servers.';
   if (err) invalid('servers', err);
+  const domainErr = checkForwardDomain(String(b.domain ?? old?.domain ?? ''));
+  if (domainErr) invalid('domain', domainErr);
   return { id: old?.id ?? state.nextId++, domain: hostField(b, 'domain', old?.domain), servers, ...common(b, old) };
 }, 'dns');
 

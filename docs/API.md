@@ -412,7 +412,7 @@ of an upstream, or `null`.
 ### 5.6 Clients in statistics
 
 A seen client has a `key`. The key is the MAC address (lower case, colon form) when the
-server knows it, else the IP address. The key can have `:` and `/` characters. The UI
+server knows it, else the IP address. The key can have `:` characters. The UI
 encodes it with `encodeURIComponent` in a path.
 
 #### `GET /stats/clients`
@@ -846,7 +846,7 @@ Parameters: `limit` (default 200), `cursor`.
 
 - `domain`: a domain or a reverse zone, for example `2.0.192.in-addr.arpa`.
 - `servers`: 1 to 4 IPv4 addresses, with an optional port (`192.0.2.1:53`). IPv6 gives 422 (A11).
-- A reverse zone for an IPv4 subnet ends in `.in-addr.arpa`. An `ip6.arpa` zone is allowed, because it is DNS content, but v1 has no IPv6 clients.
+- A reverse zone for an IPv4 subnet ends in `.in-addr.arpa`. v1 rejects an `ip6.arpa` zone with 422 (A11).
 
 | Collection | Paths |
 |---|---|
@@ -1104,3 +1104,5 @@ Not in the API on purpose: password change (A7: `rusthole passwd` only), config 
    matches, 5 s) are assumptions.
 7. **Rate limit for the API.** Only the login ban is defined. A general request limit for
    the API is open.
+8. **IPv6 (A11).** v1 rejects IPv6 values in transport fields and `ip6.arpa` forwarding
+   zones. The version that adds IPv6 transport also allows them. This is an additive change.

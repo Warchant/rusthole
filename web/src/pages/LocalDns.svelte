@@ -4,7 +4,7 @@
   import { api } from '../lib/api';
   import type { Forwarder, LocalCname, LocalRecord } from '../lib/api/types';
   import { act, resource } from '../lib/state.svelte';
-  import { checkServers, IPV6_HINT, isHostname, isIPv4, looksLikeIPv6, splitList } from '../lib/validate';
+  import { checkForwardDomain, checkServers, IPV6_HINT, isHostname, isIPv4, looksLikeIPv6, splitList } from '../lib/validate';
 
   const records = resource(() => api.dns.records.list());
   const cnames = resource(() => api.dns.cnames.list());
@@ -26,10 +26,10 @@
     else if (rec.type === 'AAAA' && !looksLikeIPv6(address)) recError = 'An AAAA record needs an IPv6 address.';
     else recError = null;
     if (recError) return;
-    const body = { name: rec.name.trim(), type: rec.type, address, comment: rec.comment.trim(), enabled: true };
+    const body = { name: rec.name.trim(), type: rec.type, address, comment: rec.comment.trim() };
     const id = rec.id;
     const ok = await act(
-      () => (id !== null ? api.dns.records.update(id, body) : api.dns.records.create(body)),
+      () => (id !== null ? api.dns.records.update(id, body) : api.dns.records.create({ ...body, enabled: true })),
       'Record saved.',
       records.reload,
     );
@@ -48,10 +48,10 @@
     e.preventDefault();
     cnError = isHostname(cn.name.trim()) && isHostname(cn.target.trim()) ? null : 'Enter valid names.';
     if (cnError) return;
-    const body = { name: cn.name.trim(), target: cn.target.trim(), comment: cn.comment.trim(), enabled: true };
+    const body = { name: cn.name.trim(), target: cn.target.trim(), comment: cn.comment.trim() };
     const id = cn.id;
     const ok = await act(
-      () => (id !== null ? api.dns.cnames.update(id, body) : api.dns.cnames.create(body)),
+      () => (id !== null ? api.dns.cnames.update(id, body) : api.dns.cnames.create({ ...body, enabled: true })),
       'CNAME saved.',
       cnames.reload,
     );
@@ -69,12 +69,12 @@
   async function saveForwarder(e: SubmitEvent) {
     e.preventDefault();
     const servers = splitList(fw.servers);
-    fwError = !isHostname(fw.domain.trim()) ? 'Enter a domain or a reverse zone.' : checkServers(servers, 4);
+    fwError = checkForwardDomain(fw.domain) ?? checkServers(servers, 4);
     if (fwError) return;
-    const body = { domain: fw.domain.trim(), servers, comment: fw.comment.trim(), enabled: true };
+    const body = { domain: fw.domain.trim(), servers, comment: fw.comment.trim() };
     const id = fw.id;
     const ok = await act(
-      () => (id !== null ? api.dns.forwarders.update(id, body) : api.dns.forwarders.create(body)),
+      () => (id !== null ? api.dns.forwarders.update(id, body) : api.dns.forwarders.create({ ...body, enabled: true })),
       'Forwarding saved.',
       forwarders.reload,
     );

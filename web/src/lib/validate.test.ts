@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   checkCidrs,
+  checkForwardDomain,
   checkServers,
   classifyClientMatch,
   IPV6_HINT,
@@ -83,6 +84,12 @@ describe('lists of servers and CIDRs', () => {
     expect(checkCidrs(['198.51.100.0/24'], 64)).toBeNull();
     expect(checkCidrs(['2001:db8::/64'], 64)).toContain(IPV6_HINT);
     expect(checkCidrs(['198.51.100.0'], 64)).toMatch(/IPv4 CIDR/);
+  });
+  it('checks conditional-forwarding domains (no ip6.arpa in v1)', () => {
+    expect(checkForwardDomain('lan')).toBeNull();
+    expect(checkForwardDomain('2.0.192.in-addr.arpa')).toBeNull();
+    expect(checkForwardDomain('8.b.d.0.1.0.0.2.ip6.arpa')).toMatch(/IPv6 comes in a later version/);
+    expect(checkForwardDomain('bad domain')).toMatch(/domain/);
   });
   it('splits text on commas, spaces and lines', () => {
     expect(splitList(' 192.0.2.1, 192.0.2.2\n192.0.2.3  ')).toEqual(['192.0.2.1', '192.0.2.2', '192.0.2.3']);

@@ -3,7 +3,7 @@
   // Listener addresses, TLS files and the password are not here: they are in
   // rusthole.toml and `rusthole passwd`.
   import Status from '../components/Status.svelte';
-  import { api, errorText } from '../lib/api';
+  import { api, ApiError, errorText } from '../lib/api';
   import type { Settings, SettingsPatch } from '../lib/api/types';
   import { formatBytes, formatCount, formatDateTime, formatDuration } from '../lib/format';
   import { resource, toast } from '../lib/state.svelte';
@@ -39,14 +39,29 @@
     void load();
   });
 
+  function setSection<K extends keyof Settings>(target: Settings, key: K, value: Settings[K]) {
+    target[key] = value;
+  }
+
+  /**
+   * Saves one section. On success, only that section of the draft changes, so
+   * unsaved edits in other sections stay. On a 422 the input stays, so the user
+   * can correct it. Only a config conflict loads all data again.
+   */
   async function save(section: keyof SettingsPatch, patch: SettingsPatch, label: string) {
     errors[section] = null;
     try {
-      accept(await api.settings.update(patch));
+      const next = await api.settings.update(patch);
+      saved = next;
+      if (draft) {
+        setSection(draft, section, structuredClone(next[section]));
+        if (section === 'upstreams') upstreamText = next.upstreams.servers.join('\n');
+        if (section === 'acl') cidrText = next.acl.extra_cidrs.join('\n');
+      }
       toast('ok', `${label} saved.`, 3000);
     } catch (e) {
       errors[section] = errorText(e);
-      await load();
+      if (e instanceof ApiError && e.code === 'config_conflict') await load();
     }
   }
 

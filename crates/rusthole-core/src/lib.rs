@@ -6,9 +6,11 @@
 pub mod acl;
 pub mod blocking_state;
 pub mod cache;
+pub mod clients;
 pub mod config;
 pub mod domain;
 pub mod lists;
+pub mod localdns;
 pub mod net;
 pub mod pattern;
 pub mod policy;

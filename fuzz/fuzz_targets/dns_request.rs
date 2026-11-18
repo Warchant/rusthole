@@ -10,13 +10,39 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use libfuzzer_sys::fuzz_target;
+use rusthole_core::Config;
 use rusthole_core::acl::Acl;
+use rusthole_core::config::{ConditionalForward, LocalCname, LocalRecord, RecordType};
+use rusthole_core::localdns::LocalZone;
 use rusthole_core::net::Cidr;
 use rusthole_dns::wire::{self, RawHeader};
 use rusthole_dns::{
     AllowAll, ClientTransport, Clock, Front, Handler, HandlerSettings, NoopObserver, Reply,
     UpstreamAnswer, UpstreamError,
 };
+
+/// Local data for the fuzzer: a record, a CNAME and a conditional forward (part P3c), so
+/// that the local answers and the forward route run too.
+fn local_zone() -> Arc<LocalZone> {
+    let mut cfg = Config::default();
+    cfg.local_dns.records = vec![LocalRecord {
+        name: "nas.lan".to_owned(),
+        record_type: RecordType::A,
+        value: "192.0.2.10".to_owned(),
+    }];
+    cfg.local_dns.cnames = vec![LocalCname {
+        name: "media.lan".to_owned(),
+        target: "nas.lan".to_owned(),
+        ttl: None,
+    }];
+    cfg.local_dns.conditional_forwarding = vec![ConditionalForward {
+        enabled: true,
+        cidr: "198.51.100.0/24".to_owned(),
+        server: "192.0.2.1".to_owned(),
+        domain: Some("corp".to_owned()),
+    }];
+    Arc::new(LocalZone::from_config(&cfg).0)
+}
 
 fn check(reply: &Reply, query: &[u8], max_len: usize) {
     assert!(reply.bytes.len() <= max_len, "reply too long");
@@ -60,7 +86,8 @@ fuzz_target!(|data: &[u8]| {
         Arc::new(AllowAll),
         Arc::new(NoopObserver),
         Clock::new(),
-    );
+    )
+    .with_local_zone(local_zone());
     // The size limit of a reply from `front`. A cache hit is a full answer, so its UDP limit
     // is the client EDNS size (512 without EDNS). 1232 is only for a header-only reply to a
     // query that does not parse.

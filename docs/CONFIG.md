@@ -150,6 +150,8 @@ When the file has no `[[groups]]`, rusthole uses one group: `default`.
 | `comment` | text | none | Free text. |
 
 A client with no `[[clients]]` entry is in the group `default`.
+[CLIENTS.md](CLIENTS.md) gives the precedence (IP, MAC, host name, CIDR, `default`) and how
+rusthole finds the MAC address and the host name.
 
 ### `[local_dns]`
 
@@ -165,6 +167,10 @@ A client with no `[[clients]]` entry is in the group `default`.
 | `conditional_forwarding[].cidr` | IPv4 CIDR block | | Reverse lookups (PTR) for this network go to `server`. |
 | `conditional_forwarding[].server` | text | | An IPv4 address with an optional port: `IP` or `IP:PORT`. |
 | `conditional_forwarding[].domain` | domain | none | Queries for this domain and its subdomains also go to `server`. |
+
+Local records are answered with the AA bit before the cache and the upstreams, and they are
+not blocked. A private reverse lookup that no conditional forwarding rule covers gets
+NXDOMAIN. [CLIENTS.md](CLIENTS.md) has the details.
 
 ### `[admin]`
 

@@ -92,7 +92,7 @@ wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
 Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `dns_request`,
-`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`.
+`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`, `arp_parse`.
 
 Temporary files go to `D:\tmp`, not to drive C.
 

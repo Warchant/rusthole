@@ -88,3 +88,10 @@ path = "fuzz_targets/pem_load.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "arp_parse"
+path = "fuzz_targets/arp_parse.rs"
+test = false
+doc = false
+bench = false

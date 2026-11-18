@@ -15,6 +15,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true }
+getrandom = { workspace = true }
 rusthole-core = { workspace = true }
 rusthole-dns = { workspace = true }
 rusthole-import = { workspace = true }
@@ -24,6 +25,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
 [dev-dependencies]
+hickory-proto = { workspace = true }
 rusthole-import = { workspace = true, features = ["testkit"] }
 
 [lints]

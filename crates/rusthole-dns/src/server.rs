@@ -23,6 +23,7 @@ use rusthole_core::Config;
 use rusthole_core::acl::{self, Acl, InterfaceNet};
 use rusthole_core::cache::TtlPolicy;
 use rusthole_core::config::AUTO;
+use rusthole_core::localdns::LocalZone;
 use rusthole_core::net::{Cidr, Transport, UpstreamHost, UpstreamUrl};
 use rusthole_core::ratelimit;
 use rusthole_core::upstream_health::{HealthConfig, HealthState};
@@ -120,6 +121,8 @@ pub struct DnsSettings {
     pub rescan_interval: Duration,
     /// TCP listener limits.
     pub tcp: TcpLimits,
+    /// Local DNS data and conditional forwarding (part P3c).
+    pub local: Arc<LocalZone>,
 }
 
 /// Why the config cannot give DNS settings.
@@ -191,6 +194,8 @@ impl DnsSettings {
         if servers.is_empty() {
             return Err(SettingsError::NoUpstream);
         }
+        let (local, local_issues) = LocalZone::from_config(cfg);
+        warnings.extend(local_issues.iter().map(ToString::to_string));
         let settings = Self {
             listen,
             port: cfg.server.dns_port,
@@ -216,6 +221,7 @@ impl DnsSettings {
             },
             rescan_interval: RESCAN_INTERVAL,
             tcp: TcpLimits::default(),
+            local: Arc::new(local),
         };
         Ok((settings, warnings))
     }
@@ -319,13 +325,10 @@ pub async fn start(settings: DnsSettings, deps: ServerDeps) -> Result<DnsServer,
         Vec::new()
     };
     let acl = Acl::build(settings.acl_auto_local, &nets, &settings.acl_allow);
-    let handler = Arc::new(Handler::new(
-        &settings.handler,
-        acl,
-        deps.filter,
-        deps.observer,
-        clock,
-    ));
+    let handler = Arc::new(
+        Handler::new(&settings.handler, acl, deps.filter, deps.observer, clock)
+            .with_local_zone(Arc::clone(&settings.local)),
+    );
     let pool = Pool::new(settings.pool.clone(), clock, spawner.clone());
     let tcp = TcpAdmission::new(&settings.tcp);
     let shared = Arc::new(Shared {

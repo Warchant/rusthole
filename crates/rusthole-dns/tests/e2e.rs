@@ -224,6 +224,7 @@ fn settings(servers: Vec<UpstreamServer>) -> DnsSettings {
         },
         rescan_interval: Duration::from_secs(30),
         tcp: TcpLimits::default(),
+        local: Arc::default(),
     }
 }
 

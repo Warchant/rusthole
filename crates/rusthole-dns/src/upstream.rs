@@ -262,6 +262,36 @@ impl Pool {
         Ok(rx)
     }
 
+    /// Sends `query` to a conditional forwarding server (part P3c), over UDP with a TCP retry
+    /// on truncation, with the same hardening as a public upstream query. There is no
+    /// coalescing, no health state and no fallback to the public upstreams: a failure gives
+    /// an error (the client gets SERVFAIL). The query holds a permit of the in-flight limit.
+    pub(crate) async fn forward(
+        &self,
+        server: SocketAddr,
+        query: &Query,
+        dnssec_ok: bool,
+    ) -> Result<UpstreamAnswer, UpstreamError> {
+        let timeout = self.inner.settings.timeout;
+        let Ok(Ok(_permit)) =
+            tokio::time::timeout(timeout, Arc::clone(&self.inner.permits).acquire_owned()).await
+        else {
+            return Err(UpstreamError::Overloaded);
+        };
+        let server = UpstreamServer {
+            addr: server,
+            proto: UpstreamProto::Udp,
+        };
+        let budget = self.inner.settings.query_budget();
+        let message = tokio::time::timeout(budget, exchange(server, query, dnssec_ok, timeout))
+            .await
+            .map_err(|_| UpstreamError::Timeout)??;
+        Ok(UpstreamAnswer {
+            message,
+            upstream: server.addr,
+        })
+    }
+
     /// Probes each `Down` upstream when its probe is due.
     ///
     /// Service loop: unbounded on purpose. It runs for the life of the server and ends when
@@ -409,7 +439,7 @@ impl PoolInner {
 }
 
 /// One exchange with one upstream: UDP with a TCP retry on truncation, or TCP.
-async fn exchange(
+pub(crate) async fn exchange(
     server: UpstreamServer,
     query: &Query,
     dnssec_ok: bool,

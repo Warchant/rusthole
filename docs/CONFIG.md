@@ -80,7 +80,8 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `max_entries` | integer | `10000` | Maximum number of answers, at most 1000000. 0 turns the cache off. A full cache drops the least recently used answer. The key is the name (case does not matter), the type, the class and the DNSSEC OK bit. SERVFAIL and truncated answers are not cached. An answer longer than 4096 bytes goes to the client but is not cached, so the cache holds at most `max_entries` x 4 KiB of DNS data (about 40 MB for the default; the parsed form in memory is larger). On a small host, keep this value low. |
+| `max_entries` | integer | `10000` | Maximum number of answers, at most 1000000. 0 turns the cache off. A full cache drops the least recently used answer. The key is the name (case does not matter), the type, the class and the DNSSEC OK bit. SERVFAIL and truncated answers are not cached. An answer longer than 4096 bytes goes to the client but is not cached. |
+| `max_bytes` | integer | `16777216` | Most memory of the cache in bytes (16 MiB), from 65536 to 1073741824. The cache keeps the encoded answer (not the parsed form). Each answer costs its encoded size, the length of its key name and a fixed overhead of 256 bytes. The cache also reserves 48 bytes of hash table for each answer that can fit: the lower of `max_entries` and `max_bytes` / 304. When a new answer does not fit, the cache drops the least recently used answers until it fits. So the cache never uses more than `max_bytes`, also when each answer is near 4096 bytes. On a small host, set this value low. |
 | `min_ttl` | integer | `0` | Lowest TTL in seconds. Not more than `max_ttl`. |
 | `max_ttl` | integer | `86400` | Highest TTL in seconds. |
 | `negative_ttl` | integer | `300` | TTL of NXDOMAIN and NODATA answers without an SOA record. With an SOA record, the TTL is the lower of the SOA TTL and the SOA minimum field, but not more than this value. |
@@ -290,6 +291,7 @@ deep_cname_check = true
 
 [cache]
 max_entries = 10000
+max_bytes = 16777216
 min_ttl = 0
 max_ttl = 86400
 negative_ttl = 300

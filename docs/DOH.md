@@ -267,3 +267,38 @@ stateDiagram-v2
 
 Set `fallback_plain` on a device without a real-time clock. Queries go over plain DNS only
 while the clock is wrong, which is usually a few seconds after a boot.
+
+### Wrong clock after the build time
+
+A clock can be wrong but later than the build time. For example, the device was off for
+some weeks and the OS restores the last saved time. The upstream certificate is new, so each
+handshake fails with "not yet valid". The clock check above sees a valid clock, so a second
+check looks at the handshakes:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Normal
+    Normal --> DateFallback: each DoT and DoH upstream failed with a date error, fallback set (WARN)
+    DateFallback --> Normal: one handshake passed (WARN)
+```
+
+- A date error is a certificate that is not yet valid or expired. Other errors (a timeout,
+  a wrong name) do not count.
+- When the last handshake of each DoT and DoH upstream failed with a date error and
+  `fallback_plain` is set, rusthole logs a WARN and uses the fallback (as in the `Fallback`
+  mode above). The query that found the last error gets SERVFAIL; the next queries use the
+  fallback.
+- In this state, rusthole tries one handshake with each DoT and DoH upstream at each clock
+  check (each minute). When one handshake passes, rusthole logs a WARN and goes back to
+  the encrypted upstreams.
+- Without `fallback_plain`, rusthole keeps the encrypted upstreams (no server can help).
+- rusthole logs a failed handshake at WARN at most once a minute. The other failures go to
+  DEBUG, and the next WARN gives their count.
+
+### Cache of fallback answers
+
+An attacker on the path can forge a plain DNS answer. So an answer from a `fallback_plain`
+server has a TTL of at most 30 seconds, in the cache and in the reply to the client. This
+applies to positive and negative answers. When rusthole goes back to the encrypted upstreams,
+a forged answer stays in the cache for 30 seconds at most. The cache is not cleared, so the
+other answers stay. Answers from the plain servers in `upstreams.servers` keep their TTL.

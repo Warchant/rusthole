@@ -6,7 +6,10 @@
 //! of `upstreams.fallback_plain`. Each server has its own health state. The clock mode
 //! ([`crate::clock`]) selects which servers a query can use: while the wall clock is not
 //! plausible, the DoT and DoH servers are skipped (no query, no probe, no health change) and
-//! the fallback servers are used.
+//! the fallback servers are used. The same occurs while each DoT and DoH server fails its
+//! handshake with a certificate date error (review item m1, [`clock::date_step`]). An
+//! answer from a fallback server has [`UpstreamAnswer::fallback`] set, and the cache keeps
+//! it for a short time only (review item m3).
 //!
 //! For each plain upstream query:
 //!
@@ -16,16 +19,28 @@
 //!   and has the same question. Other packets are ignored, and the wait goes on until the
 //!   time limit (at most [`MAX_IGNORED_REPLIES`] packets);
 //! - a reply with the TC bit makes a retry over TCP;
-//! - a timeout, an I/O error or SERVFAIL makes the query go to the next upstream, at most
-//!   [`PoolSettings::max_attempts`] upstreams.
+//! - a timeout, an I/O error, SERVFAIL or REFUSED makes the query go to the next upstream,
+//!   at most [`PoolSettings::max_attempts`] upstreams. When no upstream gives a better
+//!   answer, the client gets the last SERVFAIL or REFUSED answer.
+//!
+//! Health: a timeout or an I/O error is a failure. Each valid answer is a success, also
+//! SERVFAIL and REFUSED. Reason: an upstream can refuse or fail one name only (for example
+//! its own block list, or a broken zone). If such an answer were a failure, a client could
+//! take a good upstream `Down` with a few names that it refuses.
 //!
 //! Identical queries in flight (same cache key) share one upstream query. A semaphore
 //! limits the upstream queries in flight.
+//!
+//! In-flight share (review item m2): each requester (a client address, or the local host
+//! resolver) can lead at most [`PoolSettings::max_inflight_per_client`] upstream queries at
+//! the same time (coalesced queries and conditional forwards). A query that joins a query in
+//! flight takes no slot. So one client cannot take all [`PoolSettings::max_inflight`] slots.
 
 use std::collections::HashMap;
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use hickory_proto::op::{Message, Query};
@@ -39,7 +54,9 @@ use tokio::sync::{Semaphore, watch};
 use tokio::time::{Instant, timeout_at};
 use tokio_util::sync::CancellationToken;
 
-use crate::clock::{self, ModeCell, ServerRole, UpstreamMode};
+use crate::clock::{
+    self, DateEvent, DateState, HandshakeClass, ModeCell, ServerRole, UpstreamMode,
+};
 use crate::doh_client::DohClient;
 use crate::dot::DotClient;
 use crate::sync::{Clock, LOCK_TIMEOUT, Spawner};
@@ -50,6 +67,8 @@ use crate::wire::{self, ReplyReject};
 pub const MAX_ATTEMPTS: usize = 3;
 /// Upstream queries in flight, at most. Also the size limit of the coalescing map.
 pub const MAX_INFLIGHT: usize = 512;
+/// Upstream queries in flight that one requester can lead, at most (review item m2).
+pub const MAX_INFLIGHT_PER_CLIENT: usize = 64;
 /// Wrong packets that one UDP upstream query ignores before it gives up.
 pub const MAX_IGNORED_REPLIES: usize = 64;
 /// Random source ports to try before the OS picks one.
@@ -103,6 +122,8 @@ pub struct PoolSettings {
     pub max_attempts: usize,
     /// Upstream queries in flight, at most.
     pub max_inflight: usize,
+    /// Upstream queries in flight that one requester (a client address) can lead, at most.
+    pub max_inflight_per_client: usize,
     /// Settings of the health state machine.
     pub health: HealthConfig,
 }
@@ -152,6 +173,10 @@ pub enum UpstreamError {
     /// server has no HTTP/2.
     #[error("TLS handshake failed")]
     Tls,
+    /// The TLS handshake failed because the certificate is not yet valid or expired. A
+    /// wrong system clock can cause this (review item m1).
+    #[error("TLS handshake failed: the certificate is not yet valid or expired")]
+    CertDate,
     /// A DoH server answered with an HTTP status that is not 200.
     #[error("HTTP status {0}")]
     Http(u16),
@@ -164,9 +189,36 @@ pub struct UpstreamAnswer {
     pub message: Message,
     /// The upstream that sent it.
     pub upstream: SocketAddr,
+    /// True when a `upstreams.fallback_plain` server sent the answer. The cache keeps such
+    /// an answer for a short time only (review item m3).
+    pub fallback: bool,
 }
 
 type Shared = Arc<Result<UpstreamAnswer, UpstreamError>>;
+
+/// Who asks the pool for an upstream query. Each requester has its own share of the
+/// in-flight slots.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub(crate) enum Requester {
+    /// A DNS client.
+    Client(IpAddr),
+    /// The host resolver of rusthole itself (list downloads).
+    Local,
+}
+
+/// True when a requester that leads `in_use` upstream queries now can lead one more, with
+/// `share` slots for each requester. Pure.
+pub(crate) fn share_allows(in_use: usize, share: usize) -> bool {
+    in_use < share.max(1)
+}
+
+/// A slot of the in-flight share of one requester. The slot is free again when the value
+/// is dropped (also on cancel or panic): the count is the strong count of the `Arc`, so no
+/// lock is needed to give the slot back, and the count cannot leak.
+#[derive(Debug)]
+pub(crate) struct ShareSlot {
+    _token: Arc<()>,
+}
 
 /// The upstream pool. Cheap to clone.
 #[derive(Debug, Clone)]
@@ -189,10 +241,21 @@ struct PoolInner {
     roles: Vec<ServerRole>,
     /// The DoT or DoH client of each server in `all` (`None` for a plain server).
     clients: Vec<Option<EncClient>>,
+    /// The clock mode ([`clock::clock_step`]).
     mode: ModeCell,
+    /// The certificate date state (review item m1). The flag is true for
+    /// [`DateState::DateFallback`]; [`PoolInner::note_handshake`] sets it under the `dates`
+    /// lock.
+    date_fallback: AtomicBool,
+    /// The last counted handshake result of each server (by index into `all`).
+    dates: Mutex<Vec<Option<HandshakeClass>>>,
     health: Mutex<Vec<HealthState>>,
     permits: Arc<Semaphore>,
     inflight: Mutex<HashMap<CacheKey, watch::Receiver<Option<Shared>>>>,
+    /// One token for each requester with a slot in use. The strong count of a token minus
+    /// one is the number of slots in use ([`ShareSlot`]). At most `max_inflight` + 1 entries
+    /// stay: free tokens are removed when the map is larger.
+    shares: Mutex<HashMap<Requester, Arc<()>>>,
     clock: Clock,
     spawner: Spawner,
 }
@@ -273,9 +336,12 @@ impl Pool {
                 roles,
                 clients,
                 mode: ModeCell::new(UpstreamMode::Encrypted),
+                date_fallback: AtomicBool::new(false),
+                dates: Mutex::new(vec![None; n]),
                 health: Mutex::new(vec![HealthState::Healthy; n]),
                 permits,
                 inflight: Mutex::new(HashMap::new()),
+                shares: Mutex::new(HashMap::new()),
                 clock,
                 spawner,
             }),
@@ -292,14 +358,50 @@ impl Pool {
         self.inner.roles.contains(&ServerRole::Fallback)
     }
 
-    /// The clock mode.
+    /// The mode that the pool uses: the clock mode and the certificate date state
+    /// ([`clock::effective_mode`]).
     pub(crate) fn mode(&self) -> UpstreamMode {
+        self.inner.effective_mode()
+    }
+
+    /// The clock mode only (the input of the next clock check).
+    pub(crate) fn clock_mode(&self) -> UpstreamMode {
         self.inner.mode.get()
     }
 
     /// Sets the clock mode.
     pub(crate) fn set_mode(&self, mode: UpstreamMode) {
         self.inner.mode.set(mode);
+    }
+
+    /// True while the pool uses the fallback because of certificate date errors.
+    pub(crate) fn in_date_fallback(&self) -> bool {
+        self.inner.date_fallback.load(Ordering::Acquire)
+    }
+
+    /// In the certificate date fallback, tries one exchange (`. NS`) with each encrypted
+    /// upstream, in order, until one passes. A passed exchange ends the fallback
+    /// ([`PoolInner::note_handshake`]). Does nothing in the other states.
+    ///
+    /// Bounded: one exchange for each server, each with the query timeout. The health
+    /// state does not change (the clock mode skips these servers).
+    pub(crate) async fn date_probe(&self) {
+        if !self.in_date_fallback() {
+            return;
+        }
+        let query = Query::query(Name::root(), RecordType::NS);
+        for idx in 0..self.inner.all.len() {
+            if self.inner.roles.get(idx) != Some(&ServerRole::Encrypted) {
+                continue;
+            }
+            let r = self.inner.exchange_idx(idx, &query, false).await;
+            tracing::debug!(upstream = ?self.inner.all.get(idx).map(|s| s.addr), ok = r.is_ok(), "certificate date probe done");
+            self.inner
+                .note_handshake(idx, r.as_ref().map(|_| ()).map_err(|e| *e));
+            if !self.in_date_fallback() {
+                return;
+            }
+        }
     }
 
     /// Live DoT connections and DoH connections of all upstreams.
@@ -332,15 +434,16 @@ impl Pool {
             .map_or(0, |g| g.len())
     }
 
-    /// Resolves `query` through the upstreams. Identical queries in flight share one
-    /// upstream query.
+    /// Resolves `query` through the upstreams for `who`. Identical queries in flight share
+    /// one upstream query.
     pub(crate) async fn resolve(
         &self,
         key: &CacheKey,
         query: &Query,
         dnssec_ok: bool,
+        who: Requester,
     ) -> Result<UpstreamAnswer, UpstreamError> {
-        let mut rx = self.join_or_lead(key, query, dnssec_ok)?;
+        let mut rx = self.join_or_lead(key, query, dnssec_ok, who)?;
         let budget = self.inner.settings.query_budget();
         let shared = match tokio::time::timeout(budget, rx.wait_for(Option::is_some)).await {
             Ok(Ok(value)) => value.clone(),
@@ -353,11 +456,45 @@ impl Pool {
         }
     }
 
+    /// Takes one slot of the in-flight share of `who`, or gives
+    /// [`UpstreamError::Overloaded`] when `who` uses all its slots.
+    fn take_share(&self, who: Requester) -> Result<ShareSlot, UpstreamError> {
+        let mut shares = self
+            .inner
+            .shares
+            .try_lock_for(LOCK_TIMEOUT)
+            .ok_or(UpstreamError::Overloaded)?;
+        if shares.len() > self.inner.settings.max_inflight {
+            // Bounded: one pass over at most max_inflight + 1 entries.
+            shares.retain(|_, token| Arc::strong_count(token) > 1);
+        }
+        let token = shares.entry(who).or_default();
+        let in_use = Arc::strong_count(token).saturating_sub(1);
+        if !share_allows(in_use, self.inner.settings.max_inflight_per_client) {
+            tracing::debug!(requester = ?who, in_use, "the requester uses all its in-flight slots");
+            return Err(UpstreamError::Overloaded);
+        }
+        Ok(ShareSlot {
+            _token: Arc::clone(token),
+        })
+    }
+
+    /// The number of in-flight slots that `who` uses now. For tests.
+    #[cfg(test)]
+    fn share_in_use(&self, who: Requester) -> usize {
+        self.inner
+            .shares
+            .try_lock_for(LOCK_TIMEOUT)
+            .and_then(|s| s.get(&who).map(|t| Arc::strong_count(t).saturating_sub(1)))
+            .unwrap_or(0)
+    }
+
     fn join_or_lead(
         &self,
         key: &CacheKey,
         query: &Query,
         dnssec_ok: bool,
+        who: Requester,
     ) -> Result<watch::Receiver<Option<Shared>>, UpstreamError> {
         let mut map = self
             .inner
@@ -374,6 +511,7 @@ impl Pool {
         if map.len() >= self.inner.settings.max_inflight.max(1) {
             return Err(UpstreamError::Overloaded);
         }
+        let slot = self.take_share(who)?;
         let (tx, rx) = watch::channel(None);
         map.insert(key.clone(), rx.clone());
         drop(map);
@@ -391,6 +529,8 @@ impl Pool {
             let result = inner.lead(&query, dnssec_ok).await;
             // No receiver left is not an error.
             let _ = tx.send(Some(Arc::new(result)));
+            // The slot is free again here, or when a cancel drops this task.
+            drop(slot);
         });
         Ok(rx)
     }
@@ -398,13 +538,16 @@ impl Pool {
     /// Sends `query` to a conditional forwarding server (part P3c), over UDP with a TCP retry
     /// on truncation, with the same hardening as a public upstream query. There is no
     /// coalescing, no health state and no fallback to the public upstreams: a failure gives
-    /// an error (the client gets SERVFAIL). The query holds a permit of the in-flight limit.
+    /// an error (the client gets SERVFAIL). The query holds a permit of the in-flight limit
+    /// and a slot of the in-flight share of `who`.
     pub(crate) async fn forward(
         &self,
         server: SocketAddr,
         query: &Query,
         dnssec_ok: bool,
+        who: Requester,
     ) -> Result<UpstreamAnswer, UpstreamError> {
+        let _slot = self.take_share(who)?;
         let timeout = self.inner.settings.timeout;
         let Ok(Ok(_permit)) =
             tokio::time::timeout(timeout, Arc::clone(&self.inner.permits).acquire_owned()).await
@@ -421,6 +564,7 @@ impl Pool {
         Ok(UpstreamAnswer {
             message,
             upstream: server,
+            fallback: false,
         })
     }
 
@@ -448,7 +592,7 @@ impl Pool {
 
 impl PoolInner {
     /// Queries the upstreams in health order until one gives a valid answer that is not
-    /// SERVFAIL. The loop is bounded by `max_attempts`.
+    /// SERVFAIL or REFUSED. The loop is bounded by `max_attempts`.
     async fn lead(&self, query: &Query, dnssec_ok: bool) -> Result<UpstreamAnswer, UpstreamError> {
         let deadline = Instant::now() + self.settings.timeout;
         let Ok(Ok(_permit)) = timeout_at(deadline, Arc::clone(&self.permits).acquire_owned()).await
@@ -461,17 +605,20 @@ impl PoolInner {
             let Some(server_addr) = self.all.get(idx).map(|s| s.addr) else {
                 continue;
             };
-            match self.exchange_idx(idx, query, dnssec_ok).await {
+            let result = self.exchange_idx(idx, query, dnssec_ok).await;
+            self.note_handshake(idx, result.as_ref().map(|_| ()).map_err(|e| *e));
+            match result {
                 Ok((message, from)) => {
                     self.report(idx, true);
                     let answer = UpstreamAnswer {
                         message,
                         upstream: from,
+                        fallback: self.roles.get(idx) == Some(&ServerRole::Fallback),
                     };
                     if !wire::is_server_failure(&answer.message) {
                         return Ok(answer);
                     }
-                    tracing::debug!(upstream = %from, "upstream answered SERVFAIL; trying the next one");
+                    tracing::debug!(upstream = %from, rcode = %answer.message.metadata.response_code, "upstream answered SERVFAIL or REFUSED; trying the next one");
                     last = Ok(answer);
                 }
                 Err(e) => {
@@ -488,9 +635,69 @@ impl PoolInner {
         last
     }
 
-    /// The servers that the current clock mode allows, as indexes into `all`.
+    /// The servers that the current mode allows, as indexes into `all`.
     fn eligible(&self) -> Vec<usize> {
-        clock::eligible(&self.roles, self.mode.get())
+        clock::eligible(&self.roles, self.effective_mode())
+    }
+
+    /// The clock mode and the certificate date state together.
+    fn effective_mode(&self) -> UpstreamMode {
+        let date = if self.date_fallback.load(Ordering::Acquire) {
+            DateState::DateFallback
+        } else {
+            DateState::Normal
+        };
+        clock::effective_mode(self.mode.get(), date)
+    }
+
+    /// Feeds the result of one exchange with server `idx` to the certificate date machine
+    /// (review item m1). Only encrypted servers count. A passed exchange is
+    /// [`HandshakeClass::Passed`], [`UpstreamError::CertDate`] is
+    /// [`HandshakeClass::DateError`]; other errors do not change the class.
+    fn note_handshake(&self, idx: usize, result: Result<(), UpstreamError>) {
+        if self.roles.get(idx) != Some(&ServerRole::Encrypted) {
+            return;
+        }
+        let class = match result {
+            Ok(()) => HandshakeClass::Passed,
+            Err(UpstreamError::CertDate) => HandshakeClass::DateError,
+            Err(_) => return,
+        };
+        let Some(mut dates) = self.dates.try_lock_for(LOCK_TIMEOUT) else {
+            tracing::error!("cannot update the certificate date state: the lock timed out");
+            return;
+        };
+        if let Some(slot) = dates.get_mut(idx) {
+            *slot = Some(class);
+        }
+        let event = match class {
+            HandshakeClass::Passed => DateEvent::HandshakePassed,
+            HandshakeClass::DateError if clock::all_date_errors(&self.roles, &dates) => {
+                DateEvent::AllDateErrors
+            }
+            HandshakeClass::DateError => return,
+        };
+        let prev = if self.date_fallback.load(Ordering::Acquire) {
+            DateState::DateFallback
+        } else {
+            DateState::Normal
+        };
+        let has_fallback = self.roles.contains(&ServerRole::Fallback);
+        let step = clock::date_step(prev, event, has_fallback);
+        if let Some(invalid) = step.invalid {
+            tracing::error!(
+                state = ?invalid.state,
+                event = ?invalid.event,
+                has_fallback = invalid.has_fallback,
+                next = ?step.state,
+                "invalid certificate date transition; going to the safe state"
+            );
+        }
+        if let Some(notice) = step.notice {
+            clock::log_date_notice(notice);
+        }
+        self.date_fallback
+            .store(step.state == DateState::DateFallback, Ordering::Release);
     }
 
     /// The order of servers for one query: the eligible servers by health, then in order,
@@ -620,7 +827,9 @@ impl PoolInner {
             return;
         };
         let query = Query::query(Name::root(), RecordType::NS);
-        let ok = self.exchange_idx(idx, &query, false).await.is_ok();
+        let result = self.exchange_idx(idx, &query, false).await;
+        self.note_handshake(idx, result.as_ref().map(|_| ()).map_err(|e| *e));
+        let ok = result.is_ok();
         tracing::debug!(upstream = %addr, ok, "upstream probe done");
         self.report(idx, ok);
     }
@@ -821,10 +1030,103 @@ mod tests {
             UpstreamError::Io(io::ErrorKind::ConnectionReset),
             UpstreamError::BadReply,
             UpstreamError::Tls,
+            UpstreamError::CertDate,
             UpstreamError::Http(502),
         ] {
             assert!(is_upstream_fault(e), "{e}");
         }
+    }
+
+    #[test]
+    fn share_rule() {
+        assert!(share_allows(0, 64));
+        assert!(share_allows(63, 64));
+        assert!(!share_allows(64, 64));
+        assert!(!share_allows(65, 64));
+        // A share of 0 still allows one query.
+        assert!(share_allows(0, 0));
+        assert!(!share_allows(1, 0));
+    }
+
+    proptest::proptest! {
+        /// The rule allows exactly `max(share, 1)` slots.
+        #[test]
+        fn share_rule_counts(in_use in 0usize..2000, share in 0usize..1000) {
+            proptest::prop_assert_eq!(share_allows(in_use, share), in_use < share.max(1));
+        }
+    }
+
+    fn pool_with(server: SocketAddr, max_inflight: usize, share: usize) -> Pool {
+        Pool::new(
+            PoolSettings {
+                servers: vec![UpstreamServer {
+                    addr: server,
+                    proto: UpstreamProto::Udp,
+                }],
+                fallback: Vec::new(),
+                timeout: Duration::from_secs(5),
+                max_attempts: 1,
+                max_inflight,
+                max_inflight_per_client: share,
+                health: HealthConfig::default(),
+            },
+            Clock::new(),
+            Spawner::new(),
+            None,
+            &CancellationToken::new(),
+        )
+    }
+
+    fn key_q(name: &str) -> (CacheKey, Query) {
+        let q = Query::query(Name::from_ascii(name).unwrap(), RecordType::A);
+        (CacheKey::new(name, 1, 1, false), q)
+    }
+
+    /// m2: a requester leads at most its share; another requester still gets a slot; a
+    /// query that joins a query in flight takes no slot; a slot is free again when its
+    /// leader ends (here: the pool stops it).
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn each_requester_has_its_own_share() {
+        // An upstream that never answers.
+        let silent = UdpSocket::bind("127.0.0.1:0").await.unwrap();
+        let pool = pool_with(silent.local_addr().unwrap(), 16, 3);
+        let a = Requester::Client("192.0.2.1".parse().unwrap());
+        let b = Requester::Client("192.0.2.2".parse().unwrap());
+        let mut rxs = Vec::new();
+        for i in 0..3 {
+            let (k, q) = key_q(&format!("a{i}.example."));
+            rxs.push(pool.join_or_lead(&k, &q, false, a).unwrap());
+        }
+        assert_eq!(pool.share_in_use(a), 3);
+        let (k, q) = key_q("a3.example.");
+        assert_eq!(
+            pool.join_or_lead(&k, &q, false, a).unwrap_err(),
+            UpstreamError::Overloaded
+        );
+        // Joining a query in flight is free, also for a full requester.
+        let (k0, q0) = key_q("a0.example.");
+        rxs.push(pool.join_or_lead(&k0, &q0, false, a).unwrap());
+        rxs.push(pool.join_or_lead(&k0, &q0, false, b).unwrap());
+        assert_eq!(pool.share_in_use(a), 3);
+        assert_eq!(pool.share_in_use(b), 0);
+        // Another requester and the local resolver have their own shares.
+        let (k, q) = key_q("b0.example.");
+        rxs.push(pool.join_or_lead(&k, &q, false, b).unwrap());
+        let (k, q) = key_q("local.example.");
+        rxs.push(pool.join_or_lead(&k, &q, false, Requester::Local).unwrap());
+        assert_eq!(pool.inflight_len(), 5);
+        // A hard stop of the leader tasks (the upstream never answers) gives the slots
+        // back: the cleanup path of a cancelled leader.
+        let clean = pool
+            .inner
+            .spawner
+            .stop(Duration::from_millis(50), Duration::from_secs(2))
+            .await;
+        assert!(!clean);
+        assert_eq!(pool.inner.spawner.len(), 0);
+        assert_eq!(pool.share_in_use(a), 0);
+        assert_eq!(pool.share_in_use(b), 0);
+        assert_eq!(pool.inflight_len(), 0);
     }
 
     #[test]
@@ -835,6 +1137,7 @@ mod tests {
             timeout: Duration::from_millis(100),
             max_attempts: 3,
             max_inflight: 4,
+            max_inflight_per_client: 2,
             health: HealthConfig::default(),
         };
         assert_eq!(s.query_budget(), Duration::from_millis(100 * 6 + 100 + 500));

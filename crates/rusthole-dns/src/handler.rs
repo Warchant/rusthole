@@ -49,8 +49,27 @@ use crate::filter::{
 };
 use crate::local;
 use crate::sync::{Clock, LOCK_TIMEOUT, SharedAcl};
-use crate::upstream::{Pool, UpstreamAnswer, UpstreamError};
+use crate::upstream::{Pool, Requester, UpstreamAnswer, UpstreamError};
 use crate::wire::{self, MAX_TCP_MESSAGE, RawHeader, Request, RequestError};
+
+/// Default of [`HandlerSettings::cache_bytes`]: the default of `cache.max_bytes`.
+pub const DEFAULT_CACHE_BYTES: usize = 16 * 1024 * 1024;
+
+/// The highest TTL, in seconds, of an answer from a `upstreams.fallback_plain` server
+/// (review item m3). The cache and the client keep such an answer for this time at most,
+/// so a forged plain answer from the fallback time does not stay after the encrypted
+/// upstreams are in use again.
+pub const FALLBACK_MAX_TTL: u32 = 30;
+
+/// The TTL rules for an answer from a fallback server: each limit at most
+/// [`FALLBACK_MAX_TTL`]. Pure.
+pub fn fallback_policy(p: &TtlPolicy) -> TtlPolicy {
+    TtlPolicy {
+        min_ttl: p.min_ttl.min(FALLBACK_MAX_TTL),
+        max_ttl: p.max_ttl.min(FALLBACK_MAX_TTL),
+        negative_ttl: p.negative_ttl.min(FALLBACK_MAX_TTL),
+    }
+}
 
 /// Settings of the pipeline.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,6 +78,8 @@ pub struct HandlerSettings {
     pub ttl: TtlPolicy,
     /// Maximum cache entries. 0 turns the cache off.
     pub cache_entries: usize,
+    /// Most memory of the cache in bytes (`cache.max_bytes`, review item M1).
+    pub cache_bytes: usize,
     /// Queries per interval for one client. 0 turns the limit off.
     pub rate_queries: u32,
     /// Rate limit interval in seconds.
@@ -76,6 +97,7 @@ impl Default for HandlerSettings {
                 negative_ttl: 300,
             },
             cache_entries: 10_000,
+            cache_bytes: DEFAULT_CACHE_BYTES,
             rate_queries: 1000,
             rate_interval_seconds: 60,
             rate_max_clients: ratelimit::MAX_CLIENTS,
@@ -157,7 +179,8 @@ impl Pending {
 pub struct Handler {
     acl: SharedAcl,
     limiter: Mutex<RateLimiter>,
-    cache: Mutex<Cache<Arc<Message>>>,
+    /// The encoded answers (review item M1: bytes, not parsed messages).
+    cache: Mutex<Cache<Arc<[u8]>>>,
     ttl: ArcSwap<TtlPolicy>,
     filter: Arc<dyn QueryFilter>,
     observer: Arc<dyn QueryObserver>,
@@ -181,7 +204,7 @@ impl Handler {
                 settings.rate_interval_seconds,
                 settings.rate_max_clients,
             )),
-            cache: Mutex::new(Cache::new(settings.cache_entries)),
+            cache: Mutex::new(Cache::new(settings.cache_entries, settings.cache_bytes)),
             ttl: ArcSwap::from_pointee(settings.ttl),
             filter,
             observer,
@@ -204,12 +227,12 @@ impl Handler {
     }
 
     /// Uses new cache and rate limit settings (a config change, part P5). A new cache size
-    /// empties the cache; new rate limit values reset the rate limiter.
+    /// (entries or bytes) empties the cache; new rate limit values reset the rate limiter.
     pub fn apply_settings(&self, old: &HandlerSettings, new: &HandlerSettings) {
         self.ttl.store(Arc::new(new.ttl));
-        if old.cache_entries != new.cache_entries {
+        if (old.cache_entries, old.cache_bytes) != (new.cache_entries, new.cache_bytes) {
             if let Some(mut c) = self.cache.try_lock_for(LOCK_TIMEOUT) {
-                *c = Cache::new(new.cache_entries);
+                *c = Cache::new(new.cache_entries, new.cache_bytes);
             } else {
                 tracing::error!("the cache lock timed out; the new cache size is not used");
             }
@@ -248,6 +271,13 @@ impl Handler {
     /// Number of cache entries.
     pub fn cache_len(&self) -> usize {
         self.cache.try_lock_for(LOCK_TIMEOUT).map_or(0, |c| c.len())
+    }
+
+    /// The bytes that the cache counts now (at most `cache_bytes`).
+    pub fn cache_bytes(&self) -> usize {
+        self.cache
+            .try_lock_for(LOCK_TIMEOUT)
+            .map_or(0, |c| c.bytes())
     }
 
     pub(crate) fn allowed(&self, ip: IpAddr) -> bool {
@@ -341,14 +371,30 @@ impl Handler {
                 Some(outcome),
             ));
         }
-        let hit = self.cache.try_lock_for(LOCK_TIMEOUT).and_then(|mut c| {
-            c.get(&pending.key, self.clock.now_ms())
-                .map(|h| (Arc::clone(h.value), h.age))
-        });
-        if let Some((msg, age)) = hit {
+        if let Some((msg, age)) = self.cache_hit(&pending.key) {
             return Front::Reply(self.respond(&pending, &msg, age, AnswerSource::Cache, None));
         }
         Front::Resolve(Box::new(pending))
+    }
+
+    /// The cached answer for `key` and its age. The cache keeps the encoded answer; this
+    /// function parses it outside the cache lock. An entry that does not parse is removed
+    /// and gives a miss.
+    fn cache_hit(&self, key: &CacheKey) -> Option<(Message, u32)> {
+        let (bytes, age) = self.cache.try_lock_for(LOCK_TIMEOUT).and_then(|mut c| {
+            c.get(key, self.clock.now_ms())
+                .map(|h| (Arc::clone(h.value), h.age))
+        })?;
+        match Message::from_vec(&bytes) {
+            Ok(msg) => Some((msg, age)),
+            Err(e) => {
+                tracing::error!(error = %e, "a cached answer does not parse; it is removed");
+                if let Some(mut c) = self.cache.try_lock_for(LOCK_TIMEOUT) {
+                    c.remove(key);
+                }
+                None
+            }
+        }
     }
 
     /// The local DNS step (part P3c): a reply from local data, or `None` to go on. A
@@ -392,19 +438,37 @@ impl Handler {
         outcome: Result<UpstreamAnswer, UpstreamError>,
     ) -> Reply {
         match outcome {
-            Ok(UpstreamAnswer { message, upstream }) => {
-                match wire::prepare_for_cache(message, &self.ttl.load()) {
+            Ok(UpstreamAnswer {
+                message,
+                upstream,
+                fallback,
+            }) => {
+                let policy = **self.ttl.load();
+                let policy = if fallback {
+                    fallback_policy(&policy)
+                } else {
+                    policy
+                };
+                match wire::prepare_for_cache(message, &policy) {
                     Ok(c) => {
-                        let msg = Arc::new(c.message);
+                        let size = c.bytes.len();
+                        let bytes: Arc<[u8]> = c.bytes.into();
                         if let Some(mut cache) = self.cache.try_lock_for(LOCK_TIMEOUT) {
                             cache.insert(
                                 pending.key.clone(),
-                                Arc::clone(&msg),
+                                bytes,
+                                size,
                                 c.ttl,
                                 self.clock.now_ms(),
                             );
                         }
-                        self.respond(pending, &msg, 0, AnswerSource::Upstream, Some(upstream))
+                        self.respond(
+                            pending,
+                            &c.message,
+                            0,
+                            AnswerSource::Upstream,
+                            Some(upstream),
+                        )
                     }
                     Err(msg) => {
                         self.respond(pending, &msg, 0, AnswerSource::Upstream, Some(upstream))
@@ -519,13 +583,19 @@ impl Handler {
             Front::Drop => None,
             Front::Reply(r) => Some(r),
             Front::Resolve(pending) => {
+                let who = Requester::Client(pending.ctx.client);
                 let outcome = match pending.route {
                     Route::Upstreams => {
-                        pool.resolve(&pending.key, &pending.req.query, pending.req.dnssec_ok())
-                            .await
+                        pool.resolve(
+                            &pending.key,
+                            &pending.req.query,
+                            pending.req.dnssec_ok(),
+                            who,
+                        )
+                        .await
                     }
                     Route::Forward { server, .. } => {
-                        pool.forward(server, &pending.req.query, pending.req.dnssec_ok())
+                        pool.forward(server, &pending.req.query, pending.req.dnssec_ok(), who)
                             .await
                     }
                 };

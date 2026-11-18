@@ -13,7 +13,7 @@ use rusthole_core::DomainName;
 use rusthole_core::cache::CacheKey;
 use tokio_util::sync::CancellationToken;
 
-use crate::upstream::{Pool, UpstreamError};
+use crate::upstream::{Pool, Requester, UpstreamError};
 
 /// The most addresses that one lookup gives.
 pub const MAX_ADDRESSES: usize = 16;
@@ -65,7 +65,7 @@ impl HostResolver {
         }
         let answer = tokio::select! {
             () = self.stop.cancelled() => Err(UpstreamError::Stopped),
-            r = self.pool.resolve(&key, &query, false) => r,
+            r = self.pool.resolve(&key, &query, false, Requester::Local) => r,
         }
         .map_err(ResolveError::Upstream)?;
         let rcode = answer.message.metadata.response_code;

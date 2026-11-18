@@ -13,6 +13,7 @@ idna = { workspace = true }
 lru = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 siphasher = { workspace = true }
 thiserror = { workspace = true }
 toml = { workspace = true }

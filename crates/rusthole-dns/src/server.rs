@@ -34,6 +34,7 @@ use tokio_util::sync::CancellationToken;
 use crate::filter::{AllowAll, ClientTransport, NoopObserver, QueryFilter, QueryObserver};
 use crate::handler::{Handler, HandlerSettings};
 use crate::interfaces::{self, InterfaceSource, SystemInterfaces};
+use crate::resolve::HostResolver;
 use crate::sync::{Clock, LOCK_TIMEOUT, Spawner};
 use crate::upstream::{self, Pool, PoolSettings, UpstreamProto, UpstreamServer};
 use crate::wire::{self, HEADER_LEN, RawHeader};
@@ -399,6 +400,12 @@ impl DnsServer {
     /// Number of coalesced upstream queries in flight.
     pub fn inflight_upstream(&self) -> usize {
         self.shared.pool.inflight_len()
+    }
+
+    /// A host name lookup through the upstream pool of this server (no ACL, no filter, no
+    /// cache). The list refresher uses it for its downloads (part P3b).
+    pub fn host_resolver(&self) -> HostResolver {
+        HostResolver::new(self.shared.pool.clone(), self.shared.root.clone())
     }
 
     /// Scans the interfaces now: updates the ACL and (with `auto`) the listeners.

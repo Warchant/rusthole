@@ -19,6 +19,23 @@ pub(crate) fn read_limited(path: &Path, limit: u64) -> io::Result<Vec<u8>> {
     Ok(data)
 }
 
+/// The Unix mode of a file when the group or others can read or write it (m14, amendment
+/// A7). `None`: the mode is safe, the file cannot be read, or the system has no Unix modes
+/// (a stub on other systems).
+pub(crate) fn mode_too_open(path: &Path) -> Option<u32> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = std::fs::metadata(path).ok()?.permissions().mode() & 0o777;
+        (mode & 0o077 != 0).then_some(mode)
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = path;
+        None
+    }
+}
+
 /// Writes `data` to `path` atomically.
 ///
 /// The function writes a temp file in the same directory, flushes it to disk, and renames it
@@ -113,6 +130,37 @@ mod tests {
         write_atomic(&path, b"x", false).unwrap();
         let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
         assert_eq!(mode, 0o600);
+    }
+
+    /// m14: a config file that the group or others can read gives its mode.
+    #[cfg(unix)]
+    #[test]
+    fn open_modes_are_found() {
+        use std::os::unix::fs::PermissionsExt;
+        // TMPDIR: `scripts/linux.sh` puts it on a file system with Unix modes.
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("rusthole.toml");
+        std::fs::write(&path, b"x").unwrap();
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o640)).unwrap();
+        // Some file systems (for example a Windows drive in WSL) keep no Unix mode.
+        if std::fs::metadata(&path).unwrap().permissions().mode() & 0o777 != 0o640 {
+            return;
+        }
+        assert_eq!(mode_too_open(&path), Some(0o640));
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o604)).unwrap();
+        assert_eq!(mode_too_open(&path), Some(0o604));
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+        assert_eq!(mode_too_open(&path), None);
+        assert_eq!(mode_too_open(&dir.path().join("missing")), None);
+    }
+
+    #[cfg(not(unix))]
+    #[test]
+    fn open_modes_stub() {
+        let dir = scratch();
+        let path = dir.path().join("rusthole.toml");
+        std::fs::write(&path, b"x").unwrap();
+        assert_eq!(mode_too_open(&path), None);
     }
 
     #[test]

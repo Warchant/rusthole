@@ -15,6 +15,9 @@ rusthole reads one TOML file. The default path is `/etc/rusthole/rusthole.toml`.
 - Each section and each field has a default. A file with only `config_version = 1` is valid.
 - An unknown key is an error. Thus a typing error does not go unseen.
 - The file holds secrets (the password hash). rusthole writes it with mode 0600.
+  `rusthole run` and `rusthole check-config` print a warning (and log a WARN) when the
+  group or other users can read or write the file (amendment A7, m14). Fix it with
+  `chmod 600 rusthole.toml`. Windows builds do not check the mode.
 - An error message about the file gives the line, the column and the problem. It never quotes
   the text of the line or a string value, because that text can be a secret.
 - Domain names can be Unicode. When rusthole loads the file, it changes each valid domain
@@ -51,7 +54,7 @@ flowchart LR
 | `doh.listen` | list of text | `["auto"]` | Like `dns_listen`. |
 | `doh.port` | integer | `443` | DoH port. It must not be `dns_port` when DoH is on, because DNS also uses TCP. |
 | `admin.enabled` | bool | `true` | Admin UI and REST API (HTTPS). |
-| `admin.listen` | list of text | `["auto"]` | Like `dns_listen`. |
+| `admin.listen` | list of text | `["auto"]` | The values of `dns_listen`. But the admin listener binds one time, at the start: it does not bind again when the interfaces change (a restart does). An address that cannot be bound gives an ERROR log; DNS runs on, also when no admin address is bound. |
 | `admin.port` | integer | `8443` | Admin port. When the admin listener is on, it must not be `dns_port`, and it must not be the DoH port when DoH is on. |
 
 ### `[upstreams]`

@@ -3,7 +3,8 @@
 //!
 //! The command changes `admin.password_hash` (or `admin.totp_secret`) with `toml_edit`, so
 //! comments and order stay, and writes the file atomically with mode 0600. A running
-//! rusthole reads the changed file at the next login.
+//! rusthole reads the changed file at the next API request (at most 2 s later) and ends all
+//! open sessions (m13).
 
 use std::io::{self, BufRead, IsTerminal, Read, Write};
 use std::path::Path;
@@ -108,7 +109,7 @@ pub(crate) fn set_password(
     edit_file(path, |c| c.admin.password_hash = hash).map_err(|e| write_error(path, e))?;
     writeln!(
         out,
-        "The admin password is set in {}. A running rusthole uses it at the next login.",
+        "The admin password is set in {}. A running rusthole uses it at the next request and ends all open sessions.",
         path.display()
     )?;
     writeln!(
@@ -140,7 +141,7 @@ pub(crate) fn setup_totp(
     edit_file(path, |c| c.admin.totp_secret = secret).map_err(|e| write_error(path, e))?;
     writeln!(
         out,
-        "TOTP is on. A login now needs the password and a code."
+        "TOTP is on. A login now needs the password and a code. A running rusthole ends all open sessions at the next request."
     )?;
     Ok(ExitCode::SUCCESS)
 }
@@ -148,7 +149,10 @@ pub(crate) fn setup_totp(
 /// Turns TOTP off.
 fn disable(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
     edit_file(path, |c| c.admin.totp_secret.clear()).map_err(|e| write_error(path, e))?;
-    writeln!(out, "TOTP is off.")?;
+    writeln!(
+        out,
+        "TOTP is off. A running rusthole ends all open sessions at the next request."
+    )?;
     Ok(ExitCode::SUCCESS)
 }
 

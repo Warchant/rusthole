@@ -127,8 +127,12 @@ sequenceDiagram
   seconds, so an address that waits in a long queue for more than 5 seconds can be queued a
   second time (known limit: at most one extra lookup).
 - Time limit: 1 second for UDP and 1 second for the TCP retry.
-- Cache (4096 entries): a name for its record TTL, at least 60 seconds and at most 1 hour;
-  "no name" for 5 minutes; a timeout or an I/O error for 30 seconds.
+- Cache (4096 entries): a name for its record TTL, at least 60 seconds and at most 1 hour.
+  A name from `local_dns.records` has the local record TTL (300 s). "No name" for 5
+  minutes; a timeout or an I/O error for 30 seconds.
+- A config change (a live apply) clears the PTR cache and the client cache (m10). A lookup
+  that started before the change does not store its result. Thus a moved or removed local
+  record does not keep its old name or group.
 - The match is exact: the PTR name `printer.lan` matches the client `printer.lan`, not
   `printer`.
 
@@ -272,6 +276,13 @@ flowchart LR
   fixed seed (tests only).
 - Shutdown: the DNS server stops first, then the identity tasks. A start error of the
   server also stops the identity tasks. Tests prove both paths.
+- Identity sync (`rusthole run`, each 60 s): the MAC address and the name of each client
+  address go into the statistics store. Each round reads the local zone of the resolver now,
+  so a live apply of local records reaches the statistics in one round (m11). The name is
+  the local record name, else the PTR name, else the stored name. A stored name that the
+  local zone of the last round gave to the address is cleared when the zone and the PTR
+  cache give no name now (the record was removed). A PTR name stays when its cache entry
+  ends. A record that was removed while rusthole was stopped keeps its stored name.
 
 ## Limits
 

@@ -91,6 +91,8 @@ fn env_for(
         stats,
         rule_ids: RuleIds::new(cfg),
         config_path: "rusthole.toml".to_owned(),
+        certs: None,
+        cert_check: CERT_CHECK,
     }
 }
 
@@ -249,8 +251,11 @@ async fn a_dns_start_error_stops_the_started_parts() {
     drop(blocker);
 }
 
+/// m16: a failed admin bind must not stop DNS (owner decision). rusthole logs an ERROR and
+/// runs DNS with no admin listener. This test replaces the old test that asserted the
+/// opposite (`an_admin_start_error_stops_the_dns_server_too`).
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn an_admin_start_error_stops_the_dns_server_too() {
+async fn an_admin_bind_error_keeps_dns_running() {
     let dir = tempfile::tempdir().unwrap();
     let (cfg, text) = test_config(dir.path(), "http://127.0.0.1:9/list.txt");
     let path = dir.path().join("rusthole.toml");
@@ -261,18 +266,287 @@ async fn an_admin_start_error_stops_the_dns_server_too() {
     let src = Arc::new(StaticNeighbors::default());
     let neighbors: Arc<dyn NeighborSource> = src.clone();
     let env = env_for(&cfg, neighbors, busy_addr, None);
-    let err = serve_all(
-        store,
-        settings_for(&cfg, 0),
-        test_deps(),
-        env,
-        std::future::pending(),
-        |_| panic!("the server must not start"),
-    )
-    .await
-    .err()
-    .unwrap();
-    assert!(format!("{err:#}").contains("admin"), "{err:#}");
+    let (stop_tx, stop_rx) = tokio::sync::oneshot::channel::<()>();
+    let (ready_tx, ready_rx) =
+        tokio::sync::oneshot::channel::<(Vec<BoundListener>, Vec<SocketAddr>)>();
+    let settings = settings_for(&cfg, 0);
+    let task = tokio::spawn(async move {
+        serve_all(
+            store,
+            settings,
+            test_deps(),
+            env,
+            async move {
+                let _ = stop_rx.await;
+            },
+            move |r| {
+                let _ = ready_tx.send((r.dns.clone(), r.admin.clone()));
+            },
+        )
+        .await
+    });
+    let (dns, admin) = tokio::time::timeout(Duration::from_secs(20), ready_rx)
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(admin.is_empty(), "no admin address is bound");
+    let m = ask(dns[0].udp, "nas.lan.").await.unwrap();
+    assert!(m.metadata.authoritative, "DNS must answer");
+    stop_tx.send(()).unwrap();
+    tokio::time::timeout(Duration::from_secs(20), task)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
     assert!(released(&src).await);
     drop(busy);
+}
+
+/// A self-signed certificate (PEM pair) for `127.0.0.1`, `localhost` and `extra`.
+fn cert_pair(extra: &[&str]) -> rusthole_tls::generate::GeneratedPair {
+    let mut names: std::collections::BTreeSet<String> =
+        extra.iter().map(|n| (*n).to_owned()).collect();
+    names.insert("localhost".to_owned());
+    let sans = rusthole_tls::SanSet {
+        names,
+        ips: [IpAddr::V4(Ipv4Addr::LOCALHOST)].into_iter().collect(),
+    };
+    rusthole_tls::generate::self_signed(&sans, rusthole_tls::now_unix() - 60).unwrap()
+}
+
+fn der_of(pem: &str) -> Vec<u8> {
+    use rustls::pki_types::pem::PemObject;
+    rustls::pki_types::CertificateDer::from_pem_slice(pem.as_bytes())
+        .unwrap()
+        .to_vec()
+}
+
+/// The certificate that the TLS server at `addr` shows to a new connection.
+async fn served_cert(addr: SocketAddr, trust: &[&str]) -> Vec<u8> {
+    use rustls::pki_types::pem::PemObject;
+    let mut roots = rustls::RootCertStore::empty();
+    for pem in trust {
+        roots
+            .add(rustls::pki_types::CertificateDer::from_pem_slice(pem.as_bytes()).unwrap())
+            .unwrap();
+    }
+    let cfg = rustls::ClientConfig::builder_with_provider(rusthole_tls::provider())
+        .with_safe_default_protocol_versions()
+        .unwrap()
+        .with_root_certificates(roots)
+        .with_no_client_auth();
+    let connector = tokio_rustls::TlsConnector::from(Arc::new(cfg));
+    let tcp = tokio::net::TcpStream::connect(addr).await.unwrap();
+    let name = rustls::pki_types::ServerName::IpAddress(Ipv4Addr::LOCALHOST.into());
+    let tls = tokio::time::timeout(Duration::from_secs(5), connector.connect(name, tcp))
+        .await
+        .unwrap()
+        .unwrap();
+    tls.get_ref().1.peer_certificates().unwrap()[0].to_vec()
+}
+
+/// M2: in mode `file`, a new certificate file is used for the next TLS connection of the
+/// admin listener and of the DoH listener (one shared store), with no restart. m18: the
+/// live listener list has the DoH address. The reload task stops with the other parts.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn a_new_certificate_file_is_used_for_new_connections() {
+    let dir = tempfile::tempdir().unwrap();
+    let (mut cfg, _) = test_config(dir.path(), "http://127.0.0.1:9/list.txt");
+    let (cert_path, key_path) = (dir.path().join("cert.pem"), dir.path().join("key.pem"));
+    let a = cert_pair(&[]);
+    std::fs::write(&cert_path, &a.cert_pem).unwrap();
+    std::fs::write(&key_path, &a.key_pem).unwrap();
+    cfg.tls.mode = Some(rusthole_core::config::TlsMode::File);
+    cfg.tls.cert_path = Some(cert_path.display().to_string());
+    cfg.tls.key_path = Some(key_path.display().to_string());
+    cfg.server.doh.enabled = true;
+    let text = cfg.to_toml_string().unwrap();
+    let path = dir.path().join("rusthole.toml");
+    std::fs::write(&path, &text).unwrap();
+    let store = Arc::new(ConfigStore::new(path, text, &cfg));
+    let (certs, doh_tls) = crate::doh::server_tls(&cfg).unwrap().unwrap();
+    let mut env = env_for(
+        &cfg,
+        Arc::new(StaticNeighbors::default()),
+        "127.0.0.1:0".parse().unwrap(),
+        None,
+    );
+    env.certs = Some(Arc::clone(&certs));
+    env.cert_check = Duration::from_millis(100);
+    let mut settings = settings_for(&cfg, 0);
+    settings.doh = Some(rusthole_dns::DohSettings {
+        listen: ListenMode::Addrs(vec![IpAddr::V4(Ipv4Addr::LOCALHOST)]),
+        port: 0,
+        limits: rusthole_dns::DohLimits::default(),
+    });
+    let deps = ServerDeps {
+        doh_tls: Some(doh_tls),
+        ..test_deps()
+    };
+    let (stop_tx, stop_rx) = tokio::sync::oneshot::channel::<()>();
+    let (ready_tx, ready_rx) =
+        tokio::sync::oneshot::channel::<(Vec<SocketAddr>, Vec<(String, SocketAddr)>)>();
+    let task = tokio::spawn(async move {
+        serve_all(
+            store,
+            settings,
+            deps,
+            env,
+            async move {
+                let _ = stop_rx.await;
+            },
+            move |r| {
+                let _ = ready_tx.send((r.admin.clone(), live_listeners(r.server)));
+            },
+        )
+        .await
+    });
+    let (admin, listeners) = tokio::time::timeout(Duration::from_secs(20), ready_rx)
+        .await
+        .unwrap()
+        .unwrap();
+    let doh: Vec<SocketAddr> = listeners
+        .iter()
+        .filter(|(k, _)| k == "doh")
+        .map(|(_, a)| *a)
+        .collect();
+    assert_eq!(doh.len(), 1, "{listeners:?}");
+    assert!(listeners.iter().any(|(k, _)| k == "dns"), "{listeners:?}");
+    let b = cert_pair(&["new-name.lan"]);
+    let trust = [a.cert_pem.as_str(), b.cert_pem.as_str()];
+    assert_eq!(served_cert(admin[0], &trust).await, der_of(&a.cert_pem));
+    assert_eq!(served_cert(doh[0], &trust).await, der_of(&a.cert_pem));
+    // The new pair has one more name: the files differ in size, so the stamps differ.
+    std::fs::write(&key_path, &b.key_pem).unwrap();
+    std::fs::write(&cert_path, &b.cert_pem).unwrap();
+    let want = der_of(&b.cert_pem);
+    let mut seen = false;
+    for _ in 0..100 {
+        if served_cert(admin[0], &trust).await == want {
+            seen = true;
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    assert!(seen, "the admin listener must use the new certificate");
+    assert_eq!(served_cert(doh[0], &trust).await, want);
+    stop_tx.send(()).unwrap();
+    tokio::time::timeout(Duration::from_secs(20), task)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    // Each part that held the store (the reload task, the listeners) stopped.
+    let mut free = false;
+    for _ in 0..500 {
+        if Arc::strong_count(&certs) == 1 {
+            free = true;
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert!(free, "a task still holds the certificate store");
+}
+
+#[test]
+fn cert_check_policy() {
+    let hour = Duration::from_secs(3600);
+    assert!(cert_check_due(true, false, Duration::ZERO));
+    assert!(cert_check_due(false, true, Duration::ZERO));
+    assert!(!cert_check_due(false, false, Duration::from_secs(3599)));
+    assert!(cert_check_due(false, false, hour));
+}
+
+/// m11: when a stored name is cleared, kept or replaced.
+#[test]
+fn identity_names() {
+    use rusthole_store::Identity;
+    let id = |mac: Option<&str>, name: Option<&str>| Identity {
+        mac: mac.map(str::to_owned),
+        name: name.map(str::to_owned),
+    };
+    let mac = Some("02:00:00:00:00:01");
+    let s = |v: &str| Some(v.to_owned());
+    // A new local name replaces the stored name.
+    assert_eq!(
+        next_identity(&id(mac, Some("old.lan")), None, s("nas.lan"), true),
+        Some(id(mac, Some("nas.lan")))
+    );
+    // A removed local record clears the name; the MAC stays.
+    assert_eq!(
+        next_identity(&id(mac, Some("nas.lan")), None, None, true),
+        Some(id(mac, None))
+    );
+    // A PTR name stays when its cache entry ends.
+    assert_eq!(
+        next_identity(&id(mac, Some("printer.lan")), None, None, false),
+        None
+    );
+    // No change: nothing to write.
+    assert_eq!(
+        next_identity(
+            &id(mac, Some("nas.lan")),
+            s("02:00:00:00:00:01"),
+            s("nas.lan"),
+            true
+        ),
+        None
+    );
+    assert_eq!(next_identity(&Identity::default(), None, None, false), None);
+    // A new MAC is written.
+    assert_eq!(
+        next_identity(&Identity::default(), s("02:00:00:00:00:02"), None, false),
+        Some(id(Some("02:00:00:00:00:02"), None))
+    );
+}
+
+/// m11: the identity sync reads the local zone of the resolver at each round. A record that
+/// a live apply adds gives the name; a record that a live apply removes clears it.
+#[tokio::test]
+async fn the_identity_sync_follows_live_local_records() {
+    use rusthole_core::stats::{StatsEvent, Status};
+    let service = StatsService::start(&StatsSettings::ram_only()).unwrap();
+    let stats = service.stats();
+    let client = IpAddr::V4(Ipv4Addr::new(192, 0, 2, 10));
+    stats
+        .apply(&mut vec![StatsEvent {
+            at: rusthole_store::wall_now(),
+            client,
+            name: "example.com".to_owned(),
+            qtype: 1,
+            status: Status::Forwarded,
+            reason: None,
+            upstream: Some("192.0.2.53:53".to_owned()),
+            duration_us: 1000,
+        }])
+        .unwrap();
+    let name_of = || {
+        stats
+            .clients_index()
+            .unwrap()
+            .all()
+            .find(|m| m.ip == client)
+            .and_then(|m| m.name.clone())
+    };
+    let (mut cfg, _) = test_config(Path::new("."), "http://127.0.0.1:9/list.txt");
+    cfg.local_dns.records.clear();
+    let zone = |c: &Config| Arc::new(rusthole_core::localdns::LocalZone::from_config(c).0);
+    let resolver = rusthole_dns::ClientResolver::new(
+        ClientTable::from_config(&cfg).0,
+        zone(&cfg),
+        Arc::new(rusthole_dns::NeighborTable::default()),
+        IdentitySettings::default(),
+    );
+    let prev = sync_once(&stats, &resolver, None).unwrap();
+    assert_eq!(name_of(), None);
+    // A live apply adds the record `nas.lan` for the client address.
+    let (with, _) = test_config(Path::new("."), "http://127.0.0.1:9/list.txt");
+    assert!(resolver.set_config(ClientTable::from_config(&with).0, zone(&with)));
+    let prev = sync_once(&stats, &resolver, Some(&prev)).unwrap();
+    assert_eq!(name_of().as_deref(), Some("nas.lan"));
+    // A live apply removes it again.
+    assert!(resolver.set_config(ClientTable::from_config(&cfg).0, zone(&cfg)));
+    sync_once(&stats, &resolver, Some(&prev)).unwrap();
+    assert_eq!(name_of(), None);
+    drop(service);
 }

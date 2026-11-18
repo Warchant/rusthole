@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 use rusthole_core::Config;
 
-use crate::host::{HostAllow, host_allowed};
+use crate::host::{HostAllow, cross_site, host_allowed, origin_allowed};
 use crate::model::{
     self, BlockingReq, ClientCreate, ClientPatch, CnameCreate, CnamePatch, CodeReq, DisableTotpReq,
     ForwarderCreate, ForwarderPatch, GroupCreate, GroupPatch, ListCreate, ListPatch, LoginReq,
@@ -100,13 +100,22 @@ pub fn api_json(data: &[u8]) {
     }
 }
 
-/// Runs the `Host` check on arbitrary bytes. It must never panic.
+/// Runs the `Host` check and the `Origin` check on arbitrary bytes. It must never panic.
+/// The bytes after the first 0 byte are the `Sec-Fetch-Site` value.
 pub fn host_header(data: &[u8]) {
     static ALLOW: OnceLock<HostAllow> = OnceLock::new();
     let allow =
         ALLOW.get_or_init(|| HostAllow::new(8443, ["rusthole.lan"], [Ipv4Addr::new(192, 0, 2, 2)]));
     let text = String::from_utf8_lossy(data);
     let _ = host_allowed(&text, allow);
+    let (origin, site) = text.split_once('\0').unwrap_or((&text, ""));
+    let allowed = origin_allowed(origin, allow);
+    let refused = cross_site("POST", Some(site), [Some(origin)], allow);
+    // A write with an origin that is not allowed is always refused.
+    assert!(
+        allowed || refused,
+        "a foreign origin passed the cross-site check"
+    );
 }
 
 #[cfg(test)]
@@ -123,5 +132,7 @@ mod tests {
         }
         host_header(b"localhost:8443");
         host_header(&[0xff, 0xfe]);
+        host_header(b"https://rusthole.lan:8443\0same-origin");
+        host_header(b"null\0cross-site");
     }
 }

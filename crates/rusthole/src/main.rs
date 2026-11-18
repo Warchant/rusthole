@@ -123,6 +123,12 @@ fn load_config_text(path: &Path, out: &mut impl Write) -> anyhow::Result<Option<
         .with_context(|| format!("cannot read {}", path.display()))?;
     let text = String::from_utf8(bytes)
         .with_context(|| format!("{} is not UTF-8 text", path.display()))?;
+    // m14 (amendment A7): the file holds the password hash and the TOTP secret.
+    if let Some(mode) = fsutil::mode_too_open(path) {
+        let text = config_mode_warning(path, mode);
+        tracing::warn!("{text}");
+        writeln!(out, "{text}")?;
+    }
     let config = match Config::from_toml_str(&text) {
         Ok(c) => c,
         Err(e) => {
@@ -139,6 +145,15 @@ fn load_config_text(path: &Path, out: &mut impl Write) -> anyhow::Result<Option<
     }
     writeln!(out, "{} problem(s) found", issues.len())?;
     Ok(None)
+}
+
+/// The warning for a config file that other users can read or write.
+fn config_mode_warning(path: &Path, mode: u32) -> String {
+    format!(
+        "warning: {} has mode {mode:04o}; the group or other users can read or write it. It holds the password hash and the TOTP secret. Run: chmod 600 {}",
+        path.display(),
+        path.display()
+    )
 }
 
 /// Header of an imported config file.
@@ -195,6 +210,29 @@ fn init_logging() {
 mod tests {
     use super::*;
     use clap::CommandFactory;
+
+    /// m14: `check-config` (and `run`, through the same loader) warns when other users can
+    /// read the config file.
+    #[cfg(unix)]
+    #[test]
+    fn a_readable_config_gives_a_warning() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("rusthole.toml");
+        std::fs::write(&path, Config::default().to_toml_string().unwrap()).unwrap();
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644)).unwrap();
+        if std::fs::metadata(&path).unwrap().permissions().mode() & 0o777 != 0o644 {
+            return; // No Unix modes on this file system.
+        }
+        let mut out = Vec::new();
+        assert_eq!(check_config(&path, &mut out).unwrap(), ExitCode::SUCCESS);
+        let text = String::from_utf8(out).unwrap();
+        assert!(text.contains("mode 0644"), "{text}");
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+        let mut out = Vec::new();
+        assert_eq!(check_config(&path, &mut out).unwrap(), ExitCode::SUCCESS);
+        assert!(!String::from_utf8(out).unwrap().contains("warning"));
+    }
 
     #[test]
     fn cli_is_valid() {

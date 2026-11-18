@@ -149,15 +149,32 @@ rusthole keeps the files that it makes in `<data_dir>/tls/`. The default `data_d
 ## Reload without a restart
 
 The certificate store (`CertStore`) gives rustls the current certificate for each new
-connection. The caller asks the store to reload:
+connection. `rusthole run` opens one store. The admin listener and the DoH listener use the
+same store. One task in `run.rs` checks the certificate:
 
-- Mode `file`: rusthole reads the files again when the size or the modification time of the
-  certificate file or the key file changed. Thus a renewal tool (for example an ACME client)
-  can replace the files.
-- Modes `self-signed` and `local-ca`: rusthole makes a new certificate when renewal is due or
-  when the names changed.
+```mermaid
+flowchart LR
+    tick[each minute] --> scan[read the local IPv4 addresses]
+    scan --> due{check due?}
+    due -->|mode file: always| reload[CertStore::reload on a blocking thread, 60 s limit]
+    due -->|other modes: new addresses, or 1 hour since the last check| reload
+    due -->|no| tick
+    reload -->|new certificate| next[the next TLS connection gets it]
+    reload -->|error| keep[ERROR log; the current certificate stays]
+```
+
+- Mode `file`: each minute, rusthole compares the size and the modification time of the
+  certificate file and the key file. When one changed, it reads the files again. Thus a
+  renewal tool (for example an ACME client) can replace the files with no restart. Write
+  the key file and the certificate file in one step (for example a rename), or the first
+  check can see a pair that does not match; that check keeps the old certificate, and the
+  next check reads the files again.
+- Modes `self-signed` and `local-ca`: each hour, and each minute when the set of local IPv4
+  addresses changed, rusthole makes a new certificate when renewal is due or when the names
+  changed (for example a new LAN address).
 - A reload that fails (a bad file, a key that does not match, a missing file) keeps the
-  current certificate. Open connections do not change.
+  current certificate and logs an ERROR. Open connections do not change.
+- The task stops with the other parts at the stop signal.
 
 ## Time and the clock
 

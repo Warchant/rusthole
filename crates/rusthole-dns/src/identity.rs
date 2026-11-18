@@ -28,6 +28,7 @@
 
 use std::net::IpAddr;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
 use arc_swap::ArcSwap;
@@ -38,7 +39,9 @@ use rusthole_core::DomainName;
 use rusthole_core::clients::{
     CLIENT_CACHE_ENTRIES, CLIENT_CACHE_TTL_MS, ClientFacts, ClientTable, MatchedBy, TtlLru,
 };
-use rusthole_core::localdns::{LocalAnswer, LocalData, LocalZone, qtype, reverse_name};
+use rusthole_core::localdns::{
+    DEFAULT_LOCAL_TTL, LocalAnswer, LocalData, LocalZone, qtype, reverse_name,
+};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
@@ -118,6 +121,9 @@ struct PtrState {
     cache: Mutex<TtlLru<IpAddr, PtrEntry>>,
     tx: mpsc::Sender<IpAddr>,
     rx: Mutex<Option<mpsc::Receiver<IpAddr>>>,
+    /// Goes up by one at each config change. A lookup that started before the change does
+    /// not store its result (it can hold a name of the old zone).
+    epoch: AtomicU64,
 }
 
 /// Finds the MAC address and the groups of a client. See the module documentation.
@@ -147,6 +153,7 @@ impl ClientResolver {
                 cache: Mutex::new(TtlLru::new(settings.ptr_cache_entries)),
                 tx,
                 rx: Mutex::new(Some(rx)),
+                epoch: AtomicU64::new(0),
             }
         });
         Self {
@@ -161,18 +168,34 @@ impl ClientResolver {
     }
 
     /// Uses a new client table and local zone after a config change (part P5), and clears
-    /// the client cache. Returns false when the new table has host-name clients but the
-    /// resolver has no PTR task: those clients need a restart.
+    /// the client cache and the PTR cache (m10: a name of an old local record must not
+    /// stay). Returns false when the new table has host-name clients but the resolver has
+    /// no PTR task: those clients need a restart.
     pub fn set_config(&self, table: ClientTable, zone: Arc<LocalZone>) -> bool {
         let needs_ptr = table.has_hostnames() && self.ptr.is_none();
         self.table.store(Arc::new(table));
         self.zone.store(zone);
+        if let Some(ptr) = &self.ptr {
+            ptr.epoch.fetch_add(1, Ordering::AcqRel);
+            if let Some(mut c) = ptr.cache.try_lock_for(LOCK_TIMEOUT) {
+                c.clear();
+            } else {
+                tracing::warn!(
+                    "the PTR cache lock timed out; old client names stay for up to 1 hour"
+                );
+            }
+        }
         if let Some(mut c) = self.cache.try_lock_for(LOCK_TIMEOUT) {
             c.clear();
         } else {
             tracing::warn!("the client cache lock timed out; old client facts stay for up to 10 s");
         }
         !needs_ptr
+    }
+
+    /// The local zone now (the zone of the last [`ClientResolver::set_config`]).
+    pub fn zone(&self) -> Arc<LocalZone> {
+        self.zone.load_full()
     }
 
     /// The neighbor table that the resolver reads.
@@ -259,12 +282,24 @@ impl ClientResolver {
         }
     }
 
-    /// Stores the result of a PTR lookup and drops the cached client result.
-    fn store_ptr(&self, ip: IpAddr, entry: PtrEntry, ttl: Duration) {
+    /// The PTR epoch now (see [`PtrState::epoch`]).
+    fn ptr_epoch(&self) -> u64 {
+        self.ptr
+            .as_ref()
+            .map_or(0, |p| p.epoch.load(Ordering::Acquire))
+    }
+
+    /// Stores the result of a PTR lookup and drops the cached client result. A lookup that
+    /// started before a config change (`epoch` is old) stores nothing.
+    fn store_ptr(&self, ip: IpAddr, entry: PtrEntry, ttl: Duration, epoch: u64) {
         let now = self.clock.now_ms();
         if let Some(ptr) = &self.ptr
             && let Some(mut c) = ptr.cache.try_lock_for(LOCK_TIMEOUT)
         {
+            if ptr.epoch.load(Ordering::Acquire) != epoch {
+                tracing::debug!(%ip, "the config changed during a PTR lookup; the result is dropped");
+                return;
+            }
             c.insert(ip, entry, ms(ttl), now);
         }
         if let Some(mut c) = self.cache.try_lock_for(LOCK_TIMEOUT) {
@@ -277,8 +312,13 @@ impl ClientResolver {
     /// time to live.
     async fn lookup_ptr(&self, ip: IpAddr) -> (PtrEntry, Duration) {
         let s = &self.settings;
+        // A local name has the TTL of a local record (docs/CLIENTS.md), in the PTR limits.
+        let local_ttl = |ttl: u32| {
+            Duration::from_secs(u64::from(ttl))
+                .clamp(s.ptr_min_ttl, s.ptr_max_ttl.max(s.ptr_min_ttl))
+        };
         if let Some(name) = self.zone.load().names_of(ip).first() {
-            return (PtrEntry::Known(name.clone()), s.ptr_max_ttl);
+            return (PtrEntry::Known(name.clone()), local_ttl(DEFAULT_LOCAL_TTL));
         }
         let Some(rev) = reverse_name(ip) else {
             return (PtrEntry::Unknown, s.ptr_negative_ttl);
@@ -286,11 +326,11 @@ impl ClientResolver {
         let server = match self.zone.load().lookup(&rev, qtype::PTR) {
             LocalAnswer::Answer(records) => {
                 let name = records.into_iter().find_map(|r| match r.data {
-                    LocalData::Ptr(n) => Some(n),
+                    LocalData::Ptr(n) => Some((n, r.ttl)),
                     _ => None,
                 });
                 return match name {
-                    Some(n) => (PtrEntry::Known(n), s.ptr_max_ttl),
+                    Some((n, ttl)) => (PtrEntry::Known(n), local_ttl(ttl)),
                     None => (PtrEntry::Unknown, s.ptr_negative_ttl),
                 };
             }
@@ -354,9 +394,10 @@ async fn ptr_worker(
                 None => break,
             },
         };
+        let epoch = resolver.ptr_epoch();
         let (entry, ttl) = resolver.lookup_ptr(ip).await;
         tracing::debug!(%ip, ?entry, "client name lookup done");
-        resolver.store_ptr(ip, entry, ttl);
+        resolver.store_ptr(ip, entry, ttl, epoch);
     }
 }
 

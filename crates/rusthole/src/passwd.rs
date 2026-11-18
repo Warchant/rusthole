@@ -5,7 +5,7 @@
 //! comments and order stay, and writes the file atomically with mode 0600. A running
 //! rusthole reads the changed file at the next login.
 
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, IsTerminal, Read, Write};
 use std::path::Path;
 use std::process::ExitCode;
 
@@ -24,7 +24,6 @@ pub(crate) fn run(
     disable_totp: bool,
     out: &mut impl Write,
 ) -> anyhow::Result<ExitCode> {
-    let mut read_secret = |prompt: &str| rpassword::prompt_password(prompt);
     if disable_totp {
         return disable(path, out);
     }
@@ -38,7 +37,30 @@ pub(crate) fn run(
         };
         return setup_totp(path, &mut read_line, rusthole_store::wall_now(), out);
     }
-    set_password(path, &mut read_secret, out)
+    // Without a terminal (a pipe, a file, a CI job) rpassword cannot open `/dev/tty`, so
+    // the password comes from stdin. It never comes from the command line or the
+    // environment, where other users can see it.
+    if io::stdin().is_terminal() {
+        set_password(path, &mut |p: &str| rpassword::prompt_password(p), out)
+    } else {
+        set_password(path, &mut read_stdin_line, out)
+    }
+}
+
+/// The longest line that the stdin path reads: a password of the largest size, and the line
+/// end.
+const MAX_STDIN_LINE: u64 = MAX_PASSWORD_LEN as u64 + 2;
+
+/// Reads one line from stdin, with at most [`MAX_STDIN_LINE`] bytes. The prompt goes to
+/// stderr. A longer line gives a text that is too long, and `set_password` refuses it.
+fn read_stdin_line(prompt: &str) -> io::Result<String> {
+    eprint_prompt(prompt)?;
+    let mut line = String::new();
+    io::stdin()
+        .lock()
+        .take(MAX_STDIN_LINE)
+        .read_line(&mut line)?;
+    Ok(line)
 }
 
 /// Writes a prompt to stderr (the output of the command stays on stdout).

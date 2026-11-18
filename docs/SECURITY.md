@@ -82,7 +82,9 @@ without credentials and expects 401.
   (503 after that) and runs at most 30 s on a blocking thread.
 - With no password in the config, every login fails with 401 `password_not_set`. There is
   no setup endpoint. Set the password with `rusthole passwd` (the password is read two
-  times from the terminal, with no echo; at least 10 bytes). A running rusthole reads the
+  times from the terminal, with no echo; at least 10 bytes; when stdin is not a terminal,
+  for example in a script, it reads two lines from stdin; never from the command line or
+  the environment, where other users can see it). A running rusthole reads the
   changed file at the next login (a login reads the file at most once in 2 s, after the ban
   check).
 

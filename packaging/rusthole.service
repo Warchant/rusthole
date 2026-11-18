@@ -1,0 +1,81 @@
+# systemd unit of rusthole. packaging/install.sh installs it to
+# /etc/systemd/system/rusthole.service. docs/INSTALL.md explains the install.
+#
+# rusthole runs as the system user "rusthole", not as root. The only capability is
+# CAP_NET_BIND_SERVICE: it binds port 53 (DNS) and port 443 (DoH).
+#
+# What rusthole needs, and the option that allows it:
+#   - bind ports 53, 443 and 8443 on IPv4        CAP_NET_BIND_SERVICE, AF_INET
+#   - read the local interface addresses         AF_NETLINK (getifaddrs)
+#   - send READY=1 and STOPPING=1 to systemd     AF_UNIX, Type=notify
+#   - read /proc/net/arp (MAC of a client)       /proc stays readable (no ProtectProc,
+#                                                no ProcSubset, no PrivateNetwork)
+#   - write rusthole.toml atomically (admin UI,  ReadWritePaths=/etc/rusthole
+#     `rusthole passwd`)                         (the directory belongs to rusthole)
+#   - write lists, the query database, TLS files ReadWritePaths=/var/lib/rusthole
+# v1 uses IPv4 transport only (amendment A11), so AF_INET6 is not allowed.
+
+[Unit]
+Description=rusthole DNS ad blocker
+Documentation=https://github.com/warchant/rusthole/blob/main/docs/INSTALL.md
+Wants=network-online.target
+After=network-online.target
+# rusthole gives DNS service to the host and the LAN.
+Wants=nss-lookup.target
+Before=nss-lookup.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+ExecStart=/usr/local/bin/rusthole run -c /etc/rusthole/rusthole.toml
+Environment=RUSTHOLE_LOG=info
+# The first start makes a TLS certificate and loads the lists from the disk cache.
+TimeoutStartSec=120
+# rusthole gives the queries in flight 5 s, then stops all tasks (about 15 s at most).
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=2
+
+User=rusthole
+Group=rusthole
+UMask=0077
+StateDirectory=rusthole
+StateDirectoryMode=0750
+ConfigurationDirectory=rusthole
+ConfigurationDirectoryMode=0750
+ReadWritePaths=/var/lib/rusthole /etc/rusthole
+
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
+
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RemoveIPC=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# Open files at the largest load, from the limits in the code:
+#   DNS over TCP 256 (+16 for off-net clients), DoH 128, admin UI 256,
+#   upstream queries in flight 512 (one socket each), DoT 2 per upstream,
+#   list downloads, two sockets per listen address, SQLite and TLS files.
+# That is about 1200. 4096 gives room for many listen addresses.
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

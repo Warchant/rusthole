@@ -77,8 +77,10 @@ jobs:
             exit 1
           fi
 
-  # Prove the static musl build on each part (amendment A2).
+  # Prove the static musl build on each part (amendment A2). The binary holds the built web
+  # UI from the web job (part P8), so the smoke job tests the real UI.
   musl:
+    needs: web
     strategy:
       fail-fast: false
       matrix:
@@ -86,6 +88,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
       - run: rustup show
       - run: rustup target add ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
@@ -112,11 +118,92 @@ jobs:
             echo "the binary is not static" >&2
             exit 1
           fi
+      - name: Check that the binary holds the built web UI
+        run: |
+          marker="$(grep -oE '/assets/[A-Za-z0-9._-]+\.js' web/dist/index.html | head -n 1)"
+          echo "UI marker: $marker"
+          test -n "$marker"
+          grep -aqF "$marker" target/${{ matrix.target }}/release/rusthole
       - uses: actions/upload-artifact@v4
         with:
           name: rusthole-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/rusthole
           if-no-files-found: error
+
+  # End-to-end test of the x86_64 binary (part P8): plain DNS, blocking, a local record,
+  # login and statistics, DoH, the UI, and a clean stop on SIGTERM. scripts/smoke-test.sh
+  # lists the checks.
+  smoke:
+    needs: musl
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: rusthole-x86_64-unknown-linux-musl
+          path: out
+      - name: Install dig
+        run: command -v dig || (sudo apt-get update && sudo apt-get install -y dnsutils)
+      - name: Smoke test
+        run: |
+          chmod +x out/rusthole
+          bash scripts/smoke-test.sh out/rusthole
+      - name: shellcheck of the scripts
+        run: |
+          shellcheck packaging/install.sh packaging/uninstall.sh scripts/release-build.sh scripts/smoke-test.sh
+
+  # The install script and the hardened systemd unit on a real Ubuntu host (part P8). The
+  # runner has root and systemd; a development machine often has neither.
+  install:
+    needs: musl
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: rusthole-x86_64-unknown-linux-musl
+          path: out
+      - name: Install dig
+        run: command -v dig || (sudo apt-get update && sudo apt-get install -y dnsutils)
+      - name: Install (two times, to prove that the script is idempotent)
+        run: |
+          sudo sh packaging/install.sh --binary out/rusthole
+          sudo sh packaging/install.sh --binary out/rusthole
+          systemctl is-active rusthole.service
+          systemd-analyze verify /etc/systemd/system/rusthole.service
+          test "$(sudo stat -c '%U %a' /etc/rusthole)" = "rusthole 750"
+          test "$(sudo stat -c '%U %a' /var/lib/rusthole)" = "rusthole 750"
+          test "$(sudo stat -c '%U %a' /etc/rusthole/rusthole.toml)" = "rusthole 600"
+      - name: The service answers and the sandbox allows its work
+        run: |
+          addr="$(hostname -I | awk '{print $1}')"
+          dig +time=3 +tries=3 @"$addr" example.com A | tee dig.txt
+          grep -q 'status: NOERROR' dig.txt
+          code="$(curl -sk -o /dev/null -w '%{http_code}' "https://$addr:8443/api/v1/stats/summary")"
+          test "$code" = "401"
+          # The admin password through the config directory (atomic write in /etc/rusthole).
+          printf '%s\n%s\n' ci-password-1234 ci-password-1234 |
+            sudo -u rusthole /usr/local/bin/rusthole passwd -c /etc/rusthole/rusthole.toml
+          sudo grep -q 'password_hash = "\$argon2id' /etc/rusthole/rusthole.toml
+          sudo systemctl restart rusthole.service
+          systemctl is-active rusthole.service
+          sudo journalctl -u rusthole.service --no-pager -o cat | tail -n 40
+          if sudo journalctl -u rusthole.service --no-pager -o cat | grep -E ' ERROR |Permission denied|Operation not permitted'; then
+            echo "the service log has errors" >&2
+            exit 1
+          fi
+      - name: systemd-analyze security
+        run: systemd-analyze security --no-pager rusthole.service
+      - name: Uninstall
+        run: |
+          sudo sh packaging/uninstall.sh
+          test ! -e /usr/local/bin/rusthole
+          # /etc/rusthole is 0750 and owned by rusthole: the runner user cannot enter it.
+          sudo test -e /etc/rusthole/rusthole.toml
+          sudo sh packaging/uninstall.sh --purge
+          test ! -e /etc/rusthole
+          test ! -e /var/lib/rusthole
+          if getent passwd rusthole; then exit 1; fi
 
   deny:
     runs-on: ubuntu-latest

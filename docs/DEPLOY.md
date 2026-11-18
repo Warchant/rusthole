@@ -1,7 +1,7 @@
 # Deploy rusthole
 
-This page tells you how to run the DNS server on a Linux host. Part P8 adds the systemd unit
-and the install script. Until then, start the server by hand.
+This page tells you how to run the DNS server on a Linux host by hand. To install rusthole
+as a systemd service, use the install script: see [INSTALL.md](INSTALL.md).
 
 ## Start the server
 
@@ -24,8 +24,9 @@ and the install script. Until then, start the server by hand.
 4. Stop it with SIGTERM or SIGINT (Ctrl+C). rusthole stops to accept queries, gives the
    queries in flight 5 seconds to end, then stops all tasks.
 
-Port 53 is a privileged port. Give the binary the capability, or run it from a systemd unit
-with `AmbientCapabilities=CAP_NET_BIND_SERVICE` (part P8). Do not run rusthole as root.
+Port 53 is a privileged port. Give the binary the capability, or run it from the systemd
+unit `packaging/rusthole.service` (`AmbientCapabilities=CAP_NET_BIND_SERVICE`). Do not run
+rusthole as root.
 
 ```bash
 sudo setcap cap_net_bind_service=+ep /usr/local/bin/rusthole

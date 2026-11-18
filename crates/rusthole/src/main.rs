@@ -2,9 +2,13 @@
 
 mod doh;
 mod fsutil;
+mod notify;
 mod passwd;
 mod run;
 mod stats_observer;
+// The binary gets the version text from `build.rs`; the tests check the format.
+#[cfg(test)]
+mod version;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -21,10 +25,13 @@ const MAX_CONFIG_BYTES: u64 = 16 * 1024 * 1024;
 /// Largest Teleporter zip that rusthole reads.
 const MAX_ZIP_BYTES: u64 = 1024 * 1024 * 1024;
 
+/// The text of `rusthole --version`: the version and the git commit (`build.rs`).
+const VERSION_TEXT: &str = env!("RUSTHOLE_VERSION_TEXT");
+
 #[derive(Debug, Parser)]
 #[command(
     name = "rusthole",
-    version,
+    version = VERSION_TEXT,
     about = "DNS ad blocker. One static binary."
 )]
 struct Cli {
@@ -54,6 +61,7 @@ enum Command {
         force: bool,
     },
     /// Set the admin password. Reads the password two times from the terminal (no echo).
+    /// When stdin is not a terminal (a pipe or a file), reads two lines from stdin.
     Passwd {
         /// Set up TOTP (a second login factor) instead: prints the otpauth URI one time.
         #[arg(long, conflicts_with = "disable_totp")]
@@ -171,11 +179,14 @@ fn import(
 }
 
 /// Log to stderr. The `RUSTHOLE_LOG` environment variable sets the filter (default `info`).
+/// Colors only when stderr is a terminal.
 fn init_logging() {
     let filter = tracing_subscriber::EnvFilter::try_from_env("RUSTHOLE_LOG")
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    // Colors only on a terminal: the systemd journal and log files get plain text.
     tracing_subscriber::fmt()
         .with_env_filter(filter)
+        .with_ansi(std::io::IsTerminal::is_terminal(&std::io::stderr()))
         .with_writer(std::io::stderr)
         .init();
 }
@@ -188,5 +199,50 @@ mod tests {
     #[test]
     fn cli_is_valid() {
         Cli::command().debug_assert();
+    }
+
+    #[test]
+    fn version_text_has_the_version_and_the_commit() {
+        assert_eq!(
+            VERSION_TEXT,
+            version::version_text(env!("CARGO_PKG_VERSION"), option_env!("RUSTHOLE_COMMIT"))
+        );
+        assert!(VERSION_TEXT.starts_with(concat!(env!("CARGO_PKG_VERSION"), " (commit ")));
+        assert!(VERSION_TEXT.ends_with(')'));
+        let rendered = Cli::command().render_version();
+        assert_eq!(rendered.trim_end(), format!("rusthole {VERSION_TEXT}"));
+    }
+
+    #[test]
+    fn version_format() {
+        use version::{clean_commit, version_text};
+        assert_eq!(
+            version_text("0.1.0", Some("0123456789ABCDEF0123456789abcdef01234567")),
+            "0.1.0 (commit 0123456789ab)"
+        );
+        assert_eq!(
+            version_text("0.1.0", Some("abc1234")),
+            "0.1.0 (commit abc1234)"
+        );
+        assert_eq!(version_text("0.1.0", None), "0.1.0 (commit unknown)");
+        // Text that is not a commit id never goes into the version text.
+        assert_eq!(version_text("0.1.0", Some("abc")), "0.1.0 (commit unknown)");
+        assert_eq!(
+            version_text("0.1.0", Some("not-a-commit-at-all")),
+            "0.1.0 (commit unknown)"
+        );
+        assert_eq!(
+            version_text("0.1.0", Some(&"a".repeat(41))),
+            "0.1.0 (commit unknown)"
+        );
+        assert_eq!(
+            clean_commit(
+                " abcdef0
+"
+            )
+            .as_deref(),
+            Some("abcdef0")
+        );
+        assert_eq!(clean_commit(""), None);
     }
 }

@@ -164,3 +164,104 @@ fn run_refuses_a_bad_config_with_exit_code_1() {
     assert!(err.contains("self-signed"), "{err}");
     assert!(!data.join("tls").exists());
 }
+
+#[test]
+fn version_shows_the_version_and_the_commit() {
+    let o = rusthole(&["--version"]);
+    assert!(o.status.success(), "{o:?}");
+    let text = stdout(&o);
+    let line = text.trim_end();
+    let rest = line
+        .strip_prefix(concat!("rusthole ", env!("CARGO_PKG_VERSION"), " (commit "))
+        .unwrap_or_else(|| panic!("unexpected version text: {line}"));
+    let commit = rest.strip_suffix(')').unwrap();
+    let is_id = (7..=12).contains(&commit.len())
+        && commit
+            .chars()
+            .all(|c| c.is_ascii_digit() || ('a'..='f').contains(&c));
+    assert!(is_id || commit == "unknown", "{line}");
+}
+
+#[test]
+fn passwd_reads_the_password_from_a_pipe() {
+    use std::io::Write as _;
+    use std::process::Stdio;
+
+    let dir = scratch("passwd_reads_the_password_from_a_pipe");
+    let path = dir.join("rusthole.toml");
+    let text = "# keep me\nconfig_version = 1\n";
+    std::fs::write(&path, text).unwrap();
+    let pipe = |input: &str| {
+        let mut child = Command::new(env!("CARGO_BIN_EXE_rusthole"))
+            .args(["passwd", "-c", path.to_str().unwrap()])
+            .env("RUSTHOLE_LOG", "error")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        child
+            .stdin
+            .take()
+            .unwrap()
+            .write_all(input.as_bytes())
+            .unwrap();
+        child.wait_with_output().unwrap()
+    };
+
+    // Two different lines: nothing changes.
+    let o = pipe("correct horse battery\ncorrect horse batterz\n");
+    assert_eq!(o.status.code(), Some(1), "{o:?}");
+    assert_eq!(std::fs::read_to_string(&path).unwrap(), text);
+    // No input at all: nothing changes.
+    let o = pipe("");
+    assert_eq!(o.status.code(), Some(1), "{o:?}");
+    assert_eq!(std::fs::read_to_string(&path).unwrap(), text);
+    // A line that is longer than the password limit (1024 bytes): nothing changes.
+    let long = "a".repeat(4096);
+    let o = pipe(&format!("{long}\n{long}\n"));
+    assert_eq!(o.status.code(), Some(1), "{o:?}");
+    assert_eq!(std::fs::read_to_string(&path).unwrap(), text);
+
+    let o = pipe("correct horse battery\ncorrect horse battery\n");
+    assert!(o.status.success(), "{o:?}");
+    let new = std::fs::read_to_string(&path).unwrap();
+    assert!(new.starts_with("# keep me\n"), "{new}");
+    assert!(new.contains("password_hash = \"$argon2id$"), "{new}");
+    // The output never shows the password.
+    let all = format!("{}{}", stdout(&o), String::from_utf8_lossy(&o.stderr));
+    assert!(!all.contains("correct horse"), "{all}");
+}
+
+/// The default config of `packaging/install.sh` is valid, and it holds the values that the
+/// install script, the systemd unit and docs/INSTALL.md expect.
+#[test]
+fn packaged_default_config_is_valid() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../packaging/rusthole.toml");
+    let o = rusthole(&["check-config", "-c", path.to_str().unwrap()]);
+    assert!(o.status.success(), "{}", stdout(&o));
+    let text = std::fs::read_to_string(&path).unwrap();
+    assert!(text.contains("data_dir = \"/var/lib/rusthole\""), "{text}");
+    assert!(text.contains("port = 8443"), "{text}");
+    // No secret in the template: the password is set with `rusthole passwd`.
+    assert!(!text.contains("password_hash ="), "{text}");
+}
+
+/// The unit runs the binary with the config path that install.sh writes.
+#[test]
+fn systemd_unit_matches_the_install_script() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../packaging");
+    let unit = std::fs::read_to_string(root.join("rusthole.service")).unwrap();
+    let install = std::fs::read_to_string(root.join("install.sh")).unwrap();
+    assert!(
+        unit.contains("ExecStart=/usr/local/bin/rusthole run -c /etc/rusthole/rusthole.toml"),
+        "{unit}"
+    );
+    assert!(unit.contains("Type=notify"));
+    assert!(unit.contains("User=rusthole"));
+    assert!(unit.contains("ReadWritePaths=/var/lib/rusthole /etc/rusthole"));
+    assert!(install.contains("BIN=\"$DESTDIR/usr/local/bin/rusthole\""));
+    assert!(install.contains("CONF=\"$CONF_DIR/rusthole.toml\""));
+    assert!(install.contains("CONF_DIR=\"$DESTDIR/etc/rusthole\""));
+    assert!(install.contains("DATA_DIR=\"$DESTDIR/var/lib/rusthole\""));
+}

@@ -1,0 +1,66 @@
+# rusthole.toml: the default config that packaging/install.sh writes to
+# /etc/rusthole/rusthole.toml when no config is there. docs/CONFIG.md explains each field.
+#
+# Next step: set the admin password (with no password, no login is possible):
+#   sudo -u rusthole rusthole passwd -c /etc/rusthole/rusthole.toml
+# Then open the admin UI: https://<this host>:8443/
+
+config_version = 1
+
+[server]
+# "auto": each IPv4 address of each local interface (no wildcard address).
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+# DNS over HTTPS needs a certificate that the clients trust (docs/DOH.md, docs/TLS.md).
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "udp://1.1.1.1:53"
+
+[blocking]
+enabled = true
+mode = "null"
+
+[acl]
+# Loopback and each local subnet get answers. Add other networks (for example a VPN) here.
+auto_local = true
+allow = []
+
+[stats]
+# One write to the SD card each 60 seconds.
+flush_interval_seconds = 60
+retention_days = 30
+
+[lists]
+refresh_interval_hours = 24
+
+# One block list to start with. Add more lists in the admin UI, or here.
+[[lists.adlists]]
+id = 1
+url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "StevenBlack unified hosts"
+
+[tls]
+# "self-signed" is for the admin UI only. Compare the fingerprint in the log with the one that
+# the browser shows. For DoH, use "local-ca" or "file" (docs/TLS.md).
+mode = "self-signed"
+names = []

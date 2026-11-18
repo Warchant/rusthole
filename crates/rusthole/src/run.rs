@@ -14,7 +14,9 @@
 //!     M->>S: start with the filter (bind, upstream pool, rescan)
 //!     M->>L: start downloads (names through the upstream pool)
 //!     M->>A: TLS store, HTTPS listener, API
+//!     M->>M: systemd READY=1 (notify.rs)
 //!     M->>M: wait for SIGTERM / SIGINT / Ctrl+C
+//!     M->>M: systemd STOPPING=1
 //!     M->>A: shutdown (graceful, then hard stop)
 //!     M->>L: shutdown (deadline)
 //!     M->>S: shutdown (finish in-flight queries, hard stop after grace)
@@ -97,13 +99,28 @@ pub(crate) fn run(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode>
         rule_ids,
         config_path: path.display().to_string(),
     };
-    let result = runtime.block_on(serve_all(store, settings, deps, env, stop_signal(), |r| {
+    // systemd (`Type=notify`): READY=1 after all listeners are bound, STOPPING=1 at the stop
+    // signal. Without NOTIFY_SOCKET both calls do nothing.
+    let stop = async {
+        stop_signal().await;
+        crate::notify::notify(&[crate::notify::State::Stopping]);
+    };
+    let result = runtime.block_on(serve_all(store, settings, deps, env, stop, |r| {
         tracing::info!(dns = ?r.dns, admin = ?r.admin, "listeners are bound");
+        crate::notify::notify(&[
+            crate::notify::State::Ready,
+            crate::notify::State::Status(ready_status(r.dns.len(), r.admin.len())),
+        ]);
     }));
     runtime.shutdown_timeout(RUNTIME_STOP);
     crate::stats_observer::stop(stats);
     result?;
     Ok(ExitCode::SUCCESS)
+}
+
+/// The status text that `systemctl status` shows after the start.
+fn ready_status(dns: usize, admin: usize) -> String {
+    format!("running: DNS on {dns} address(es), admin UI on {admin} address(es)")
 }
 
 /// The parts of the process environment that tests replace.

@@ -1477,7 +1477,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-core"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "idna",
  "lru",
@@ -1493,7 +1493,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-dns"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "arc-swap",
  "base64",
@@ -1532,7 +1532,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-import"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "rusqlite",
  "rusthole-core",
@@ -1543,7 +1543,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-lists"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "arc-swap",
  "getrandom 0.4.3",
@@ -1563,7 +1563,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-store"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "parking_lot",
  "rusqlite",
@@ -1574,7 +1574,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-tls"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "arc-swap",
  "rcgen",
@@ -1593,7 +1593,7 @@ dependencies = [
 
 [[package]]
 name = "rusthole-web"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "arc-swap",
  "argon2",

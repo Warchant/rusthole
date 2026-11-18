@@ -34,7 +34,7 @@ files:
 | `SHA256SUMS` | The SHA-256 checksum of each file above. |
 
 1. Download all files into one empty folder. Replace `VERSION` with the release tag, for
-   example `v0.1.0`:
+   example `v0.0.1`:
 
    ```sh
    mkdir rusthole-release && cd rusthole-release

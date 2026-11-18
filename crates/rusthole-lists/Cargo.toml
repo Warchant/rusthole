@@ -29,6 +29,9 @@ flate2 = { workspace = true }
 peak_alloc = { workspace = true }
 proptest = { workspace = true }
 rustls-pki-types = { workspace = true }
+# `test-util`: a paused tokio clock, so that a test of a build limit does not depend on the
+# speed of the machine.
+tokio = { workspace = true, features = ["test-util"] }
 tokio-rustls = { workspace = true }
 
 [lints]

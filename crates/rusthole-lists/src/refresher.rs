@@ -52,13 +52,16 @@
 use std::collections::BTreeMap;
 use std::fmt;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::time::{Duration, Instant};
 
+use arc_swap::ArcSwap;
 use parking_lot::{Mutex, MutexGuard};
 use rusthole_core::Config;
 use rusthole_core::config::Adlist;
 use rusthole_core::lists::{self, ListFormat, ParseLimits, ParsedList};
+use rusthole_core::localdns::LocalZone;
 use rusthole_core::policy::{BuildReport, ListStatus as BuildListStatus};
 use rusthole_core::refresh::{
     BodyFacts, EntryCounts, ListMeta, ListRefresh, MonoTime, RefreshEvent, RefreshPolicy,
@@ -70,7 +73,7 @@ use tokio_util::task::TaskTracker;
 
 use crate::engine::{EngineHandle, build_engine};
 use crate::fetch::{FetchError, FetchLimits, FetchOutcome, Fetcher};
-use crate::resolver::HostLookup;
+use crate::resolver::{HostLookup, LocalFirstLookup};
 use crate::status::{
     EngineStatus, ListState, ListStatus, ListsStatus, RefreshPhase, ScheduleStatus,
 };
@@ -323,6 +326,10 @@ struct Inner {
     tracker: TaskTracker,
     cancel: CancellationToken,
     fetcher: OnceLock<Fetcher>,
+    /// The local zone of the current config, for the host names of list URLs.
+    local: Arc<ArcSwap<LocalZone>>,
+    /// Builds that went over their time limit since the load.
+    build_timeouts: AtomicU64,
 }
 
 impl fmt::Debug for Inner {
@@ -453,6 +460,7 @@ impl Refresher {
             lists.insert(adlist.id, Slot::new(adlist.clone(), disk_meta));
         }
         let policy = policy_for(&config, &settings);
+        let local = Arc::new(ArcSwap::from_pointee(LocalZone::from_config(&config).0));
         // The first handle has the rules of the config and no list, with a random seed. The
         // first build below replaces it with the cached lists.
         let engine = EngineHandle::new(build_engine(&config, std::iter::empty()).0);
@@ -474,6 +482,8 @@ impl Refresher {
             tracker: TaskTracker::new(),
             cancel: CancellationToken::new(),
             fetcher: OnceLock::new(),
+            local,
+            build_timeouts: AtomicU64::new(0),
             settings,
         });
         let refresher = Self {
@@ -505,8 +515,9 @@ impl Refresher {
         Ok(refresher)
     }
 
-    /// Starts the downloads: the scheduler fetches due lists in the background. Names are
-    /// looked up with `lookup` (production: the upstream pool of the DNS server).
+    /// Starts the downloads: the scheduler fetches due lists in the background. A host name
+    /// is looked up in the local zone of the current config first (local records and local
+    /// CNAMEs), then with `lookup` (production: the upstream pool of the DNS server).
     pub fn start(&self, lookup: Arc<dyn HostLookup>) -> Result<(), RefresherError> {
         let tls = match &self.inner.settings.tls {
             Some(t) => Arc::clone(t),
@@ -516,6 +527,8 @@ impl Refresher {
                     .0
             }
         };
+        let lookup: Arc<dyn HostLookup> =
+            Arc::new(LocalFirstLookup::new(Arc::clone(&self.inner.local), lookup));
         let fetcher = Fetcher::new(self.inner.settings.limits, tls, lookup)?;
         self.inner
             .fetcher
@@ -542,6 +555,12 @@ impl Refresher {
         &self.inner.cache
     }
 
+    /// Number of builds that went over their time limit since the load. Such a build does
+    /// not swap.
+    pub fn build_timeouts(&self) -> u64 {
+        self.inner.build_timeouts.load(Ordering::Relaxed)
+    }
+
     /// Asks for an update of one list or of all enabled lists. Returns at once with the
     /// number of lists; [`Refresher::status`] shows the progress.
     pub fn update_now(&self, target: UpdateTarget) -> Result<usize, UpdateError> {
@@ -556,6 +575,10 @@ impl Refresher {
     pub fn set_config(&self, config: Arc<Config>) -> Result<(), UpdateError> {
         let wall = (self.inner.settings.wall_clock)();
         let (mut guard, now) = self.inner.lock().ok_or(UpdateError::Busy)?;
+        // The next name lookup uses the local zone of the new config.
+        self.inner
+            .local
+            .store(Arc::new(LocalZone::from_config(&config).0));
         let st = &mut *guard;
         let policy = policy_for(&config, &self.inner.settings);
         let interval_changed = policy != st.policy;
@@ -1026,9 +1049,12 @@ impl Inner {
     async fn run_build(self: &Arc<Self>) {
         let Some(permit) = self.acquire_work(self.settings.build_timeout).await else {
             if !self.cancel.is_cancelled() {
+                // Do not lose the build: a build that took too long can still hold the
+                // permit. Ask again; the build loop waits again, with the same limit.
                 tracing::error!(
-                    "the engine build waited too long for the work permit; the old engine stays"
+                    "the engine build waited too long for the work permit; the old engine stays for now, and the build is asked for again"
                 );
+                self.build_wanted.notify_one();
             }
             return;
         };
@@ -1056,6 +1082,7 @@ impl Inner {
             }
             Err(_) => {
                 stop.cancel();
+                self.build_timeouts.fetch_add(1, Ordering::Relaxed);
                 tracing::error!(
                     "the engine build took too long; the old engine stays, and the next build waits until this build stops"
                 );
@@ -1263,6 +1290,71 @@ fn body_text(bytes: &[u8]) -> std::borrow::Cow<'_, str> {
     String::from_utf8_lossy(bytes)
 }
 
+/// Why a downloaded body that parsed is not used as the list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+pub enum NotAList {
+    /// More invalid names and lines than valid entries: for example an HTML error page.
+    #[error(
+        "the body is not a list: {invalid} names or lines are not valid and {valid} are valid (for example an HTML page)"
+    )]
+    MostlyInvalid {
+        /// Valid entries of the body.
+        valid: u64,
+        /// Invalid names and lines of the body.
+        invalid: u64,
+    },
+    /// No entry and no comment line, but the last good copy has entries: for example an
+    /// empty answer.
+    #[error(
+        "the body has no entries and no comment line, but the last good copy has {old_valid}; a list that is emptied on purpose must keep a comment line"
+    )]
+    EmptyReplacesEntries {
+        /// Valid entries of the last good copy.
+        old_valid: u64,
+    },
+}
+
+/// Decides if a new body that parsed can replace the list (pure).
+///
+/// - More invalid names and lines than valid entries: [`NotAList::MostlyInvalid`]. An HTML
+///   page, a JSON error or a binary file gives this. A list with some bad lines still
+///   passes.
+/// - No valid entry and no comment line, while the last good copy for the same URL
+///   (`old_valid`) has entries: [`NotAList::EmptyReplacesEntries`]. An empty answer gives
+///   this. A list that its owner emptied on purpose keeps a comment line (`#` or `!`), so it
+///   passes.
+/// - Else the body is used. With no good copy (`old_valid` is `None`), an empty body is used.
+///
+/// `has_comment` tells if the body has a comment line ([`has_comment_line`]).
+pub fn check_list_body(
+    new: EntryCounts,
+    has_comment: bool,
+    old_valid: Option<u64>,
+) -> Result<(), NotAList> {
+    if new.invalid > new.valid {
+        return Err(NotAList::MostlyInvalid {
+            valid: new.valid,
+            invalid: new.invalid,
+        });
+    }
+    if new.valid == 0
+        && !has_comment
+        && let Some(old_valid) = old_valid.filter(|v| *v > 0)
+    {
+        return Err(NotAList::EmptyReplacesEntries { old_valid });
+    }
+    Ok(())
+}
+
+/// True when `text` has a comment line: a line that starts with `#` or `!` after white
+/// space. Bounded by the text size.
+pub fn has_comment_line(text: &str) -> bool {
+    text.lines().any(|l| {
+        let t = l.trim_start();
+        t.starts_with('#') || t.starts_with('!')
+    })
+}
+
 fn counts(list: &ParsedList) -> EntryCounts {
     let s = &list.stats;
     EntryCounts {
@@ -1277,7 +1369,8 @@ fn counts(list: &ParsedList) -> EntryCounts {
 /// - The same body as on disk (same hash): no body write; the metadata gets the new times
 ///   and validators, and is written only when it changed.
 /// - A new body: parse it first. A parse error (too many entries, too large) is a failure,
-///   and the old copy stays. Else write the body, then the metadata.
+///   and the old copy stays. A body that is not a list ([`check_list_body`]) is also a
+///   failure, and the old copy stays. Else write the body, then the metadata.
 fn store_body_blocking(
     cache: &DiskCache,
     job: &FetchJob,
@@ -1320,10 +1413,15 @@ fn store_body_blocking(
             body_ok: true,
         };
     }
-    let entries = {
+    let (entries, has_comment) = {
         let text = body_text(bytes);
         match lists::parse(&text, ListFormat::Auto, limits) {
-            Ok(parsed) => counts(&parsed),
+            Ok(parsed) => {
+                let c = counts(&parsed);
+                drop(parsed);
+                // Only a body with no entry needs the comment check.
+                (c, c.valid == 0 && has_comment_line(&text))
+            }
             Err(e) => {
                 tracing::warn!(list = job.id, error = %e, "the downloaded list is not usable; the last good copy stays in use");
                 let meta = job.base.after_failure(now_unix, &e.to_string());
@@ -1337,6 +1435,19 @@ fn store_body_blocking(
             }
         }
     };
+    let old_valid =
+        (job.body_ok && job.base.has_body_for(&job.url)).then_some(job.base.entries.valid);
+    if let Err(e) = check_list_body(entries, has_comment, old_valid) {
+        tracing::warn!(list = job.id, error = %e, "the downloaded body is not a list; the last good copy stays in use");
+        let meta = job.base.after_failure(now_unix, &e.to_string());
+        let disk = write_meta(&meta);
+        return Finished {
+            outcome: Outcome::Failed,
+            meta,
+            disk,
+            body_ok: job.body_ok,
+        };
+    }
     if let Err(e) = cache.write_body(job.id, bytes) {
         tracing::warn!(list = job.id, error = %e, "cannot write the list body");
         let meta = job
@@ -1509,5 +1620,120 @@ mod tests {
             body_hash(b"abc"),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
+    }
+
+    fn c(valid: u64, invalid: u64) -> EntryCounts {
+        EntryCounts {
+            valid,
+            invalid,
+            skipped: 0,
+        }
+    }
+
+    /// The counts and the comment flag of a body, as the store step gets them.
+    fn facts_of(text: &str) -> (EntryCounts, bool) {
+        let parsed = lists::parse(text, ListFormat::Auto, &ParseLimits::default()).unwrap();
+        let counts = counts(&parsed);
+        (counts, has_comment_line(text))
+    }
+
+    #[test]
+    fn not_a_list_guard() {
+        // A list with some bad lines is used.
+        assert_eq!(check_list_body(c(10, 3), false, Some(100)), Ok(()));
+        assert_eq!(check_list_body(c(3, 3), false, None), Ok(()));
+        // More bad lines than entries: not a list, also with no old copy.
+        assert_eq!(
+            check_list_body(c(1, 40), true, Some(100)),
+            Err(NotAList::MostlyInvalid {
+                valid: 1,
+                invalid: 40
+            })
+        );
+        assert_eq!(
+            check_list_body(c(0, 1), false, None),
+            Err(NotAList::MostlyInvalid {
+                valid: 0,
+                invalid: 1
+            })
+        );
+        // An empty body does not replace a copy with entries.
+        assert_eq!(
+            check_list_body(c(0, 0), false, Some(100)),
+            Err(NotAList::EmptyReplacesEntries { old_valid: 100 })
+        );
+        // A list that is emptied on purpose keeps a comment line.
+        assert_eq!(check_list_body(c(0, 0), true, Some(100)), Ok(()));
+        // No good copy, or a good copy with no entries: an empty body is used.
+        assert_eq!(check_list_body(c(0, 0), false, None), Ok(()));
+        assert_eq!(check_list_body(c(0, 0), false, Some(0)), Ok(()));
+        assert!(has_comment_line("\n  # note\n"));
+        assert!(has_comment_line("! Title: x\n"));
+        assert!(!has_comment_line("a.example # inline\n\n"));
+    }
+
+    #[test]
+    fn real_bodies() {
+        let html = "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>404 Not Found</title></head>\n<body>\n<h1>Not Found</h1>\n<p>The file ads.example is not here.</p>\n</body>\n</html>\n";
+        let (n, comment) = facts_of(html);
+        assert!(matches!(
+            check_list_body(n, comment, Some(5)),
+            Err(NotAList::MostlyInvalid { .. })
+        ));
+        let json = "{\"error\": \"rate limited\", \"retry\": 60}\n";
+        let (n, comment) = facts_of(json);
+        assert!(check_list_body(n, comment, Some(5)).is_err());
+        let hosts = "# Title: test\n0.0.0.0 a.example\n0.0.0.0 b.example\nbad line here\n";
+        let (n, comment) = facts_of(hosts);
+        assert_eq!(check_list_body(n, comment, Some(5)), Ok(()));
+        let emptied = "# This list is discontinued.\n";
+        let (n, comment) = facts_of(emptied);
+        assert_eq!(check_list_body(n, comment, Some(5)), Ok(()));
+        let (n, comment) = facts_of("");
+        assert!(check_list_body(n, comment, Some(5)).is_err());
+    }
+
+    proptest::proptest! {
+        #![proptest_config(proptest::prelude::ProptestConfig::with_cases(256))]
+
+        /// A real list is always used: entries in any format, comments, and at most as
+        /// many bad lines as entries.
+        #[test]
+        fn a_real_list_passes(
+            names in proptest::collection::btree_set("[a-z]{1,10}[.](com|net|example)", 1..40),
+            format in 0u8..3,
+            bad in 0usize..40,
+            comment in proptest::bool::ANY,
+            old in proptest::option::of(0u64..1000),
+        ) {
+            use std::fmt::Write as _;
+            let mut text = String::new();
+            if comment {
+                text.push_str("# a list\n");
+            }
+            for n in &names {
+                let _ = match format {
+                    0 => writeln!(text, "0.0.0.0 {n}"),
+                    1 => writeln!(text, "{n}"),
+                    _ => writeln!(text, "||{n}^"),
+                };
+            }
+            for i in 0..bad.min(names.len()) {
+                let _ = writeln!(text, "bad line {i}");
+            }
+            let (n, has_comment) = facts_of(&text);
+            proptest::prop_assert_eq!(check_list_body(n, has_comment, old), Ok(()));
+        }
+
+        /// An HTML page is never used.
+        #[test]
+        fn an_html_page_never_passes(
+            tags in proptest::collection::vec("<[a-z]{1,8}( [a-z]{1,6}=\"[a-z]{1,6}\")?>", 1..30),
+            old in proptest::option::of(0u64..1000),
+        ) {
+            let text = format!("<!DOCTYPE html>\n{}\n", tags.join("\n"));
+            let (n, has_comment) = facts_of(&text);
+            proptest::prop_assert!(check_list_body(n, has_comment, old).is_err(), "{:?}", n);
+        }
     }
 }

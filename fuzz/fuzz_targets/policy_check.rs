@@ -130,10 +130,18 @@ fuzz_target!(|data: &[u8]| {
         }
         let _ = engine.explain(None, name);
     }
-    // The chain is blocked if and only if some name in it is blocked.
+    // The Pi-hole CNAME rule: the chain takes the decision of the first name that has an
+    // allow match or is blocked. With no such name, the chain is allowed.
     let chain = engine.check_chain(&default, true, &names);
-    let any = names
-        .iter()
-        .any(|n| engine.check(&default, true, n).is_blocked());
-    assert_eq!(chain.is_blocked(), any);
+    let first = names.iter().enumerate().find_map(|(i, n)| {
+        let d = engine.check(&default, true, n);
+        (d.is_blocked() || d.reason.is_allow_match()).then_some((i, d))
+    });
+    match first {
+        Some((i, d)) => {
+            assert_eq!((chain.action, chain.reason), (d.action, d.reason));
+            assert_eq!(chain.name_index, i);
+        }
+        None => assert_eq!(chain.action, Action::Allow),
+    }
 });

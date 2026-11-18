@@ -346,6 +346,168 @@ async fn a_list_that_fails_to_parse_keeps_the_old_copy() {
     assert!(r.shutdown(WAIT).await);
 }
 
+const HTML_PAGE: &str = "<!DOCTYPE html>\n<html>\n<head><title>Service unavailable</title></head>\n\
+<body>\n<h1>Sorry</h1>\n<p>The file is not here.</p>\nads.example\n</body>\n</html>\n";
+
+/// A 200 answer that is not a list (an HTML page, or an empty body) does not replace a good
+/// list. A list that its owner emptied on purpose (a comment line, no entries) does.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_body_that_is_not_a_list_keeps_the_old_copy() {
+    let dir = temp_dir();
+    let body = Arc::new(Mutex::new("a.example\nb.example\n"));
+    let b = Arc::clone(&body);
+    let server = serve(move |_| Resp::ok(*b.lock().unwrap())).await;
+    let cfg = Arc::new(config(dir.path(), &[(1, &server.url("/l"))]));
+    let clock = TestClock::new(T0);
+    let r = Refresher::load(Arc::clone(&cfg), settings(&cfg, &clock))
+        .await
+        .unwrap();
+    r.start(test_lookup()).unwrap();
+    wait_for(&r, WAIT, |s| s.list(1).unwrap().in_engine).await;
+    let good = std::fs::read(r.cache().body_path(1)).unwrap();
+
+    for (attempt, (bad, error)) in [
+        (HTML_PAGE, "the body is not a list"),
+        ("", "no entries and no comment line"),
+        ("\n  \r\n", "no entries and no comment line"),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        *body.lock().unwrap() = bad;
+        let before = server.request_count();
+        r.update_now(UpdateTarget::One(1)).unwrap();
+        let st = wait_for(&r, WAIT, |s| {
+            server.request_count() > before && s.list(1).unwrap().phase == RefreshPhase::Backoff
+        })
+        .await;
+        let l = st.list(1).unwrap();
+        assert_eq!(l.state, ListState::Error, "{bad:?}");
+        assert_eq!(l.failures, u32::try_from(attempt).unwrap() + 1);
+        assert!(
+            l.last_error.as_deref().unwrap().contains(error),
+            "{bad:?}: {l:?}"
+        );
+        // The good copy stays on disk and in the engine.
+        assert_eq!(l.entries.valid, 2);
+        assert!(l.in_engine);
+        assert_eq!(std::fs::read(r.cache().body_path(1)).unwrap(), good);
+        assert!(blocked(&r.engine(), "a.example"));
+    }
+
+    // The owner empties the list on purpose: it keeps a comment line.
+    *body.lock().unwrap() = "# This list is discontinued.\n";
+    r.update_now(UpdateTarget::One(1)).unwrap();
+    let st = wait_for(&r, WAIT, |s| {
+        let l = s.list(1).unwrap();
+        l.state == ListState::Ok && l.entries.valid == 0
+    })
+    .await;
+    assert_eq!(st.list(1).unwrap().last_error, None);
+    wait_for(&r, WAIT, |_| !blocked(&r.engine(), "a.example")).await;
+    assert!(r.shutdown(WAIT).await);
+}
+
+/// A first download that is an HTML page is a failure: the status does not show "ok" with
+/// zero entries, and no body is stored.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_first_body_that_is_not_a_list_is_a_failure() {
+    let dir = temp_dir();
+    let server = serve(|_| Resp::ok(HTML_PAGE)).await;
+    let cfg = Arc::new(config(dir.path(), &[(1, &server.url("/l"))]));
+    let clock = TestClock::new(T0);
+    let r = Refresher::load(Arc::clone(&cfg), settings(&cfg, &clock))
+        .await
+        .unwrap();
+    r.start(test_lookup()).unwrap();
+    let st = wait_for(&r, WAIT, |s| {
+        s.list(1).unwrap().phase == RefreshPhase::Backoff
+    })
+    .await;
+    let l = st.list(1).unwrap();
+    assert_eq!(l.state, ListState::Error);
+    assert!(
+        l.last_error.as_deref().unwrap().contains("not a list"),
+        "{l:?}"
+    );
+    assert!(!l.in_engine);
+    assert!(!r.cache().body_path(1).exists());
+    assert!(!blocked(&r.engine(), "ads.example"));
+    assert!(r.shutdown(WAIT).await);
+}
+
+/// A list URL with a local host name: the lookup reads the local records and the local
+/// CNAMEs of the current config before the upstream lookup.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_list_url_with_a_local_host_name_is_downloaded() {
+    use rusthole_core::config::{LocalCname, LocalRecord, RecordType};
+    let record = |name: &str| LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
+        name: name.to_owned(),
+        record_type: RecordType::A,
+        value: "127.0.0.1".to_owned(),
+    };
+    let dir = temp_dir();
+    let server = serve(|req| {
+        Resp::ok(match req.path.as_str() {
+            "/1" => "one.example\n",
+            "/2" => "two.example\n",
+            _ => "three.example\n",
+        })
+    })
+    .await;
+    let port = server.addr.port();
+    let mut cfg = config(
+        dir.path(),
+        &[
+            (1, &format!("http://nas.lan:{port}/1")),
+            (2, &format!("http://lists.lan:{port}/2")),
+            (3, &format!("http://new.lan:{port}/3")),
+        ],
+    );
+    cfg.local_dns.records = vec![record("nas.lan")];
+    // A local CNAME to a name that only the upstream lookup knows.
+    cfg.local_dns.cnames = vec![LocalCname {
+        id: None,
+        enabled: true,
+        comment: None,
+        name: "lists.lan".to_owned(),
+        target: common::TEST_HOST.to_owned(),
+        ttl: None,
+    }];
+    let cfg = Arc::new(cfg);
+    let clock = TestClock::new(T0);
+    let r = Refresher::load(Arc::clone(&cfg), settings(&cfg, &clock))
+        .await
+        .unwrap();
+    // The upstream lookup knows `lists.test` only.
+    r.start(test_lookup()).unwrap();
+    let st = wait_for(&r, WAIT, |s| {
+        s.list(1).unwrap().in_engine
+            && s.list(2).unwrap().in_engine
+            && s.list(3).unwrap().phase == RefreshPhase::Backoff
+    })
+    .await;
+    assert!(blocked(&r.engine(), "one.example"));
+    assert!(blocked(&r.engine(), "two.example"));
+    let l3 = st.list(3).unwrap();
+    assert!(
+        l3.last_error.as_deref().unwrap().contains("new.lan"),
+        "{l3:?}"
+    );
+
+    // A config change adds a local record: the next fetch uses it.
+    let mut cfg2 = (*cfg).clone();
+    cfg2.local_dns.records.push(record("new.lan"));
+    r.set_config(Arc::new(cfg2)).unwrap();
+    r.update_now(UpdateTarget::One(3)).unwrap();
+    wait_for(&r, WAIT, |s| s.list(3).unwrap().in_engine).await;
+    assert!(blocked(&r.engine(), "three.example"));
+    assert!(r.shutdown(WAIT).await);
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn update_now_checks_the_target() {
     let dir = temp_dir();
@@ -802,67 +964,156 @@ async fn a_body_stored_during_a_build_keeps_the_list_in_the_engine() {
     assert!(r.shutdown(WAIT).await);
 }
 
-/// A build that takes longer than its limit keeps the work permit until it stops: the next
-/// build never runs at the same time, and `building` stays true until the first one ends.
-#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn a_build_that_took_too_long_blocks_the_next_build() {
-    let dir = temp_dir();
-    let server = serve(|_| Resp::ok("ads.example\n")).await;
-    let cfg = Arc::new(config(dir.path(), &[(1, &server.url("/l"))]));
-    let clock = TestClock::new(T0);
-    let armed = Arc::new(AtomicBool::new(false));
-    let active = Arc::new(AtomicUsize::new(0));
-    let max_active = Arc::new(AtomicUsize::new(0));
-    let calls = Arc::new(AtomicUsize::new(0));
-    let hook = {
-        let (armed, active, max_active, calls) = (
-            Arc::clone(&armed),
-            Arc::clone(&active),
-            Arc::clone(&max_active),
-            Arc::clone(&calls),
+/// Writes a cached body and its metadata for list `id`, as a fetch at `now_unix` would.
+fn write_cached_list(dir: &std::path::Path, id: u32, url: &str, body: &[u8], now_unix: i64) {
+    use rusthole_core::refresh::{BodyFacts, EntryCounts, ListMeta, Validators};
+    let cache = rusthole_lists::DiskCache::new(dir);
+    cache.ensure_dir().unwrap();
+    cache.write_body(id, body).unwrap();
+    let facts = BodyFacts {
+        hash: rusthole_lists::refresher::body_hash(body),
+        size_bytes: body.len() as u64,
+        entries: EntryCounts {
+            valid: 1,
+            invalid: 0,
+            skipped: 0,
+        },
+    };
+    let meta = ListMeta::new(url).after_body(url, now_unix, Validators::default(), facts);
+    cache.write_meta(id, &meta).unwrap();
+}
+
+/// Waits until `cond` is true. It does not use the tokio clock (the clock is paused in the
+/// caller). It yields, so that the tasks of the refresher run, and it has a real time limit.
+async fn until(what: &str, cond: impl Fn() -> bool) {
+    let end = Instant::now() + WAIT;
+    while !cond() {
+        assert!(
+            Instant::now() < end,
+            "condition not met in {WAIT:?}: {what}"
         );
+        tokio::task::yield_now().await;
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}
+
+/// A build that takes longer than its limit keeps the work permit until it stops: the next
+/// build never runs at the same time, `building` stays true until the first one ends, and
+/// the build that took too long never swaps.
+///
+/// The test does not depend on the speed of the machine (docs/PLAN.md section 6, item 4).
+/// The tokio clock is paused. tokio does not move a paused clock while a blocking task
+/// runs, so the build limit fires only when the test moves the clock. The slow build waits
+/// on a gate that the test opens. No fetch runs: the list comes from the disk cache.
+#[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn a_build_that_took_too_long_blocks_the_next_build() {
+    #[derive(Default)]
+    struct Probe {
+        /// The next build that reads its lists waits on the gate.
+        armed: AtomicBool,
+        /// Build threads that wait on the gate now.
+        in_gate: AtomicUsize,
+        /// Builds that started to read their lists.
+        reads: AtomicUsize,
+        /// A build started while another build waited on the gate.
+        overlap: AtomicBool,
+        /// The engine generation when each build started to read.
+        generations: Mutex<Vec<u64>>,
+        open: Mutex<bool>,
+        cv: std::sync::Condvar,
+    }
+    let dir = temp_dir();
+    let url = "http://127.0.0.1:9/l";
+    write_cached_list(dir.path(), 1, url, b"ads.example\n", T0);
+    let cfg = Arc::new(config(dir.path(), &[(1, url)]));
+    let clock = TestClock::new(T0);
+    let probe = Arc::new(Probe::default());
+    let engine_cell: Arc<OnceLock<rusthole_lists::EngineHandle>> = Arc::new(OnceLock::new());
+    let hook = {
+        let (p, cell) = (Arc::clone(&probe), Arc::clone(&engine_cell));
         Arc::new(move |stage: BuildStage| {
-            if stage != BuildStage::BeforeSwap || !armed.load(Ordering::SeqCst) {
+            if stage != BuildStage::BeforeRead {
                 return;
             }
-            let now = active.fetch_add(1, Ordering::SeqCst) + 1;
-            max_active.fetch_max(now, Ordering::SeqCst);
-            std::thread::sleep(Duration::from_millis(1000));
-            active.fetch_sub(1, Ordering::SeqCst);
-            calls.fetch_add(1, Ordering::SeqCst);
+            if p.in_gate.load(Ordering::SeqCst) > 0 {
+                p.overlap.store(true, Ordering::SeqCst);
+            }
+            if let Some(e) = cell.get() {
+                p.generations.lock().unwrap().push(e.generation());
+            }
+            p.reads.fetch_add(1, Ordering::SeqCst);
+            if p.armed.swap(false, Ordering::SeqCst) {
+                p.in_gate.fetch_add(1, Ordering::SeqCst);
+                let open = p.open.lock().unwrap();
+                // A time limit: a broken test must not hang forever.
+                let _ =
+                    p.cv.wait_timeout_while(open, Duration::from_secs(20), |o| !*o)
+                        .unwrap();
+                p.in_gate.fetch_sub(1, Ordering::SeqCst);
+            }
         })
     };
     let mut s = settings(&cfg, &clock);
     s.build_hook = Some(hook);
     s.build_timeout = Duration::from_millis(300);
     let r = Refresher::load(Arc::clone(&cfg), s).await.unwrap();
-    r.start(test_lookup()).unwrap();
-    wait_for(&r, WAIT, |s| s.list(1).unwrap().in_engine).await;
     let engine = r.engine();
+    engine_cell.set(engine.clone()).unwrap();
+    // The first build (in `load`) has the list from the disk.
+    assert!(r.status().unwrap().list(1).unwrap().in_engine);
+    assert!(blocked(&engine, "ads.example"));
     let generation = engine.generation();
+    assert_eq!(r.build_timeouts(), 0);
 
-    armed.store(true, Ordering::SeqCst);
+    // Build A waits on the gate and holds the work permit. Then its limit fires.
+    probe.armed.store(true, Ordering::SeqCst);
     r.set_config(Arc::clone(&cfg)).unwrap();
-    wait_for(&r, WAIT, |_| active.load(Ordering::SeqCst) == 1).await;
-    // The first build is over its limit, but its thread still runs.
-    tokio::time::sleep(Duration::from_millis(400)).await;
-    assert!(r.status().unwrap().engine.building);
-    r.set_config(Arc::clone(&cfg)).unwrap();
-    wait_for(&r, WAIT, |s| {
-        calls.load(Ordering::SeqCst) >= 1
-            && active.load(Ordering::SeqCst) == 0
-            && !s.engine.building
+    until("build A waits on the gate", || {
+        probe.in_gate.load(Ordering::SeqCst) == 1
     })
     .await;
-    tokio::time::sleep(Duration::from_millis(1500)).await;
-    assert_eq!(max_active.load(Ordering::SeqCst), 1);
-    // The build that took too long did not swap.
-    assert_eq!(engine.generation(), generation);
+    tokio::time::advance(Duration::from_millis(301)).await;
+    until("the limit of build A fired", || r.build_timeouts() == 1).await;
+    // The thread of build A still runs.
+    assert!(r.status().unwrap().engine.building);
 
-    // The next build works.
-    armed.store(false, Ordering::SeqCst);
+    // Build B is asked for while build A still runs. It must wait for the work permit.
+    let reads = probe.reads.load(Ordering::SeqCst);
     r.set_config(Arc::clone(&cfg)).unwrap();
-    wait_for(&r, WAIT, |_| engine.generation() == generation + 1).await;
+    // Give a wrong product time to start build B (this wait only helps to find a fault).
+    for _ in 0..100 {
+        tokio::task::yield_now().await;
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    assert_eq!(
+        probe.reads.load(Ordering::SeqCst),
+        reads,
+        "build B started early"
+    );
+    assert!(r.status().unwrap().engine.building);
+    // Build B waits for the work permit longer than its limit. This was the race of
+    // docs/PLAN.md section 6, item 4: the build request was lost, and the engine never got
+    // the new build. Now build B asks again.
+    tokio::time::advance(Duration::from_millis(301)).await;
+    for _ in 0..20 {
+        tokio::task::yield_now().await;
+    }
+    assert_eq!(probe.reads.load(Ordering::SeqCst), reads);
+
+    // Open the gate: build A stops without a swap, then build B runs and swaps.
+    *probe.open.lock().unwrap() = true;
+    probe.cv.notify_all();
+    until("build B swapped", || engine.generation() > generation).await;
+    until("no build runs", || !r.status().unwrap().engine.building).await;
+    assert!(
+        !probe.overlap.load(Ordering::SeqCst),
+        "two builds ran at the same time"
+    );
+    // Build B saw the generation of the first engine: build A did not swap.
+    let generations = probe.generations.lock().unwrap().clone();
+    assert_eq!(generations, [generation, generation]);
+    assert_eq!(engine.generation(), generation + 1);
+    assert_eq!(r.build_timeouts(), 1);
     assert!(blocked(&engine, "ads.example"));
     assert!(r.shutdown(WAIT).await);
 }

@@ -62,7 +62,21 @@ export function classifyClientMatch(input: string): Check<ClientKind> {
   return { ok: false, error: 'Enter an IP address, CIDR, MAC address or host name.' };
 }
 
-/** Checks a list of IPv4 servers (upstreams, conditional forwarding). */
+/** The most upstream servers that PATCH /settings accepts. */
+export const MAX_UPSTREAMS = 8;
+
+/**
+ * Checks the count of upstream servers (1 to 8). It does not check the form of each
+ * server: the server accepts udp://, tcp://, tls:// and https:// URLs, IP and IP:port,
+ * and gives a 422 with a message for each bad value (docs/API.md, section 12).
+ */
+export function checkUpstreams(list: string[]): string | null {
+  if (list.length === 0) return 'Enter at least one server.';
+  if (list.length > MAX_UPSTREAMS) return `Enter at most ${MAX_UPSTREAMS} servers.`;
+  return null;
+}
+
+/** Checks a list of plain IPv4 servers with an optional port (conditional forwarding). */
 export function checkServers(list: string[], max: number): string | null {
   if (list.length === 0) return 'Enter at least one server.';
   if (list.length > max) return `Enter at most ${max} servers.`;

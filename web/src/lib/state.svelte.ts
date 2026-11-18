@@ -157,6 +157,20 @@ export function resource<T>(fn: () => Promise<T>): Resource<T> {
 }
 
 /**
+ * Runs the write of an "enabled" checkbox. The browser changed the box before the
+ * write. When the write fails, the box goes back to its old state: the reload gives
+ * the same data as before, so Svelte does not change the DOM (review item m24).
+ */
+export async function actToggle(e: Event, work: () => Promise<unknown>, after?: () => void): Promise<boolean> {
+  // Read the box now: `currentTarget` is null after the event dispatch.
+  const box = e.currentTarget instanceof HTMLInputElement ? e.currentTarget : null;
+  const before = box ? !box.checked : null;
+  const ok = await act(work, null, after);
+  if (!ok && box && before !== null) box.checked = before;
+  return ok;
+}
+
+/**
  * Runs a write. It shows a toast on success or failure, and calls `after`
  * (usually a reload) in both cases, so the view shows the server state.
  */

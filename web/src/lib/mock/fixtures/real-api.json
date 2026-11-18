@@ -1,0 +1,450 @@
+{
+  "_about": "Answers of a real rusthole admin API, recorded in this order with curl from a Windows development build of commit 5022306 on 127.0.0.1 and 127.0.0.2. Host subnets, paths and the CSRF token are replaced. The config had two DNS and two admin listen addresses and the upstreams udp://192.0.2.53:53 and tls://dns.example:853 (with bootstrap). The PUT /blocking case sent a wrong X-CSRF-Token.",
+  "cases": [
+    {
+      "name": "system",
+      "method": "GET",
+      "path": "/system",
+      "response": {
+        "status": 200,
+        "body": {
+          "arch": "x86_64",
+          "commit": null,
+          "config_path": "/etc/rusthole/rusthole.toml",
+          "data_dir": "/var/lib/rusthole",
+          "list_entries": 0,
+          "listeners": [
+            {
+              "address": "127.0.0.1:15353",
+              "kind": "dns"
+            },
+            {
+              "address": "127.0.0.2:15353",
+              "kind": "dns"
+            },
+            {
+              "address": "127.0.0.1:18443",
+              "kind": "admin"
+            },
+            {
+              "address": "127.0.0.2:18443",
+              "kind": "admin"
+            }
+          ],
+          "memory_rss_bytes": null,
+          "os": "windows",
+          "started_at": "2026-11-18T17:23:50Z",
+          "uptime_seconds": 16,
+          "version": "0.1.0"
+        }
+      }
+    },
+    {
+      "name": "settings",
+      "method": "GET",
+      "path": "/settings",
+      "response": {
+        "status": 200,
+        "body": {
+          "acl": {
+            "extra_cidrs": [],
+            "local_subnets": [
+              "192.0.2.0/24"
+            ]
+          },
+          "blocking": {
+            "blocked_ttl": 2,
+            "cname_check": true,
+            "custom_ipv4": null,
+            "custom_ipv6": null,
+            "mode": "null",
+            "special_domains": true
+          },
+          "cache": {
+            "enabled": true,
+            "max_entries": 10000,
+            "max_ttl": 86400,
+            "min_ttl": 0,
+            "negative_ttl": 300
+          },
+          "lists": {
+            "refresh_interval_hours": 0
+          },
+          "rate_limit": {
+            "burst": 1000,
+            "queries_per_second": 17
+          },
+          "restart_required": false,
+          "stats": {
+            "flush_interval_seconds": 0,
+            "recent_queries_size": 1000,
+            "retention_days": 30
+          },
+          "upstreams": {
+            "servers": [
+              "udp://192.0.2.53:53",
+              "tls://dns.example:853"
+            ],
+            "timeout_ms": 2000
+          }
+        }
+      }
+    },
+    {
+      "name": "patch-cache-same",
+      "method": "PATCH",
+      "path": "/settings",
+      "body": "same cache section",
+      "response": {
+        "status": 200,
+        "body": {
+          "acl": {
+            "extra_cidrs": [],
+            "local_subnets": [
+              "192.0.2.0/24"
+            ]
+          },
+          "blocking": {
+            "blocked_ttl": 2,
+            "cname_check": true,
+            "custom_ipv4": null,
+            "custom_ipv6": null,
+            "mode": "null",
+            "special_domains": true
+          },
+          "cache": {
+            "enabled": true,
+            "max_entries": 10000,
+            "max_ttl": 86400,
+            "min_ttl": 0,
+            "negative_ttl": 300
+          },
+          "lists": {
+            "refresh_interval_hours": 0
+          },
+          "rate_limit": {
+            "burst": 1000,
+            "queries_per_second": 17
+          },
+          "restart_required": false,
+          "stats": {
+            "flush_interval_seconds": 0,
+            "recent_queries_size": 1000,
+            "retention_days": 30
+          },
+          "upstreams": {
+            "servers": [
+              "udp://192.0.2.53:53",
+              "tls://dns.example:853"
+            ],
+            "timeout_ms": 2000
+          }
+        }
+      }
+    },
+    {
+      "name": "patch-upstreams-bad",
+      "method": "PATCH",
+      "path": "/settings",
+      "body": {
+        "upstreams": {
+          "servers": [
+            "udp://dns.example",
+            "2001:db8::1",
+            "tls://new.example",
+            "ftp://192.0.2.1"
+          ],
+          "timeout_ms": 2000
+        }
+      },
+      "response": {
+        "status": 422,
+        "body": {
+          "code": "validation_failed",
+          "message": "The request has invalid fields.",
+          "details": [
+            {
+              "field": "upstreams.servers[0]",
+              "message": "the host of a plain DNS upstream must be an IP address, not \"dns.example\""
+            },
+            {
+              "field": "upstreams.servers[1]",
+              "message": "IPv6 comes in a later version."
+            },
+            {
+              "field": "upstreams.servers[3]",
+              "message": "\"ftp://192.0.2.1\" has no scheme that rusthole knows (use udp://, tcp://, tls:// or https://)"
+            }
+          ],
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "patch-upstreams-new-hostname",
+      "method": "PATCH",
+      "path": "/settings",
+      "body": {
+        "upstreams": {
+          "servers": [
+            "udp://192.0.2.53:53",
+            "tls://new.example:853"
+          ],
+          "timeout_ms": 3000
+        }
+      },
+      "response": {
+        "status": 422,
+        "body": {
+          "code": "validation_failed",
+          "message": "The request has invalid fields.",
+          "details": [
+            {
+              "field": "upstreams.servers[1]",
+              "message": "A DoT or DoH server with a host name needs bootstrap IP addresses. The API cannot set them: use an IP address in the URL, or add the server with `bootstrap` in rusthole.toml."
+            }
+          ],
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "patch-upstreams-ok",
+      "method": "PATCH",
+      "path": "/settings",
+      "body": {
+        "upstreams": {
+          "servers": [
+            "udp://192.0.2.53:53",
+            "tls://dns.example:853",
+            "tcp://192.0.2.55",
+            "https://192.0.2.56/dns-query",
+            "192.0.2.57:5353"
+          ],
+          "timeout_ms": 3000
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "acl": {
+            "extra_cidrs": [],
+            "local_subnets": [
+              "192.0.2.0/24"
+            ]
+          },
+          "blocking": {
+            "blocked_ttl": 2,
+            "cname_check": true,
+            "custom_ipv4": null,
+            "custom_ipv6": null,
+            "mode": "null",
+            "special_domains": true
+          },
+          "cache": {
+            "enabled": true,
+            "max_entries": 10000,
+            "max_ttl": 86400,
+            "min_ttl": 0,
+            "negative_ttl": 300
+          },
+          "lists": {
+            "refresh_interval_hours": 0
+          },
+          "rate_limit": {
+            "burst": 1000,
+            "queries_per_second": 17
+          },
+          "restart_required": true,
+          "stats": {
+            "flush_interval_seconds": 0,
+            "recent_queries_size": 1000,
+            "retention_days": 30
+          },
+          "upstreams": {
+            "servers": [
+              "udp://192.0.2.53:53",
+              "tls://dns.example:853",
+              "tcp://192.0.2.55",
+              "https://192.0.2.56/dns-query",
+              "192.0.2.57:5353"
+            ],
+            "timeout_ms": 3000
+          }
+        }
+      }
+    },
+    {
+      "name": "patch-restart-field",
+      "method": "PATCH",
+      "path": "/settings",
+      "body": {
+        "restart_required": false
+      },
+      "response": {
+        "status": 422,
+        "body": {
+          "code": "validation_failed",
+          "message": "The request has invalid fields.",
+          "details": [
+            {
+              "field": "body",
+              "message": "unknown field `restart_required`, expected one of `upstreams`, `blocking`, `cache`, `rate_limit`, `acl`, `stats`, `lists` at line 1 column 19"
+            }
+          ],
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "groups",
+      "method": "GET",
+      "path": "/groups",
+      "response": {
+        "status": 200,
+        "body": {
+          "items": [
+            {
+              "clients": 0,
+              "comment": "",
+              "enabled": true,
+              "id": 0,
+              "lists": 0,
+              "name": "default",
+              "rules": 0
+            }
+          ],
+          "next_cursor": null
+        }
+      }
+    },
+    {
+      "name": "group-upper",
+      "method": "POST",
+      "path": "/groups",
+      "body": {
+        "name": "Kids"
+      },
+      "response": {
+        "status": 422,
+        "body": {
+          "code": "validation_failed",
+          "message": "The request has invalid fields.",
+          "details": [
+            {
+              "field": "name",
+              "message": "Use 1 to 64 characters: a-z, 0-9, '-', '_', '.'. Start with a letter or a digit."
+            }
+          ],
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "group-new",
+      "method": "POST",
+      "path": "/groups",
+      "body": {
+        "name": "kids"
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 2,
+          "name": "kids",
+          "enabled": true,
+          "comment": "",
+          "lists": 0,
+          "rules": 0,
+          "clients": 0
+        }
+      }
+    },
+    {
+      "name": "group-again",
+      "method": "POST",
+      "path": "/groups",
+      "body": {
+        "name": "kids"
+      },
+      "response": {
+        "status": 409,
+        "body": {
+          "code": "conflict",
+          "message": "A group with this name exists.",
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "group-rename-default",
+      "method": "PATCH",
+      "path": "/groups/0",
+      "body": {
+        "name": "main"
+      },
+      "response": {
+        "status": 409,
+        "body": {
+          "code": "conflict",
+          "message": "The default group cannot get a new name.",
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "group-delete-default",
+      "method": "DELETE",
+      "path": "/groups/0",
+      "response": {
+        "status": 409,
+        "body": {
+          "code": "conflict",
+          "message": "The default group cannot be deleted.",
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "clients-seen",
+      "method": "GET",
+      "path": "/clients/seen",
+      "response": {
+        "status": 200,
+        "body": {
+          "items": [],
+          "next_cursor": null
+        }
+      }
+    },
+    {
+      "name": "csrf-stale",
+      "method": "PUT",
+      "path": "/blocking",
+      "body": {
+        "enabled": true
+      },
+      "response": {
+        "status": 403,
+        "body": {
+          "code": "csrf_failed",
+          "message": "The X-CSRF-Token header is missing or not valid.",
+          "retry_after_seconds": null
+        }
+      }
+    },
+    {
+      "name": "session",
+      "method": "GET",
+      "path": "/auth/session",
+      "response": {
+        "status": 200,
+        "body": {
+          "csrf_token": "REDACTED-b64url-32-bytes-0000000000000000",
+          "expires_at": "2026-11-18T18:24:08Z",
+          "totp_enabled": false
+        }
+      }
+    }
+  ]
+}

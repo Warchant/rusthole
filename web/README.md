@@ -56,8 +56,14 @@ The preview server sends the same `Content-Security-Policy` header.
 
 ```bash
 bun run check   # svelte-check and tsc
-bun run test    # vitest unit tests (not `bun test`, which is a different test runner)
+bun run test    # vitest unit and component tests (not `bun test`, which is a different test runner)
 ```
+
+Component tests (`*.test.ts` with `// @vitest-environment happy-dom` on the first line)
+mount pages in happy-dom. They use the real API client on top of the mock API
+(`src/test/harness.ts`). Keep the mock in step with the real API: a difference hides
+faults of the UI. `src/lib/mock/upstream.ts` is a port of the upstream URL parser of the
+server; change it when `UpstreamUrl::parse` changes.
 
 ## Rules for UI code
 
@@ -66,5 +72,36 @@ bun run test    # vitest unit tests (not `bun test`, which is a different test r
 - Do not load resources from other hosts. Use the system font stack.
 - Do not keep secrets in `localStorage`. The CSRF token stays in memory.
 - All API calls go through `src/lib/api/client.ts`.
+- On 403 `csrf_failed` for a write, the client reads the token again with
+  `GET /auth/session` and tries the write one more time. This occurs when you log in
+  again in another tab. A second 403 is the final result.
+- A keyed `{#each}` block needs a unique key. Use a key that the API makes unique (an
+  `id`, or for example `kind` and `address` together). To add a page of data to a list,
+  use `mergeByKey` (`src/lib/grouping.ts`), because the server can send an item again.
+- A checkbox that writes at once uses `actToggle` (`src/lib/state.svelte.ts`). When the
+  write fails, it puts the checkbox back.
 - rusthole v1 uses IPv4 transport only. Forms accept IPv4 for client ids, CIDRs and
   servers, and show a hint for IPv6.
+
+## Background polling and the session idle limit
+
+Each API request moves the idle limit of the session (1 h, docs/API.md section 3). A
+poll with no end would keep a session alive until the absolute limit (8 h). Thus all
+background polls use `poll()` from `src/lib/activity.ts`, not `setInterval`:
+
+- A poll sends no request while the tab is hidden.
+- A poll sends no request when the last user input (pointer, key, wheel or touch) is
+  15 minutes or more ago (`POLL_IDLE_LIMIT_MS`).
+- When the user comes back (an input, or the tab becomes visible), each stopped poll
+  sends one request at once. Then it continues at its interval.
+- The idle time uses `performance.now()`, a monotonic clock.
+
+When no request goes to the server for 1 h, the session ends on the server. The next
+request then gets 401 and the UI shows the login page.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Polling
+    Polling --> Stopped: tab hidden, or no input for 15 min
+    Stopped --> Polling: input or tab visible (one request at once)
+```

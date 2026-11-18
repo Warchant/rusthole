@@ -405,10 +405,15 @@ export interface Settings {
   acl: { extra_cidrs: string[]; local_subnets: string[] };
   stats: { flush_interval_seconds: number; retention_days: number; recent_queries_size: number };
   lists: { refresh_interval_hours: number };
+  /**
+   * True when a change since the start needs a restart (upstreams, statistics,
+   * listeners, TLS). It stays true until the restart. Read-only.
+   */
+  restart_required: boolean;
 }
 
-/** The body of PATCH /settings. `acl.local_subnets` is read-only. */
-export type SettingsPatch = Partial<Omit<Settings, 'acl'>> & {
+/** The body of PATCH /settings. `acl.local_subnets` and `restart_required` are read-only. */
+export type SettingsPatch = Partial<Omit<Settings, 'acl' | 'restart_required'>> & {
   acl?: { extra_cidrs: string[] };
 };
 

@@ -15,6 +15,12 @@ export interface ClientOptions {
   fetch: FetchFn;
   /** Returns the CSRF token of the session, or null. */
   getCsrfToken: () => string | null;
+  /**
+   * Gets the CSRF token of the session again (GET /auth/session) and keeps it.
+   * Returns the new token, or null. The client calls it on 403 `csrf_failed` and
+   * then tries the write one more time. This occurs when another tab logged in.
+   */
+  refreshCsrfToken?: () => Promise<string | null>;
   /** Called on 401 `unauthorized`: the session is not valid. */
   onUnauthorized?: (err: ApiError) => void;
   /** Called on 429 with the wait time in seconds. */
@@ -105,6 +111,27 @@ export function createClient(options: ClientOptions): Client {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   async function request<T>(method: string, path: string, req: RequestOptions = {}): Promise<T> {
+    try {
+      return await send<T>(method, path, req);
+    } catch (err) {
+      if (!(await mayTryAgain(err, method, path))) throw err;
+    }
+    // One more try only: the second result is final, also a second 403.
+    return send<T>(method, path, req);
+  }
+
+  /** True when the write failed on an old CSRF token and a new token is now set. */
+  async function mayTryAgain(err: unknown, method: string, path: string): Promise<boolean> {
+    if (!(err instanceof ApiError) || err.status !== 403 || err.code !== 'csrf_failed') return false;
+    if (method === 'GET' || method === 'HEAD' || path === '/auth/login' || !options.refreshCsrfToken) return false;
+    try {
+      return (await options.refreshCsrfToken()) !== null;
+    } catch {
+      return false;
+    }
+  }
+
+  async function send<T>(method: string, path: string, req: RequestOptions): Promise<T> {
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (req.body !== undefined) headers['Content-Type'] = 'application/json';
     if (method !== 'GET' && method !== 'HEAD') {

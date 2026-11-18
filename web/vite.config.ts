@@ -21,6 +21,8 @@ export default defineConfig(({ mode }) => {
   const apiTarget = env.RUSTHOLE_API || 'https://127.0.0.1:8443';
   return {
     plugins: [svelte()],
+    // Component tests mount Svelte in happy-dom. They need the browser build of Svelte.
+    resolve: mode === 'test' ? { conditions: ['browser'] } : undefined,
     build: {
       outDir: 'dist',
       target: 'es2022',
@@ -29,11 +31,24 @@ export default defineConfig(({ mode }) => {
       modulePreload: { polyfill: false },
     },
     server: {
+      // Tests read the packaged config (packaging/rusthole.toml) as test data.
+      fs: mode === 'test' ? { allow: ['.', '../packaging'] } : undefined,
       // Mode "api" sends /api to a real rusthole. The admin listener uses a
       // self-signed certificate in development, so do not check it here.
       proxy:
         mode === 'api'
-          ? { '/api': { target: apiTarget, changeOrigin: true, secure: false } }
+          ? {
+              '/api': {
+                target: apiTarget,
+                changeOrigin: true,
+                secure: false,
+                // The server refuses a write with a foreign Origin (cross-site guard).
+                // The dev page has the Origin of Vite, so remove it in this proxy only.
+                configure: (proxy) => {
+                  proxy.on('proxyReq', (req) => req.removeHeader('origin'));
+                },
+              },
+            }
           : undefined,
     },
     preview: {

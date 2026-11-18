@@ -1,11 +1,12 @@
 <script lang="ts">
   import GroupPicker from '../components/GroupPicker.svelte';
   import Status from '../components/Status.svelte';
+  import { poll } from '../lib/activity';
   import { api } from '../lib/api';
   import type { Adlist, ListKind } from '../lib/api/types';
   import { formatCount, formatDateTime, formatRelative } from '../lib/format';
   import { groupNames } from '../lib/grouping';
-  import { act, resource } from '../lib/state.svelte';
+  import { act, actToggle, resource } from '../lib/state.svelte';
   import { isHttpUrl } from '../lib/validate';
 
   const lists = resource(() => api.lists.list());
@@ -17,11 +18,11 @@
     !!lists.data && (lists.data.schedule.running || lists.data.items.some((l) => l.status.state === 'updating')),
   );
 
-  // Poll while an update runs.
+  // Poll while an update runs. The poll stops while the tab is hidden or the user
+  // is away (lib/activity.ts).
   $effect(() => {
     if (!running) return;
-    const t = setInterval(() => lists.reload(), 1500);
-    return () => clearInterval(t);
+    return poll(() => lists.reload(), 1500);
   });
 
   let editing = $state<Adlist | null>(null);
@@ -66,7 +67,7 @@
     if (ok) reset();
   }
 
-  const toggle = (l: Adlist) => act(() => api.lists.update(l.id, { enabled: !l.enabled }), null, lists.reload);
+  const toggle = (e: Event, l: Adlist) => actToggle(e, () => api.lists.update(l.id, { enabled: !l.enabled }), lists.reload);
   const refresh = (l: Adlist) => act(() => api.lists.refresh(l.id), 'Update started.', lists.reload);
   const refreshAll = () => act(() => api.lists.refreshAll(), 'Update of all lists started.', lists.reload);
 
@@ -176,7 +177,7 @@
               {#each lists.data.items as l (l.id)}
                 {@const b = stateBadge(l)}
                 <tr class:off={!l.enabled}>
-                  <td><input type="checkbox" checked={l.enabled} aria-label="Enabled" onchange={() => toggle(l)} /></td>
+                  <td><input type="checkbox" checked={l.enabled} aria-label="Enabled" onchange={(e) => toggle(e, l)} /></td>
                   <td class="list-cell">
                     <div class="mono">{l.url}</div>
                     {#if l.comment}<div class="muted small">{l.comment}</div>{/if}

@@ -133,8 +133,79 @@ describe('mock API', () => {
     const t = setup();
     await t.login();
     const groups = (await t.api.groups.list()).items;
-    const kids = groups.find((g) => g.name === 'Kids');
+    const kids = groups.find((g) => g.name === 'kids');
     expect(kids).toMatchObject({ lists: 4, clients: 2 });
+  });
+
+  it('uses the group name rule of the server (m28)', async () => {
+    const t = setup();
+    await t.login();
+    expect((await t.api.groups.get(0)).name).toBe('default');
+    await expect(t.api.groups.create({ name: 'Kids', enabled: true, comment: '' })).rejects.toMatchObject({
+      status: 422,
+      details: [{ field: 'name', message: expect.stringContaining('a-z') as unknown }],
+    });
+    await expect(t.api.groups.create({ name: '-x', enabled: true, comment: '' })).rejects.toMatchObject({ status: 422 });
+    await expect(t.api.groups.create({ name: 'kids', enabled: true, comment: '' })).rejects.toMatchObject({ status: 409 });
+    await expect(t.api.groups.create({ name: ' school.2_b-c ', enabled: true, comment: '' })).resolves.toMatchObject({
+      name: 'school.2_b-c',
+    });
+    await expect(t.api.groups.update(0, { name: 'main' })).rejects.toMatchObject({ status: 409 });
+    await expect(t.api.groups.remove(0)).rejects.toMatchObject({ status: 409 });
+    await t.api.groups.remove(1);
+    const lists = (await t.api.lists.list()).items;
+    expect(lists.some((l) => l.groups.includes(1))).toBe(false);
+  });
+
+  it('lists each bound address in GET /system, so two rows can have the same kind (m28, M4)', async () => {
+    const t = setup();
+    await t.login();
+    const kinds = (await t.api.system.get()).listeners.map((l) => l.kind);
+    expect(kinds.filter((k) => k === 'dns')).toHaveLength(2);
+    expect(kinds.filter((k) => k === 'admin')).toHaveLength(2);
+  });
+
+  it('sends the config text of upstreams and accepts every server form (m28, M5)', async () => {
+    const t = setup();
+    await t.login();
+    const s = await t.api.settings.get();
+    expect(s.upstreams.servers[0]).toBe('udp://192.0.2.53:53');
+    const servers = ['192.0.2.1', '192.0.2.1:5353', 'udp://192.0.2.1:53', 'TCP://192.0.2.1', 'tls://192.0.2.1', 'https://192.0.2.1/dns-query', 'tls://dns.example:853'];
+    const next = await t.api.settings.update({ upstreams: { servers, timeout_ms: 2000 } });
+    expect(next.upstreams.servers).toEqual(servers);
+    await expect(t.api.settings.update({ upstreams: { servers: ['udp://dns.example', '2001:db8::1'], timeout_ms: 2000 } })).rejects.toMatchObject({
+      status: 422,
+      details: [
+        { field: 'upstreams.servers[0]', message: expect.stringContaining('must be an IP address') as unknown },
+        { field: 'upstreams.servers[1]', message: expect.stringContaining('IPv6') as unknown },
+      ],
+    });
+    await expect(t.api.settings.update({ upstreams: { servers: ['tls://new.example'], timeout_ms: 2000 } })).rejects.toMatchObject({
+      status: 422,
+      details: [{ field: 'upstreams.servers[0]', message: expect.stringContaining('bootstrap') as unknown }],
+    });
+  });
+
+  it('sets restart_required after a change of upstreams or stats only (m28, M6)', async () => {
+    const t = setup();
+    await t.login();
+    const s = await t.api.settings.get();
+    expect(s.restart_required).toBe(false);
+    // The same values again, and a live section, need no restart.
+    await expect(t.api.settings.update({ upstreams: s.upstreams, cache: { ...s.cache, max_ttl: 3600 } })).resolves.toMatchObject({ restart_required: false });
+    await expect(t.api.settings.update({ stats: { ...s.stats, retention_days: 7 } })).resolves.toMatchObject({ restart_required: true });
+    await expect(t.api.settings.update({ cache: s.cache })).resolves.toMatchObject({ restart_required: true });
+    await expect(t.api.settings.get()).resolves.toMatchObject({ restart_required: true });
+    // The field is read-only.
+    await expect(t.client.patch('/settings', { restart_required: false })).rejects.toMatchObject({ status: 422 });
+  });
+
+  it('counts the queries of seen clients over 30 days, as the server does (m28, m27)', async () => {
+    const t = setup();
+    await t.login();
+    const seen = (await t.api.clients.seen()).items.find((c) => c.ip === '192.0.2.10');
+    const month = (await t.api.stats.clients('30d', { q: '192.0.2.10' })).items[0];
+    expect(seen?.queries).toBe(month?.queries);
   });
 
   it('never returns secrets in settings or token lists', async () => {

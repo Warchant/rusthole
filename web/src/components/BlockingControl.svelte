@@ -1,6 +1,7 @@
 <script lang="ts">
   // Blocking on/off with a timer. The countdown starts from the server value
   // `remaining_seconds` and uses performance.now() (a monotonic clock).
+  import { poll } from '../lib/activity';
   import { api } from '../lib/api';
   import type { BlockingState } from '../lib/api/types';
   import { MAX_TIMER_SECONDS, remainingSeconds, TIMER_PRESETS } from '../lib/countdown';
@@ -62,10 +63,11 @@
     const tick = setInterval(() => {
       now = performance.now();
     }, 1000);
-    const poll = setInterval(() => void refresh(), POLL_MS);
+    // The poll stops while the tab is hidden or the user is away (lib/activity.ts).
+    const stopPoll = poll(() => void refresh(), POLL_MS);
     return () => {
       clearInterval(tick);
-      clearInterval(poll);
+      stopPoll();
     };
   });
 

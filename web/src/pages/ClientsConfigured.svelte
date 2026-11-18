@@ -116,7 +116,7 @@
     <h2>Configured clients</h2>
     {#if clients.data}
       {#if clients.data.items.length === 0}
-        <p class="empty">No configured clients. All clients use the Default group.</p>
+        <p class="empty">No configured clients. All clients use the default group.</p>
       {:else}
         <div class="table-wrap">
           <table>
@@ -152,7 +152,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Name</th><th>IP</th><th>MAC</th><th class="num">Queries (24 h)</th><th>Last seen</th><th></th></tr>
+            <tr><th>Name</th><th>IP</th><th>MAC</th><th class="num">Queries (30 days)</th><th>Last seen</th><th></th></tr>
           </thead>
           <tbody>
             {#each seen.data.items as s (s.ip)}

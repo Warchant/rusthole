@@ -5,6 +5,7 @@
 
 import type * as T from '../api/types';
 import { classifyClientMatch, checkCidrs, checkForwardDomain, checkServers, isHttpUrl, isIPv4, looksLikeIPv6 } from '../validate';
+import { upstreamErrors } from './upstream';
 import {
   clientNames,
   clientTotals,
@@ -56,9 +57,10 @@ function randomBase32(chars: number): string {
 
 function initialState() {
   const groups: T.Group[] = [
-    { id: 0, name: 'Default', enabled: true, comment: 'All clients that match no other entry', lists: 0, rules: 0, clients: 0 },
-    { id: 1, name: 'Kids', enabled: true, comment: 'Strict lists', lists: 0, rules: 0, clients: 0 },
-    { id: 2, name: 'Guests', enabled: true, comment: 'No block lists', lists: 0, rules: 0, clients: 0 },
+    // The server rule for names: lower case (see groupName below). The default group is "default".
+    { id: 0, name: 'default', enabled: true, comment: 'All clients that match no other entry', lists: 0, rules: 0, clients: 0 },
+    { id: 1, name: 'kids', enabled: true, comment: 'Strict lists', lists: 0, rules: 0, clients: 0 },
+    { id: 2, name: 'guests', enabled: true, comment: 'No block lists', lists: 0, rules: 0, clients: 0 },
   ];
   const status = (entries: number, hoursAgo: number, error: string | null = null): T.ListStatus => ({
     state: error ? 'error' : 'ok',
@@ -127,15 +129,20 @@ function initialState() {
       { id: 1, name: 'backup script', prefix: 'rh_Ab3d', created_at: ago(86400 * 20), last_used_at: ago(3600 * 6), last_used_ip: '192.0.2.20' },
       { id: 2, name: 'home dashboard', prefix: 'rh_x7Qp', created_at: ago(86400 * 3), last_used_at: null, last_used_ip: null },
     ] as T.ApiToken[],
+    // The server sends the config text of each upstream. The default config and an
+    // import write `udp://IP:PORT`. A DoT or DoH host name has bootstrap addresses in
+    // the config file.
     settings: {
-      upstreams: { servers: ['192.0.2.53', '198.51.100.53'], timeout_ms: 2000 },
+      upstreams: { servers: ['udp://192.0.2.53:53', 'udp://198.51.100.53:53', 'tls://dns.example:853'], timeout_ms: 2000 },
       blocking: { mode: 'null', custom_ipv4: null, custom_ipv6: null, blocked_ttl: 2, special_domains: true, cname_check: true },
       cache: { enabled: true, max_entries: 10000, min_ttl: 0, max_ttl: 86400, negative_ttl: 300 },
       rate_limit: { queries_per_second: 50, burst: 200 },
       acl: { extra_cidrs: ['198.51.100.0/24'], local_subnets: ['192.0.2.0/24'] },
       stats: { flush_interval_seconds: 60, retention_days: 30, recent_queries_size: 1000 },
       lists: { refresh_interval_hours: 24 },
-    } as T.Settings,
+    } as Omit<T.Settings, 'restart_required'>,
+    /** True after a change of upstreams or stats, until a restart (a mock reset). */
+    restartRequired: false,
     audit: makeAudit(),
     nextId: 100,
     lastScheduleRunMs: Date.now() - 5 * 3600 * 1000,
@@ -179,6 +186,12 @@ refreshGroupCounts();
 /** Resets the mock state. For tests. */
 export function resetMock(): void {
   state = initialState();
+  refreshGroupCounts();
+}
+
+/** Changes the mock state directly. For tests. */
+export function changeMock(change: (s: ReturnType<typeof initialState>) => void): void {
+  change(state);
   refreshGroupCounts();
 }
 
@@ -341,7 +354,10 @@ function obj(body: Json): Record<string, unknown> {
 }
 
 function onlyFields(body: Record<string, unknown>, allowed: string[]): void {
-  for (const k of Object.keys(body)) if (!allowed.includes(k)) invalid(k, 'This field is unknown or read-only.');
+  // The server (serde, deny_unknown_fields) names the field "body" in this 422.
+  for (const k of Object.keys(body)) {
+    if (!allowed.includes(k)) invalid('body', `unknown field \`${k}\`, expected one of ${allowed.map((a) => `\`${a}\``).join(', ')}`);
+  }
 }
 
 function checkGroups(ids: unknown): number[] {
@@ -841,17 +857,34 @@ route('POST', '/rules/test', ({ body }) => {
   }
 });
 
-// Groups
+// Groups. The name rule is `is_valid_group_name` of the server: 1 to 64 characters
+// a-z, 0-9, '-', '_', '.', and the first one is a letter or a digit. Names are case
+// sensitive, so a conflict needs the same name.
+const GROUP_NAME = /^[a-z0-9][a-z0-9_.-]{0,63}$/;
+route('DELETE', '/groups/:id', ({ params }) => {
+  const id = Number(params[0]);
+  if (id === 0) throw new HttpError(409, 'conflict', 'The default group cannot be deleted.');
+  const old = byId(state.groups, id);
+  state.groups.splice(state.groups.indexOf(old), 1);
+  for (const x of [...state.lists, ...state.rules, ...state.clients]) x.groups = x.groups.filter((g) => g !== id);
+  refreshGroupCounts();
+  audit('group.delete', `group:${old.id}`);
+  return undefined;
+});
 crudRoutes<T.Group>('/groups', () => state.groups, (b, old) => {
   onlyFields(b, ['name', 'enabled', 'comment']);
-  const name = b.name ?? old?.name;
-  if (typeof name !== 'string' || name.trim() === '' || name.length > 64) invalid('name', 'Use 1 to 64 characters.');
-  if (state.groups.some((g) => g.name.toLowerCase() === name.toLowerCase() && g.id !== old?.id)) {
-    throw new HttpError(409, 'conflict', 'A group with this name already exists.');
+  const raw = b.name ?? old?.name;
+  const name = typeof raw === 'string' ? raw.trim() : '';
+  if (!GROUP_NAME.test(name)) {
+    invalid('name', "Use 1 to 64 characters: a-z, 0-9, '-', '_', '.'. Start with a letter or a digit.");
   }
+  if (state.groups.some((g) => g.name === name && g.id !== old?.id)) {
+    throw new HttpError(409, 'conflict', 'A group with this name exists.');
+  }
+  if (old?.id === 0 && name !== old.name) throw new HttpError(409, 'conflict', 'The default group cannot get a new name.');
   return {
     id: old?.id ?? state.nextId++,
-    name: name.trim(),
+    name,
     enabled: typeof b.enabled === 'boolean' ? b.enabled : (old?.enabled ?? true),
     comment: typeof b.comment === 'string' ? b.comment : (old?.comment ?? ''),
     lists: old?.lists ?? 0,
@@ -867,8 +900,9 @@ route('GET', '/clients/seen', ({ q }) => {
     mac: c.mac,
     name: c.host,
     first_seen_at: ago(firstSeenDays(c) * 86400),
-    last_seen_at: statsClient(c, '24h').last_seen_at,
-    queries: clientTotals(c, '24h', Date.now()).queries,
+    last_seen_at: statsClient(c, '30d').last_seen_at,
+    // The server counts the queries of the last 30 days (Range::Month).
+    queries: clientTotals(c, '30d', Date.now()).queries,
     client_id: configuredFor(c)?.id ?? null,
   }));
   items.push({ ip: '192.0.2.31', mac: '02:00:00:00:00:31', name: null, first_seen_at: ago(3600 * 5), last_seen_at: ago(600), queries: 37, client_id: null });
@@ -950,16 +984,21 @@ route('DELETE', '/tokens/:id', ({ params }) => {
 });
 
 // Settings
-route('GET', '/settings', () => state.settings);
+function settingsOut(): T.Settings {
+  return { ...structuredClone(state.settings), restart_required: state.restartRequired };
+}
+route('GET', '/settings', () => settingsOut());
 route('PATCH', '/settings', ({ body }) => {
   const b = obj(body);
+  // `restart_required` is read-only: the server refuses it as an unknown field.
   onlyFields(b, ['upstreams', 'blocking', 'cache', 'rate_limit', 'acl', 'stats', 'lists']);
   const next = structuredClone(state.settings);
   if (b.upstreams) {
     const u = b.upstreams as T.Settings['upstreams'];
-    const err = checkServers(u.servers ?? [], 8);
-    if (err) invalid('upstreams.servers', err);
-    next.upstreams = u;
+    const servers = Array.isArray(u.servers) ? u.servers : [];
+    const errors = upstreamErrors(servers, u.timeout_ms, state.settings.upstreams.servers);
+    if (errors.length > 0) throw new HttpError(422, 'validation_failed', 'The request has invalid fields.', errors);
+    next.upstreams = { servers: servers.map((x) => x.trim()), timeout_ms: u.timeout_ms };
   }
   if (b.acl) {
     const a = b.acl as Record<string, unknown>;
@@ -986,16 +1025,22 @@ route('PATCH', '/settings', ({ body }) => {
       invalid('stats.flush_interval_seconds', 'Use 0, or 10 to 3600.');
     }
     if (s.retention_days < 1 || s.retention_days > 365) invalid('stats.retention_days', 'Use 1 to 365.');
+    if (s.recent_queries_size < 100 || s.recent_queries_size > 100000) invalid('stats.recent_queries_size', 'Use 100 to 100000.');
     next.stats = s;
   }
   if (b.lists) {
     const l = b.lists as T.Settings['lists'];
-    if (l.refresh_interval_hours < 0 || l.refresh_interval_hours > 168) invalid('lists.refresh_interval_hours', 'Use 0 to 168.');
+    if (l.refresh_interval_hours < 0 || l.refresh_interval_hours > 168) invalid('lists.refresh_interval_hours', 'Use 0, or 1 to 168.');
     next.lists = l;
+  }
+  // As `restart_fields_changed` of the server: a real change of upstreams or stats
+  // needs a restart. The flag stays true until the restart.
+  if (JSON.stringify(next.upstreams) !== JSON.stringify(state.settings.upstreams) || JSON.stringify(next.stats) !== JSON.stringify(state.settings.stats)) {
+    state.restartRequired = true;
   }
   state.settings = next;
   audit('settings.update', 'settings', `sections=${Object.keys(b).join(',')}`);
-  return state.settings;
+  return settingsOut();
 });
 
 // Audit and system
@@ -1014,9 +1059,13 @@ route('GET', '/system', () => ({
   data_dir: '/var/lib/rusthole',
   os: 'linux',
   arch: 'aarch64',
+  // The server sends one row for each bound address. With the packaged config
+  // ("auto"), a host with a LAN address has two dns rows and two admin rows.
   listeners: [
+    { kind: 'dns', address: '127.0.0.1:53' },
     { kind: 'dns', address: '192.0.2.2:53' },
     { kind: 'doh', address: '192.0.2.2:443' },
+    { kind: 'admin', address: '127.0.0.1:8443' },
     { kind: 'admin', address: '192.0.2.2:8443' },
   ],
 }) satisfies T.SystemInfo);
@@ -1057,7 +1106,7 @@ export function createMockFetch(options: MockOptions = {}) {
       const isLogin = method === 'POST' && path === '/auth/login';
       if (!isLogin && !state.authed) throw new HttpError(401, 'unauthorized', 'Log in first.');
       if (!isLogin && method !== 'GET' && headers['X-CSRF-Token'] !== state.csrf) {
-        throw new HttpError(403, 'csrf_failed', 'The CSRF token is missing or not valid.');
+        throw new HttpError(403, 'csrf_failed', 'The X-CSRF-Token header is missing or not valid.');
       }
       let body: Json = undefined;
       if (typeof init.body === 'string' && init.body !== '') {

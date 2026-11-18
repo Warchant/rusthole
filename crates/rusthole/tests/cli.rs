@@ -36,7 +36,7 @@ fn import_then_check_config() {
     let o = rusthole(&["import", zip_s, "-o", out_s]);
     assert!(o.status.success(), "{o:?}");
     let text = stdout(&o);
-    assert!(text.contains("Translated (68):"), "{text}");
+    assert!(text.contains("Translated (66):"), "{text}");
     assert!(text.contains("rusthole passwd"));
     assert!(!text.contains("BALLOON"));
     // The command prints the full report, then the output path.

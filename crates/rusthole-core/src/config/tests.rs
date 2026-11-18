@@ -113,7 +113,7 @@ fn listen_addresses() {
     assert_one_issue(&c, "server.dns_listen[1]");
     c.server.dns_listen = vec![];
     assert_one_issue(&c, "server.dns_listen");
-    c.server.dns_listen = vec!["192.0.2.1".into(), "2001:db8::1".into()];
+    c.server.dns_listen = vec!["192.0.2.1".into(), "192.0.2.2".into()];
     assert_eq!(c.validate(), []);
     c.server.doh.listen = vec!["bad".into()];
     assert_one_issue(&c, "server.doh.listen[0]");
@@ -138,6 +138,25 @@ fn doh_and_admin_port_clash() {
     c.server.doh.enabled = true;
     c.server.doh.port = 8443;
     assert_one_issue(&c, "server.admin.port");
+    // A listener that is off does not clash.
+    c.server.doh.enabled = false;
+    assert_eq!(c.validate(), []);
+}
+
+#[test]
+fn https_listener_on_dns_port_clashes() {
+    // DNS also listens on TCP at dns_port.
+    let mut c = Config::default();
+    c.server.admin.port = 53;
+    assert_one_issue(&c, "server.admin.port");
+    c.server.admin.enabled = false;
+    assert_eq!(c.validate(), []);
+    let mut c = Config::default();
+    c.server.doh.enabled = true;
+    c.server.doh.port = 53;
+    assert_one_issue(&c, "server.doh.port");
+    c.server.doh.enabled = false;
+    assert_eq!(c.validate(), []);
 }
 
 #[test]
@@ -249,7 +268,7 @@ fn acl_cidrs() {
     let mut c = Config::default();
     c.acl.allow = vec![
         "192.0.2.0/24".into(),
-        "2001:db8::/32".into(),
+        "198.51.100.0/24".into(),
         "192.0.2.0/40".into(),
     ];
     assert_one_issue(&c, "acl.allow[2]");
@@ -420,6 +439,141 @@ fn local_dns_values() {
             "local_dns.conditional_forwarding[0].server",
         ]
     );
+}
+
+/// Asserts that the config has exactly one issue, at `path`, and that it is the A11 issue.
+fn assert_v6_issue(config: &Config, path: &str) {
+    assert_one_issue(config, path);
+    assert_eq!(config.validate()[0].message, IPV6_NOT_SUPPORTED);
+}
+
+#[test]
+fn ipv6_listen_is_refused() {
+    let mut c = Config::default();
+    c.server.dns_listen = vec!["192.0.2.1".into(), "2001:db8::1".into()];
+    assert_v6_issue(&c, "server.dns_listen[1]");
+    let mut c = Config::default();
+    c.server.doh.listen = vec!["::".into()];
+    assert_v6_issue(&c, "server.doh.listen[0]");
+    let mut c = Config::default();
+    c.server.admin.listen = vec!["2001:db8::2".into()];
+    assert_v6_issue(&c, "server.admin.listen[0]");
+    // An IPv4-mapped IPv6 address is IPv6 too.
+    let mut c = Config::default();
+    c.server.dns_listen = vec!["::ffff:192.0.2.1".into()];
+    assert_v6_issue(&c, "server.dns_listen[0]");
+}
+
+#[test]
+fn ipv6_upstream_is_refused() {
+    let up = |url: &str, bootstrap: &[&str]| Upstream {
+        url: url.to_owned(),
+        bootstrap: bootstrap.iter().map(|b| (*b).to_owned()).collect(),
+    };
+    let mut c = Config::default();
+    for url in [
+        "2001:db8::1",
+        "[2001:db8::1]:53",
+        "udp://[2001:db8::1]:53",
+        "tcp://[2001:db8::1]",
+        "tls://[2001:db8::1]:853",
+        "https://[2001:db8::1]/dns-query",
+    ] {
+        c.upstreams.servers = vec![up(url, &[])];
+        assert_v6_issue(&c, "upstreams.servers[0].url");
+    }
+    c.upstreams.servers = vec![up("tls://dns.example:853", &["192.0.2.80", "2001:db8::80"])];
+    assert_v6_issue(&c, "upstreams.servers[0].bootstrap[1]");
+    c.upstreams.servers = vec![up("udp://192.0.2.53:53", &[])];
+    c.upstreams.fallback_plain = vec!["udp://[2001:db8::53]:53".into()];
+    assert_v6_issue(&c, "upstreams.fallback_plain[0]");
+}
+
+#[test]
+fn ipv6_acl_is_refused() {
+    let mut c = Config::default();
+    c.acl.allow = vec!["192.0.2.0/24".into(), "2001:db8:100::/48".into()];
+    assert_v6_issue(&c, "acl.allow[1]");
+}
+
+#[test]
+fn ipv6_client_is_refused() {
+    let client = |id: &str| Client {
+        id: id.to_owned(),
+        groups: vec![DEFAULT_GROUP.into()],
+        comment: None,
+    };
+    let mut c = Config::default();
+    c.clients = vec![client("192.0.2.5"), client("2001:db8::5")];
+    assert_v6_issue(&c, "clients[1].id");
+    c.clients = vec![client("2001:db8::/64")];
+    assert_v6_issue(&c, "clients[0].id");
+    c.clients = vec![client("::ffff:192.0.2.52")];
+    assert_v6_issue(&c, "clients[0].id");
+}
+
+#[test]
+fn ipv6_conditional_forwarding_is_refused() {
+    let fwd = |cidr: &str, server: &str| ConditionalForward {
+        enabled: true,
+        cidr: cidr.to_owned(),
+        server: server.to_owned(),
+        domain: None,
+    };
+    let mut c = Config::default();
+    c.local_dns.conditional_forwarding = vec![fwd("2001:db8::/32", "192.0.2.1")];
+    assert_v6_issue(&c, "local_dns.conditional_forwarding[0].cidr");
+    c.local_dns.conditional_forwarding = vec![fwd("192.0.2.0/24", "[2001:db8::1]:53")];
+    assert_v6_issue(&c, "local_dns.conditional_forwarding[0].server");
+    c.local_dns.conditional_forwarding = vec![fwd("192.0.2.0/24", "2001:db8::1")];
+    assert_v6_issue(&c, "local_dns.conditional_forwarding[0].server");
+}
+
+#[test]
+fn ipv6_dns_content_stays_valid() {
+    // AAAA records and the IPv6 block answer are DNS content, not transport (A11).
+    let mut c = Config::default();
+    c.local_dns.records = vec![LocalRecord {
+        name: "nas.lan".into(),
+        record_type: RecordType::Aaaa,
+        value: "2001:db8::10".into(),
+    }];
+    c.blocking.mode = BlockingMode::Ip;
+    c.blocking.ipv6 = Some("::".into());
+    assert_eq!(c.validate(), []);
+    c.blocking.ipv4 = Some("0.0.0.0".into());
+    c.blocking.ipv6 = Some("2001:db8::1".into());
+    assert_eq!(c.validate(), []);
+}
+
+#[test]
+fn many_ipv6_transport_values_give_one_issue_each() {
+    let text = r#"config_version = 1
+[server]
+dns_listen = ["2001:db8::2"]
+[server.admin]
+listen = ["2001:db8::3"]
+[upstreams]
+fallback_plain = ["udp://[2001:db8::53]:53"]
+[[upstreams.servers]]
+url = "tcp://[2001:db8::1]:53"
+[[upstreams.servers]]
+url = "tls://dns.example"
+bootstrap = ["2001:db8::80"]
+[acl]
+allow = ["2001:db8:100::/48"]
+[[clients]]
+id = "2001:db8::5"
+[[clients]]
+id = "2001:db8::/64"
+[[local_dns.conditional_forwarding]]
+cidr = "2001:db8::/32"
+server = "[2001:db8::1]:53"
+"#;
+    let c = Config::from_toml_str(text).unwrap();
+    let issues = c.validate();
+    assert_eq!(issues.len(), 10, "{issues:#?}");
+    assert!(issues.iter().all(|i| i.message == IPV6_NOT_SUPPORTED));
 }
 
 const PHC: &str = "$argon2id$v=19$m=19456,t=2,p=1$c29tZXNhbHQ$aGFzaGhhc2hoYXNo";
@@ -651,15 +805,13 @@ fn ipv6() -> impl Strategy<Value = String> {
     any::<u128>().prop_map(|b| std::net::Ipv6Addr::from(b).to_string())
 }
 
-fn ip() -> impl Strategy<Value = String> {
-    prop_oneof![ipv4(), ipv6()]
+/// An IPv4 CIDR block. v1 transport is IPv4 only (amendment A11).
+fn cidr() -> impl Strategy<Value = String> {
+    (ipv4(), 0u8..=32).prop_map(|(a, p)| format!("{a}/{p}"))
 }
 
-fn cidr() -> impl Strategy<Value = String> {
-    prop_oneof![
-        (ipv4(), 0u8..=32).prop_map(|(a, p)| format!("{a}/{p}")),
-        (ipv6(), 0u8..=128).prop_map(|(a, p)| format!("{a}/{p}")),
-    ]
+fn ipv6_cidr() -> impl Strategy<Value = String> {
+    (ipv6(), 0u8..=128).prop_map(|(a, p)| format!("{a}/{p}"))
 }
 
 /// Any text, with control characters and Unicode, to test TOML string escapes.
@@ -681,15 +833,15 @@ fn upstream() -> impl Strategy<Value = Upstream> {
             url: format!("udp://{a}:{p}"),
             bootstrap: vec![]
         }),
-        ipv6().prop_map(|a| Upstream {
-            url: format!("tcp://[{a}]"),
+        ipv4().prop_map(|a| Upstream {
+            url: format!("tcp://{a}"),
             bootstrap: vec![]
         }),
-        (domain(), prop::collection::vec(ip(), 1..3)).prop_map(|(d, b)| Upstream {
+        (domain(), prop::collection::vec(ipv4(), 1..3)).prop_map(|(d, b)| Upstream {
             url: format!("tls://{d}:853"),
             bootstrap: b
         }),
-        (domain(), prop::collection::vec(ip(), 1..3)).prop_map(|(d, b)| Upstream {
+        (domain(), prop::collection::vec(ipv4(), 1..3)).prop_map(|(d, b)| Upstream {
             url: format!("https://{d}/dns-query"),
             bootstrap: b
         }),
@@ -707,7 +859,7 @@ fn regex_value() -> impl Strategy<Value = String> {
 fn client_id() -> impl Strategy<Value = String> {
     prop_oneof![
         any::<[u8; 6]>().prop_map(|m| crate::net::MacAddr(m).to_string()),
-        ip(),
+        ipv4(),
         cidr(),
         "[a-z][a-z0-9-]{0,10}(\\.lan)?",
     ]
@@ -717,19 +869,14 @@ prop_compose! {
     fn server()(
         dns_listen in prop_oneof![
             Just(vec![AUTO.to_owned()]),
-            prop::collection::vec(ip(), 1..3),
+            prop::collection::vec(ipv4(), 1..3),
         ],
-        dns_port in 1u16..,
+        // Three distinct ports: no listener clashes with another one.
+        (dns_port, doh_port, admin_port) in (1u16.., 1u16.., 1u16..)
+            .prop_filter("distinct ports", |(a, b, c)| a != b && b != c && a != c),
         doh_enabled in any::<bool>(),
-        doh_port in 1u16..,
         admin_enabled in any::<bool>(),
-        admin_port in 1u16..,
     ) -> Server {
-        let admin_port = if doh_enabled && admin_enabled && doh_port == admin_port {
-            admin_port.checked_add(1).unwrap_or(1)
-        } else {
-            admin_port
-        };
         Server {
             dns_listen,
             dns_port,
@@ -794,7 +941,7 @@ prop_compose! {
         clients in prop::collection::btree_map(client_id(), (free_text(), prop::collection::vec(any::<prop::sample::Index>(), 0..3)), 0..6),
         records in prop::collection::vec((domain(), any::<bool>(), ipv4(), ipv6()), 0..4),
         cnames in prop::collection::vec((domain(), domain(), prop::option::of(any::<u32>())), 0..3),
-        forwards in prop::collection::vec((any::<bool>(), cidr(), ip(), prop::option::of(domain())), 0..3),
+        forwards in prop::collection::vec((any::<bool>(), cidr(), ipv4(), prop::option::of(domain())), 0..3),
         admin in (any::<bool>(), any::<bool>(), 1u32.., prop::option::of("[a-z/]{1,20}"),
                   prop::collection::btree_set("[a-z]{1,8}", 0..3)),
     ) -> Config {
@@ -968,6 +1115,64 @@ proptest! {
         let text = c.to_toml_string().unwrap();
         let back = Config::from_toml_str(&text).unwrap();
         prop_assert_eq!(back, c);
+    }
+
+    #[test]
+    fn each_ipv6_transport_value_is_refused(
+        c in valid_config(),
+        v6 in ipv6(),
+        v6_cidr in ipv6_cidr(),
+        field in 0usize..10,
+    ) {
+        // Put one IPv6 value into one transport field of a valid config.
+        let mut c = c;
+        let path = match field {
+            0 => {
+                c.server.dns_listen = vec![v6];
+                "server.dns_listen[0]"
+            }
+            1 => {
+                c.server.admin.listen = vec![v6];
+                "server.admin.listen[0]"
+            }
+            2 => {
+                c.upstreams.servers[0] = Upstream { url: format!("udp://[{v6}]:53"), bootstrap: vec![] };
+                "upstreams.servers[0].url"
+            }
+            3 => {
+                c.upstreams.servers[0] = Upstream { url: "tls://dns.example".into(), bootstrap: vec![v6] };
+                "upstreams.servers[0].bootstrap[0]"
+            }
+            4 => {
+                c.upstreams.fallback_plain.insert(0, format!("tcp://[{v6}]"));
+                "upstreams.fallback_plain[0]"
+            }
+            5 => {
+                c.acl.allow.insert(0, v6_cidr);
+                "acl.allow[0]"
+            }
+            6 | 7 => {
+                let id = if field == 6 { v6 } else { v6_cidr };
+                c.clients.insert(0, Client { id, groups: vec![], comment: None });
+                "clients[0].id"
+            }
+            8 => {
+                c.local_dns.conditional_forwarding.insert(0, ConditionalForward {
+                    enabled: true, cidr: v6_cidr, server: "192.0.2.1".into(), domain: None,
+                });
+                "local_dns.conditional_forwarding[0].cidr"
+            }
+            _ => {
+                c.local_dns.conditional_forwarding.insert(0, ConditionalForward {
+                    enabled: true, cidr: "192.0.2.0/24".into(), server: format!("[{v6}]:53"), domain: None,
+                });
+                "local_dns.conditional_forwarding[0].server"
+            }
+        };
+        let issues = c.validate();
+        prop_assert_eq!(issues.len(), 1, "issues: {:#?}", issues);
+        prop_assert_eq!(issues[0].path.as_str(), path);
+        prop_assert_eq!(issues[0].message.as_str(), IPV6_NOT_SUPPORTED);
     }
 
     #[test]

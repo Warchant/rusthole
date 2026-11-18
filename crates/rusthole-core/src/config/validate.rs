@@ -17,6 +17,8 @@ pub const MAX_CACHE_ENTRIES: u32 = 1_000_000;
 pub const MAX_RECENT_QUERIES: u32 = 1_000_000;
 /// Highest allowed upstream timeout, in milliseconds.
 pub const MAX_UPSTREAM_TIMEOUT_MS: u32 = 60_000;
+/// The issue text for an IPv6 transport value (amendment A11).
+pub const IPV6_NOT_SUPPORTED: &str = "IPv6 is not supported in v1";
 
 /// One problem in a config.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -70,6 +72,17 @@ pub(super) fn validate(config: &Config) -> Vec<ConfigIssue> {
     out.0
 }
 
+/// Adds the A11 issue when `ip` is an IPv6 address.
+///
+/// v1 uses IPv4 transport only (amendment A11). The types stay `IpAddr`, so v2 can add IPv6
+/// with no config migration. An IPv4-mapped IPv6 address (`::ffff:192.0.2.1`) is IPv6 here.
+/// Do not use this function for DNS content (AAAA records, `blocking.ipv6`).
+fn reject_v6(ip: IpAddr, path: impl Into<String>, out: &mut Issues) {
+    if ip.is_ipv6() {
+        out.add(path, IPV6_NOT_SUPPORTED);
+    }
+}
+
 fn check_listen(list: &[String], path: &str, out: &mut Issues) {
     if list.is_empty() {
         out.add(
@@ -82,11 +95,15 @@ fn check_listen(list: &[String], path: &str, out: &mut Issues) {
         out.add(path, "\"auto\" cannot be used together with addresses");
     }
     for (i, addr) in list.iter().enumerate() {
-        if addr != AUTO && addr.parse::<IpAddr>().is_err() {
-            out.add(
+        if addr == AUTO {
+            continue;
+        }
+        match addr.parse::<IpAddr>() {
+            Ok(ip) => reject_v6(ip, format!("{path}[{i}]"), out),
+            Err(_) => out.add(
                 format!("{path}[{i}]"),
                 format!("{addr:?} is not \"auto\" and not an IP address"),
-            );
+            ),
         }
     }
 }
@@ -105,10 +122,23 @@ fn check_server(config: &Config, out: &mut Issues) {
     check_port(s.doh.port, "server.doh.port", out);
     check_listen(&s.admin.listen, "server.admin.listen", out);
     check_port(s.admin.port, "server.admin.port", out);
+    // DNS also listens on TCP at dns_port, so an HTTPS listener cannot use that port.
     if s.doh.enabled && s.admin.enabled && s.doh.port == s.admin.port {
         out.add(
             "server.admin.port",
             "the DoH listener and the admin listener use the same port",
+        );
+    }
+    if s.admin.enabled && s.admin.port == s.dns_port {
+        out.add(
+            "server.admin.port",
+            "the admin listener and the DNS listener (TCP) use the same port",
+        );
+    }
+    if s.doh.enabled && s.doh.port == s.dns_port {
+        out.add(
+            "server.doh.port",
+            "the DoH listener and the DNS listener (TCP) use the same port",
         );
     }
 }
@@ -123,6 +153,9 @@ fn check_upstreams(config: &Config, out: &mut Issues) {
         match UpstreamUrl::parse(&server.url) {
             Err(e) => out.add(format!("{path}.url"), e.to_string()),
             Ok(url) => {
+                if let UpstreamHost::Ip(ip) = url.host {
+                    reject_v6(ip, format!("{path}.url"), out);
+                }
                 let needs_bootstrap = matches!(url.host, UpstreamHost::Name(_));
                 if needs_bootstrap && server.bootstrap.is_empty() {
                     out.add(
@@ -138,12 +171,13 @@ fn check_upstreams(config: &Config, out: &mut Issues) {
                 }
             }
         }
-        for (j, ip) in server.bootstrap.iter().enumerate() {
-            if ip.parse::<IpAddr>().is_err() {
-                out.add(
+        for (j, text) in server.bootstrap.iter().enumerate() {
+            match text.parse::<IpAddr>() {
+                Ok(ip) => reject_v6(ip, format!("{path}.bootstrap[{j}]"), out),
+                Err(_) => out.add(
                     format!("{path}.bootstrap[{j}]"),
-                    format!("{ip:?} is not an IP address"),
-                );
+                    format!("{text:?} is not an IP address"),
+                ),
             }
         }
     }
@@ -154,7 +188,11 @@ fn check_upstreams(config: &Config, out: &mut Issues) {
             Ok(url) if !matches!(url.transport, Transport::Udp | Transport::Tcp) => {
                 out.add(path, "a fallback must be plain DNS (udp:// or tcp://)");
             }
-            Ok(_) => {}
+            Ok(url) => {
+                if let UpstreamHost::Ip(ip) = url.host {
+                    reject_v6(ip, path, out);
+                }
+            }
         }
     }
     if u.timeout_ms == 0 || u.timeout_ms > MAX_UPSTREAM_TIMEOUT_MS {
@@ -202,8 +240,9 @@ fn check_numbers(config: &Config, out: &mut Issues) {
         out.add("cache.min_ttl", "min_ttl is greater than max_ttl");
     }
     for (i, cidr) in config.acl.allow.iter().enumerate() {
-        if let Err(e) = Cidr::parse(cidr) {
-            out.add(format!("acl.allow[{i}]"), e.to_string());
+        match Cidr::parse(cidr) {
+            Ok(c) => reject_v6(c.addr, format!("acl.allow[{i}]"), out),
+            Err(e) => out.add(format!("acl.allow[{i}]"), e.to_string()),
         }
     }
     let r = &config.rate_limit;
@@ -329,6 +368,11 @@ fn check_clients(config: &Config, groups: &HashSet<&str>, out: &mut Issues) {
         match ClientId::parse(&client.id) {
             Err(e) => out.add(format!("{path}.id"), e.to_string()),
             Ok(id) => {
+                match &id {
+                    ClientId::Ip(ip) => reject_v6(*ip, format!("{path}.id"), out),
+                    ClientId::Cidr(c) => reject_v6(c.addr, format!("{path}.id"), out),
+                    ClientId::Mac(_) | ClientId::Hostname(_) => {}
+                }
                 if let Some(first) = seen.insert(id, i) {
                     out.add(
                         format!("{path}.id"),
@@ -364,11 +408,13 @@ fn check_local_dns(config: &Config, out: &mut Issues) {
     }
     for (i, f) in l.conditional_forwarding.iter().enumerate() {
         let path = format!("local_dns.conditional_forwarding[{i}]");
-        if let Err(e) = Cidr::parse(&f.cidr) {
-            out.add(format!("{path}.cidr"), e.to_string());
+        match Cidr::parse(&f.cidr) {
+            Ok(c) => reject_v6(c.addr, format!("{path}.cidr"), out),
+            Err(e) => out.add(format!("{path}.cidr"), e.to_string()),
         }
-        if let Err(e) = parse_socket_addr(&f.server, 53) {
-            out.add(format!("{path}.server"), e.to_string());
+        match parse_socket_addr(&f.server, 53) {
+            Ok(addr) => reject_v6(addr.ip(), format!("{path}.server"), out),
+            Err(e) => out.add(format!("{path}.server"), e.to_string()),
         }
         if let Some(d) = &f.domain {
             check_domain(d, format!("{path}.domain"), out);

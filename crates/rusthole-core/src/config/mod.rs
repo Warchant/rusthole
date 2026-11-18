@@ -23,7 +23,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 pub use validate::{
-    ConfigIssue, MAX_CACHE_ENTRIES, MAX_GROUP_NAME_LEN, MAX_RECENT_QUERIES,
+    ConfigIssue, IPV6_NOT_SUPPORTED, MAX_CACHE_ENTRIES, MAX_GROUP_NAME_LEN, MAX_RECENT_QUERIES,
     MAX_UPSTREAM_TIMEOUT_MS, check_list_url, is_argon2id_phc, is_valid_group_name,
 };
 
@@ -288,16 +288,17 @@ fn yes() -> bool {
     true
 }
 
-/// The listen keyword for "every local address".
+/// The listen keyword for "every local IPv4 address".
 pub const AUTO: &str = "auto";
 
 /// Listen addresses and ports.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct Server {
-    /// DNS listen addresses (UDP and TCP). `"auto"` means each address on each local
+    /// DNS listen addresses (UDP and TCP). `"auto"` means each IPv4 address on each local
     /// interface; rusthole binds each one and rebinds when interfaces change.
-    /// Otherwise give IP addresses. Default: `["auto"]`.
+    /// Otherwise give IPv4 addresses. v1 refuses an IPv6 address (amendment A11).
+    /// Default: `["auto"]`.
     pub dns_listen: Vec<String>,
     /// DNS port. Default: 53.
     pub dns_port: u16,
@@ -325,9 +326,9 @@ pub struct DohListener {
     /// Default: false. DoH clients need a certificate that they trust (a file or the local
     /// CA), so you turn DoH on after you set up TLS.
     pub enabled: bool,
-    /// Listen addresses: `["auto"]` or IP addresses. Default: `["auto"]`.
+    /// Listen addresses: `["auto"]` or IPv4 addresses. Default: `["auto"]`.
     pub listen: Vec<String>,
-    /// Default: 443.
+    /// Default: 443. It must not be `dns_port`, because DNS also uses TCP.
     pub port: u16,
 }
 
@@ -347,9 +348,9 @@ impl Default for DohListener {
 pub struct AdminListener {
     /// Default: true.
     pub enabled: bool,
-    /// Listen addresses: `["auto"]` or IP addresses. Default: `["auto"]`.
+    /// Listen addresses: `["auto"]` or IPv4 addresses. Default: `["auto"]`.
     pub listen: Vec<String>,
-    /// Default: 8443.
+    /// Default: 8443. It must not be `dns_port` or (when DoH is on) the DoH port.
     pub port: u16,
 }
 
@@ -369,7 +370,7 @@ impl Default for AdminListener {
 pub struct Upstreams {
     /// The servers. rusthole sends each query to a healthy server and fails over.
     pub servers: Vec<Upstream>,
-    /// Plain DNS servers (`udp://` or `tcp://` with an IP address). rusthole uses them only
+    /// Plain DNS servers (`udp://` or `tcp://` with an IPv4 address). rusthole uses them only
     /// while the system clock is not valid, because TLS needs a valid clock (amendment A6).
     /// Default: empty.
     pub fallback_plain: Vec<String>,
@@ -401,9 +402,9 @@ impl Default for Upstreams {
 #[serde(deny_unknown_fields)]
 pub struct Upstream {
     /// `8.8.8.8`, `udp://8.8.8.8:53`, `tcp://8.8.8.8`, `tls://dns.example:853` (DoT) or
-    /// `https://dns.example/dns-query` (DoH).
+    /// `https://dns.example/dns-query` (DoH). An IP address must be IPv4 in v1 (amendment A11).
     pub url: String,
-    /// IP addresses of the DoT or DoH host. Required when the URL has a host name, so that
+    /// IPv4 addresses of the DoT or DoH host. Required when the URL has a host name, so that
     /// rusthole does not need DNS to find its own upstream (amendment A6).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub bootstrap: Vec<String>,
@@ -499,9 +500,9 @@ impl Default for Cache {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct Acl {
-    /// Allow loopback and each subnet on a local interface. Default: true.
+    /// Allow loopback and each IPv4 subnet on a local interface. Default: true.
     pub auto_local: bool,
-    /// More allowed networks (CIDR, for example `192.0.2.0/24`). Default: empty.
+    /// More allowed IPv4 networks (CIDR, for example `192.0.2.0/24`). Default: empty.
     pub allow: Vec<String>,
 }
 
@@ -667,7 +668,8 @@ pub struct Group {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Client {
-    /// An IP address, a CIDR block, a MAC address or a host name.
+    /// An IPv4 address, an IPv4 CIDR block, a MAC address or a host name. v1 refuses an
+    /// IPv6 address or block (amendment A11).
     pub id: String,
     /// The groups of this client. Default: `["default"]`. An empty list means no group, so no
     /// list and no rule applies to the client.
@@ -735,7 +737,7 @@ pub struct ConditionalForward {
     pub enabled: bool,
     /// Reverse lookups (PTR) for addresses in this network go to `server`.
     pub cidr: String,
-    /// The local DNS server: `IP` or `IP:PORT` (`[IPv6]:PORT`).
+    /// The local DNS server: an IPv4 address with an optional port (`IP` or `IP:PORT`).
     pub server: String,
     /// Queries for this domain and its subdomains also go to `server`.
     #[serde(default, skip_serializing_if = "Option::is_none")]

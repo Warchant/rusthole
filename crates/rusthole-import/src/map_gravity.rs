@@ -7,8 +7,8 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use rusthole_core::DomainName;
 use rusthole_core::config::{
-    Adlist, Client, Config, DEFAULT_GROUP, Group, ListKind, MAX_GROUP_NAME_LEN, Rule, RuleAction,
-    RuleKind, check_list_url, is_valid_group_name,
+    Adlist, Client, Config, DEFAULT_GROUP, Group, IPV6_NOT_SUPPORTED, ListKind, MAX_GROUP_NAME_LEN,
+    Rule, RuleAction, RuleKind, check_list_url, is_valid_group_name,
 };
 use rusthole_core::net::ClientId;
 use rusthole_core::pattern::compile_rule_regex;
@@ -321,6 +321,20 @@ fn map_clients(
                 continue;
             }
         };
+        // v1 uses IPv4 transport only (amendment A11). Check this before the duplicate
+        // check, so that each IPv6 row gets its own report line.
+        let is_v6 = match &parsed {
+            ClientId::Ip(ip) => ip.is_ipv6(),
+            ClientId::Cidr(c) => c.addr.is_ipv6(),
+            ClientId::Mac(_) | ClientId::Hostname(_) => false,
+        };
+        if is_v6 {
+            report.report(format!(
+                "{what}: {:?}: {IPV6_NOT_SUPPORTED}; not imported",
+                row.ip
+            ));
+            continue;
+        }
         if !seen.insert(parsed.clone()) {
             report.report(format!(
                 "{what}: {:?} is the same client as an earlier row; not imported",

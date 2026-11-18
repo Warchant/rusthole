@@ -18,18 +18,14 @@ use crate::{Gravity, ImportError, ImportReport, Limits, import_teleporter, map_g
 /// The config that the home fixture must give, written out in full.
 fn expected_home_config() -> Config {
     let mut e = Config::default();
-    e.upstreams.servers = [
-        "udp://192.0.2.53:53",
-        "udp://192.0.2.54:53",
-        "udp://[2001:db8::53]:53",
-        "udp://[2001:db8::54]:53",
-    ]
-    .iter()
-    .map(|u| Upstream {
-        url: (*u).to_owned(),
-        bootstrap: vec![],
-    })
-    .collect();
+    // The two IPv6 upstreams of the fixture are reported, not imported (A11).
+    e.upstreams.servers = ["udp://192.0.2.53:53", "udp://192.0.2.54:53"]
+        .iter()
+        .map(|u| Upstream {
+            url: (*u).to_owned(),
+            bootstrap: vec![],
+        })
+        .collect();
     e.groups[0].comment = Some("The default group".into());
     e.groups.push(Group {
         name: "kids".into(),
@@ -94,11 +90,9 @@ fn expected_home_config() -> Config {
 }
 
 /// The translated lines that the home fixture must give, written out in full.
-const HOME_TRANSLATED: [&str; 68] = [
+const HOME_TRANSLATED: [&str; 66] = [
     r#"dns.upstreams "192.0.2.53" -> upstreams.servers[0] "udp://192.0.2.53:53""#,
     r#"dns.upstreams "192.0.2.54" -> upstreams.servers[1] "udp://192.0.2.54:53""#,
-    r#"dns.upstreams "2001:db8::53" -> upstreams.servers[2] "udp://[2001:db8::53]:53""#,
-    r#"dns.upstreams "2001:db8::54" -> upstreams.servers[3] "udp://[2001:db8::54]:53""#,
     r"dns.blocking.active = true -> blocking.enabled",
     r#"dns.blocking.mode NULL -> blocking.mode "null""#,
     r"dns.rateLimit.count = 1000 -> rate_limit.queries",
@@ -176,13 +170,15 @@ fn home_fixture_gives_exact_config_and_report() {
     assert_eq!(
         r.reported,
         [
+            "dns.upstreams \"2001:db8::53\": IPv6 is not supported in v1; not imported",
+            "dns.upstreams \"2001:db8::54\": IPv6 is not supported in v1; not imported",
             "dns.dnssec = true: rusthole v1 does not validate DNSSEC; it sets the DO bit and passes the AD bit of the upstream through",
             "webserver.port = \"80o,443os,[::]:80o,[::]:443os\": the rusthole admin UI uses server.admin.port (default 8443, HTTPS)",
             "webserver.api.pwhash: the Pi-hole password cannot be imported; set a new password with `rusthole passwd`",
             "group id 1: renamed \"Kids\" to \"kids\" (rusthole group names use a-z, 0-9, '-', '_', '.' and are unique)",
         ]
     );
-    // 4 upstreams, blocking active, blocking mode, cache size, rate limit count and interval,
+    // 2 IPv4 upstreams, blocking active, blocking mode, cache size, rate limit count and interval,
     // 2 groups, 9 lists, 34 rules, 13 clients, 1 host record.
     assert_eq!(r.translated, HOME_TRANSLATED, "{:#?}", r.translated);
     assert_eq!(
@@ -347,7 +343,8 @@ fn bad_rows_are_reported_not_lost() {
         ip: "02:00:00:00:00:01".into(),
         comment: None,
     });
-    // An IPv6 address that starts with "::" is not an interface.
+    // An IPv6 address that starts with "::" is not an interface. It is IPv6, so v1 reports it
+    // (A11). An IPv4-mapped address is IPv6 too.
     g.clients.push(ClientRow {
         id: 52,
         ip: "::ffff:192.0.2.52".into(),
@@ -371,8 +368,15 @@ fn bad_rows_are_reported_not_lost() {
     assert!(has("domainlist id 103: unknown type 9"));
     assert!(has("client id 50: "));
     assert!(has("client id 51: "));
-    assert!(!has("client id 52: "), "{:#?}", r.reported);
-    assert!(c.clients.iter().any(|x| x.id == "::ffff:192.0.2.52"));
+    assert!(
+        r.reported.contains(
+            &"client id 52: \"::ffff:192.0.2.52\": IPv6 is not supported in v1; not imported"
+                .to_owned()
+        ),
+        "{:#?}",
+        r.reported
+    );
+    assert!(!c.clients.iter().any(|x| x.id.contains("::")));
     assert!(has("adlist id 60: "));
     assert!(has("group id 5: renamed"));
     let idn = c
@@ -408,6 +412,10 @@ fn client_text() -> impl Strategy<Value = String> {
         any::<[u8; 4]>().prop_map(|b| std::net::Ipv4Addr::from(b).to_string()),
         (any::<[u8; 4]>(), 0u8..40)
             .prop_map(|(b, p)| format!("{}/{p}", std::net::Ipv4Addr::from(b))),
+        // IPv6 clients must be reported, not lost (A11).
+        any::<u128>().prop_map(|b| std::net::Ipv6Addr::from(b).to_string()),
+        (any::<u128>(), 0u8..=128)
+            .prop_map(|(b, p)| format!("{}/{p}", std::net::Ipv6Addr::from(b))),
         "[a-z]{1,8}",
         ":[a-z]{1,4}[0-9]",
         "\\PC{0,10}",
@@ -574,6 +582,22 @@ proptest! {
         }
         let mut clients = c.clients.iter();
         for row in &g.clients {
+            let is_v6 = match rusthole_core::net::ClientId::parse(&row.ip) {
+                Ok(rusthole_core::net::ClientId::Ip(ip)) => ip.is_ipv6(),
+                Ok(rusthole_core::net::ClientId::Cidr(c)) => c.addr.is_ipv6(),
+                _ => false,
+            };
+            if is_v6 {
+                // An IPv6 client has the v1 report line and no translated line (A11).
+                let prefix = format!("client id {}: ", row.id);
+                prop_assert!(
+                    r.reported.iter().any(|l| l.starts_with(&prefix) && l.contains("IPv6 is not supported in v1")),
+                    "row {:?}: {:#?}", row, r.reported
+                );
+                let translated = format!("client id {} ", row.id);
+                prop_assert!(!r.translated.iter().any(|l| l.starts_with(&translated)));
+                continue;
+            }
             if r.translated.iter().any(|l| l.starts_with(&format!("client id {} ", row.id))) {
                 let client = clients.next().unwrap();
                 prop_assert_eq!(&client.groups, &expected_groups(&g.client_by_group, row.id, &groups, &names));

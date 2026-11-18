@@ -16,6 +16,9 @@ rusthole check-config -c rusthole.toml
   changed). Each item has one line.
 - The import never copies or prints a password hash, a TOTP secret or an app password.
   Set a new admin password with `rusthole passwd`.
+- v1 uses IPv4 transport only (amendment A11). The import does not copy an IPv6 upstream,
+  an IPv6 client or an IPv6 conditional forwarding rule. It reports each one with
+  "IPv6 is not supported in v1; not imported". IPv6 local records (AAAA) are imported.
 
 ```mermaid
 flowchart LR
@@ -73,7 +76,7 @@ error. A generated column can compute a very large value from a small file.
 | `adlist_by_group` | `lists.adlists[].groups` | Exact membership. A list with no group gets `groups = []` (reported): no client uses it, as in Pi-hole. |
 | `domainlist` | `[[rules]]` | `type` 0 -> exact allow, 1 -> exact deny, 2 -> regex allow, 3 -> regex deny. An exact domain is normalized (lowercase, punycode). A regex must compile with the Rust `regex` crate (case-insensitive, size limit). A regex with a Pi-hole extension (`;querytype=`, `;invert`, `;reply=`), a regex that does not compile, a bad domain or an unknown type is reported and not imported. No row is dropped without a report line. |
 | `domainlist_by_group` | `rules[].groups` | Exact membership. A rule with no group gets `groups = []` (reported). |
-| `client` | `[[clients]]` | `ip` -> `id`: an IP address, a CIDR block, a MAC address (normalized to lowercase) or a host name. An IPv6 address that starts with `::` (for example `::1`) is an address. An interface (`:eth0`) is not supported and is reported. A duplicate client is reported. |
+| `client` | `[[clients]]` | `ip` -> `id`: an IPv4 address, an IPv4 CIDR block, a MAC address (normalized to lowercase) or a host name. An IPv6 address or block (also an IPv4-mapped one, such as `::ffff:192.0.2.1`) is reported as not supported in v1 and is not imported. An IPv6 address that starts with `::` (for example `::1`) is an address, not an interface. An interface (`:eth0`) is not supported and is reported. A duplicate client is reported. |
 | `client_by_group` | `clients[].groups` | Exact membership. A client that is only in a non-default group stays only in that group. Thus, when that group has no list, the client is not blocked, as in Pi-hole. A client in no group gets `groups = []` (reported). |
 | Link to an unknown group id | none | Reported. |
 | `gravity`, `antigravity`, `info`, views, other tables | none | Ignored. rusthole downloads the lists itself. |
@@ -82,10 +85,10 @@ error. A generated column can compute a very large value from a small file.
 
 | Key | rusthole field, or what the import does | Why |
 |---|---|---|
-| `dns.upstreams` | `upstreams.servers` as `udp://IP:PORT` | Pi-hole forwards over plain UDP. `IP#port` becomes `IP:port`. An entry that is not an IP address is reported. An empty list keeps the rusthole defaults (reported). |
+| `dns.upstreams` | `upstreams.servers` as `udp://IP:PORT` | Pi-hole forwards over plain UDP. `IP#port` becomes `IP:port`. An entry that is not an IP address is reported. An IPv6 entry is reported as not supported in v1 and is not imported. When no IPv4 entry stays, rusthole keeps its default upstreams (reported). |
 | `dns.hosts` | `local_dns.records` | Each `"IP name [name ...]"` gives one record per name. A bad line is reported. |
 | `dns.cnameRecords` | `local_dns.cnames` | `"name[,name...],target[,ttl]"`. A bad entry is reported. |
-| `dns.revServers` | `local_dns.conditional_forwarding` | `"active,CIDR,server[#port][,domain]"`. `active` -> `enabled`. A bad entry is reported. |
+| `dns.revServers` | `local_dns.conditional_forwarding` | `"active,CIDR,server[#port][,domain]"`. `active` -> `enabled`. A bad entry is reported. An entry with an IPv6 CIDR or an IPv6 server is reported as not supported in v1 and is not imported. |
 | `dns.blocking.active` | `blocking.enabled` | |
 | `dns.blocking.mode` | `blocking.mode` | `NULL` -> `null`, `NXDOMAIN` -> `nxdomain`, `NODATA` -> `nodata`. `IP` and `IP-NODATA-AAAA` -> `ip` with the address from `dns.reply.blocking.IPv4` / `IPv6` when `force4` / `force6` is true. Without a fixed address, Pi-hole uses its interface address, which the export does not hold: rusthole then uses `null` (reported). A missing address family gives NODATA (reported). |
 | `dns.reply.blocking.force4`, `IPv4`, `force6`, `IPv6` | `blocking.ipv4`, `blocking.ipv6` | Only for mode `IP` and `IP-NODATA-AAAA`. |
@@ -118,10 +121,10 @@ error. A generated column can compute a very large value from a small file.
 
 - A synthetic export in the shape of a real home setup (2 groups, 9 lists with 1 disabled,
   5 exact allow, 20 exact deny, 9 regex deny, 13 clients with 2 only in the second group,
-  4 upstreams, mode `NULL`, `dnssec = true`, a password hash) imports to an exact expected
-  config and report.
+  4 upstreams of which 2 are IPv6, mode `NULL`, `dnssec = true`, a password hash) imports to
+  an exact expected config and report. The 2 IPv6 upstreams are in the report.
 - Property tests: each `domainlist` row ends up in the config or in the report; group
-  membership stays exact; the output config is always valid; the SQLite and zip layer loses
+  membership stays exact; each IPv6 client is in the report and not in the config; the output config is always valid; the SQLite and zip layer loses
   nothing.
 - SQLite tests: a generated column, an `fts5` virtual table and a value above the length limit
   each give an error. A small step budget stops the read. The test schema has a view and a

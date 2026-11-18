@@ -11,8 +11,8 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 use rusthole_core::DomainName;
 use rusthole_core::config::{
-    BlockingMode, ConditionalForward, Config, LocalCname, LocalRecord, MAX_CACHE_ENTRIES,
-    RecordType, Upstream, toml_error_text,
+    BlockingMode, ConditionalForward, Config, IPV6_NOT_SUPPORTED, LocalCname, LocalRecord,
+    MAX_CACHE_ENTRIES, RecordType, Upstream, toml_error_text,
 };
 use rusthole_core::net::Cidr;
 use toml::{Table, Value};
@@ -185,6 +185,10 @@ fn map_upstreams(root: &Table, config: &mut Config, report: &mut ImportReport) {
     let mut servers = Vec::new();
     for item in get_strings(root, "dns.upstreams", report) {
         match split_hash_port(item) {
+            // v1 uses IPv4 transport only (amendment A11).
+            Some((IpAddr::V6(_), _)) => report.report(format!(
+                "dns.upstreams {item:?}: {IPV6_NOT_SUPPORTED}; not imported"
+            )),
             Some((ip, port)) => {
                 let url = format!("udp://{}", socket_text(ip, port));
                 report.translate(format!(
@@ -391,18 +395,25 @@ fn map_rev_servers(root: &Table, config: &mut Config, report: &mut ImportReport)
                 continue;
             }
         };
-        if Cidr::parse(cidr).is_err() {
+        let Ok(network) = Cidr::parse(cidr) else {
             report.report(format!(
                 "dns.revServers {item:?}: {cidr:?} is not a CIDR block; not imported"
             ));
             continue;
-        }
+        };
         let Some((ip, port)) = split_hash_port(server) else {
             report.report(format!(
                 "dns.revServers {item:?}: {server:?} is not an IP address with an optional #port; not imported"
             ));
             continue;
         };
+        // v1 uses IPv4 transport only (amendment A11).
+        if network.addr.is_ipv6() || ip.is_ipv6() {
+            report.report(format!(
+                "dns.revServers {item:?}: {IPV6_NOT_SUPPORTED}; not imported"
+            ));
+            continue;
+        }
         let domain = if domain.is_empty() {
             None
         } else if let Ok(d) = DomainName::parse_idn(domain) {
@@ -766,16 +777,25 @@ mod tests {
 upstreams = ["192.0.2.1", "192.0.2.2#5353", "2001:db8::1", "2001:db8::2#54", "bad", "192.0.2.3#0"]
 "#);
         let urls: Vec<_> = c.upstreams.servers.iter().map(|s| s.url.as_str()).collect();
+        assert_eq!(urls, ["udp://192.0.2.1:53", "udp://192.0.2.2:5353"]);
         assert_eq!(
-            urls,
+            r.reported,
             [
-                "udp://192.0.2.1:53",
-                "udp://192.0.2.2:5353",
-                "udp://[2001:db8::1]:53",
-                "udp://[2001:db8::2]:54"
+                "dns.upstreams \"2001:db8::1\": IPv6 is not supported in v1; not imported",
+                "dns.upstreams \"2001:db8::2#54\": IPv6 is not supported in v1; not imported",
+                "dns.upstreams \"bad\": not an IP address with an optional #port; not imported",
+                "dns.upstreams \"192.0.2.3#0\": not an IP address with an optional #port; not imported",
             ]
         );
-        assert_eq!(r.reported.len(), 2);
+        assert_eq!(c.validate(), []);
+    }
+
+    #[test]
+    fn only_ipv6_upstreams_keep_defaults() {
+        let (c, r) = run("[dns]\nupstreams = [\"2001:db8::53\", \"[2001:db8::54]#53\"]\n");
+        assert_eq!(c.upstreams, Config::default().upstreams);
+        assert_eq!(r.reported.len(), 3, "{:#?}", r.reported);
+        assert!(r.reported[2].contains("rusthole keeps its default upstreams"));
         assert_eq!(c.validate(), []);
     }
 
@@ -792,7 +812,14 @@ upstreams = ["192.0.2.1", "192.0.2.2#5353", "2001:db8::1", "2001:db8::2#54", "ba
 [dns]
 hosts = ["192.0.2.10 nas.lan media", "2001:db8::10 nas.lan", "junk line", "192.0.2.11"]
 cnameRecords = ["www.lan,nas.lan", "a.lan,b.lan,nas.lan,300", "only"]
-revServers = ["true,192.0.2.0/24,192.0.2.1,lan", "false,2001:db8::/32,[2001:db8::1]#5353", "maybe,1,2,3"]
+revServers = [
+    "true,192.0.2.0/24,192.0.2.1,lan",
+    "false,192.0.2.128/25,192.0.2.129#5353",
+    "false,2001:db8::/32,[2001:db8::1]#5353",
+    "true,192.0.2.0/24,2001:db8::1",
+    "true,2001:db8::/32,192.0.2.1",
+    "maybe,1,2,3",
+]
 "#);
         assert_eq!(c.local_dns.records.len(), 3);
         assert_eq!(c.local_dns.records[1].name, "media");
@@ -819,9 +846,18 @@ revServers = ["true,192.0.2.0/24,192.0.2.1,lan", "false,2001:db8::/32,[2001:db8:
         );
         assert_eq!(
             (f[1].enabled, f[1].server.as_str()),
-            (false, "[2001:db8::1]:5353")
+            (false, "192.0.2.129:5353")
         );
-        assert_eq!(r.reported.len(), 4, "{:#?}", r.reported);
+        // An IPv6 CIDR or an IPv6 server is reported (A11).
+        let v6: Vec<_> = r
+            .reported
+            .iter()
+            .filter(|l| {
+                l.starts_with("dns.revServers") && l.contains("IPv6 is not supported in v1")
+            })
+            .collect();
+        assert_eq!(v6.len(), 3, "{:#?}", r.reported);
+        assert_eq!(r.reported.len(), 7, "{:#?}", r.reported);
         assert_eq!(c.validate(), [], "{:#?}", c.validate());
     }
 

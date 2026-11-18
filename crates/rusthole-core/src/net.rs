@@ -268,6 +268,9 @@ impl UpstreamUrl {
     /// Forms: `8.8.8.8`, `8.8.8.8:53`, `udp://8.8.8.8:53`, `tcp://[2001:db8::1]:53`,
     /// `tls://dns.example:853`, `https://dns.example/dns-query`. A plain DNS upstream
     /// (`udp://`, `tcp://`) must use an IP address. A DoH URL without a path gets `/dns-query`.
+    ///
+    /// The parser accepts IPv6 hosts, so the type is ready for v2. `Config::validate` refuses
+    /// an IPv6 upstream in v1 (amendment A11).
     pub fn parse(input: &str) -> Result<Self, NetError> {
         let s = input.trim();
         let Some((scheme, rest)) = s.split_once("://") else {

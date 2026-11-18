@@ -77,12 +77,5 @@ strip = true
 # Unwind (not abort): a panic in one task must not stop DNS for everyone.
 panic = "unwind"
 
-# Dev and test builds: line tables only for our crates (backtraces keep file and line),
-# no debug info for dependencies. Builds are faster and use less disk.
-# The test profile inherits these settings from dev.
-[profile.dev]
-debug = "line-tables-only"
-
 [profile.dev.package."*"]
 opt-level = 1
-debug = false

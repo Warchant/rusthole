@@ -22,6 +22,10 @@ rusthole reads one TOML file. The default path is `/etc/rusthole/rusthole.toml`.
   Unicode name. This applies to exact rule values, `blocking.special_domains`, local record
   names, CNAME names and targets, conditional forwarding domains, and clients that are host
   names. Regex rules do not change. `rusthole import` writes the canonical form.
+- v1 uses IPv4 transport only (amendment A11). `check-config` refuses an IPv6 address or
+  block in a listen address, an upstream, a bootstrap address, a fallback, `acl.allow`, a
+  client, or a conditional forwarding rule, with the issue "IPv6 is not supported in v1".
+  DNS content is not transport: AAAA records and the `::` block answer stay valid.
 
 ```mermaid
 flowchart LR
@@ -37,23 +41,23 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `dns_listen` | list of text | `["auto"]` | DNS addresses (UDP and TCP). `"auto"` means each address on each local interface. Or give IP addresses. `"auto"` cannot be mixed with addresses. |
+| `dns_listen` | list of text | `["auto"]` | DNS addresses (UDP and TCP). `"auto"` means each IPv4 address on each local interface. Or give IPv4 addresses. `"auto"` cannot be mixed with addresses. |
 | `dns_port` | integer | `53` | DNS port. 0 is not allowed. |
 | `doh.enabled` | bool | `false` | DNS-over-HTTPS listener (`/dns-query`). DoH clients need a certificate that they trust, so turn it on after you set up TLS. |
 | `doh.listen` | list of text | `["auto"]` | Like `dns_listen`. |
-| `doh.port` | integer | `443` | DoH port. |
+| `doh.port` | integer | `443` | DoH port. It must not be `dns_port` when DoH is on, because DNS also uses TCP. |
 | `admin.enabled` | bool | `true` | Admin UI and REST API (HTTPS). |
 | `admin.listen` | list of text | `["auto"]` | Like `dns_listen`. |
-| `admin.port` | integer | `8443` | Admin port. It must not be the DoH port when both are on. |
+| `admin.port` | integer | `8443` | Admin port. When the admin listener is on, it must not be `dns_port`, and it must not be the DoH port when DoH is on. |
 
 ### `[upstreams]`
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
 | `servers` | list of tables | `udp://9.9.9.9:53` and `udp://1.1.1.1:53` | The upstream servers. At least one is necessary. |
-| `servers[].url` | text | | `8.8.8.8`, `8.8.8.8:53`, `udp://8.8.8.8:53`, `tcp://[2001:db8::1]:53`, `tls://dns.example:853` (DoT) or `https://dns.example/dns-query` (DoH). A plain DNS upstream must use an IP address. A DoH URL without a path gets `/dns-query`. |
-| `servers[].bootstrap` | list of IP addresses | `[]` | Addresses of a DoT or DoH host name. Required for a host name, so that rusthole needs no DNS to find its own upstream. Only for `tls://` and `https://`. |
-| `fallback_plain` | list of text | `[]` | Plain DNS upstreams (`udp://` or `tcp://` with an IP address). rusthole uses them only while the clock is not valid (TLS needs a valid clock, and a Pi has no RTC). |
+| `servers[].url` | text | | `8.8.8.8`, `8.8.8.8:53`, `udp://8.8.8.8:53`, `tcp://8.8.8.8:53`, `tls://dns.example:853` (DoT) or `https://dns.example/dns-query` (DoH). A plain DNS upstream must use an IP address. An IP address must be IPv4. A DoH URL without a path gets `/dns-query`. |
+| `servers[].bootstrap` | list of IPv4 addresses | `[]` | Addresses of a DoT or DoH host name. Required for a host name, so that rusthole needs no DNS to find its own upstream. Only for `tls://` and `https://`. |
+| `fallback_plain` | list of text | `[]` | Plain DNS upstreams (`udp://` or `tcp://` with an IPv4 address). rusthole uses them only while the clock is not valid (TLS needs a valid clock, and a Pi has no RTC). |
 | `timeout_ms` | integer | `2000` | Time limit for one upstream query, 1 to 60000 ms. |
 
 ### `[blocking]`
@@ -81,8 +85,8 @@ flowchart LR
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `auto_local` | bool | `true` | Allow loopback and each subnet on a local interface (IPv4 and IPv6). |
-| `allow` | list of CIDR blocks | `[]` | More allowed networks, for example `192.0.2.0/24`. Other clients get no answer. |
+| `auto_local` | bool | `true` | Allow loopback and each IPv4 subnet on a local interface. |
+| `allow` | list of IPv4 CIDR blocks | `[]` | More allowed networks, for example `192.0.2.0/24`. Other clients get no answer. |
 
 ### `[rate_limit]`
 
@@ -136,7 +140,7 @@ When the file has no `[[groups]]`, rusthole uses one group: `default`.
 
 | Field | Type | Default | Meaning |
 |---|---|---|---|
-| `id` | text | | An IP address, a CIDR block, a MAC address (`02:00:00:00:00:01`) or a host name. Each client only once. rusthole finds a MAC address in the kernel neighbor table. |
+| `id` | text | | An IPv4 address, an IPv4 CIDR block, a MAC address (`02:00:00:00:00:01`) or a host name. Each client only once. rusthole finds a MAC address in the kernel neighbor table. |
 | `groups` | list of group names | `["default"]` | `[]` means no group: no list and no rule applies to the client. |
 | `comment` | text | none | Free text. |
 
@@ -153,8 +157,8 @@ A client with no `[[clients]]` entry is in the group `default`.
 | `cnames[].target` | domain | | The target name. |
 | `cnames[].ttl` | integer | none | TTL in seconds. |
 | `conditional_forwarding[].enabled` | bool | `true` | |
-| `conditional_forwarding[].cidr` | CIDR block | | Reverse lookups (PTR) for this network go to `server`. |
-| `conditional_forwarding[].server` | text | | `IP`, `IP:PORT` or `[IPv6]:PORT`. |
+| `conditional_forwarding[].cidr` | IPv4 CIDR block | | Reverse lookups (PTR) for this network go to `server`. |
+| `conditional_forwarding[].server` | text | | An IPv4 address with an optional port: `IP` or `IP:PORT`. |
 | `conditional_forwarding[].domain` | domain | none | Queries for this domain and its subdomains also go to `server`. |
 
 ### `[admin]`
@@ -178,7 +182,7 @@ A unit test parses and validates this example, so it stays correct.
 ```toml
 # rusthole.toml: a full example. docs/CONFIG.md explains each field.
 # All values here are examples. Addresses come from the documentation ranges
-# 192.0.2.0/24 and 2001:db8::/32.
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
 
 config_version = 1
 
@@ -193,7 +197,7 @@ port = 443
 
 [server.admin]
 enabled = true
-listen = ["192.0.2.2", "2001:db8::2"]
+listen = ["192.0.2.2"]
 port = 8443
 
 [upstreams]
@@ -208,7 +212,7 @@ url = "8.8.8.8"
 
 [[upstreams.servers]]
 url = "tls://dns.example:853"
-bootstrap = ["192.0.2.80", "2001:db8::80"]
+bootstrap = ["192.0.2.80", "192.0.2.82"]
 
 [[upstreams.servers]]
 url = "https://doh.example/dns-query"
@@ -229,7 +233,7 @@ negative_ttl = 300
 
 [acl]
 auto_local = true
-allow = ["198.51.100.0/24", "2001:db8:100::/48"]
+allow = ["198.51.100.0/24"]
 
 [rate_limit]
 queries = 1000

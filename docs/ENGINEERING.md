@@ -107,5 +107,3 @@ Use one build folder per platform, and reuse it, so incremental builds work:
 - Do not set another `--target-dir` or `CARGO_TARGET_DIR`. Cross builds (for example musl)
   use the Linux folder: cargo puts them in a `<target-triple>/` subfolder.
 - Windows and Linux cannot share one folder: their host builds overwrite each other.
-- Dev and test builds keep line tables only for our crates and no debug info for
-  dependencies (see `[profile.dev]` in `Cargo.toml`).

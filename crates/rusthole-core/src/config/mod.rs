@@ -25,9 +25,9 @@ use serde::{Deserialize, Serialize};
 
 pub use ids::{DEFAULT_GROUP_ID, IdKind, next_free_id};
 pub use validate::{
-    ConfigIssue, IPV6_NOT_SUPPORTED, MAX_CACHE_ENTRIES, MAX_GROUP_NAME_LEN, MAX_RECENT_QUERIES,
-    MAX_TLS_NAMES, MAX_UPSTREAM_TIMEOUT_MS, check_list_url, is_argon2id_phc, is_valid_group_name,
-    tls_name_problem,
+    ConfigIssue, IPV6_NOT_SUPPORTED, MAX_CACHE_BYTES, MAX_CACHE_ENTRIES, MAX_GROUP_NAME_LEN,
+    MAX_RECENT_QUERIES, MAX_TLS_NAMES, MAX_UPSTREAM_TIMEOUT_MS, MIN_CACHE_BYTES, check_list_url,
+    is_argon2id_phc, is_valid_group_name, tls_name_problem,
 };
 
 /// The config version that this build reads and writes.
@@ -530,12 +530,19 @@ impl Default for Blocking {
     }
 }
 
+/// Default of `cache.max_bytes`: 16 MiB.
+pub const DEFAULT_CACHE_BYTES: u64 = 16 * 1024 * 1024;
+
 /// DNS answer cache.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct Cache {
     /// Maximum number of answers. 0 turns the cache off. Default: 10000.
     pub max_entries: u32,
+    /// Most memory of the cache, in bytes (review item M1). The cache counts the encoded
+    /// answer, the key and a fixed overhead for each answer, and drops the least recently
+    /// used answers to stay below this value. Default: 16 MiB.
+    pub max_bytes: u64,
     /// Lowest TTL in seconds. A shorter upstream TTL goes up to this value. Default: 0.
     pub min_ttl: u32,
     /// Highest TTL in seconds. Default: 86400.
@@ -548,6 +555,7 @@ impl Default for Cache {
     fn default() -> Self {
         Self {
             max_entries: 10_000,
+            max_bytes: DEFAULT_CACHE_BYTES,
             min_ttl: 0,
             max_ttl: 86_400,
             negative_ttl: 300,

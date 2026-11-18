@@ -18,6 +18,25 @@
 //!
 //! Each event (a clock check) is valid in each state, so the machine has no invalid
 //! transition. [`clock_step`] is pure: the wall clock is an input.
+//!
+//! Certificate date fallback (review item m1). A clock can be wrong but later than the
+//! build time (for example the last saved time after some weeks with no power). Then
+//! [`clock_step`] gives [`UpstreamMode::Encrypted`], but each handshake fails because the
+//! certificate is not yet valid or expired. A second machine ([`date_step`]) looks at the
+//! handshake results:
+//!
+//! ```mermaid
+//! stateDiagram-v2
+//!     [*] --> Normal
+//!     Normal --> DateFallback: each encrypted upstream failed with a certificate date error, fallback set (WARN)
+//!     DateFallback --> Normal: one handshake passed (WARN)
+//!     DateFallback --> Normal: no fallback set (invalid, ERROR)
+//! ```
+//!
+//! The mode that the pool uses is [`effective_mode`]: [`UpstreamMode::Fallback`] when the
+//! clock mode is [`UpstreamMode::Encrypted`] and the date state is
+//! [`DateState::DateFallback`]. In that state the server tries one handshake with each
+//! encrypted upstream on each clock check, so the pool can go back.
 
 use std::fmt;
 use std::sync::atomic::{AtomicI64, AtomicU8, Ordering};
@@ -113,6 +132,140 @@ pub fn log_notice(notice: ClockNotice, now_unix: i64, build_time_unix: i64) {
         ClockNotice::ClockValid => tracing::warn!(
             now_unix,
             "the system clock is valid again; the DoT and DoH upstreams are in use"
+        ),
+    }
+}
+
+/// The certificate date state of the pool (review item m1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DateState {
+    /// The handshakes do not show a clock problem.
+    Normal,
+    /// Each encrypted upstream failed its last handshake with a certificate date error
+    /// (not yet valid or expired). The pool uses the fallback servers.
+    DateFallback,
+}
+
+/// The last handshake result of one encrypted upstream that the date machine counts.
+/// Other errors (a timeout, a wrong name) do not change it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum HandshakeClass {
+    /// The exchange passed, so the handshake passed.
+    Passed,
+    /// The handshake failed with a certificate date error.
+    DateError,
+}
+
+/// An event of the date machine.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DateEvent {
+    /// Each encrypted upstream failed its last handshake with a certificate date error.
+    AllDateErrors,
+    /// A handshake with an encrypted upstream passed.
+    HandshakePassed,
+}
+
+/// What to log after a date step.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DateNotice {
+    /// The certificate dates show a wrong clock; the fallback servers are in use. WARN.
+    UseFallback,
+    /// A handshake passed again; the encrypted upstreams are in use. WARN.
+    Valid,
+}
+
+/// An event that the state does not expect: logged at ERROR.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InvalidDateTransition {
+    /// The state before the event.
+    pub state: DateState,
+    /// The event.
+    pub event: DateEvent,
+    /// True when a fallback is set.
+    pub has_fallback: bool,
+}
+
+/// The result of one date step.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DateStep {
+    /// The new state.
+    pub state: DateState,
+    /// What to log, if the state changed.
+    pub notice: Option<DateNotice>,
+    /// Set when the event was not valid in the state. The new state is then the safe
+    /// state [`DateState::Normal`].
+    pub invalid: Option<InvalidDateTransition>,
+}
+
+/// One step of the date machine. Pure.
+///
+/// - `Normal` + `AllDateErrors`: `DateFallback` with a WARN when a fallback is set. Without
+///   a fallback the state stays (no server can help).
+/// - `DateFallback` + `HandshakePassed`: `Normal` with a WARN.
+/// - `DateFallback` + `AllDateErrors`: no change (the retries fail again).
+/// - `Normal` + `HandshakePassed`: no change.
+/// - `DateFallback` without a fallback cannot occur (the step to it needs a fallback).
+///   Each event in it is invalid: the step goes to the safe state `Normal`.
+pub fn date_step(prev: DateState, event: DateEvent, has_fallback: bool) -> DateStep {
+    let (state, notice, invalid) = match (prev, event, has_fallback) {
+        (DateState::DateFallback, _, false) => (
+            DateState::Normal,
+            None,
+            Some(InvalidDateTransition {
+                state: prev,
+                event,
+                has_fallback,
+            }),
+        ),
+        (DateState::Normal, DateEvent::AllDateErrors, true) => {
+            (DateState::DateFallback, Some(DateNotice::UseFallback), None)
+        }
+        (DateState::DateFallback, DateEvent::HandshakePassed, true) => {
+            (DateState::Normal, Some(DateNotice::Valid), None)
+        }
+        (s, _, _) => (s, None, None),
+    };
+    DateStep {
+        state,
+        notice,
+        invalid,
+    }
+}
+
+/// True when `roles` has at least one encrypted server and the last counted handshake of
+/// each encrypted server is a date error. `last` has one value for each server (by index);
+/// a missing value counts as not a date error. Pure.
+pub fn all_date_errors(roles: &[ServerRole], last: &[Option<HandshakeClass>]) -> bool {
+    let mut any = false;
+    for (i, r) in roles.iter().enumerate() {
+        if *r != ServerRole::Encrypted {
+            continue;
+        }
+        any = true;
+        if last.get(i).copied().flatten() != Some(HandshakeClass::DateError) {
+            return false;
+        }
+    }
+    any
+}
+
+/// The mode that the pool uses: the clock mode, but [`UpstreamMode::Fallback`] when the
+/// clock looks valid and the date state is [`DateState::DateFallback`]. Pure.
+pub fn effective_mode(clock: UpstreamMode, date: DateState) -> UpstreamMode {
+    match (clock, date) {
+        (UpstreamMode::Encrypted, DateState::DateFallback) => UpstreamMode::Fallback,
+        (m, _) => m,
+    }
+}
+
+/// Logs a date notice at its level.
+pub fn log_date_notice(notice: DateNotice) {
+    match notice {
+        DateNotice::UseFallback => tracing::warn!(
+            "each DoT and DoH upstream failed the TLS handshake with a certificate date error              (not yet valid or expired); the system clock is probably wrong. The DoT and DoH              upstreams are skipped and upstreams.fallback_plain is used until one handshake              passes"
+        ),
+        DateNotice::Valid => tracing::warn!(
+            "a TLS handshake with a DoT or DoH upstream passed again; the DoT and DoH              upstreams are in use"
         ),
     }
 }
@@ -367,6 +520,136 @@ mod tests {
         ] {
             c.set(m);
             assert_eq!(c.get(), m);
+        }
+    }
+
+    /// m1: each encrypted upstream with a date error goes to the fallback; one passed
+    /// handshake goes back.
+    #[test]
+    fn date_machine() {
+        use DateEvent::{AllDateErrors, HandshakePassed};
+        use DateState::{DateFallback, Normal};
+        let s = date_step(Normal, AllDateErrors, true);
+        assert_eq!(
+            (s.state, s.notice, s.invalid),
+            (DateFallback, Some(DateNotice::UseFallback), None)
+        );
+        let s = date_step(DateFallback, AllDateErrors, true);
+        assert_eq!((s.state, s.notice, s.invalid), (DateFallback, None, None));
+        let s = date_step(DateFallback, HandshakePassed, true);
+        assert_eq!(
+            (s.state, s.notice, s.invalid),
+            (Normal, Some(DateNotice::Valid), None)
+        );
+        let s = date_step(Normal, HandshakePassed, true);
+        assert_eq!((s.state, s.notice, s.invalid), (Normal, None, None));
+        // No fallback: nothing to change to.
+        let s = date_step(Normal, AllDateErrors, false);
+        assert_eq!((s.state, s.notice, s.invalid), (Normal, None, None));
+        // The fallback state without a fallback is invalid: the safe state is Normal.
+        for e in [AllDateErrors, HandshakePassed] {
+            let s = date_step(DateFallback, e, false);
+            assert_eq!(s.state, Normal);
+            assert_eq!(
+                s.invalid,
+                Some(InvalidDateTransition {
+                    state: DateFallback,
+                    event: e,
+                    has_fallback: false
+                })
+            );
+        }
+    }
+
+    #[test]
+    fn all_date_errors_rule() {
+        use HandshakeClass::{DateError, Passed};
+        use ServerRole::{Encrypted as E, Fallback as F, Plain as P};
+        let roles = [E, P, E, F];
+        assert!(!all_date_errors(&roles, &[]));
+        assert!(!all_date_errors(
+            &roles,
+            &[Some(DateError), None, None, None]
+        ));
+        assert!(!all_date_errors(
+            &roles,
+            &[Some(DateError), None, Some(Passed), None]
+        ));
+        assert!(all_date_errors(
+            &roles,
+            &[Some(DateError), None, Some(DateError), None]
+        ));
+        // No encrypted server: never.
+        assert!(!all_date_errors(
+            &[P, F],
+            &[Some(DateError), Some(DateError)]
+        ));
+    }
+
+    #[test]
+    fn effective_mode_rule() {
+        use UpstreamMode::{Encrypted, EncryptedUnverified, Fallback};
+        assert_eq!(effective_mode(Encrypted, DateState::Normal), Encrypted);
+        assert_eq!(effective_mode(Encrypted, DateState::DateFallback), Fallback);
+        for m in [Fallback, EncryptedUnverified] {
+            for d in [DateState::Normal, DateState::DateFallback] {
+                assert_eq!(effective_mode(m, d), m);
+            }
+        }
+    }
+
+    fn date_state() -> impl Strategy<Value = DateState> {
+        prop_oneof![Just(DateState::Normal), Just(DateState::DateFallback)]
+    }
+
+    fn date_event() -> impl Strategy<Value = DateEvent> {
+        prop_oneof![
+            Just(DateEvent::AllDateErrors),
+            Just(DateEvent::HandshakePassed)
+        ]
+    }
+
+    proptest! {
+        /// The date machine: the fallback state needs a fallback; a notice comes if and only
+        /// if the state changed and the event was valid; only an invalid event gives an
+        /// ERROR, and then the state is Normal; a passed handshake always ends in Normal.
+        #[test]
+        fn date_step_invariants(
+            events in proptest::collection::vec(date_event(), 0..50),
+            start in date_state(),
+            fb in any::<bool>(),
+        ) {
+            let mut state = start;
+            for e in events {
+                let s = date_step(state, e, fb);
+                if s.state == DateState::DateFallback {
+                    prop_assert!(fb);
+                }
+                if s.invalid.is_some() {
+                    prop_assert_eq!(s.state, DateState::Normal);
+                    prop_assert!(!fb && state == DateState::DateFallback);
+                }
+                prop_assert_eq!(s.notice.is_some(), s.state != state && s.invalid.is_none());
+                if e == DateEvent::HandshakePassed {
+                    prop_assert_eq!(s.state, DateState::Normal);
+                }
+                state = s.state;
+            }
+        }
+
+        /// The effective mode is Fallback for a date fallback with a valid clock, and the
+        /// clock mode in each other case.
+        #[test]
+        fn effective_mode_invariants(d in date_state(), m in prop_oneof![
+                Just(UpstreamMode::Encrypted),
+                Just(UpstreamMode::Fallback),
+                Just(UpstreamMode::EncryptedUnverified)]) {
+            let e = effective_mode(m, d);
+            if m == UpstreamMode::Encrypted && d == DateState::DateFallback {
+                prop_assert_eq!(e, UpstreamMode::Fallback);
+            } else {
+                prop_assert_eq!(e, m);
+            }
         }
     }
 

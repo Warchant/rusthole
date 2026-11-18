@@ -23,9 +23,12 @@ pub const MAX_UDP_PAYLOAD: u16 = 1232;
 /// The largest DNS message over TCP (2-byte length prefix).
 pub const MAX_TCP_MESSAGE: usize = 65_535;
 /// The largest answer (encoded, in bytes) that goes into the cache. A larger answer goes to
-/// the client but not into the cache. With this limit, the cache holds at most
-/// `cache.max_entries` x 4 KiB of wire data, so a flood of big answers cannot use all the
-/// memory of a small host.
+/// the client but not into the cache.
+///
+/// The cache keeps the encoded bytes of each answer, not the parsed message (a parsed
+/// answer with many small records uses about 17 times its wire size). The memory bound of
+/// the cache is the byte budget `cache.max_bytes` ([`rusthole_core::cache`]): it counts
+/// these bytes, the key and a fixed overhead for each answer.
 pub const MAX_CACHEABLE_BYTES: usize = 4096;
 
 /// The fields of the 12-byte header that the pipeline checks before a full parse.
@@ -246,9 +249,14 @@ pub fn check_upstream_reply(bytes: &[u8], id: u16, query: &Query) -> Result<Mess
     }
 }
 
-/// True for an upstream answer that makes the query go to the next upstream.
+/// True for an upstream answer that makes the query go to the next upstream: SERVFAIL or
+/// REFUSED (m5). An upstream can refuse our address or one name, and the next upstream can
+/// still answer.
 pub fn is_server_failure(msg: &Message) -> bool {
-    msg.metadata.response_code == ResponseCode::ServFail
+    matches!(
+        msg.metadata.response_code,
+        ResponseCode::ServFail | ResponseCode::Refused
+    )
 }
 
 /// An upstream answer ready for the cache.
@@ -256,6 +264,8 @@ pub fn is_server_failure(msg: &Message) -> bool {
 pub struct Cacheable {
     /// The answer with clamped TTLs and without EDNS.
     pub message: Message,
+    /// The encoded form of `message`, at most [`MAX_CACHEABLE_BYTES`]. The cache keeps this.
+    pub bytes: Vec<u8>,
     /// The cache TTL in seconds.
     pub ttl: u32,
 }
@@ -269,8 +279,10 @@ pub struct Cacheable {
 /// - The EDNS record is removed (RFC 6891: OPT records are never cached).
 /// - Positive answer: each record TTL is clamped to `[min_ttl, max_ttl]`. The cache TTL is
 ///   the lowest answer record TTL.
-/// - Negative answer (NXDOMAIN, or NOERROR with no answer record): the cache TTL comes from
-///   the SOA record ([`TtlPolicy::negative`]). No record TTL is higher than it.
+/// - Negative answer (NXDOMAIN, or NODATA: NOERROR with no answer record of the query
+///   type, for example only a CNAME chain): the cache TTL is the SOA rule
+///   ([`TtlPolicy::negative`]), lowered to the lowest answer record TTL (the CNAME records).
+///   `min_ttl` does not apply. No record TTL is higher than the cache TTL.
 ///
 /// The caller checked the question, so the answer always matches the cache key.
 pub fn prepare_for_cache(mut msg: Message, policy: &TtlPolicy) -> Result<Cacheable, Box<Message>> {
@@ -282,13 +294,16 @@ pub fn prepare_for_cache(mut msg: Message, policy: &TtlPolicy) -> Result<Cacheab
     {
         return Err(Box::new(msg));
     }
-    let negative = rcode == ResponseCode::NXDomain || msg.answers.is_empty();
+    let negative = rcode == ResponseCode::NXDomain || is_nodata(&msg);
     let ttl = if negative {
         let soa = msg.authorities.iter().find_map(|r| match &r.data {
             RData::SOA(soa) => Some((r.ttl, soa.minimum)),
             _ => None,
         });
-        let ttl = policy.negative(soa);
+        // NODATA behind a CNAME (m4): the CNAME records must not live longer than they
+        // can. `min_ttl` does not raise a negative TTL.
+        let chain = msg.answers.iter().map(|r| r.ttl).min().unwrap_or(u32::MAX);
+        let ttl = policy.negative(soa).min(chain);
         for r in all_records_mut(&mut msg) {
             r.ttl = r.ttl.min(ttl);
         }
@@ -299,10 +314,32 @@ pub fn prepare_for_cache(mut msg: Message, policy: &TtlPolicy) -> Result<Cacheab
         }
         msg.answers.iter().map(|r| r.ttl).min().unwrap_or(0)
     };
-    if !msg.to_vec().is_ok_and(|v| v.len() <= MAX_CACHEABLE_BYTES) {
-        return Err(Box::new(msg));
+    match msg.to_vec() {
+        Ok(bytes) if bytes.len() <= MAX_CACHEABLE_BYTES => Ok(Cacheable {
+            message: msg,
+            bytes,
+            ttl,
+        }),
+        _ => Err(Box::new(msg)),
     }
-    Ok(Cacheable { message: msg, ttl })
+}
+
+/// True for a NOERROR answer with no record of the query type (RFC 2308 NODATA): an empty
+/// answer section, or only a CNAME chain whose last name has no record of the type.
+///
+/// A CNAME or ANY query with any answer record is not NODATA. A message without a
+/// question uses the old rule: NODATA only when the answer section is empty.
+fn is_nodata(msg: &Message) -> bool {
+    if msg.answers.is_empty() {
+        return true;
+    }
+    let Some(qtype) = msg.queries.first().map(Query::query_type) else {
+        return false;
+    };
+    if matches!(qtype, RecordType::CNAME | RecordType::ANY) {
+        return false;
+    }
+    !msg.answers.iter().any(|r| r.record_type() == qtype)
 }
 
 fn all_records_mut(msg: &mut Message) -> impl Iterator<Item = &mut Record> {
@@ -701,6 +738,54 @@ mod tests {
         let mut big = m;
         big.authorities[0] = soa("example.com.", 9000, 9000);
         assert_eq!(prepare_for_cache(big, &POLICY).unwrap().ttl, 300);
+    }
+
+    fn cname(owner: &str, ttl: u32, target: &str) -> Record {
+        Record::from_rdata(name(owner), ttl, RData::CNAME(CNAME(name(target))))
+    }
+
+    fn nodata_behind_cname(qtype: RecordType, cname_ttl: u32, soa_ttl: u32) -> Message {
+        let mut m = Message::new(1, MessageType::Response, OpCode::Query);
+        m.add_query(Query::query(name("www.example.com."), qtype));
+        m.answers
+            .push(cname("www.example.com.", cname_ttl, "edge.example.net."));
+        m.authorities.push(soa("example.net.", soa_ttl, soa_ttl));
+        m
+    }
+
+    /// m4: a NOERROR answer with only a CNAME chain and an SOA is NODATA for the query
+    /// type. Its TTL is the lower of the CNAME TTL and the negative TTL from the SOA.
+    #[test]
+    fn cache_nodata_behind_cname_is_negative() {
+        // CNAME TTL 86400, SOA 30: the SOA wins.
+        let c =
+            prepare_for_cache(nodata_behind_cname(RecordType::AAAA, 86_400, 30), &POLICY).unwrap();
+        assert_eq!(c.ttl, 30);
+        assert!(c.message.answers.iter().all(|r| r.ttl <= 30));
+        assert!(c.message.authorities.iter().all(|r| r.ttl <= 30));
+        // CNAME TTL 20, SOA capped at negative_ttl 300: the CNAME TTL wins.
+        let c = prepare_for_cache(nodata_behind_cname(RecordType::A, 20, 9000), &POLICY).unwrap();
+        assert_eq!(c.ttl, 20);
+        // min_ttl (10) never raises the TTL of a negative answer.
+        let c = prepare_for_cache(nodata_behind_cname(RecordType::A, 5, 30), &POLICY).unwrap();
+        assert_eq!(c.ttl, 5);
+        // No SOA: negative_ttl caps the TTL.
+        let mut no_soa = nodata_behind_cname(RecordType::A, 86_400, 30);
+        no_soa.authorities.clear();
+        assert_eq!(prepare_for_cache(no_soa, &POLICY).unwrap().ttl, 300);
+    }
+
+    /// A CNAME chain that ends in a record of the query type is a positive answer. A CNAME
+    /// or ANY query with a CNAME answer is positive too.
+    #[test]
+    fn cache_cname_chain_with_the_type_is_positive() {
+        let mut m = nodata_behind_cname(RecordType::A, 500, 30);
+        m.answers.push(a("edge.example.net.", 600, [192, 0, 2, 1]));
+        assert_eq!(prepare_for_cache(m, &POLICY).unwrap().ttl, 500);
+        for qtype in [RecordType::CNAME, RecordType::ANY] {
+            let m = nodata_behind_cname(qtype, 500, 30);
+            assert_eq!(prepare_for_cache(m, &POLICY).unwrap().ttl, 500, "{qtype}");
+        }
     }
 
     #[test]

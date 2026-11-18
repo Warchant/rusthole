@@ -269,6 +269,7 @@ impl DnsSettings {
                     negative_ttl: cfg.cache.negative_ttl,
                 },
                 cache_entries: usize::try_from(cfg.cache.max_entries).unwrap_or(usize::MAX),
+                cache_bytes: usize::try_from(cfg.cache.max_bytes).unwrap_or(usize::MAX),
                 rate_queries: cfg.rate_limit.queries,
                 rate_interval_seconds: cfg.rate_limit.interval_seconds,
                 rate_max_clients: ratelimit::MAX_CLIENTS,
@@ -279,6 +280,7 @@ impl DnsSettings {
                 timeout: Duration::from_millis(u64::from(cfg.upstreams.timeout_ms.max(1))),
                 max_attempts: upstream::MAX_ATTEMPTS,
                 max_inflight: upstream::MAX_INFLIGHT,
+                max_inflight_per_client: upstream::MAX_INFLIGHT_PER_CLIENT,
                 health: HealthConfig::default(),
             },
             rescan_interval: RESCAN_INTERVAL,
@@ -641,15 +643,19 @@ impl DnsServer {
         self.shared.doh.as_ref().map_or(0, |d| d.open_connections())
     }
 
-    /// The clock mode: which upstreams the pool uses (amendment A6).
+    /// The mode: which upstreams the pool uses (amendment A6). It is the clock mode, or
+    /// [`UpstreamMode::Fallback`] while each encrypted upstream fails with a certificate
+    /// date error (review item m1).
     pub fn upstream_mode(&self) -> UpstreamMode {
         self.shared.pool.mode()
     }
 
-    /// Checks the wall clock now and updates the clock mode.
+    /// Checks the wall clock now and updates the clock mode. Gives the mode that the pool
+    /// uses after the check ([`Self::upstream_mode`]).
     pub fn check_clock(&self) -> UpstreamMode {
-        let prev = self.shared.pool.mode();
-        self.shared.clock_check(Some(prev))
+        let prev = self.shared.pool.clock_mode();
+        self.shared.clock_check(Some(prev));
+        self.shared.pool.mode()
     }
 
     /// Live DoT and DoH upstream connections.
@@ -755,7 +761,9 @@ impl Shared {
         step.mode
     }
 
-    /// Checks the wall clock on a period.
+    /// Checks the wall clock on a period. In the certificate date fallback (review item
+    /// m1), each check also tries one handshake with the encrypted upstreams, so the pool
+    /// can go back to them.
     ///
     /// Service loop: unbounded on purpose. It runs for the life of the server and ends when
     /// `cancel` is cancelled.
@@ -768,6 +776,11 @@ impl Shared {
             tokio::select! {
                 () = cancel.cancelled() => break,
                 _ = tick.tick() => mode = self.clock_check(Some(mode)),
+            }
+            // Each exchange of the probe has the query timeout, and the cancel stops it.
+            tokio::select! {
+                () = cancel.cancelled() => break,
+                () = self.pool.date_probe() => {}
             }
         }
     }

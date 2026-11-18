@@ -127,6 +127,7 @@ fuzz_target!(|data: &[u8]| {
                             Ok(message) => Ok(UpstreamAnswer {
                                 message,
                                 upstream: "192.0.2.53:53".parse().unwrap(),
+                                fallback: false,
                             }),
                             Err(_) => Err(UpstreamError::BadReply),
                         }

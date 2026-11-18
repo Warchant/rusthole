@@ -37,6 +37,8 @@ enum Mode {
     Silent,
     /// Answer SERVFAIL.
     ServFail,
+    /// Answer REFUSED.
+    Refused,
     /// Answer after a delay in milliseconds.
     Delay(u64),
 }
@@ -143,10 +145,14 @@ async fn fake(mode: Mode) -> Fake {
                             send(answer(&q, 1)).await;
                         }
                         Mode::Silent => {}
-                        Mode::ServFail => {
+                        Mode::ServFail | Mode::Refused => {
                             let mut m = answer(&q, 1);
                             m.answers.clear();
-                            m.metadata.response_code = ResponseCode::ServFail;
+                            m.metadata.response_code = if mode == Mode::Refused {
+                                ResponseCode::Refused
+                            } else {
+                                ResponseCode::ServFail
+                            };
                             send(m).await;
                         }
                         Mode::Delay(ms) => {
@@ -221,6 +227,7 @@ fn settings(servers: Vec<UpstreamServer>) -> DnsSettings {
             timeout: Duration::from_millis(300),
             max_attempts: 3,
             max_inflight: 64,
+            max_inflight_per_client: 64,
             health: HealthConfig::default(),
         },
         rescan_interval: Duration::from_secs(30),
@@ -411,6 +418,38 @@ async fn servfail_fails_over_but_keeps_health() {
     assert!(server.shutdown(WAIT).await);
 }
 
+/// m5: an upstream that answers REFUSED does not stop the query. The query goes to the next
+/// upstream, like SERVFAIL. REFUSED counts as a health success (the upstream answered), so a
+/// client cannot take an upstream down with names that the upstream refuses.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn refused_fails_over_to_the_next_upstream() {
+    let bad = fake(Mode::Refused).await;
+    let good = fake(Mode::Answer).await;
+    let server = start(settings(vec![udp_upstream(&bad), udp_upstream(&good)])).await;
+    for (id, name) in [(46, "refused-a.example."), (47, "refused-b.example.")] {
+        let m = ask_udp(first_udp(&server), id, name).await;
+        assert_eq!(m.metadata.response_code, ResponseCode::NoError, "{name}");
+        assert_eq!(a_value(&m), Ipv4Addr::new(192, 0, 2, 1));
+    }
+    assert_eq!(bad.udp.load(Ordering::SeqCst), 2);
+    assert_eq!(good.udp.load(Ordering::SeqCst), 2);
+    assert_eq!(server.upstream_health()[0], HealthState::Healthy);
+    assert!(server.shutdown(WAIT).await);
+}
+
+/// When each upstream refuses, the client gets REFUSED (the last answer), not SERVFAIL.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn all_upstreams_refusing_gives_the_refused_answer() {
+    let one = fake(Mode::Refused).await;
+    let two = fake(Mode::Refused).await;
+    let server = start(settings(vec![udp_upstream(&one), udp_upstream(&two)])).await;
+    let m = ask_udp(first_udp(&server), 48, "refused-all.example.").await;
+    assert_eq!(m.metadata.response_code, ResponseCode::Refused);
+    assert_eq!(one.udp.load(Ordering::SeqCst), 1);
+    assert_eq!(two.udp.load(Ordering::SeqCst), 1);
+    assert!(server.shutdown(WAIT).await);
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn all_upstreams_failing_gives_servfail() {
     let silent = fake(Mode::Silent).await;
@@ -595,6 +634,54 @@ async fn identical_queries_in_flight_share_one_upstream_query() {
     }
     assert_eq!(up.udp.load(Ordering::SeqCst), 1);
     assert_eq!(server.inflight_upstream(), 0);
+    assert!(server.shutdown(WAIT).await);
+}
+
+/// m2: one client cannot take all in-flight slots. Client A (127.0.0.1) sends as many slow
+/// queries as the pool has slots. Client B (127.0.0.2, also loopback) still gets an answer.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn one_client_cannot_fill_the_inflight_map() {
+    const FLOOD: u16 = 64;
+    let up = fake(Mode::Delay(1_000)).await;
+    let mut cfg = settings(vec![udp_upstream(&up)]);
+    cfg.pool.timeout = Duration::from_secs(3);
+    cfg.pool.max_inflight = usize::from(FLOOD);
+    cfg.pool.max_inflight_per_client = 8;
+    let server = start(cfg).await;
+    let addr = first_udp(&server);
+    let flood_sock = UdpSocket::bind((LOCALHOST, 0)).await.unwrap();
+    for i in 0..FLOOD {
+        flood_sock
+            .send_to(&query(1000 + i, &format!("flood{i}.example."), true), addr)
+            .await
+            .unwrap();
+    }
+    // Give the server time to start each query of A.
+    let mut seen = 0;
+    for _ in 0..100 {
+        seen = server.inflight_upstream();
+        if seen >= 8 {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert!(seen >= 8, "{seen}");
+    tokio::time::sleep(Duration::from_millis(200)).await;
+    let other_sock = UdpSocket::bind((Ipv4Addr::new(127, 0, 0, 2), 0))
+        .await
+        .unwrap();
+    other_sock
+        .send_to(&query(7, "client-b.example.", true), addr)
+        .await
+        .unwrap();
+    let mut buf = vec![0u8; 4096];
+    let (n, _) = tokio::time::timeout(WAIT, other_sock.recv_from(&mut buf))
+        .await
+        .unwrap()
+        .unwrap();
+    let m = Message::from_vec(&buf[..n]).unwrap();
+    assert_eq!(m.metadata.response_code, ResponseCode::NoError);
+    assert_eq!(a_value(&m), Ipv4Addr::new(192, 0, 2, 1));
     assert!(server.shutdown(WAIT).await);
 }
 

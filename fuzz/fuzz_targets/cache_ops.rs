@@ -1,7 +1,8 @@
 #![no_main]
-//! Fuzz the cache with any op sequence and any `now` (also going back). The invariants:
-//! a hit is never expired, the served TTL is in `1..=stored TTL`, the hit value is the last
-//! value stored under the key, and the size never exceeds `max_entries`.
+//! Fuzz the cache with any op sequence, any entry size, any byte budget and any `now` (also
+//! going back). The invariants: a hit is never expired, the served TTL is in
+//! `1..=stored TTL`, the hit value is the last value stored under the key, the size never
+//! exceeds `max_entries`, and the counted bytes never exceed `max_bytes`.
 
 use std::collections::HashMap;
 
@@ -50,7 +51,12 @@ fuzz_target!(|data: &[u8]| {
         return;
     };
     let max = usize::from(max % 8);
-    let mut cache: Cache<u64> = Cache::new(max);
+    let Some(budget) = input.u32() else {
+        return;
+    };
+    let max_bytes = usize::try_from(budget % 20_000).unwrap_or(0);
+    let mut cache: Cache<u64> = Cache::new(max, max_bytes);
+    let on = cache.is_enabled();
     let mut model: HashMap<u8, (u64, u64, u32)> = HashMap::new();
     let mut tag = 0u64;
     for _ in 0..1000 {
@@ -58,14 +64,21 @@ fuzz_target!(|data: &[u8]| {
             break;
         };
         tag += 1;
-        match op % 3 {
+        match op % 4 {
             0 => {
-                let (Some(k), Some(ttl), Some(now)) = (input.byte(), input.u32(), input.u64())
+                let (Some(k), Some(size), Some(ttl), Some(now)) =
+                    (input.byte(), input.u32(), input.u32(), input.u64())
                 else {
                     break;
                 };
-                let stored = cache.insert(key(k), tag, ttl, now);
-                assert_eq!(stored, max > 0 && ttl > 0);
+                let size = usize::try_from(size % 5000).unwrap_or(0);
+                let stored = cache.insert(key(k), tag, size, ttl, now);
+                if stored {
+                    assert!(on && ttl > 0, "stored in an off cache or with TTL 0");
+                }
+                if !on || ttl == 0 {
+                    assert!(!stored);
+                }
                 if stored {
                     model.insert(model_key(k), (tag, now, ttl));
                 } else {
@@ -87,11 +100,19 @@ fuzz_target!(|data: &[u8]| {
                     assert_eq!(hit.age + hit.remaining, ttl);
                 }
             }
+            2 => {
+                let Some(k) = input.byte() else {
+                    break;
+                };
+                cache.remove(&key(k));
+                model.remove(&model_key(k));
+            }
             _ => {
                 cache.clear();
                 model.clear();
             }
         }
         assert!(cache.len() <= max);
+        assert!(cache.bytes() <= max_bytes, "over the byte budget");
     }
 });

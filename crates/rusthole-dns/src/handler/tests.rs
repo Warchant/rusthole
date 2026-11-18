@@ -5,7 +5,7 @@ use std::net::Ipv4Addr;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use hickory_proto::op::{Edns, MessageType, OpCode, Query};
-use hickory_proto::rr::rdata::{A, CNAME};
+use hickory_proto::rr::rdata::{A, CNAME, SOA};
 use hickory_proto::rr::{Name, RData, Record, RecordType};
 use rusthole_core::DomainName;
 use rusthole_core::acl::InterfaceNet;
@@ -75,6 +75,7 @@ fn upstream_answer(p: &Pending, records: Vec<Record>) -> UpstreamAnswer {
     UpstreamAnswer {
         message: m,
         upstream: addr("192.0.2.53:53"),
+        fallback: false,
     }
 }
 
@@ -273,6 +274,77 @@ fn upstream_answer_is_cached_and_served_with_client_id() {
         ),
         Front::Resolve(_)
     ));
+}
+
+/// m3: an answer from a fallback server stays in the cache for at most
+/// `FALLBACK_MAX_TTL` seconds, also with a long upstream TTL. An answer from another server
+/// keeps its TTL.
+#[test]
+fn fallback_answers_get_a_short_ttl() {
+    let h = handler();
+    for (i, (name, fallback, want)) in [
+        ("fb.example.", true, FALLBACK_MAX_TTL),
+        ("enc.example.", false, 86_400),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let id = 300 + u16::try_from(i).unwrap() * 2;
+        let q = query(id, name, RecordType::A, None);
+        let p = pending(h.front(&q, addr(ON_NET), ClientTransport::Udp));
+        let mut ans = upstream_answer(&p, vec![a_record(name, 86_400, 1)]);
+        ans.fallback = fallback;
+        let m = parse(&h.complete(&p, Ok(ans)));
+        assert_eq!(m.answers[0].ttl, want, "{name}");
+        // The cache hit has the same limit.
+        let q = query(id + 1, name, RecordType::A, None);
+        let m = parse(&reply(h.front(&q, addr(ON_NET), ClientTransport::Udp)));
+        assert!(
+            m.answers[0].ttl <= want && m.answers[0].ttl + 1 >= want,
+            "{name}"
+        );
+    }
+    // A negative answer from a fallback server: the SOA TTL is capped too.
+    let q = query(310, "nx.example.", RecordType::A, None);
+    let p = pending(h.front(&q, addr(ON_NET), ClientTransport::Udp));
+    let mut ans = upstream_answer(&p, vec![]);
+    ans.message.metadata.response_code = ResponseCode::NXDomain;
+    ans.message.authorities.push(Record::from_rdata(
+        Name::from_ascii("example.").unwrap(),
+        3600,
+        RData::SOA(SOA::new(
+            Name::from_ascii("ns.example.").unwrap(),
+            Name::from_ascii("host.example.").unwrap(),
+            1,
+            3600,
+            600,
+            86_400,
+            3600,
+        )),
+    ));
+    ans.fallback = true;
+    let m = parse(&h.complete(&p, Ok(ans)));
+    assert!(m.authorities.iter().all(|r| r.ttl <= FALLBACK_MAX_TTL));
+}
+
+#[test]
+fn fallback_policy_caps_each_limit() {
+    let p = TtlPolicy {
+        min_ttl: 600,
+        max_ttl: 86_400,
+        negative_ttl: 300,
+    };
+    let f = fallback_policy(&p);
+    assert_eq!(
+        (f.min_ttl, f.max_ttl, f.negative_ttl),
+        (FALLBACK_MAX_TTL, FALLBACK_MAX_TTL, FALLBACK_MAX_TTL)
+    );
+    let small = TtlPolicy {
+        min_ttl: 0,
+        max_ttl: 10,
+        negative_ttl: 5,
+    };
+    assert_eq!(fallback_policy(&small), small);
 }
 
 #[test]

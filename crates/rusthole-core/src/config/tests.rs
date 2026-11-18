@@ -256,6 +256,16 @@ fn cache_and_numbers() {
     let mut c = Config::default();
     c.cache.max_entries = MAX_CACHE_ENTRIES + 1;
     assert_one_issue(&c, "cache.max_entries");
+    for bad in [0, MIN_CACHE_BYTES - 1, MAX_CACHE_BYTES + 1] {
+        let mut c = Config::default();
+        c.cache.max_bytes = bad;
+        assert_one_issue(&c, "cache.max_bytes");
+    }
+    for good in [MIN_CACHE_BYTES, MAX_CACHE_BYTES] {
+        let mut c = Config::default();
+        c.cache.max_bytes = good;
+        assert_eq!(c.validate(), []);
+    }
     let mut c = Config::default();
     c.rate_limit.interval_seconds = 0;
     assert_one_issue(&c, "rate_limit.interval_seconds");
@@ -1129,6 +1139,7 @@ prop_compose! {
         timeout_ms in 1..=MAX_UPSTREAM_TIMEOUT_MS,
         blocking in blocking(),
         max_entries in 0..=MAX_CACHE_ENTRIES,
+        max_bytes in MIN_CACHE_BYTES..=MAX_CACHE_BYTES,
         ttl_a in any::<u32>(),
         ttl_b in any::<u32>(),
         negative_ttl in any::<u32>(),
@@ -1218,7 +1229,7 @@ prop_compose! {
                 timeout_ms,
             },
             blocking,
-            cache: Cache { max_entries, min_ttl, max_ttl, negative_ttl },
+            cache: Cache { max_entries, max_bytes, min_ttl, max_ttl, negative_ttl },
             acl: Acl { auto_local, allow },
             rate_limit: RateLimit { queries, interval_seconds },
             stats: Stats {

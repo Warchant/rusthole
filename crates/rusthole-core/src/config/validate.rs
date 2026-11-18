@@ -13,6 +13,10 @@ use crate::pattern::compile_rule_regex;
 pub const MAX_GROUP_NAME_LEN: usize = 64;
 /// Highest allowed cache size. It keeps memory bounded on a small device.
 pub const MAX_CACHE_ENTRIES: u32 = 1_000_000;
+/// Lowest allowed `cache.max_bytes`: 64 KiB.
+pub const MIN_CACHE_BYTES: u64 = 64 * 1024;
+/// Highest allowed `cache.max_bytes`: 1 GiB.
+pub const MAX_CACHE_BYTES: u64 = 1024 * 1024 * 1024;
 /// Highest allowed size of the recent-query ring.
 pub const MAX_RECENT_QUERIES: u32 = 1_000_000;
 /// Highest allowed upstream timeout, in milliseconds.
@@ -337,6 +341,12 @@ fn check_numbers(config: &Config, out: &mut Issues) {
         out.add(
             "cache.max_entries",
             format!("must be at most {MAX_CACHE_ENTRIES}"),
+        );
+    }
+    if !(MIN_CACHE_BYTES..=MAX_CACHE_BYTES).contains(&c.max_bytes) {
+        out.add(
+            "cache.max_bytes",
+            format!("must be in {MIN_CACHE_BYTES}..={MAX_CACHE_BYTES}"),
         );
     }
     if c.min_ttl > c.max_ttl {

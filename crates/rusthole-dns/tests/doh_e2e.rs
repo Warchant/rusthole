@@ -71,6 +71,7 @@ fn settings(upstream: SocketAddr, limits: DohLimits) -> DnsSettings {
             timeout: Duration::from_millis(500),
             max_attempts: 3,
             max_inflight: 64,
+            max_inflight_per_client: 64,
             health: HealthConfig::default(),
         },
         rescan_interval: Duration::from_secs(30),

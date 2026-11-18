@@ -46,6 +46,12 @@ pub struct TestCa {
 }
 
 pub fn test_ca(names: &[&str]) -> TestCa {
+    test_ca_at(names, rusthole_tls::now_unix())
+}
+
+/// A test CA and server certificate made at `now_unix`. A time far in the future gives a
+/// certificate that is not yet valid for the real clock (review item m1).
+pub fn test_ca_at(names: &[&str], now_unix: i64) -> TestCa {
     let dir = tempfile::Builder::new()
         .prefix("rusthole-p7-")
         .tempdir_in(temp_root())
@@ -57,7 +63,7 @@ pub fn test_ca(names: &[&str]) -> TestCa {
         names: names.iter().map(|s| (*s).to_owned()).collect(),
         data_dir: dir.path().to_owned(),
     };
-    let (store, _) = CertStore::open(settings, &[LOCALHOST], rusthole_tls::now_unix()).unwrap();
+    let (store, _) = CertStore::open(settings, &[LOCALHOST], now_unix).unwrap();
     let ca_path = store.info().ca_cert_path.unwrap();
     let mut roots = RootCertStore::empty();
     for c in rusthole_tls::pem::parse_cert_chain(&std::fs::read(ca_path).unwrap(), "ca").unwrap() {
@@ -202,9 +208,18 @@ fn record_sni(sni: &Mutex<Vec<String>>, conn: &rustls::ServerConnection) {
 
 /// A DoT upstream on 127.0.0.1 with the certificate of `ca`. Answers A 192.0.2.`last`.
 pub async fn fake_dot(ca: &TestCa, mode: DotMode, last: u8) -> FakeTls {
+    fake_dot_switch(Arc::new(Mutex::new(ca.server_config())), mode, last).await
+}
+
+/// A DoT upstream like [`fake_dot`]. Each new connection uses the server config that is in
+/// `config` now, so a test can change the certificate.
+pub async fn fake_dot_switch(
+    config: Arc<Mutex<Arc<ServerConfig>>>,
+    mode: DotMode,
+    last: u8,
+) -> FakeTls {
     let listener = TcpListener::bind((LOCALHOST, 0)).await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let acceptor = TlsAcceptor::from(ca.server_config());
     let conns = Arc::new(AtomicUsize::new(0));
     let queries = Arc::new(AtomicUsize::new(0));
     let closed = Arc::new(AtomicUsize::new(0));
@@ -223,7 +238,7 @@ pub async fn fake_dot(ca: &TestCa, mode: DotMode, last: u8) -> FakeTls {
                 continue;
             };
             let first = c1.fetch_add(1, Ordering::SeqCst) == 0;
-            let acceptor = acceptor.clone();
+            let acceptor = TlsAcceptor::from(Arc::clone(&*config.lock()));
             let q1 = Arc::clone(&q1);
             let x1 = Arc::clone(&x1);
             let f1 = Arc::clone(&f1);

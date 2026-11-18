@@ -1763,6 +1763,7 @@ dependencies = [
  "hyper-util",
  "if-addrs",
  "parking_lot",
+ "peak_alloc",
  "proptest",
  "rusthole-core",
  "rusthole-tls",

@@ -72,6 +72,7 @@ fn settings(servers: Vec<UpstreamServer>, fallback: Vec<UpstreamServer>) -> DnsS
             timeout: Duration::from_millis(700),
             max_attempts: 3,
             max_inflight: 64,
+            max_inflight_per_client: 64,
             health: HealthConfig::default(),
         },
         rescan_interval: Duration::from_secs(30),
@@ -331,6 +332,8 @@ async fn full_dot_upstream_stays_healthy() {
     let mut s = settings(vec![dot("dns.test", slow.addr), udp(plain.addr)], vec![]);
     s.pool.timeout = Duration::from_secs(3);
     s.pool.max_inflight = 512;
+    // One client sends the full burst: give it all slots.
+    s.pool.max_inflight_per_client = 512;
     let server = start(&ca, s, good_clock()).await;
     let sock = UdpSocket::bind((LOCALHOST, 0)).await.unwrap();
     let to = server.bound()[0].udp;
@@ -573,6 +576,72 @@ async fn clock_task_checks_on_its_period() {
     assert!(eventually(|| server.upstream_mode() == UpstreamMode::Fallback).await);
     assert!(server.shutdown(WAIT).await);
     assert_eq!(server.task_count(), 0);
+}
+
+/// m1: the clock is after the build time, but the DoT certificate is not yet valid (as with
+/// a wrong clock). The handshake fails with a date error, so the pool uses the fallback.
+/// When a handshake passes again (here: the upstream gets a valid certificate), the clock
+/// task probe makes the pool go back to the DoT upstream.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn certificate_date_errors_use_the_fallback_then_switch_back() {
+    const YEAR: i64 = 365 * 24 * 3600;
+    let good = test_ca(&["dns.test"]);
+    let future = test_ca_at(&["dns.test"], rusthole_tls::now_unix() + 3 * YEAR);
+    let cert = Arc::new(parking_lot::Mutex::new(future.server_config()));
+    let d = fake_dot_switch(Arc::clone(&cert), DotMode::Answer, 7).await;
+    let fb = fake_udp(9).await;
+    let mut roots = good.roots.clone();
+    roots.roots.extend(future.roots.roots.iter().cloned());
+    let mut s = settings(vec![dot("dns.test", d.addr)], vec![udp(fb.addr)]);
+    s.clock_check_interval = Duration::from_millis(50);
+    let server = rusthole_dns::start(
+        s,
+        ServerDeps {
+            interfaces: Arc::new(StaticInterfaces::default()),
+            upstream_tls: Some(rusthole_dns::UpstreamTls::with_roots(roots).unwrap()),
+            wall_clock: good_clock(),
+            ..ServerDeps::default()
+        },
+    )
+    .await
+    .unwrap();
+    assert_eq!(server.upstream_mode(), UpstreamMode::Encrypted);
+    // The first query fails: the only allowed upstream has a date error.
+    let m = ask(&server, 1, "date1.example.").await;
+    assert_eq!(m.metadata.response_code, ResponseCode::ServFail);
+    assert_eq!(server.upstream_mode(), UpstreamMode::Fallback);
+    // The clock check does not undo the date fallback.
+    assert_eq!(server.check_clock(), UpstreamMode::Fallback);
+    let m = ask(&server, 2, "date2.example.").await;
+    assert_eq!(first_a(&m), a(9), "the fallback answered");
+    // The upstream gets a valid certificate: the next probe passes.
+    *cert.lock() = good.server_config();
+    assert!(eventually(|| server.upstream_mode() == UpstreamMode::Encrypted).await);
+    let m = ask(&server, 3, "date3.example.").await;
+    assert_eq!(first_a(&m), a(7), "DoT answered");
+    assert_eq!(fb.count.load(Ordering::SeqCst), 1);
+    assert!(server.shutdown(WAIT).await);
+    assert_eq!(server.task_count(), 0);
+}
+
+/// m1: without a fallback, date errors do not change the mode.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn certificate_date_errors_without_fallback_keep_the_mode() {
+    let future = test_ca_at(
+        &["dns.test"],
+        rusthole_tls::now_unix() + 3 * 365 * 24 * 3600,
+    );
+    let d = fake_dot(&future, DotMode::Answer, 7).await;
+    let server = start(
+        &future,
+        settings(vec![dot("dns.test", d.addr)], vec![]),
+        good_clock(),
+    )
+    .await;
+    let m = ask(&server, 1, "date4.example.").await;
+    assert_eq!(m.metadata.response_code, ResponseCode::ServFail);
+    assert_eq!(server.upstream_mode(), UpstreamMode::Encrypted);
+    assert!(server.shutdown(WAIT).await);
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]

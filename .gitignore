@@ -10,3 +10,5 @@
 *teleporter*.zip
 /data
 /.claude/
+# The default data directory of a Windows development build.
+/rusthole-data

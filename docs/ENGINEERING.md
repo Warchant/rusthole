@@ -24,6 +24,7 @@ flowchart LR
 | `rusthole-core` | Pure. No I/O, no clock, no threads, no async runtime. `now` is an input. |
 | `rusthole-import` | Reads files. All conversion logic is pure and has tests. |
 | `rusthole-dns`, `rusthole-store`, `rusthole-web` | Thin I/O shell around policy from `rusthole-core`. |
+| `rusthole-tls` | TLS certificates and rustls configs ([TLS.md](TLS.md)). Its policy module is pure; certificate dates use the wall clock. |
 | `rusthole` | CLI and wiring only. |
 
 ## Code rules
@@ -91,7 +92,7 @@ wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
 Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `dns_request`,
-`cache_ops`.
+`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`.
 
 Temporary files go to `D:\tmp`, not to drive C.
 

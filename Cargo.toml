@@ -6,6 +6,7 @@ members = [
     "crates/rusthole-dns",
     "crates/rusthole-store",
     "crates/rusthole-web",
+    "crates/rusthole-tls",
     "crates/rusthole",
 ]
 default-members = ["crates/rusthole"]
@@ -24,9 +25,12 @@ publish = false
 rusthole-core = { path = "crates/rusthole-core" }
 rusthole-import = { path = "crates/rusthole-import" }
 rusthole-dns = { path = "crates/rusthole-dns" }
+rusthole-tls = { path = "crates/rusthole-tls" }
 
 # Third-party crates. Add new ones here, then use `x = { workspace = true }` in a member.
 anyhow = "1"
+# Lock-free swap of the current TLS certificate (no lock, so no wait without a time limit).
+arc-swap = "1.9"
 # CSPRNG for DNS query IDs and source ports.
 getrandom = "0.4"
 # DNS wire format only (decision D11). Default features: no DNSSEC crypto, no aws-lc.
@@ -44,6 +48,17 @@ idna = "1.1"
 # Pure-Rust deflate only. The default features pull in C and crypto crates.
 zip = { version = "9.6", default-features = false, features = ["deflate"] }
 regex = "1.13"
+# TLS (amendment A1): the crypto provider is `ring`. The default features pull in aws-lc,
+# so each TLS crate turns them off.
+rcgen = { version = "0.14.10", default-features = false, features = ["crypto", "pem", "ring", "x509-parser"] }
+ring = "0.17.14"
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-native-certs = "0.8.5"
+rustls-pki-types = { version = "1.16", features = ["std"] }
+time = { version = "0.3.47", features = ["formatting"] }
+tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "tls12"] }
+webpki-roots = "1.0.12"
+x509-parser = "0.18.1"
 # `bundled` builds SQLite from source, so the static musl build needs no system library.
 # `serialize` lets the import read a database from memory, with no temp file.
 # `limits` and `hooks` let the import cap value sizes and VM steps for an untrusted file.

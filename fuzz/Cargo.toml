@@ -13,6 +13,8 @@ libfuzzer-sys = "0.4"
 rusthole-core = { path = "../crates/rusthole-core" }
 rusthole-import = { path = "../crates/rusthole-import" }
 rusthole-dns = { path = "../crates/rusthole-dns" }
+rusthole-tls = { path = "../crates/rusthole-tls" }
+rustls-pki-types = "1.16"
 
 # Not a member of the main workspace: it needs nightly and libFuzzer.
 [workspace]
@@ -76,6 +78,13 @@ bench = false
 [[bin]]
 name = "regex_rules"
 path = "fuzz_targets/regex_rules.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pem_load"
+path = "fuzz_targets/pem_load.rs"
 test = false
 doc = false
 bench = false

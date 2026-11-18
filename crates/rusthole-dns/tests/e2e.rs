@@ -777,3 +777,31 @@ async fn tcp_connection_closes_after_max_queries() {
     );
     assert!(server.shutdown(WAIT).await);
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn host_resolver_uses_the_upstream_pool() {
+    let up = fake(Mode::Answer).await;
+    let server = start(settings(vec![udp_upstream(&up)])).await;
+    let resolver = server.host_resolver();
+    let name = rusthole_core::DomainName::parse("lists.example").unwrap();
+    let addrs = resolver.resolve_ipv4(&name).await.unwrap();
+    assert_eq!(addrs, vec![Ipv4Addr::new(192, 0, 2, 1)]);
+    assert_eq!(up.udp.load(Ordering::SeqCst), 1);
+    // The lookup does not fill the DNS cache.
+    assert_eq!(server.cache_len(), 0);
+
+    up.set_mode(Mode::ServFail);
+    let err = resolver.resolve_ipv4(&name).await.unwrap_err();
+    assert_eq!(err, rusthole_dns::ResolveError::Rcode(2));
+
+    // After the stop, a lookup fails and does not hang.
+    server.shutdown(Duration::from_millis(500)).await;
+    up.set_mode(Mode::Answer);
+    let result = tokio::time::timeout(WAIT, resolver.resolve_ipv4(&name)).await;
+    assert_eq!(
+        result,
+        Ok(Err(rusthole_dns::ResolveError::Upstream(
+            rusthole_dns::UpstreamError::Stopped
+        )))
+    );
+}

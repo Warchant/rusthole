@@ -17,6 +17,9 @@ flowchart LR
     import --> core
     web --> store
     dns --> store
+    lists[rusthole-lists] --> dns
+    lists --> core
+    lists --> tls[rusthole-tls]
 ```
 
 | Crate | Rule |
@@ -25,6 +28,7 @@ flowchart LR
 | `rusthole-import` | Reads files. All conversion logic is pure and has tests. |
 | `rusthole-dns`, `rusthole-store`, `rusthole-web` | Thin I/O shell around policy from `rusthole-core`. |
 | `rusthole-tls` | TLS certificates and rustls configs ([TLS.md](TLS.md)). Its policy module is pure; certificate dates use the wall clock. |
+| `rusthole-lists` | List refresher: download, disk cache, schedule, engine swap ([LISTS.md](LISTS.md)). The refresh policy is pure code in `rusthole-core::refresh`. |
 | `rusthole` | CLI and wiring only. |
 
 ## Code rules
@@ -92,7 +96,7 @@ wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
 Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `dns_request`,
-`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`.
+`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`, `list_meta`.
 
 Temporary files go to `D:\tmp`, not to drive C.
 

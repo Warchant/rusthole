@@ -7,6 +7,7 @@ members = [
     "crates/rusthole-store",
     "crates/rusthole-web",
     "crates/rusthole-tls",
+    "crates/rusthole-lists",
     "crates/rusthole",
 ]
 default-members = ["crates/rusthole"]
@@ -45,6 +46,11 @@ tokio = { version = "1.54", features = ["rt-multi-thread", "net", "time", "sync"
 tokio-util = { version = "0.7.20", features = ["rt"] }
 clap = { version = "4", features = ["derive", "env"] }
 idna = "1.1"
+# HTTP client for list downloads (part P3b). No default features: no aws-lc, no system
+# proxy, no HTTP/2. TLS comes from rusthole-tls (rustls with ring, amendment A1).
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls-no-provider", "gzip", "deflate"] }
+# Metadata files of the list disk cache (part P3b).
+serde_json = "1.0.154"
 # Pure-Rust deflate only. The default features pull in C and crypto crates.
 zip = { version = "9.6", default-features = false, features = ["deflate"] }
 regex = "1.13"
@@ -73,6 +79,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 
 # Dev
+# Makes gzip test bodies in the list refresher tests (tests only).
+flate2 = "1.1.11"
 # Counts heap bytes in the memory test of the policy engine (tests only).
 peak_alloc = "0.3"
 proptest = "1"

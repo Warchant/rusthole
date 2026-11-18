@@ -7,6 +7,7 @@
 //! - [`wire`]: DNS wire format helpers on top of `hickory-proto`.
 //! - [`filter`]: hooks for the policy engine (part P3a) and for statistics (part P4).
 //! - [`interfaces`]: local interface addresses behind a trait.
+//! - [`resolve`]: host name lookup through the upstream pool (for list downloads, part P3b).
 //!
 //! The policy (ACL, cache rules, rate limit, upstream health) is pure code in
 //! `rusthole-core`. This crate is the I/O shell around it.
@@ -14,6 +15,7 @@
 pub mod filter;
 pub mod handler;
 pub mod interfaces;
+pub mod resolve;
 pub mod server;
 mod sync;
 pub mod upstream;
@@ -25,6 +27,7 @@ pub use filter::{
 };
 pub use handler::{Front, Handler, HandlerSettings, Pending, Reply};
 pub use interfaces::{InterfaceSource, StaticInterfaces, SystemInterfaces};
+pub use resolve::{HostResolver, ResolveError};
 pub use server::{
     BoundListener, DnsServer, DnsSettings, ListenMode, ServerDeps, SettingsError, StartError,
     TcpLimits, start,

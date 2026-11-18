@@ -88,3 +88,10 @@ path = "fuzz_targets/pem_load.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "list_meta"
+path = "fuzz_targets/list_meta.rs"
+test = false
+doc = false
+bench = false

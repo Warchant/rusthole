@@ -601,6 +601,137 @@ fn admin_secrets() {
 }
 
 #[test]
+fn tls_mode_defaults_and_old_admin_paths() {
+    let mut c = Config::default();
+    assert_eq!(c.tls_mode(), TlsMode::SelfSigned);
+    assert_eq!(c.tls_files(), None);
+    // A file from before the [tls] section keeps its meaning: the admin paths give mode file.
+    let c2 = Config::from_toml_str(
+        "config_version = 1\n[admin]\ntls_cert_path = \"/c.pem\"\ntls_key_path = \"/k.pem\"\n",
+    )
+    .unwrap();
+    assert_eq!(c2.tls_mode(), TlsMode::File);
+    assert_eq!(c2.tls_files(), Some(("/c.pem", "/k.pem")));
+    assert_eq!(c2.validate(), []);
+    c.tls.cert_path = Some("/n.pem".into());
+    c.tls.key_path = Some("/nk.pem".into());
+    assert_eq!(c.tls_mode(), TlsMode::File);
+    assert_eq!(c.tls_files(), Some(("/n.pem", "/nk.pem")));
+    assert_eq!(c.validate(), []);
+    c.tls.mode = Some(TlsMode::LocalCa);
+    assert_eq!(c.tls_mode(), TlsMode::LocalCa);
+    assert_one_issue(&c, "tls.mode");
+}
+
+#[test]
+fn tls_section_checks() {
+    let mut c = Config::default();
+    c.tls.mode = Some(TlsMode::File);
+    assert_one_issue(&c, "tls.mode");
+    c.tls.cert_path = Some("/c.pem".into());
+    // Only one path: one issue for the pair, and mode file has no files.
+    assert_eq!(paths(&c), ["tls.cert_path", "tls.mode"]);
+    c.tls.key_path = Some("/k.pem".into());
+    assert_eq!(c.validate(), []);
+    c.admin.tls_cert_path = Some("/old.pem".into());
+    c.admin.tls_key_path = Some("/old.key".into());
+    assert_one_issue(&c, "tls.cert_path");
+    let mut c = Config::default();
+    c.server.data_dir = " ".into();
+    assert_one_issue(&c, "server.data_dir");
+    c.server.data_dir = "/var/lib/a\0b".into();
+    assert_one_issue(&c, "server.data_dir");
+}
+
+/// A `config_version` 1 file with DoH on and no TLS setup was valid before the `[tls]` section.
+/// It stays valid: only the DoH server config builder refuses mode self-signed (A6).
+#[test]
+fn doh_with_self_signed_stays_valid() {
+    let c = Config::from_toml_str(
+        "config_version = 1
+[server.doh]
+enabled = true
+",
+    )
+    .unwrap();
+    assert_eq!(c.tls_mode(), TlsMode::SelfSigned);
+    assert_eq!(c.validate(), []);
+    let mut c = Config::default();
+    c.server.doh.enabled = true;
+    c.tls.mode = Some(TlsMode::SelfSigned);
+    assert_eq!(c.validate(), []);
+}
+
+#[test]
+fn tls_names() {
+    let mut c = Config::default();
+    c.tls.names = vec!["rusthole.lan".into(), "pi".into()];
+    assert_eq!(c.validate(), []);
+    c.tls.names = vec![
+        "192.0.2.1".into(),
+        "bad name".into(),
+        "a_b.lan".into(),
+        "x.lan".into(),
+        "X.lan.".into(),
+    ];
+    assert_eq!(
+        paths(&c),
+        [
+            "tls.names[0]",
+            "tls.names[1]",
+            "tls.names[2]",
+            "tls.names[4]"
+        ]
+    );
+    // webpki refuses these names in a certificate, and a local CA with one of them in its
+    // name constraints is refused for every name.
+    c.tls.names = vec![
+        "-pi.lan".into(),
+        "pi-.lan".into(),
+        "10.0.0".into(),
+        "123".into(),
+        "pi.-lan".into(),
+        "pi.lan-".into(),
+        "a.b.42".into(),
+        "pi-1.lan".into(),
+        "1pi.lan".into(),
+        "pi.l4n".into(),
+    ];
+    assert_eq!(
+        paths(&c),
+        [
+            "tls.names[0]",
+            "tls.names[1]",
+            "tls.names[2]",
+            "tls.names[3]",
+            "tls.names[4]",
+            "tls.names[5]",
+            "tls.names[6]"
+        ]
+    );
+    for bad in [
+        "-pi.lan",
+        "pi-.lan",
+        "10.0.0",
+        "123",
+        "a_b",
+        "",
+        "a..b",
+        "192.0.2.1",
+    ] {
+        assert!(tls_name_problem(bad).is_some(), "{bad}");
+    }
+    for good in ["pi", "rusthole.lan", "rusthole.lan.", "x-1.y2", "0a.lan"] {
+        assert_eq!(tls_name_problem(good), None, "{good}");
+    }
+    c.tls.names = (0..=MAX_TLS_NAMES).map(|i| format!("h{i}.lan")).collect();
+    assert_one_issue(&c, "tls.names");
+    // Unicode names load as punycode.
+    let c = Config::from_toml_str("config_version = 1\n[tls]\nnames = [\"Bücher.LAN\"]\n").unwrap();
+    assert_eq!(c.tls.names, ["xn--bcher-kva.lan"]);
+}
+
+#[test]
 fn api_tokens() {
     let mut c = Config::default();
     c.admin.api_tokens = vec![
@@ -676,6 +807,7 @@ fn full_example_in_docs_is_valid() {
         "[[local_dns.cnames]]",
         "[[local_dns.conditional_forwarding]]",
         "[admin]",
+        "[tls]",
     ] {
         assert!(text.contains(section), "example has no {section}");
     }
@@ -876,13 +1008,53 @@ prop_compose! {
             .prop_filter("distinct ports", |(a, b, c)| a != b && b != c && a != c),
         doh_enabled in any::<bool>(),
         admin_enabled in any::<bool>(),
+        data_dir in "/[a-z]{1,8}(/[a-z]{1,8}){0,2}",
     ) -> Server {
         Server {
             dns_listen,
             dns_port,
             doh: DohListener { enabled: doh_enabled, listen: vec![AUTO.to_owned()], port: doh_port },
             admin: AdminListener { enabled: admin_enabled, listen: vec![AUTO.to_owned()], port: admin_port },
+            data_dir,
         }
+    }
+}
+
+/// A host name for `tls.names` that [`tls_name_problem`] accepts: the last label starts with
+/// a letter, so it is not all digits and the name is not an IP address.
+fn tls_name() -> impl Strategy<Value = String> {
+    (
+        prop::collection::vec(label(), 0..3),
+        "[a-z]([a-z0-9-]{0,10}[a-z0-9])?",
+    )
+        .prop_map(|(mut labels, last)| {
+            labels.push(last);
+            labels.join(".")
+        })
+}
+
+/// Makes the TLS section of a valid config.
+///
+/// `legacy` is the path stem of `admin.tls_cert_path` and `admin.tls_key_path`, if the config
+/// has them. `pick` selects the mode: 0 is no explicit mode, 1 is `file`, 2 is `self-signed`,
+/// 3 is `local-ca`. The function changes the choice where it would give an invalid config.
+fn make_tls(pick: u8, legacy: bool, stem: &str, names: Vec<String>) -> Tls {
+    let mut mode = match pick % 4 {
+        0 => None,
+        1 => Some(TlsMode::File),
+        2 => Some(TlsMode::SelfSigned),
+        _ => Some(TlsMode::LocalCa),
+    };
+    // The paths of an older file mean mode `file`.
+    if legacy && mode.is_some() {
+        mode = Some(TlsMode::File);
+    }
+    let own_paths = !legacy && mode == Some(TlsMode::File);
+    Tls {
+        mode,
+        cert_path: own_paths.then(|| format!("{stem}.pem")),
+        key_path: own_paths.then(|| format!("{stem}.key.pem")),
+        names,
     }
 }
 
@@ -944,6 +1116,7 @@ prop_compose! {
         forwards in prop::collection::vec((any::<bool>(), cidr(), ipv4(), prop::option::of(domain())), 0..3),
         admin in (any::<bool>(), any::<bool>(), 1u32.., prop::option::of("[a-z/]{1,20}"),
                   prop::collection::btree_set("[a-z]{1,8}", 0..3)),
+        tls_in in (any::<u8>(), "[a-z/]{1,20}", prop::collection::btree_set(tls_name(), 0..3)),
     ) -> Config {
         let (min_ttl, max_ttl) = (ttl_a.min(ttl_b), ttl_a.max(ttl_b));
         let mut group_names = vec![DEFAULT_GROUP.to_owned()];
@@ -987,6 +1160,13 @@ prop_compose! {
             .map(|(id, (comment, g))| Client { id: id.clone(), groups: pick(g), comment: comment.clone() })
             .collect();
         let (pw, totp, session_ttl_seconds, tls, tokens) = admin;
+        let (tls_pick, tls_stem, tls_names) = tls_in;
+        let tls_section = make_tls(
+            tls_pick,
+            tls.is_some(),
+            &tls_stem,
+            tls_names.into_iter().collect(),
+        );
         Config {
             config_version: CURRENT_VERSION,
             server,
@@ -1037,6 +1217,7 @@ prop_compose! {
                     .map(|name| ApiToken { name, hash: format!("sha256:{}", "0".repeat(64)) })
                     .collect(),
             },
+            tls: tls_section,
         }
     }
 }
@@ -1098,6 +1279,9 @@ fn wild_config() -> impl Strategy<Value = Config> {
                 domain: Some(next()),
             });
             c.admin.password_hash = next();
+            c.tls.names.push(next());
+            c.tls.cert_path = Some(next());
+            c.server.data_dir = next();
             c
         })
 }

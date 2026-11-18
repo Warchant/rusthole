@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-use super::{AUTO, Admin, BlockingMode, CURRENT_VERSION, Config, DEFAULT_GROUP, RuleKind};
+use super::{AUTO, Admin, BlockingMode, CURRENT_VERSION, Config, DEFAULT_GROUP, RuleKind, TlsMode};
 use crate::domain::DomainName;
 use crate::net::{Cidr, ClientId, Transport, UpstreamHost, UpstreamUrl, parse_socket_addr};
 use crate::pattern::compile_rule_regex;
@@ -17,6 +17,8 @@ pub const MAX_CACHE_ENTRIES: u32 = 1_000_000;
 pub const MAX_RECENT_QUERIES: u32 = 1_000_000;
 /// Highest allowed upstream timeout, in milliseconds.
 pub const MAX_UPSTREAM_TIMEOUT_MS: u32 = 60_000;
+/// Highest number of host names in `tls.names`.
+pub const MAX_TLS_NAMES: usize = 32;
 /// The issue text for an IPv6 transport value (amendment A11).
 pub const IPV6_NOT_SUPPORTED: &str = "IPv6 is not supported in v1";
 
@@ -69,6 +71,7 @@ pub(super) fn validate(config: &Config) -> Vec<ConfigIssue> {
     check_clients(config, &groups, &mut out);
     check_local_dns(config, &mut out);
     check_admin(&config.admin, &mut out);
+    check_tls(config, &mut out);
     out.0
 }
 
@@ -505,4 +508,109 @@ fn check_admin(admin: &Admin, out: &mut Issues) {
             );
         }
     }
+}
+
+fn check_tls(config: &Config, out: &mut Issues) {
+    let data_dir = &config.server.data_dir;
+    if data_dir.trim().is_empty() {
+        out.add("server.data_dir", "the data directory is empty");
+    } else if data_dir.contains('\0') {
+        out.add("server.data_dir", "the path contains a NUL character");
+    }
+    let tls = &config.tls;
+    if tls.cert_path.is_some() != tls.key_path.is_some() {
+        out.add(
+            "tls.cert_path",
+            "set both cert_path and key_path, or neither",
+        );
+    }
+    let new_paths = tls.cert_path.is_some() || tls.key_path.is_some();
+    let old_paths = config.admin.tls_cert_path.is_some() || config.admin.tls_key_path.is_some();
+    if new_paths && old_paths {
+        out.add(
+            "tls.cert_path",
+            "admin.tls_cert_path and tls.cert_path are both set; use only tls.cert_path and \
+             tls.key_path",
+        );
+    }
+    let mode = config.tls_mode();
+    match mode {
+        TlsMode::File if config.tls_files().is_none() => {
+            out.add(
+                "tls.mode",
+                "mode \"file\" needs tls.cert_path and tls.key_path",
+            );
+        }
+        // Without an explicit mode, a half pair of paths gives self-signed. The pair check
+        // above reports that pair already.
+        TlsMode::SelfSigned | TlsMode::LocalCa
+            if config.tls.mode.is_some() && (new_paths || old_paths) =>
+        {
+            out.add(
+                "tls.mode",
+                "the certificate and key paths are only for mode \"file\"",
+            );
+        }
+        _ => {}
+    }
+    // Amendment A6 (DoH needs a trusted certificate) is not checked here: a config_version 1
+    // file with DoH on and no TLS setup was valid before the [tls] section, and it must stay
+    // valid. The DoH server config builder in rusthole-tls refuses mode "self-signed".
+    if tls.names.len() > MAX_TLS_NAMES {
+        out.add(
+            "tls.names",
+            format!("give at most {MAX_TLS_NAMES} host names"),
+        );
+    }
+    let mut seen = HashSet::new();
+    for (i, name) in tls.names.iter().enumerate() {
+        let path = format!("tls.names[{i}]");
+        if let Some(problem) = tls_name_problem(name) {
+            out.add(path, problem);
+            continue;
+        }
+        if let Ok(d) = DomainName::parse(name)
+            && !seen.insert(d)
+        {
+            out.add(path, "this name is used twice");
+        }
+    }
+}
+
+/// Tells why `name` cannot be a host name in a TLS certificate, or gives `None` when it can.
+///
+/// The rules are the webpki rules for a DNS name in a certificate: ASCII letters, digits and
+/// '-' only (RFC 952, no '_'), labels of 1 to 63 characters that do not start or end with
+/// '-', at most 253 characters, and a last label that is not all digits. One trailing '.' is
+/// permitted. A TLS client refuses a certificate with a name that breaks a rule. A local CA
+/// with such a name in its name constraints is refused for every name. rusthole-tls also
+/// uses this function, for settings that did not go through [`Config::validate`].
+pub fn tls_name_problem(name: &str) -> Option<String> {
+    if name.parse::<IpAddr>().is_ok() {
+        return Some(
+            "give a host name, not an IP address; rusthole adds the local IPv4 addresses"
+                .to_owned(),
+        );
+    }
+    // DomainName::parse refuses an empty name, an empty label, a label longer than 63
+    // characters, a name longer than 253 characters and a character that is not a letter,
+    // a digit, '-' or '_'.
+    if let Err(e) = DomainName::parse(name) {
+        return Some(e.to_string());
+    }
+    let trimmed = name.strip_suffix('.').unwrap_or(name);
+    if trimmed.contains('_') {
+        return Some("a host name cannot contain '_'".to_owned());
+    }
+    if trimmed
+        .split('.')
+        .any(|label| label.starts_with('-') || label.ends_with('-'))
+    {
+        return Some("a label of a host name cannot start or end with '-'".to_owned());
+    }
+    let last = trimmed.rsplit('.').next().unwrap_or(trimmed);
+    if last.bytes().all(|b| b.is_ascii_digit()) {
+        return Some("the last label of a host name cannot be all digits".to_owned());
+    }
+    None
 }

@@ -1,0 +1,32 @@
+[package]
+name = "rusthole-tls"
+description = "TLS for rusthole: certificate from a file, self-signed, or a local CA. rustls with ring."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+arc-swap = { workspace = true }
+rcgen = { workspace = true }
+ring = { workspace = true }
+rusthole-core = { workspace = true }
+rustls = { workspace = true }
+rustls-native-certs = { workspace = true }
+rustls-pki-types = { workspace = true }
+tempfile = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true }
+tracing = { workspace = true }
+webpki-roots = { workspace = true }
+x509-parser = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+tokio = { workspace = true, features = ["io-util", "macros", "rt", "time"] }
+tokio-rustls = { workspace = true }
+
+[lints]
+workspace = true

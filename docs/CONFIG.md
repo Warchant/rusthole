@@ -43,7 +43,8 @@ flowchart LR
 |---|---|---|---|
 | `dns_listen` | list of text | `["auto"]` | DNS addresses (UDP and TCP). `"auto"` means each IPv4 address on each local interface. Or give IPv4 addresses. `"auto"` cannot be mixed with addresses. |
 | `dns_port` | integer | `53` | DNS port. 0 is not allowed. |
-| `doh.enabled` | bool | `false` | DNS-over-HTTPS listener (`/dns-query`). DoH clients need a certificate that they trust, so turn it on after you set up TLS. |
+| `data_dir` | text | `/var/lib/rusthole` | Data directory: downloaded lists, the query database and the TLS files (in `tls/`). It must not be empty. A Windows build is for development only; its default is `rusthole-data` in the working directory. |
+| `doh.enabled` | bool | `false` | DNS-over-HTTPS listener (`/dns-query`). DoH clients need a certificate that they trust, so turn it on after you set up TLS. The DoH listener needs `tls.mode` `file` or `local-ca`: the DoH TLS setup refuses `self-signed`. `check-config` does not report this, because a config_version 1 file with DoH on was valid before the `[tls]` section. |
 | `doh.listen` | list of text | `["auto"]` | Like `dns_listen`. |
 | `doh.port` | integer | `443` | DoH port. It must not be `dns_port` when DoH is on, because DNS also uses TCP. |
 | `admin.enabled` | bool | `true` | Admin UI and REST API (HTTPS). |
@@ -168,12 +169,31 @@ A client with no `[[clients]]` entry is in the group `default`.
 | `password_hash` | text | empty | Argon2id PHC string (`$argon2id$v=19$m=...,t=...,p=...$SALT$HASH`). Empty means that no login is possible. Set it with `rusthole passwd`. |
 | `totp_secret` | text | empty | Base32 TOTP secret (A-Z, 2-7, at least 16 characters). Empty turns TOTP off. |
 | `session_ttl_seconds` | integer | `28800` | Session lifetime. More than 0. |
-| `tls_cert_path` | text | none | TLS certificate chain (PEM). Without it, rusthole makes a self-signed certificate for the admin UI. |
-| `tls_key_path` | text | none | TLS private key (PEM). Set both paths or neither. |
+| `tls_cert_path` | text | none | The older form of `tls.cert_path`. It stays valid: with both admin paths and no `tls.mode`, the mode is `file`. Do not set it together with `tls.cert_path`. |
+| `tls_key_path` | text | none | The older form of `tls.key_path`. Set both paths or neither. |
 | `api_tokens[].name` | text | | A unique name. It must not be empty. |
 | `api_tokens[].hash` | text | | Hash of the token: an Argon2id PHC string, or `sha256:` and 64 hex digits. |
 
 rusthole never shows a secret in a log, an error message or the API.
+
+### `[tls]`
+
+One certificate serves the admin listener and the DoH listener. [TLS.md](TLS.md) explains the
+modes and how to install the local CA on a device.
+
+| Field | Type | Default | Meaning |
+|---|---|---|---|
+| `mode` | text | see the meaning | `file`: a certificate and a key from PEM files. `self-signed`: rusthole makes a self-signed certificate (admin UI only). `local-ca`: rusthole makes a local certificate authority and a server certificate; you install the CA on your devices. Without `mode`, the mode is `file` when the config gives a certificate and a key (here or in `admin`), otherwise `self-signed`. |
+| `cert_path` | text | none | Certificate chain (PEM), the server certificate first. Only for mode `file`. |
+| `key_path` | text | none | Private key (PEM). Only for mode `file`. Set both paths or neither. |
+| `names` | list of host names | `[]` | Host names in a certificate that rusthole makes. rusthole also adds `localhost`, `127.0.0.1` and each local IPv4 address. At most 32 names. An IP address is not allowed here. A name has only letters, digits and `-` (no `_`), no label starts or ends with `-`, and the last label is not all digits, because TLS clients refuse other names. |
+
+Rules:
+
+- DoH clients accept only a certificate that they trust (amendment A6). The DoH listener
+  needs mode `file` or `local-ca`. The DoH TLS setup refuses mode `self-signed`.
+  `check-config` does not report this, so that older config_version 1 files stay valid.
+- rusthole keeps the files that it makes in `<data_dir>/tls/`. A private key has mode 0600.
 
 ## Full example
 
@@ -189,6 +209,7 @@ config_version = 1
 [server]
 dns_listen = ["auto"]
 dns_port = 53
+data_dir = "/var/lib/rusthole"
 
 [server.doh]
 enabled = false
@@ -334,10 +355,16 @@ domain = "lan"
 # Set the password with `rusthole passwd`. With no hash, no login is possible.
 # password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
 session_ttl_seconds = 28800
-# tls_cert_path = "/etc/rusthole/cert.pem"
-# tls_key_path = "/etc/rusthole/key.pem"
 
 [[admin.api_tokens]]
 name = "monitoring"
 hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]
 ```

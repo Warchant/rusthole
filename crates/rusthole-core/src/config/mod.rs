@@ -24,7 +24,8 @@ use serde::{Deserialize, Serialize};
 
 pub use validate::{
     ConfigIssue, IPV6_NOT_SUPPORTED, MAX_CACHE_ENTRIES, MAX_GROUP_NAME_LEN, MAX_RECENT_QUERIES,
-    MAX_UPSTREAM_TIMEOUT_MS, check_list_url, is_argon2id_phc, is_valid_group_name,
+    MAX_TLS_NAMES, MAX_UPSTREAM_TIMEOUT_MS, check_list_url, is_argon2id_phc, is_valid_group_name,
+    tls_name_problem,
 };
 
 /// The config version that this build reads and writes.
@@ -95,6 +96,9 @@ pub struct Config {
     /// Admin login and API tokens.
     #[serde(default)]
     pub admin: Admin,
+    /// TLS certificate for the admin listener and the DoH listener.
+    #[serde(default)]
+    pub tls: Tls,
 }
 
 impl Default for Config {
@@ -114,6 +118,7 @@ impl Default for Config {
             clients: Vec::new(),
             local_dns: LocalDns::default(),
             admin: Admin::default(),
+            tls: Tls::default(),
         }
     }
 }
@@ -155,8 +160,8 @@ impl Config {
     /// The function does not change a value that is not a valid domain name;
     /// [`Config::validate`] reports it. The fields are: exact rule values,
     /// `blocking.special_domains`, local record names, CNAME names and targets, conditional
-    /// forwarding domains, and client IDs that are host names. Regex rules and URLs do not
-    /// change. A second call changes nothing.
+    /// forwarding domains, client IDs that are host names, and `tls.names`. Regex rules and
+    /// URLs do not change. A second call changes nothing.
     pub fn normalize(&mut self) {
         for rule in &mut self.rules {
             if rule.kind == RuleKind::Exact {
@@ -183,6 +188,9 @@ impl Config {
                 c.id = id.to_string();
             }
         }
+        for n in &mut self.tls.names {
+            normalize_domain(n);
+        }
     }
 
     /// Writes the config as TOML text. [`Config::from_toml_str`] reads it back to an equal
@@ -194,6 +202,34 @@ impl Config {
     /// Returns every problem in the config. An empty list means that the config is valid.
     pub fn validate(&self) -> Vec<ConfigIssue> {
         validate::validate(self)
+    }
+
+    /// Returns the certificate and key paths for TLS mode `file`, if the config gives them.
+    ///
+    /// `tls.cert_path` and `tls.key_path` come first. The older fields `admin.tls_cert_path`
+    /// and `admin.tls_key_path` are the second source, so that files from before the `[tls]`
+    /// section keep their meaning. The function gives a pair only when both paths of one
+    /// source are set.
+    pub fn tls_files(&self) -> Option<(&str, &str)> {
+        match (&self.tls.cert_path, &self.tls.key_path) {
+            (Some(c), Some(k)) => Some((c.as_str(), k.as_str())),
+            _ => match (&self.admin.tls_cert_path, &self.admin.tls_key_path) {
+                (Some(c), Some(k)) => Some((c.as_str(), k.as_str())),
+                _ => None,
+            },
+        }
+    }
+
+    /// Returns the TLS mode that rusthole uses.
+    ///
+    /// An explicit `tls.mode` wins. Without it, the mode is `file` when the config gives a
+    /// certificate and a key (see [`Config::tls_files`]), and `self-signed` otherwise.
+    pub fn tls_mode(&self) -> TlsMode {
+        self.tls.mode.unwrap_or(if self.tls_files().is_some() {
+            TlsMode::File
+        } else {
+            TlsMode::SelfSigned
+        })
     }
 }
 
@@ -306,7 +342,20 @@ pub struct Server {
     pub doh: DohListener,
     /// Admin UI and REST API listener (HTTPS).
     pub admin: AdminListener,
+    /// The data directory: downloaded lists, the query database and the TLS files
+    /// (decision D2). Default: [`DEFAULT_DATA_DIR`].
+    pub data_dir: String,
 }
+
+/// The default data directory: `/var/lib/rusthole`.
+///
+/// Windows builds are for development only (PLAN.md section 7). They use `rusthole-data` in
+/// the working directory, because that directory needs no administrator rights.
+pub const DEFAULT_DATA_DIR: &str = if cfg!(windows) {
+    "rusthole-data"
+} else {
+    "/var/lib/rusthole"
+};
 
 impl Default for Server {
     fn default() -> Self {
@@ -315,6 +364,7 @@ impl Default for Server {
             dns_port: 53,
             doh: DohListener::default(),
             admin: AdminListener::default(),
+            data_dir: DEFAULT_DATA_DIR.to_owned(),
         }
     }
 }
@@ -757,11 +807,11 @@ pub struct Admin {
     pub totp_secret: String,
     /// Session lifetime in seconds. Default: 28800 (8 hours).
     pub session_ttl_seconds: u32,
-    /// Path to the TLS certificate chain (PEM). Without it, rusthole makes a self-signed
-    /// certificate for the admin UI.
+    /// Path to the TLS certificate chain (PEM). This is the older form of `tls.cert_path`.
+    /// It stays valid: with both admin paths set and no `tls.mode`, the mode is `file`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tls_cert_path: Option<String>,
-    /// Path to the TLS private key (PEM).
+    /// Path to the TLS private key (PEM). This is the older form of `tls.key_path`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tls_key_path: Option<String>,
     /// API tokens. rusthole keeps only a hash of each token.
@@ -819,4 +869,38 @@ impl fmt::Debug for ApiToken {
             .field("hash", &redact(&self.hash))
             .finish()
     }
+}
+
+/// Where the TLS certificate comes from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum TlsMode {
+    /// A certificate chain and a key from PEM files (`tls.cert_path`, `tls.key_path`).
+    File,
+    /// rusthole makes a self-signed certificate. Browsers show a warning. This mode is for
+    /// the admin UI only: DoH clients do not accept it (amendment A6).
+    SelfSigned,
+    /// rusthole makes a local certificate authority (CA) and a server certificate that the
+    /// CA signs. You install the CA certificate on your devices (amendment A6).
+    LocalCa,
+}
+
+/// TLS settings for the admin listener and the DoH listener. docs/TLS.md has the details.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(deny_unknown_fields, default)]
+pub struct Tls {
+    /// `file`, `self-signed` or `local-ca`. Default: `file` when the config gives a
+    /// certificate and a key, otherwise `self-signed`. See [`Config::tls_mode`].
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mode: Option<TlsMode>,
+    /// Certificate chain (PEM) for mode `file`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cert_path: Option<String>,
+    /// Private key (PEM) for mode `file`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key_path: Option<String>,
+    /// Host names for a certificate that rusthole makes (modes `self-signed` and
+    /// `local-ca`). rusthole also adds `localhost`, `127.0.0.1` and each local IPv4 address.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub names: Vec<String>,
 }

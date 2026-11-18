@@ -1047,6 +1047,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "psl"
+version = "2.1.257"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e08d72dd5047173b22310be0c2a8b480e30f611545de2dbbd3a94ace2de4d2b8"
+dependencies = [
+ "psl-types",
+]
+
+[[package]]
+name = "psl-types"
+version = "2.0.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33cb294fe86a74cbcf50d4445b37da762029549ebeea341421c7c70370f86cac"
+
+[[package]]
 name = "quick-error"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1190,6 +1205,7 @@ dependencies = [
  "rusthole-core",
  "rusthole-dns",
  "rusthole-import",
+ "rusthole-store",
  "tempfile",
  "tokio",
  "tracing",
@@ -1204,6 +1220,7 @@ dependencies = [
  "lru",
  "peak_alloc",
  "proptest",
+ "psl",
  "regex",
  "serde",
  "siphasher",
@@ -1242,6 +1259,15 @@ dependencies = [
 [[package]]
 name = "rusthole-store"
 version = "0.1.0"
+dependencies = [
+ "parking_lot",
+ "proptest",
+ "rusqlite",
+ "rusthole-core",
+ "tempfile",
+ "thiserror",
+ "tracing",
+]
 
 [[package]]
 name = "rusthole-tls"

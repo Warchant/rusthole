@@ -11,6 +11,7 @@ publish.workspace = true
 [dependencies]
 idna = { workspace = true }
 lru = { workspace = true }
+psl = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true }
 siphasher = { workspace = true }

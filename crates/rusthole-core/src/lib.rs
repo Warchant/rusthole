@@ -13,6 +13,7 @@ pub mod net;
 pub mod pattern;
 pub mod policy;
 pub mod ratelimit;
+pub mod stats;
 pub mod upstream_health;
 
 pub use config::{Config, ConfigError, ConfigIssue};

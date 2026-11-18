@@ -88,3 +88,10 @@ path = "fuzz_targets/pem_load.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "stats_events"
+path = "fuzz_targets/stats_events.rs"
+test = false
+doc = false
+bench = false

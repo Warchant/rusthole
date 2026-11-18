@@ -164,6 +164,27 @@ Open:
    The test used real sleeps (1000 ms hook, 300 ms limit), so the result depended on the load
    of the machine. Now the build loop asks again for such a build. The test uses a paused tokio
    clock and a gate, and it moves the clock past both limits on purpose.
+5. OPEN (2026-11-18): final review items that are not fixed yet
+   (see `.claude/review/FINAL-REVIEW.md`). Fix them in a later version.
+   - m20: docs/API.md lists the reason `local:{id}`, but the server never sends it.
+   - m21: the UI cannot edit a forwarding rule with a CIDR that is not /8, /16, /24 or /32.
+   - m22: temp files and the files of removed lists stay in the data directory.
+   - m23: queries before NTP sync give a wrong client `first_seen`.
+   - m39: no test checks the peak memory of a list refresh (A12).
+   - m1 rest: the query that finds the last certificate date error still gets SERVFAIL.
+     A date error on one bootstrap address followed by an I/O error on the next address
+     does not count as a date error. One WARN rate limit covers all upstreams.
+   - M2 rest: the certificate reload uses a scan each minute, not an interface event.
+   - m13 rest: if the auth lock times out during a credential change, old sessions stay
+     (logged at ERROR).
+   - m14 rest: no file mode warning after a config reload at run time.
+   - m16 rest: the admin listener does not bind again after an interface change.
+   - `cache.max_bytes` is in the config file only, not in the settings API or the UI.
+   - docs/INSTALL.md describes only the build-time clock rule, not the new date-error fallback.
+   - Docs: amendment A4 still says that each CNAME target goes through the policy.
+     The Pi-hole stop rule (owner decision) replaces it; see docs/POLICY.md.
+   - CI: the aarch64 qemu check, the release gates and the new install-test steps run first
+     in CI. No local run of them was possible.
 
 ## 7. Assumptions
 

@@ -1,0 +1,104 @@
+#![no_main]
+//! Fuzz the DNS request pipeline with a fake upstream: the input holds a client query and
+//! an upstream reply. Nothing may panic. Each reply has QR=1, the client ID, and a size
+//! within the limit of the transport.
+//!
+//! Input layout: byte 0 = flags (bit 0: TCP, bit 1: off-net client, bit 2: no upstream
+//! answer), bytes 1..3 = query length (big endian), then the query, then the upstream reply.
+
+use std::net::SocketAddr;
+use std::sync::Arc;
+
+use libfuzzer_sys::fuzz_target;
+use rusthole_core::acl::Acl;
+use rusthole_core::net::Cidr;
+use rusthole_dns::wire::{self, RawHeader};
+use rusthole_dns::{
+    AllowAll, ClientTransport, Clock, Front, Handler, HandlerSettings, NoopObserver, Reply,
+    UpstreamAnswer, UpstreamError,
+};
+
+fn check(reply: &Reply, query: &[u8], max_len: usize) {
+    assert!(reply.bytes.len() <= max_len, "reply too long");
+    let h = RawHeader::parse(&reply.bytes).expect("a reply has a header");
+    let q = RawHeader::parse(query).expect("only a query with a header gets a reply");
+    assert!(h.qr, "a reply has QR=1");
+    assert_eq!(h.id, q.id, "a reply has the client ID");
+}
+
+fuzz_target!(|data: &[u8]| {
+    let Some((&flags, rest)) = data.split_first() else {
+        return;
+    };
+    let Some(len_bytes) = rest.get(..2) else {
+        return;
+    };
+    let qlen = usize::from(u16::from_be_bytes([len_bytes[0], len_bytes[1]]));
+    let rest = &rest[2..];
+    let query = &rest[..qlen.min(rest.len())];
+    let upstream = &rest[qlen.min(rest.len())..];
+
+    let transport = if flags & 1 != 0 {
+        ClientTransport::Tcp
+    } else {
+        ClientTransport::Udp
+    };
+    let client: SocketAddr = if flags & 2 != 0 {
+        "198.51.100.7:5353".parse().unwrap()
+    } else {
+        "192.0.2.7:5353".parse().unwrap()
+    };
+    let settings = HandlerSettings {
+        cache_entries: 16,
+        rate_max_clients: 16,
+        ..HandlerSettings::default()
+    };
+    let acl = Acl::build(false, &[], &[Cidr::parse("192.0.2.0/24").unwrap()]);
+    let handler = Handler::new(
+        &settings,
+        acl,
+        Arc::new(AllowAll),
+        Arc::new(NoopObserver),
+        Clock::new(),
+    );
+    // The size limit of a reply from `front`. A cache hit is a full answer, so its UDP limit
+    // is the client EDNS size (512 without EDNS). 1232 is only for a header-only reply to a
+    // query that does not parse.
+    let front_max = match transport {
+        ClientTransport::Udp => wire::parse_request(query)
+            .map_or(usize::from(wire::MAX_UDP_PAYLOAD), |(req, _)| {
+                req.max_udp_len()
+            }),
+        ClientTransport::Tcp => wire::MAX_TCP_MESSAGE,
+    };
+
+    // Two rounds: the second one can be a cache hit.
+    for _ in 0..2 {
+        match handler.front(query, client, transport) {
+            Front::Drop => {}
+            Front::Reply(r) => check(&r, query, front_max),
+            Front::Resolve(p) => {
+                let max_len = match transport {
+                    ClientTransport::Udp => p.request().max_udp_len(),
+                    ClientTransport::Tcp => wire::MAX_TCP_MESSAGE,
+                };
+                // The fake upstream uses its own ID, so the ID check passes and the
+                // question check and the answer handling run.
+                let outcome = match RawHeader::parse(upstream) {
+                    Some(h) if flags & 4 == 0 => {
+                        match wire::check_upstream_reply(upstream, h.id, &p.request().query) {
+                            Ok(message) => Ok(UpstreamAnswer {
+                                message,
+                                upstream: "192.0.2.53:53".parse().unwrap(),
+                            }),
+                            Err(_) => Err(UpstreamError::BadReply),
+                        }
+                    }
+                    _ => Err(UpstreamError::Timeout),
+                };
+                let r = handler.complete(&p, outcome);
+                check(&r, query, max_len);
+            }
+        }
+    }
+});

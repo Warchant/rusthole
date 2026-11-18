@@ -1,6 +1,7 @@
 //! rusthole command-line entry point.
 
 mod fsutil;
+mod run;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -69,7 +70,7 @@ fn run(cli: &Cli) -> anyhow::Result<ExitCode> {
     // The report and the issues are the output of the command, so they go to stdout.
     let mut out = std::io::stdout().lock();
     match &cli.command {
-        Command::Run => anyhow::bail!("`run` is not available yet (part P2)"),
+        Command::Run => run::run(&cli.config, &mut out),
         Command::CheckConfig => check_config(&cli.config, &mut out),
         Command::Import {
             teleporter,
@@ -82,6 +83,16 @@ fn run(cli: &Cli) -> anyhow::Result<ExitCode> {
 
 /// Loads and validates a config file. Prints each issue.
 fn check_config(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
+    if load_config(path, out)?.is_none() {
+        return Ok(ExitCode::FAILURE);
+    }
+    writeln!(out, "{}: config is valid", path.display())?;
+    Ok(ExitCode::SUCCESS)
+}
+
+/// Reads, parses and validates a config file. Prints each problem to `out` and returns
+/// `None` when the config has a problem.
+fn load_config(path: &Path, out: &mut impl Write) -> anyhow::Result<Option<Config>> {
     let bytes = fsutil::read_limited(path, MAX_CONFIG_BYTES)
         .with_context(|| format!("cannot read {}", path.display()))?;
     let text = String::from_utf8(bytes)
@@ -90,19 +101,18 @@ fn check_config(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
         Ok(c) => c,
         Err(e) => {
             writeln!(out, "{}: {e}", path.display())?;
-            return Ok(ExitCode::FAILURE);
+            return Ok(None);
         }
     };
     let issues = config.validate();
     if issues.is_empty() {
-        writeln!(out, "{}: config is valid", path.display())?;
-        return Ok(ExitCode::SUCCESS);
+        return Ok(Some(config));
     }
     for issue in &issues {
         writeln!(out, "{}: {issue}", path.display())?;
     }
     writeln!(out, "{} problem(s) found", issues.len())?;
-    Ok(ExitCode::FAILURE)
+    Ok(None)
 }
 
 /// Header of an imported config file.

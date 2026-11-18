@@ -90,9 +90,26 @@ Static musl build (amendment A2). The script installs zig and cargo-zigbuild on 
 wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
-Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`.
+Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `dns_request`,
+`cache_ops`.
 
 Temporary files go to `D:\tmp`, not to drive C.
+
+## Network in tests (no Windows firewall prompt)
+
+On Windows, a program that listens on a non-loopback address opens the Windows Defender
+Firewall prompt. The owner does not want this prompt. So:
+
+1. Tests bind only to `127.0.0.1` with port 0 (the OS picks a free port). Never bind
+   `0.0.0.0` or a LAN address in a test.
+2. Interface auto-detect in tests uses a fake interface list (loopback only).
+3. A socket that talks to a loopback upstream binds to `127.0.0.1:0`, not `0.0.0.0:0`.
+   Production code picks the bind address from the upstream address.
+4. On an OS other than Linux, `server.dns_listen = "auto"` binds `127.0.0.1` only
+   (development mode), and logs this at INFO.
+5. Run `rusthole run` with real interfaces only in WSL or on Linux, never on Windows.
+   On Windows, manual runs use `127.0.0.1` listen addresses.
+6. A test that must bind a non-loopback address is `#[cfg(target_os = "linux")]`.
 
 ## Build folders
 

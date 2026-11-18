@@ -10,6 +10,7 @@ publish.workspace = true
 
 [dependencies]
 idna = { workspace = true }
+lru = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }

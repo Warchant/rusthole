@@ -115,6 +115,10 @@ flowchart LR
 | `adlists[].groups` | list of group names | `["default"]` | The groups that use the list. `[]` means no group. |
 | `adlists[].comment` | text | none | Free text. |
 
+A list can use the hosts format, the domain-only format or the ABP subset (`||name^`), also
+mixed. rusthole finds the format of each line. An `@@||name^` entry allows a name only in an
+allow-kind list. [POLICY.md](POLICY.md) has the details and the decision order.
+
 ### `[[rules]]`
 
 | Field | Type | Default | Meaning |

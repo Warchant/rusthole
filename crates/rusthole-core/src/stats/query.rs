@@ -249,12 +249,6 @@ impl RangeSpec {
         Self::with_buckets(range, now, range.bucket_seconds(), range.buckets())
     }
 
-    /// The 24 h range with 1-hour buckets. A timeline with a client or name filter uses
-    /// it, because the database keeps these counts by hour only.
-    pub fn day_by_hour(now: i64) -> Self {
-        Self::with_buckets(Range::Day, now, HOUR_SECONDS, 24)
-    }
-
     fn with_buckets(range: Range, now: i64, bucket_seconds: i64, buckets: usize) -> Self {
         let n = i64::try_from(buckets).unwrap_or(1);
         let last = now.div_euclid(bucket_seconds);

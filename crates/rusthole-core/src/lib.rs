@@ -4,6 +4,7 @@
 //! input. This makes all policy testable with property tests.
 
 pub mod acl;
+pub mod ban;
 pub mod blocking_state;
 pub mod cache;
 pub mod clients;
@@ -16,6 +17,7 @@ pub mod pattern;
 pub mod policy;
 pub mod ratelimit;
 pub mod refresh;
+pub mod session;
 pub mod stats;
 pub mod upstream_health;
 

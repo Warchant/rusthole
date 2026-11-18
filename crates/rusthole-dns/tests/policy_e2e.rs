@@ -88,6 +88,7 @@ impl Fake {
 
 fn group(name: &str) -> Group {
     Group {
+        id: None,
         name: name.to_owned(),
         enabled: true,
         comment: None,
@@ -96,6 +97,7 @@ fn group(name: &str) -> Group {
 
 fn client(id: &str, groups: &[&str]) -> Client {
     Client {
+        uid: None,
         id: id.to_owned(),
         groups: groups.iter().map(|g| (*g).to_owned()).collect(),
         comment: None,
@@ -118,6 +120,9 @@ fn base_config(cf_server: SocketAddr) -> Config {
         comment: None,
     }];
     cfg.rules = vec![Rule {
+        id: None,
+        created_at: None,
+        updated_at: None,
         kind: RuleKind::Exact,
         action: RuleAction::Deny,
         value: "nas.lan".to_owned(),
@@ -126,11 +131,16 @@ fn base_config(cf_server: SocketAddr) -> Config {
         comment: None,
     }];
     cfg.local_dns.records = vec![LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "nas.lan".to_owned(),
         record_type: CfgType::A,
         value: "192.0.2.10".to_owned(),
     }];
     cfg.local_dns.conditional_forwarding = vec![ConditionalForward {
+        id: None,
+        comment: None,
         enabled: true,
         cidr: "198.51.100.0/24".to_owned(),
         server: cf_server.to_string(),
@@ -452,5 +462,73 @@ async fn toggle_off_then_timer_ends() {
         &ask(h.addr, "blocked.example.", RecordType::A).await
     ));
     assert!(blocked(&ask(h.addr, "cname.example.", RecordType::A).await));
+    h.stop().await;
+}
+
+/// Part P5: a config change applies live. A new local record answers, a new client entry
+/// gets its group, a new `acl.allow` network is in the ACL, and a listener change asks for a
+/// restart.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn config_changes_apply_live() {
+    let up = fake(1).await;
+    let cf = fake(50).await;
+    let cfg = base_config(cf.addr);
+    let h = harness(&cfg, &up, Arc::new(StaticNeighbors::default())).await;
+    let (mut old, _) = DnsSettings::from_config(&cfg).unwrap();
+    old.listen = ListenMode::Addrs(vec![IpAddr::V4(LOCALHOST)]);
+    old.port = 0;
+    old.pool.servers = vec![UpstreamServer {
+        addr: up.addr,
+        proto: UpstreamProto::Udp,
+    }];
+    old.pool.timeout = Duration::from_secs(1);
+
+    // Before: blocked for the default group; no record for new.lan.
+    let m = ask(h.addr, "blocked.example.", RecordType::A).await;
+    assert_eq!(data(&m), vec![RData::A(A(Ipv4Addr::UNSPECIFIED))]);
+    let m = ask(h.addr, "new.lan.", RecordType::A).await;
+    assert!(!m.metadata.authoritative);
+
+    let mut cfg2 = cfg.clone();
+    cfg2.local_dns.records.push(LocalRecord {
+        id: None,
+        name: "new.lan".to_owned(),
+        record_type: rusthole_core::config::RecordType::A,
+        value: "192.0.2.77".to_owned(),
+        enabled: true,
+        comment: None,
+    });
+    cfg2.clients = vec![client("127.0.0.1", &["kids"])];
+    cfg2.acl.allow = vec!["198.51.100.0/24".to_owned()];
+    assert!(cfg2.validate().is_empty(), "{:?}", cfg2.validate());
+    let (mut new, _) = DnsSettings::from_config(&cfg2).unwrap();
+    new.listen = old.listen.clone();
+    new.port = old.port;
+    new.pool = old.pool.clone();
+    assert!(
+        h.filter
+            .clients()
+            .set_config(ClientTable::from_config(&cfg2).0, Arc::clone(&new.local))
+    );
+    assert!(
+        !h.server.apply_live(&old, &new),
+        "no restart for these changes"
+    );
+
+    let m = ask(h.addr, "new.lan.", RecordType::A).await;
+    assert!(m.metadata.authoritative);
+    assert_eq!(data(&m), vec![RData::A(A(Ipv4Addr::new(192, 0, 2, 77)))]);
+    // 127.0.0.1 is in `kids` now: no list applies.
+    let m = ask(h.addr, "blocked.example.", RecordType::A).await;
+    assert_eq!(data(&m), vec![RData::A(A(Ipv4Addr::new(192, 0, 2, 1)))]);
+    assert_eq!(h.events.last().policy.groups.as_ref(), ["kids".to_owned()]);
+    let acl = h.server.acl().unwrap();
+    assert!(acl.allows(IpAddr::V4(Ipv4Addr::new(198, 51, 100, 9))));
+    assert!(acl.allows(IpAddr::V4(LOCALHOST)));
+
+    // A listener change needs a restart.
+    let mut moved = new.clone();
+    moved.port = 5300;
+    assert!(h.server.apply_live(&new, &moved));
     h.stop().await;
 }

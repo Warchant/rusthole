@@ -275,8 +275,9 @@ export interface Rule {
   enabled: boolean;
   groups: number[];
   comment: string;
-  created_at: Timestamp;
-  updated_at: Timestamp;
+  /** null for a rule that the API did not make (for example from an import). */
+  created_at: Timestamp | null;
+  updated_at: Timestamp | null;
 }
 
 export type RuleInput = Pick<Rule, 'kind' | 'action' | 'pattern' | 'enabled' | 'groups' | 'comment'>;
@@ -359,7 +360,7 @@ export interface ApiToken {
   id: number;
   name: string;
   prefix: string;
-  created_at: Timestamp;
+  created_at: Timestamp | null;
   last_used_at: Timestamp | null;
   last_used_ip: string | null;
 }
@@ -381,7 +382,7 @@ export interface TotpSetup {
 
 // Section 12: settings
 
-export type BlockingMode = 'null' | 'nxdomain' | 'refused' | 'custom_ip';
+export type BlockingMode = 'null' | 'nxdomain' | 'nodata' | 'custom_ip';
 
 export interface Settings {
   upstreams: { servers: string[]; timeout_ms: number };

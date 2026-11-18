@@ -15,12 +15,15 @@ fn groups(names: &[&str]) -> Vec<String> {
 
 fn rule(kind: RuleKind, action: RuleAction, value: &str, g: &[&str]) -> Rule {
     Rule {
+        id: None,
         kind,
         action,
         value: value.to_owned(),
         enabled: true,
         groups: groups(g),
         comment: None,
+        created_at: None,
+        updated_at: None,
     }
 }
 
@@ -39,16 +42,19 @@ fn base_config() -> Config {
     Config {
         groups: vec![
             Group {
+                id: None,
                 name: "default".into(),
                 enabled: true,
                 comment: None,
             },
             Group {
+                id: None,
                 name: "kids".into(),
                 enabled: true,
                 comment: None,
             },
             Group {
+                id: None,
                 name: "off".into(),
                 enabled: false,
                 comment: None,
@@ -673,6 +679,9 @@ fn engine_from(items: &[Item], lists: &[(bool, Vec<String>)], list_order: &[u32]
                 name: n,
                 groups: g,
             } => c.rules.push(Rule {
+                id: None,
+                created_at: None,
+                updated_at: None,
                 kind: if *regex {
                     RuleKind::Regex
                 } else {

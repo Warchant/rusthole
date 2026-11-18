@@ -58,6 +58,12 @@ impl EngineHandle {
         self.current.load_full()
     }
 
+    /// The shared engine cell, for the DNS path (`rusthole_dns::EngineHandle` has this
+    /// type). All clones and this cell see the same engine.
+    pub fn shared(&self) -> Arc<ArcSwap<PolicyEngine>> {
+        Arc::clone(&self.current)
+    }
+
     /// The number of swaps since the start.
     pub fn generation(&self) -> u64 {
         self.generation.load(Ordering::Acquire)

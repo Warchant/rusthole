@@ -16,6 +16,10 @@ flowchart LR
     store --> core
     import --> core
     web --> store
+    web --> lists
+    web --> dns
+    web --> tls
+    bin --> lists
     dns --> store
     lists[rusthole-lists] --> dns
     lists --> core
@@ -96,7 +100,8 @@ wsl -d Ubuntu-22.04 -- bash /mnt/e/bohdan/rusthole/scripts/musl-build.sh
 ```
 
 Fuzz targets: `domain_parse`, `config_parse`, `teleporter_zip`, `pihole_toml`, `dns_request`,
-`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`, `list_meta`, `arp_parse`.
+`cache_ops`, `list_parse`, `policy_check`, `regex_rules`, `pem_load`, `list_meta`, `arp_parse`,
+`stats_events`, `api_json`, `host_header`.
 
 Temporary files go to `D:\tmp`, not to drive C.
 

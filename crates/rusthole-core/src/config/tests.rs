@@ -21,6 +21,9 @@ fn assert_one_issue(config: &Config, path: &str) {
 
 fn rule(kind: RuleKind, value: &str) -> Rule {
     Rule {
+        id: None,
+        created_at: None,
+        updated_at: None,
         kind,
         action: RuleAction::Deny,
         value: value.to_owned(),
@@ -278,6 +281,7 @@ fn acl_cidrs() {
 fn groups_default_unique_valid() {
     let mut c = Config::default();
     c.groups = vec![Group {
+        id: None,
         name: "kids".into(),
         enabled: true,
         comment: None,
@@ -290,6 +294,7 @@ fn groups_default_unique_valid() {
     for bad in ["Kids", "", "-x", "a b", &"a".repeat(65)] {
         c.groups.truncate(1);
         c.groups.push(Group {
+            id: None,
             name: bad.to_owned(),
             enabled: true,
             comment: None,
@@ -309,6 +314,7 @@ fn unknown_group_references() {
     assert_one_issue(&c, "rules[0].groups[1]");
     let mut c = Config::default();
     c.clients.push(Client {
+        uid: None,
         id: "192.0.2.5".into(),
         groups: vec!["ghost".into()],
         comment: None,
@@ -379,6 +385,7 @@ fn rule_values() {
 #[test]
 fn clients_ids() {
     let client = |id: &str| Client {
+        uid: None,
         id: id.to_owned(),
         groups: vec![DEFAULT_GROUP.into()],
         comment: None,
@@ -404,27 +411,41 @@ fn local_dns_values() {
     let mut c = Config::default();
     c.local_dns.records = vec![
         LocalRecord {
+            id: None,
+            enabled: true,
+            comment: None,
             name: "nas.lan".into(),
             record_type: RecordType::A,
             value: "192.0.2.10".into(),
         },
         LocalRecord {
+            id: None,
+            enabled: true,
+            comment: None,
             name: "nas.lan".into(),
             record_type: RecordType::Aaaa,
             value: "192.0.2.10".into(),
         },
         LocalRecord {
+            id: None,
+            enabled: true,
+            comment: None,
             name: "bad name".into(),
             record_type: RecordType::Aaaa,
             value: "2001:db8::10".into(),
         },
     ];
     c.local_dns.cnames = vec![LocalCname {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "media.lan".into(),
         target: "nas..lan".into(),
         ttl: Some(60),
     }];
     c.local_dns.conditional_forwarding = vec![ConditionalForward {
+        id: None,
+        comment: None,
         enabled: true,
         cidr: "192.0.2.0/24".into(),
         server: "192.0.2.1#53".into(),
@@ -499,6 +520,7 @@ fn ipv6_acl_is_refused() {
 #[test]
 fn ipv6_client_is_refused() {
     let client = |id: &str| Client {
+        uid: None,
         id: id.to_owned(),
         groups: vec![DEFAULT_GROUP.into()],
         comment: None,
@@ -515,6 +537,8 @@ fn ipv6_client_is_refused() {
 #[test]
 fn ipv6_conditional_forwarding_is_refused() {
     let fwd = |cidr: &str, server: &str| ConditionalForward {
+        id: None,
+        comment: None,
         enabled: true,
         cidr: cidr.to_owned(),
         server: server.to_owned(),
@@ -534,6 +558,9 @@ fn ipv6_dns_content_stays_valid() {
     // AAAA records and the IPv6 block answer are DNS content, not transport (A11).
     let mut c = Config::default();
     c.local_dns.records = vec![LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "nas.lan".into(),
         record_type: RecordType::Aaaa,
         value: "2001:db8::10".into(),
@@ -736,14 +763,23 @@ fn api_tokens() {
     let mut c = Config::default();
     c.admin.api_tokens = vec![
         ApiToken {
+            id: None,
+            prefix: None,
+            created_at: None,
             name: "ci".into(),
             hash: format!("sha256:{}", "a".repeat(64)),
         },
         ApiToken {
+            id: None,
+            prefix: None,
+            created_at: None,
             name: "ci".into(),
             hash: PHC.into(),
         },
         ApiToken {
+            id: None,
+            prefix: None,
+            created_at: None,
             name: " ".into(),
             hash: "plain".into(),
         },
@@ -774,6 +810,9 @@ fn debug_hides_secrets() {
     c.admin.password_hash = PHC.into();
     c.admin.totp_secret = "JBSWY3DPEHPK3PXP".into();
     c.admin.api_tokens.push(ApiToken {
+        id: None,
+        prefix: None,
+        created_at: None,
         name: "ci".into(),
         hash: format!("sha256:{}", "b".repeat(64)),
     });
@@ -1124,7 +1163,7 @@ prop_compose! {
         let groups = group_names
             .iter()
             .zip(group_flags.into_iter().cycle())
-            .map(|(name, (enabled, comment))| Group { name: name.clone(), enabled, comment })
+            .map(|(name, (enabled, comment))| Group { id: None, name: name.clone(), enabled, comment })
             .collect::<Vec<_>>();
         let pick = |idx: &[prop::sample::Index]| -> Vec<String> {
             idx.iter().map(|i| i.get(&group_names).clone()).collect()
@@ -1144,6 +1183,9 @@ prop_compose! {
         let rules = rules
             .iter()
             .map(|(is_regex, allow, enabled, d, re, comment, g)| Rule {
+                id: None,
+                created_at: None,
+                updated_at: None,
                 kind: if *is_regex { RuleKind::Regex } else { RuleKind::Exact },
                 action: if *allow { RuleAction::Allow } else { RuleAction::Deny },
                 value: if *is_regex { re.clone() } else { d.clone() },
@@ -1157,7 +1199,7 @@ prop_compose! {
         let clients = clients
             .iter()
             .filter(|(id, _)| seen.insert(crate::net::ClientId::parse(id).unwrap()))
-            .map(|(id, (comment, g))| Client { id: id.clone(), groups: pick(g), comment: comment.clone() })
+            .map(|(id, (comment, g))| Client { uid: None, id: id.clone(), groups: pick(g), comment: comment.clone() })
             .collect();
         let (pw, totp, session_ttl_seconds, tls, tokens) = admin;
         let (tls_pick, tls_stem, tls_names) = tls_in;
@@ -1192,6 +1234,9 @@ prop_compose! {
                 records: records
                     .into_iter()
                     .map(|(name, v6, a, aaaa)| LocalRecord {
+                        id: None,
+                        enabled: true,
+                        comment: None,
                         name,
                         record_type: if v6 { RecordType::Aaaa } else { RecordType::A },
                         value: if v6 { aaaa } else { a },
@@ -1199,11 +1244,11 @@ prop_compose! {
                     .collect(),
                 cnames: cnames
                     .into_iter()
-                    .map(|(name, target, ttl)| LocalCname { name, target, ttl })
+                    .map(|(name, target, ttl)| LocalCname { id: None, name, target, ttl, enabled: true, comment: None })
                     .collect(),
                 conditional_forwarding: forwards
                     .into_iter()
-                    .map(|(enabled, cidr, server, domain)| ConditionalForward { enabled, cidr, server, domain })
+                    .map(|(enabled, cidr, server, domain)| ConditionalForward { id: None, enabled, cidr, server, domain, comment: None })
                     .collect(),
             },
             admin: Admin {
@@ -1214,7 +1259,7 @@ prop_compose! {
                 tls_key_path: tls.map(|p| format!("{p}.key")),
                 api_tokens: tokens
                     .into_iter()
-                    .map(|name| ApiToken { name, hash: format!("sha256:{}", "0".repeat(64)) })
+                    .map(|name| ApiToken { id: None, name, hash: format!("sha256:{}", "0".repeat(64)), prefix: None, created_at: None })
                     .collect(),
             },
             tls: tls_section,
@@ -1247,11 +1292,15 @@ fn wild_config() -> impl Strategy<Value = Config> {
             c.blocking.special_domains.push(next());
             c.acl.allow.push(next());
             c.groups.push(Group {
+                id: None,
                 name: next(),
                 enabled: true,
                 comment: None,
             });
             c.rules.push(Rule {
+                id: None,
+                created_at: None,
+                updated_at: None,
                 kind: RuleKind::Regex,
                 action: RuleAction::Deny,
                 value: next(),
@@ -1260,6 +1309,9 @@ fn wild_config() -> impl Strategy<Value = Config> {
                 comment: None,
             });
             c.rules.push(Rule {
+                id: None,
+                created_at: None,
+                updated_at: None,
                 kind: RuleKind::Exact,
                 action: RuleAction::Allow,
                 value: next(),
@@ -1268,11 +1320,14 @@ fn wild_config() -> impl Strategy<Value = Config> {
                 comment: None,
             });
             c.clients.push(Client {
+                uid: None,
                 id: next(),
                 groups: vec![],
                 comment: None,
             });
             c.local_dns.conditional_forwarding.push(ConditionalForward {
+                id: None,
+                comment: None,
                 enabled: true,
                 cidr: next(),
                 server: next(),
@@ -1337,17 +1392,21 @@ proptest! {
             }
             6 | 7 => {
                 let id = if field == 6 { v6 } else { v6_cidr };
-                c.clients.insert(0, Client { id, groups: vec![], comment: None });
+                c.clients.insert(0, Client { uid: None, id, groups: vec![], comment: None });
                 "clients[0].id"
             }
             8 => {
                 c.local_dns.conditional_forwarding.insert(0, ConditionalForward {
+                    id: None,
+                    comment: None,
                     enabled: true, cidr: v6_cidr, server: "192.0.2.1".into(), domain: None,
                 });
                 "local_dns.conditional_forwarding[0].cidr"
             }
             _ => {
                 c.local_dns.conditional_forwarding.insert(0, ConditionalForward {
+                    id: None,
+                    comment: None,
                     enabled: true, cidr: "192.0.2.0/24".into(), server: format!("[{v6}]:53"), domain: None,
                 });
                 "local_dns.conditional_forwarding[0].server"

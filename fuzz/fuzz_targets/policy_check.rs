@@ -36,6 +36,7 @@ fuzz_target!(|data: &[u8]| {
     config.groups = ["default", "kids", "off"]
         .iter()
         .map(|n| Group {
+            id: None,
             name: (*n).to_owned(),
             enabled: *n != "off",
             comment: None,
@@ -51,6 +52,9 @@ fuzz_target!(|data: &[u8]| {
         let rest = chars.as_str();
         match tag {
             'e' | 'E' | 'r' | 'R' if config.rules.len() < MAX_RULES => config.rules.push(Rule {
+                id: None,
+                created_at: None,
+                updated_at: None,
                 kind: if tag.eq_ignore_ascii_case(&'e') {
                     RuleKind::Exact
                 } else {

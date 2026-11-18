@@ -110,8 +110,10 @@ Every error response has a JSON body with this shape:
 | 401 | `unauthorized` | No valid session and no valid token. |
 | 401 | `invalid_credentials` | Login: the password or the TOTP code is wrong. |
 | 401 | `totp_required` | Login: TOTP is on and the body has no `totp` code. |
+| 401 | `password_not_set` | Login: the config has no password hash. Set it with `rusthole passwd`. |
 | 403 | `csrf_failed` | A write with a session cookie has no valid `X-CSRF-Token`. |
-| 403 | `forbidden` | The `Host` header is not allowed, or the client address is not in the ACL. |
+| 403 | `forbidden` | An API token uses a path for sessions only (`POST /tokens`, `/auth/totp*`, `/auth/logout`). |
+| 421 | `misdirected_request` | The `Host` header does not name this server (DNS rebinding defence). A client outside the ACL gets no answer: the server closes the connection at once. |
 | 404 | `not_found` | The path or the resource does not exist. |
 | 405 | `method_not_allowed` | The path exists, but not with this method. |
 | 409 | `config_conflict` | The config file changed on disk after rusthole read it (A7). The server does not write. The UI must reload the data and try again. |
@@ -165,8 +167,9 @@ Request:
 - A wrong password or a wrong TOTP code gives 401 `invalid_credentials`. The response does
   not tell which one is wrong.
 - A TOTP code cannot be used two times (A7).
-- With no password set in the config, every login fails (A7). You set the password with
-  `rusthole passwd`. The API has no endpoint to set or change the password.
+- With no password set in the config, every login fails with 401 `password_not_set` (A7).
+  You set the password with `rusthole passwd`. The API has no endpoint to set or change the
+  password. A running server reads the changed file at the next login.
 - Each failure counts in the ban state machine (per IPv4 address). During a
   ban the server returns 429 `rate_limited` with `Retry-After`, and it does not check the
   password.
@@ -184,12 +187,13 @@ Response 200:
 The response sets the session cookie:
 
 ```
-Set-Cookie: rusthole_session=<random>; Path=/; Secure; HttpOnly; SameSite=Strict
+Set-Cookie: __Host-rusthole_session=<random>; Path=/; Secure; HttpOnly; SameSite=Strict
 ```
 
-The cookie has no `Max-Age`. The server keeps the session expiry. The session expires 24 h
-after the last request (idle) and 7 days after login (absolute). Assumption: these values
-can change in P5.
+The cookie has no `Max-Age`. The server keeps the session expiry. The session expires 1 h
+after the last request (idle) and `admin.session_ttl_seconds` after login (absolute,
+default 8 h). When the absolute limit is shorter than 1 h, it is also the idle limit.
+Sessions are in memory: a restart ends them. [SECURITY.md](SECURITY.md) has the details.
 
 #### `POST /auth/logout`
 
@@ -236,11 +240,13 @@ endpoint to get the token again.
 
 These rules are not visible in the JSON, but the UI depends on them:
 
-- `Host` check against the configured names and addresses (DNS rebinding). Else 403.
+- `Host` check against the configured names and addresses, with the admin port (DNS
+  rebinding). Else 421 `misdirected_request`.
 - Security headers on every response:
-  `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`,
+  `Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`,
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
-  `Strict-Transport-Security: max-age=31536000`.
+  `Strict-Transport-Security: max-age=31536000`, `Permissions-Policy` (all features off),
+  `Cross-Origin-Opener-Policy: same-origin`.
 - API responses have `Cache-Control: no-store`.
 - The UI uses no inline scripts, no inline styles, no `eval` and no external resources.
 
@@ -276,6 +282,8 @@ Request, one of:
 - `duration_seconds`: 1 to 86400. Blocking goes on again after this time. Without it,
   blocking stays off until the next `PUT`.
 - `duration_seconds` with `"enabled": true` gives 422.
+- The toggle is a runtime state. It does not change `blocking.enabled` in the config (the
+  state at start).
 
 Response 200: the new state (same shape as `GET`).
 
@@ -335,6 +343,8 @@ Queries over time. Optional filters: `client` (a client key, section 5.6) and `d
 
 - The arrays have the same length. Bucket `i` starts at `from + i * bucket_seconds`.
 - Every bucket is present. A bucket without queries has `0`.
+- The `24h` range has 144 buckets of 600 s also with `client` or `domain` (the store keeps
+  10-minute counts of each client and name for the last 160 buckets).
 
 ### 5.3 `GET /stats/hours`
 
@@ -575,6 +585,7 @@ status from section 5), `q` (a part of a name).
       "type": "A",
       "status": "blocked",
       "reason": "list:3",
+      "reason_label": "https://lists.example.org/hosts.txt",
       "upstream": null,
       "duration_ms": 0.2
     }
@@ -585,7 +596,9 @@ status from section 5), `q` (a part of a name).
 
 - Newest first. No pagination.
 - `reason`: why the query has this status, or `null`. Forms: `list:{id}`, `rule:{id}`,
-  `special`, `cname:{name}`, `local:{id}`.
+  `special`, `cname:{name}`, `local:{id}`. `{id}` is the stable id of the list or rule.
+- `reason_label` (additive): the URL of the list, the pattern of the rule, or the CNAME
+  target of the reason, or `null`.
 - `upstream`: the upstream that answered, or `null`.
 
 ## 7. Lists (adlists)
@@ -685,8 +698,10 @@ Parameter: `name` (required, a domain name). The server changes an IDN to punyco
 - `matches`: every list, rule or special domain that has the name. `kind` is `block` or
   `allow`. `match` is `exact`, `parent` (a pattern for a parent domain that covers
   subdomains) or `regex`.
-- The server scans the list files on disk (A9). It stops after 100 matches or 5 s. Then
+- The enabled lists and rules come from the compiled engine. The server scans the cached
+  list files of the disabled lists on disk (A9). It stops after 100 matches or 5 s. Then
   `truncated` is `true`.
+- A verdict ignores the blocking toggle. `group_name` is the config name (lower case).
 
 ## 8. Rules
 
@@ -714,7 +729,7 @@ Parameter: `name` (required, a domain name). The server changes an IDN to punyco
 | `enabled` | boolean | Default `true`. |
 | `groups` | integer array | Default `[0]`. |
 | `comment` | string | Default `""`. |
-| `created_at`, `updated_at` | time | Read-only. |
+| `created_at`, `updated_at` | time or null | Read-only. The config keeps them. A rule that the API did not make (for example from an import) has `null`. |
 
 `kind` and `pattern` together are unique per `action`. A duplicate gives 409 `conflict`.
 
@@ -756,10 +771,11 @@ Response 200:
 { "id": 1, "name": "Kids", "enabled": true, "comment": "", "lists": 2, "rules": 4, "clients": 3 }
 ```
 
-- `name`: required, unique, 1 to 64 characters.
+- `name`: required, unique, 1 to 64 characters from `a-z`, `0-9`, `-`, `_`, `.`; the first
+  is a letter or a digit (the config rule). Other names give 422.
 - `lists`, `rules`, `clients`: read-only counts of members.
-- Group `0` is the default group. Its name is `Default`. It cannot be deleted (409
-  `conflict`). Clients that match no configured client use group 0.
+- Group `0` is the default group. Its name is `default`. It cannot be deleted or get a
+  new name (409 `conflict`). Clients that match no configured client use group 0.
 - When a group is deleted, the server removes its id from all lists, rules and clients.
 
 | Method and path | Action |
@@ -845,8 +861,14 @@ Parameters: `limit` (default 200), `cursor`.
 ```
 
 - `domain`: a domain or a reverse zone, for example `2.0.192.in-addr.arpa`.
-- `servers`: 1 to 4 IPv4 addresses, with an optional port (`192.0.2.1:53`). IPv6 gives 422 (A11).
+- `servers`: one IPv4 address, with an optional port (`192.0.2.1:53`). v1 keeps one server
+  for each rule (the config has one `server` field): more than one gives 422; add one rule
+  for each server. IPv6 gives 422 (A11).
+- In the config, a reverse zone on an octet boundary is the `cidr` of the rule, and another
+  domain is its `domain`. A rule with both shows its `domain`.
 - A reverse zone for an IPv4 subnet ends in `.in-addr.arpa`. v1 rejects an `ip6.arpa` zone with 422 (A11).
+- Local records and CNAMEs keep `comment` and `enabled` in the config. A disabled record is
+  not answered.
 
 | Collection | Paths |
 |---|---|
@@ -858,7 +880,8 @@ Parameters: `limit` (default 200), `cursor`.
 
 ### Tokens
 
-Token object (the hash is never returned):
+Token object (the hash is never returned). `created_at` is `null` for a token that the API
+did not make. `last_used_at` and `last_used_ip` are in memory only (a restart clears them):
 
 ```json
 { "id": 2, "name": "backup script", "prefix": "rh_Ab3d", "created_at": "2026-11-10T07:00:00Z", "last_used_at": "2026-11-17T06:00:00Z", "last_used_ip": "192.0.2.10" }
@@ -957,19 +980,20 @@ stateDiagram-v2
 |---|---|
 | `upstreams.servers` | 1 to 8 items. Plain IPv4 `IP` or `IP:port`. IPv6 gives 422 (A11). P7 adds `tls://` and `https://` forms. |
 | `upstreams.timeout_ms` | 100 to 10000. |
-| `blocking.mode` | `null` (`0.0.0.0` and `::`, the default), `nxdomain`, `refused`, `custom_ip`. |
+| `blocking.mode` | `null` (`0.0.0.0` and `::`, the default), `nxdomain`, `nodata`, `custom_ip` (config mode `ip`). There is no `refused` mode. |
 | `blocking.custom_ipv4`, `custom_ipv6` | Used only with `custom_ip`. Else `null`. |
 | `blocking.blocked_ttl` | 0 to 3600 seconds. |
-| `blocking.special_domains` | A3 list on or off. |
+| `blocking.special_domains` | A3 list on or off. `true` keeps the list of the config (or sets the default list when it is empty); `false` empties it. |
 | `blocking.cname_check` | A4 deep CNAME check on or off. |
+| `cache.enabled` | `max_entries > 0`. `false` writes `max_entries = 0`. `true` with `max_entries = 0` gives 422. |
 | `cache.max_entries` | 0 to 1000000. |
 | `cache.min_ttl`, `max_ttl`, `negative_ttl` | Seconds. `min_ttl` ≤ `max_ttl`. |
-| `rate_limit.queries_per_second` | Per client. 0 = no limit. |
+| `rate_limit.queries_per_second` | Per client. 0 = no limit. The config has a token bucket: `burst` is `rate_limit.queries`, and `queries_per_second` is `queries / interval_seconds`, rounded. A changed section sets `interval_seconds = round(burst / queries_per_second)`; a section that equals the current one changes nothing. |
 | `acl.extra_cidrs` | Up to 64 IPv4 CIDRs in addition to the local subnets (D7). IPv6 gives 422 (A11). |
 | `acl.local_subnets` | Read-only. The IPv4 subnets that the server found on its interfaces. |
 | `stats.flush_interval_seconds` | 0 (RAM only) or 10 to 3600 (D5). |
 | `stats.retention_days` | 1 to 365. |
-| `stats.recent_queries_size` | 100 to 100000. |
+| `stats.recent_queries_size` | 100 to 100000. The config field is `stats.recent_queries`. |
 | `lists.refresh_interval_hours` | 0 (manual only) or 1 to 168. |
 
 The response never has secrets: no password hash, no TOTP secret, no token hashes, no TLS
@@ -984,9 +1008,12 @@ section as a whole. Do not send read-only fields (`acl.local_subnets`).
 { "cache": { "enabled": true, "max_entries": 20000, "min_ttl": 0, "max_ttl": 86400, "negative_ttl": 300 } }
 ```
 
-Response 200: the full settings (same shape as `GET`). The server applies the change
-without a restart and writes the config file (D2). If the file changed on disk since
-the server read it, the response is 409 `config_conflict`.
+Response 200: the full settings (same shape as `GET`). The server writes the config file
+(D2) and applies the change without a restart where it can: blocking, cache, rate limit,
+`acl.extra_cidrs` and the list refresh interval. A change of `upstreams` or `stats` needs a
+restart: then `restart_required` (an additive field of the settings, also in `GET`) is
+`true` until the restart. If the file changed on disk since the server read it, the
+response is 409 `config_conflict`, and the server reads the file again.
 
 Listener addresses, TLS files and the password are not in this API. Change them in
 `rusthole.toml` and restart, or use `rusthole passwd`.
@@ -1053,6 +1080,31 @@ Parameters: `limit`, `cursor`, `action` (a prefix, for example `list.`).
 - `memory_rss_bytes`: `null` if the OS does not give it.
 - `list_entries`: unique domains in the compiled block and allow sets.
 
+### 14.1 TLS (additive)
+
+#### `GET /system/tls`
+
+```json
+{
+  "mode": "local-ca",
+  "fingerprint_sha256": "AB:CD:…",
+  "not_before_at": "2026-11-17T00:00:00Z",
+  "not_after_at": "2027-02-15T00:00:00Z",
+  "names": ["localhost", "rusthole.lan", "127.0.0.1", "192.0.2.2"],
+  "ca_available": true,
+  "ca_fingerprint_sha256": "12:34:…"
+}
+```
+
+`mode` is `file`, `self-signed` or `local-ca`. 404 when the listener has no certificate
+store.
+
+#### `GET /system/tls/ca.pem`
+
+The certificate of the local CA (PEM, `Content-Disposition: attachment`), to install on
+devices ([TLS.md](TLS.md)). Only in mode `local-ca`; else 404. It needs a session or a token
+like every other path.
+
 ## 15. Endpoint index
 
 | Method | Path | Section |
@@ -1082,24 +1134,31 @@ Parameters: `limit`, `cursor`, `action` (a prefix, for example `list.`).
 | GET | `/clients/seen` | 9 |
 | GET, PATCH | `/settings` | 12 |
 | GET | `/audit` | 13 |
-| GET | `/system` | 14 |
+| GET | `/system`, `/system/tls`, `/system/tls/ca.pem` | 14 |
 
 Not in the API on purpose: password change (A7: `rusthole passwd` only), config reload
 (A9: no), DHCP.
 
 ## 16. Open questions and assumptions for P5
 
-1. **Stable ids.** The config file (`rusthole.toml`) must keep an `id` for each list, rule,
-   group, client and local DNS item, so that ids do not change after a restart or an
-   import. The import (P1) must give ids. Assumption: P1 or P5 adds this to the schema.
-2. **Session lifetime.** 24 h idle and 7 days absolute are assumptions.
+P5 resolved items 1, 2 and 5:
+
+1. **Stable ids (resolved).** The config keeps an optional integer id for each list (`id`,
+   required as before), rule, group, local record, CNAME, forwarding rule and API token
+   (`id`), and client (`uid`, because the client key `id` is the match text). At load, an
+   item without an id gets one in memory (the highest id of its collection plus one, in file
+   order); the first API write writes all ids. The group `default` has id 0. While the
+   server runs, an id is not used again; after a restart, the id of a deleted item with the
+   highest id can come back. See [CONFIG.md](CONFIG.md).
+2. **Session lifetime (resolved).** 1 h idle, `admin.session_ttl_seconds` absolute (section
+   3.1).
 3. **Hour buckets.** The server keeps hourly UTC aggregates per client and per name.
    Offsets that are not a whole number of hours are rounded down (section 1.4). If this is
    too coarse, P4 can keep 15-minute aggregates.
 4. **Client key.** The key is the MAC, else the IP. A client without a known MAC that
    changes its IP shows as two clients.
-5. **Rule timestamps.** `created_at` and `updated_at` need storage in the config or in the
-   data directory.
+5. **Rule timestamps (resolved).** The config keeps `created_at` and `updated_at` of each
+   rule that the API makes or changes.
 6. **Domain search cost.** `GET /search/domain` scans list files on disk. The limits (100
    matches, 5 s) are assumptions.
 7. **Rate limit for the API.** Only the login ban is defined. A general request limit for

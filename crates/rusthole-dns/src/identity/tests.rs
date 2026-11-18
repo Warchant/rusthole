@@ -17,6 +17,7 @@ use crate::neighbors::StaticNeighbors;
 
 fn config(clients: &[(&str, &[&str])]) -> Config {
     let group = |name: &str| Group {
+        id: None,
         name: name.to_owned(),
         enabled: true,
         comment: None,
@@ -26,6 +27,7 @@ fn config(clients: &[(&str, &[&str])]) -> Config {
         clients: clients
             .iter()
             .map(|(id, groups)| Client {
+                uid: None,
                 id: (*id).to_owned(),
                 groups: groups.iter().map(|g| (*g).to_owned()).collect(),
                 comment: None,
@@ -108,6 +110,9 @@ async fn a_mac_that_comes_later_is_used() {
 async fn host_name_from_local_records() {
     let mut cfg = config(&[("nas.lan", &["kids"])]);
     cfg.local_dns.records = vec![LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "nas.lan".to_owned(),
         record_type: CfgType::A,
         value: "192.0.2.10".to_owned(),
@@ -159,6 +164,8 @@ async fn host_name_from_conditional_forwarding() {
     let (server, count) = fake_ptr_server().await;
     let mut cfg = config(&[("printer.lan", &["kids"])]);
     cfg.local_dns.conditional_forwarding = vec![ConditionalForward {
+        id: None,
+        comment: None,
         enabled: true,
         cidr: "127.0.0.0/8".to_owned(),
         server: server.to_string(),

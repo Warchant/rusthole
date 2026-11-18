@@ -7,6 +7,7 @@ use crate::config::{Client, Group};
 
 fn group(name: &str, enabled: bool) -> Group {
     Group {
+        id: None,
         name: name.to_owned(),
         enabled,
         comment: None,
@@ -15,6 +16,7 @@ fn group(name: &str, enabled: bool) -> Group {
 
 fn client(id: &str, groups: &[&str]) -> Client {
     Client {
+        uid: None,
         id: id.to_owned(),
         groups: groups.iter().map(|g| (*g).to_owned()).collect(),
         comment: None,

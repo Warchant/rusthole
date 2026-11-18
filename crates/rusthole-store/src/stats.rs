@@ -164,6 +164,8 @@ struct Need {
     upstreams: Option<(i64, i64)>,
     reasons: Option<(i64, i64)>,
     timeline: Option<(i64, i64)>,
+    /// A filter on the 10-minute pair buckets (bounds in bucket numbers).
+    pair_timeline: Option<Filter>,
     clients: bool,
     /// A name whose first query in all stored data (database and RAM) is needed.
     first_seen_of: Option<String>,
@@ -431,6 +433,9 @@ impl Stats {
             if let Some((a, b)) = need.timeline {
                 p.timeline = db.timeline(a, b)?;
             }
+            if let Some(f) = &need.pair_timeline {
+                p.timeline = db.pair_timeline(f)?;
+            }
             if need.clients {
                 metas = db.clients()?;
             }
@@ -457,6 +462,9 @@ impl Stats {
         }
         if let Some((a, b)) = need.timeline {
             merge_btree(&mut p.timeline, st.agg.timeline(a, b));
+        }
+        if let Some(f) = &need.pair_timeline {
+            merge_btree(&mut p.timeline, st.agg.pair_timeline(f));
         }
         if let Some(name) = &need.first_seen_of {
             let all = Filter {
@@ -536,9 +544,8 @@ impl Stats {
         Ok(query::summary(&p.pairs, &p.clients))
     }
 
-    /// `GET /stats/timeline`. Without filters, the 24 h range has 10-minute buckets. With a
-    /// client or name filter, the 24 h range has 1-hour buckets (24 buckets), because the
-    /// database keeps these counts by hour only.
+    /// `GET /stats/timeline`. The 24 h range has 144 buckets of 10 minutes, also with a
+    /// client or name filter (from the 10-minute pair buckets, docs/STATS.md section 2).
     pub fn timeline(
         &self,
         range: Range,
@@ -554,11 +561,23 @@ impl Stats {
             })?;
             return Ok(query::timeline(&spec, &p.timeline, TEN_MINUTES));
         }
-        let spec = if range == Range::Day {
-            RangeSpec::day_by_hour(now)
-        } else {
-            RangeSpec::new(range, now)
-        };
+        if range == Range::Day {
+            let spec = RangeSpec::new(range, now);
+            let mut f = self.filter_for(
+                &spec,
+                client,
+                domain.map(|d| NameFilter::Exact(d.to_owned())),
+            )?;
+            let (from, to) = spec.ten_minutes();
+            f.from_hour = from;
+            f.to_hour = to;
+            let p = self.parts(&Need {
+                pair_timeline: Some(f),
+                ..Need::default()
+            })?;
+            return Ok(query::timeline(&spec, &p.timeline, TEN_MINUTES));
+        }
+        let spec = RangeSpec::new(range, now);
         let f = self.filter_for(
             &spec,
             client,

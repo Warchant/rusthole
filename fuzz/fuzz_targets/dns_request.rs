@@ -26,16 +26,24 @@ use rusthole_dns::{
 fn local_zone() -> Arc<LocalZone> {
     let mut cfg = Config::default();
     cfg.local_dns.records = vec![LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "nas.lan".to_owned(),
         record_type: RecordType::A,
         value: "192.0.2.10".to_owned(),
     }];
     cfg.local_dns.cnames = vec![LocalCname {
+        id: None,
+        enabled: true,
+        comment: None,
         name: "media.lan".to_owned(),
         target: "nas.lan".to_owned(),
         ttl: None,
     }];
     cfg.local_dns.conditional_forwarding = vec![ConditionalForward {
+        id: None,
+        comment: None,
         enabled: true,
         cidr: "198.51.100.0/24".to_owned(),
         server: "192.0.2.1".to_owned(),

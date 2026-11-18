@@ -96,6 +96,9 @@ mod memory {
         c.rules = REGEX_RULES
             .iter()
             .map(|p| Rule {
+                id: None,
+                created_at: None,
+                updated_at: None,
                 kind: RuleKind::Regex,
                 action: RuleAction::Deny,
                 value: (*p).to_owned(),

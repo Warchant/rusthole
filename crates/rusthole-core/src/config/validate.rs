@@ -72,7 +72,107 @@ pub(super) fn validate(config: &Config) -> Vec<ConfigIssue> {
     check_local_dns(config, &mut out);
     check_admin(&config.admin, &mut out);
     check_tls(config, &mut out);
+    check_ids(config, &mut out);
     out.0
+}
+
+/// Longest text of an API time stamp or token prefix field.
+const MAX_META_LEN: usize = 64;
+
+/// Checks the stable ids of the API (docs/API.md section 16): unique in each collection;
+/// the group `default` has id 0, and no other group has id 0.
+fn check_ids(config: &Config, out: &mut Issues) {
+    fn unique<'a>(
+        ids: impl Iterator<Item = (usize, Option<u32>)>,
+        path: &'a str,
+        key: &'a str,
+        out: &mut Issues,
+    ) {
+        let mut seen = HashSet::new();
+        for (i, id) in ids {
+            if let Some(id) = id
+                && !seen.insert(id)
+            {
+                out.add(
+                    format!("{path}[{i}].{key}"),
+                    format!("id {id} is used twice"),
+                );
+            }
+        }
+    }
+    unique(
+        config.groups.iter().map(|g| g.id).enumerate(),
+        "groups",
+        "id",
+        out,
+    );
+    for (i, g) in config.groups.iter().enumerate() {
+        match g.id {
+            Some(id) if g.name == DEFAULT_GROUP && id != super::DEFAULT_GROUP_ID => out.add(
+                format!("groups[{i}].id"),
+                "the group \"default\" must have id 0",
+            ),
+            Some(0) if g.name != DEFAULT_GROUP => out.add(
+                format!("groups[{i}].id"),
+                "id 0 is for the group \"default\" only",
+            ),
+            _ => {}
+        }
+    }
+    unique(
+        config.rules.iter().map(|r| r.id).enumerate(),
+        "rules",
+        "id",
+        out,
+    );
+    unique(
+        config.clients.iter().map(|c| c.uid).enumerate(),
+        "clients",
+        "uid",
+        out,
+    );
+    let l = &config.local_dns;
+    unique(
+        l.records.iter().map(|r| r.id).enumerate(),
+        "local_dns.records",
+        "id",
+        out,
+    );
+    unique(
+        l.cnames.iter().map(|c| c.id).enumerate(),
+        "local_dns.cnames",
+        "id",
+        out,
+    );
+    unique(
+        l.conditional_forwarding.iter().map(|f| f.id).enumerate(),
+        "local_dns.conditional_forwarding",
+        "id",
+        out,
+    );
+    unique(
+        config.admin.api_tokens.iter().map(|t| t.id).enumerate(),
+        "admin.api_tokens",
+        "id",
+        out,
+    );
+    for (i, r) in config.rules.iter().enumerate() {
+        for (key, v) in [("created_at", &r.created_at), ("updated_at", &r.updated_at)] {
+            if v.as_ref().is_some_and(|t| t.len() > MAX_META_LEN) {
+                out.add(format!("rules[{i}].{key}"), "the text is too long");
+            }
+        }
+    }
+    for (i, t) in config.admin.api_tokens.iter().enumerate() {
+        for (key, v) in [("prefix", &t.prefix), ("created_at", &t.created_at)] {
+            if v.as_ref().is_some_and(|t| t.len() > MAX_META_LEN) {
+                out.add(
+                    format!("admin.api_tokens[{i}].{key}"),
+                    "the text is too long",
+                );
+            }
+        }
+    }
 }
 
 /// Adds the A11 issue when `ip` is an IPv6 address.
@@ -411,9 +511,18 @@ fn check_local_dns(config: &Config, out: &mut Issues) {
     }
     for (i, f) in l.conditional_forwarding.iter().enumerate() {
         let path = format!("local_dns.conditional_forwarding[{i}]");
-        match Cidr::parse(&f.cidr) {
-            Ok(c) => reject_v6(c.addr, format!("{path}.cidr"), out),
-            Err(e) => out.add(format!("{path}.cidr"), e.to_string()),
+        if f.cidr.is_empty() {
+            if f.domain.is_none() {
+                out.add(
+                    format!("{path}.cidr"),
+                    "set cidr, domain or both; the rule has neither",
+                );
+            }
+        } else {
+            match Cidr::parse(&f.cidr) {
+                Ok(c) => reject_v6(c.addr, format!("{path}.cidr"), out),
+                Err(e) => out.add(format!("{path}.cidr"), e.to_string()),
+            }
         }
         match parse_socket_addr(&f.server, 53) {
             Ok(addr) => reject_v6(addr.ip(), format!("{path}.server"), out),

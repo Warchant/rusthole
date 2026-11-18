@@ -233,6 +233,9 @@ fn push_record(
         IpAddr::V6(_) => RecordType::Aaaa,
     };
     let record = LocalRecord {
+        id: None,
+        enabled: true,
+        comment: None,
         name: domain.as_str().to_owned(),
         record_type,
         value: ip.to_string(),
@@ -363,6 +366,9 @@ fn map_cnames(root: &Table, config: &mut Config, report: &mut ImportReport) {
                 config.local_dns.cnames.len()
             ));
             config.local_dns.cnames.push(LocalCname {
+                id: None,
+                enabled: true,
+                comment: None,
                 name: alias.as_str().to_owned(),
                 target: target_name.as_str().to_owned(),
                 ttl,
@@ -440,6 +446,8 @@ fn map_rev_servers(root: &Table, config: &mut Config, report: &mut ImportReport)
             .local_dns
             .conditional_forwarding
             .push(ConditionalForward {
+                id: None,
+                comment: None,
                 enabled,
                 cidr: cidr.to_owned(),
                 server,

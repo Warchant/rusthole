@@ -1017,3 +1017,83 @@ fn settings_from_config() {
     assert_eq!(s.flush_interval, Duration::from_secs(60));
     assert_eq!(s.recent_queries, 1000);
 }
+
+#[test]
+fn filtered_day_timeline_has_ten_minute_buckets_in_ram_and_on_disk() {
+    let dir = tempdir();
+    let s = open(dir.path());
+    apply(
+        &s,
+        &[
+            ev(NOW - 300, 1, "www.example.com", Status::Cached),
+            ev(NOW - 1500, 1, "www.example.com", Status::Blocked),
+            ev(NOW - 1500, 2, "www.example.com", Status::Cached),
+            ev(NOW - 300, 1, "cdn.example.com", Status::Forwarded),
+            // Two days ago: older than the 24 h range.
+            ev(NOW - 2 * 86_400, 1, "www.example.com", Status::Cached),
+        ],
+    );
+    let check = |s: &Stats| {
+        let t = s
+            .timeline(Range::Day, NOW, Some("192.0.2.1"), None)
+            .unwrap();
+        assert_eq!(t.bucket_seconds, 600);
+        assert_eq!(t.queries.len(), 144);
+        let n = t.queries.len();
+        // NOW is 12:34:56: the last bucket starts at 12:30. NOW - 300 s (12:29:56) is in
+        // the bucket before it, NOW - 1500 s (12:09:56) three buckets before that.
+        assert_eq!(t.queries[n - 1], 0);
+        assert_eq!(t.queries[n - 2], 2);
+        assert_eq!(t.queries[n - 4], 1);
+        assert_eq!(t.blocked[n - 4], 1);
+        assert_eq!(t.queries.iter().sum::<u64>(), 3);
+        let d = s
+            .timeline(Range::Day, NOW, None, Some("www.example.com"))
+            .unwrap();
+        assert_eq!(d.queries.len(), 144);
+        assert_eq!(d.queries[n - 4], 2);
+        assert_eq!(d.queries.iter().sum::<u64>(), 3);
+        let both = s
+            .timeline(Range::Day, NOW, Some("192.0.2.2"), Some("www.example.com"))
+            .unwrap();
+        assert_eq!(both.queries.iter().sum::<u64>(), 1);
+    };
+    check(&s);
+    s.flush(NOW).unwrap();
+    check(&s);
+    // The flush keeps only the last 160 ten-minute buckets of the pair table.
+    let rows = s
+        .with_db(|db| db.count_rows("timeline_pairs"))
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert_eq!(rows, 4);
+    drop(s);
+    let s = open(dir.path());
+    check(&s);
+}
+
+#[test]
+fn schema_migration_from_version_1_adds_the_pair_table() {
+    let dir = tempdir();
+    let path = dir.path().join(DB_FILE);
+    {
+        let c = rusqlite::Connection::open(&path).unwrap();
+        c.execute_batch(crate::db::MIGRATIONS[0]).unwrap();
+        c.pragma_update(None, "user_version", 1).unwrap();
+    }
+    let s = open(dir.path());
+    assert_eq!(
+        s.with_db(crate::db::Db::schema_version)
+            .unwrap()
+            .unwrap()
+            .unwrap(),
+        2
+    );
+    apply(&s, &[ev(NOW, 1, "www.example.com", Status::Cached)]);
+    s.flush(NOW).unwrap();
+    let t = s
+        .timeline(Range::Day, NOW, Some("192.0.2.1"), None)
+        .unwrap();
+    assert_eq!(t.queries.iter().sum::<u64>(), 1);
+}

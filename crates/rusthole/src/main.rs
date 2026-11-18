@@ -1,7 +1,7 @@
 //! rusthole command-line entry point.
 
-mod engine;
 mod fsutil;
+mod passwd;
 mod run;
 mod stats_observer;
 
@@ -52,8 +52,15 @@ enum Command {
         #[arg(long)]
         force: bool,
     },
-    /// Set the admin password. Reads the password from the terminal.
-    Passwd,
+    /// Set the admin password. Reads the password two times from the terminal (no echo).
+    Passwd {
+        /// Set up TOTP (a second login factor) instead: prints the otpauth URI one time.
+        #[arg(long, conflicts_with = "disable_totp")]
+        totp: bool,
+        /// Turn TOTP off.
+        #[arg(long)]
+        disable_totp: bool,
+    },
 }
 
 fn main() -> ExitCode {
@@ -79,7 +86,9 @@ fn run(cli: &Cli) -> anyhow::Result<ExitCode> {
             output,
             force,
         } => import(teleporter, output, *force, &mut out),
-        Command::Passwd => anyhow::bail!("`passwd` is not available yet (part P5)"),
+        Command::Passwd { totp, disable_totp } => {
+            passwd::run(&cli.config, *totp, *disable_totp, &mut out)
+        }
     }
 }
 
@@ -95,6 +104,12 @@ fn check_config(path: &Path, out: &mut impl Write) -> anyhow::Result<ExitCode> {
 /// Reads, parses and validates a config file. Prints each problem to `out` and returns
 /// `None` when the config has a problem.
 fn load_config(path: &Path, out: &mut impl Write) -> anyhow::Result<Option<Config>> {
+    Ok(load_config_text(path, out)?.map(|(c, _)| c))
+}
+
+/// Like [`load_config`], and also returns the file text (the admin API keeps it to edit the
+/// file).
+fn load_config_text(path: &Path, out: &mut impl Write) -> anyhow::Result<Option<(Config, String)>> {
     let bytes = fsutil::read_limited(path, MAX_CONFIG_BYTES)
         .with_context(|| format!("cannot read {}", path.display()))?;
     let text = String::from_utf8(bytes)
@@ -108,7 +123,7 @@ fn load_config(path: &Path, out: &mut impl Write) -> anyhow::Result<Option<Confi
     };
     let issues = config.validate();
     if issues.is_empty() {
-        return Ok(Some(config));
+        return Ok(Some((config, text)));
     }
     for issue in &issues {
         writeln!(out, "{}: {issue}", path.display())?;

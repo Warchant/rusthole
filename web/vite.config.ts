@@ -5,13 +5,12 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 // The same policy that the admin listener sends (docs/API.md, section 3.4).
 // "vite preview" sends it too, so a preview shows CSP faults in the console.
 const CSP = [
-  "default-src 'self'",
+  "default-src 'none'",
   "script-src 'self'",
   "style-src 'self'",
   "img-src 'self' data:",
-  "connect-src 'self'",
   "font-src 'self'",
-  "object-src 'none'",
+  "connect-src 'self'",
   "base-uri 'none'",
   "form-action 'self'",
   "frame-ancestors 'none'",

@@ -28,6 +28,8 @@ rusthole-import = { path = "crates/rusthole-import" }
 rusthole-dns = { path = "crates/rusthole-dns" }
 rusthole-tls = { path = "crates/rusthole-tls" }
 rusthole-store = { path = "crates/rusthole-store" }
+rusthole-lists = { path = "crates/rusthole-lists" }
+rusthole-web = { path = "crates/rusthole-web" }
 
 # Third-party crates. Add new ones here, then use `x = { workspace = true }` in a member.
 anyhow = "1"
@@ -81,6 +83,30 @@ thiserror = "2"
 toml = "1.2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+# Admin API (part P5). axum on hyper 1; hyper-util serves HTTP/1.1 and HTTP/2 on one port.
+axum = { version = "0.8.9", default-features = false, features = ["http1", "http2", "json", "query", "tokio", "matched-path"] }
+hyper = { version = "1.12", features = ["http1", "http2", "server"] }
+hyper-util = { version = "0.1.21", features = ["server-auto", "server-graceful", "tokio", "service"] }
+http = "1.5"
+http-body-util = "0.1.5"
+tower = { version = "0.5.3", default-features = false, features = ["util"] }
+tower-http = { version = "0.7.1", default-features = false, features = ["limit", "timeout"] }
+# Embeds web/dist (or the placeholder page) into the binary. `debug-embed` embeds in debug
+# builds too, so tests see the same files as a release build.
+rust-embed = { version = "8.14", features = ["debug-embed", "interpolate-folder-path"] }
+# Argon2id password hashes (decision D10). Pure Rust.
+argon2 = { version = "0.6.0", default-features = false, features = ["alloc", "password-hash"] }
+# Constant-time compare of the CSRF token and token hashes.
+subtle = "2.6.1"
+# Reads the password from the terminal without echo (`rusthole passwd`).
+rpassword = "7.5.5"
+# Edits rusthole.toml and keeps comments and order (decision D2).
+toml_edit = "0.25.19"
+# MIME types of the embedded UI files.
+mime_guess = "2.0.5"
+# base64url for session ids, CSRF tokens and API tokens.
+base64 = "0.23.1"
 
 # Dev
 # Makes gzip test bodies in the list refresher tests (tests only).

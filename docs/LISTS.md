@@ -41,6 +41,11 @@ sequenceDiagram
 3. `Refresher::start(lookup)` starts the downloads. Production uses
    `DnsServer::host_resolver()` as the lookup (see "Name lookup").
 
+`rusthole run` does these steps (part P5). The policy filter gets the shared cell of
+`Refresher::engine()` (`EngineHandle::shared`). The admin API uses the same refresher for
+the list status, "update now" and `set_config` after each config write. At the stop,
+`Refresher::shutdown` runs with a time limit of 5 s.
+
 A missing or corrupt cache file is a WARN, never a crash: the list is due at once and the
 next fetch replaces the file.
 

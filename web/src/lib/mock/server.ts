@@ -923,7 +923,7 @@ crudRoutes<T.LocalCname>('/dns/cnames', () => state.cnames, (b, old) => {
 crudRoutes<T.Forwarder>('/dns/forwarders', () => state.forwarders, (b, old) => {
   onlyFields(b, ['domain', 'servers', 'comment', 'enabled']);
   const servers = (b.servers ?? old?.servers) as string[];
-  const err = Array.isArray(servers) ? checkServers(servers, 4) : 'Use a list of servers.';
+  const err = Array.isArray(servers) ? checkServers(servers, 1) : 'Use a list of servers.';
   if (err) invalid('servers', err);
   const domainErr = checkForwardDomain(String(b.domain ?? old?.domain ?? ''));
   if (domainErr) invalid('domain', domainErr);

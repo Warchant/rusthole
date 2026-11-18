@@ -278,8 +278,8 @@ pub fn is_private_reverse(rev: &ReverseName) -> bool {
 pub struct Forward {
     /// The index in `local_dns.conditional_forwarding` of the config.
     pub rule: usize,
-    /// Reverse lookups for this network go to `server`.
-    pub cidr: Cidr,
+    /// Reverse lookups for this network go to `server`. `None`: the rule has a domain only.
+    pub cidr: Option<Cidr>,
     /// The local DNS server.
     pub server: SocketAddr,
     /// Queries for this domain and its subdomains also go to `server`.
@@ -296,6 +296,51 @@ pub struct LocalZone {
     forwards: Vec<Forward>,
 }
 
+/// Parses one enabled conditional forwarding rule. `Err` has the TOML path and the issue.
+fn forward_of(
+    i: usize,
+    f: &crate::config::ConditionalForward,
+) -> Result<Forward, (String, String)> {
+    let path = format!("local_dns.conditional_forwarding[{i}]");
+    let cidr = if f.cidr.is_empty() {
+        None
+    } else {
+        Some(
+            Cidr::parse(&f.cidr)
+                .map_err(|e| (format!("{path}.cidr"), format!("{e}; the rule is ignored")))?,
+        )
+    };
+    if cidr.is_none() && f.domain.is_none() {
+        return Err((
+            format!("{path}.cidr"),
+            "the rule has no cidr and no domain; the rule is ignored".to_owned(),
+        ));
+    }
+    let server = parse_socket_addr(&f.server, 53).map_err(|e| {
+        (
+            format!("{path}.server"),
+            format!("{e}; the rule is ignored"),
+        )
+    })?;
+    let domain = f
+        .domain
+        .as_deref()
+        .map(DomainName::parse_idn)
+        .transpose()
+        .map_err(|e| {
+            (
+                format!("{path}.domain"),
+                format!("{e}; the rule is ignored"),
+            )
+        })?;
+    Ok(Forward {
+        rule: i,
+        cidr,
+        server,
+        domain,
+    })
+}
+
 impl LocalZone {
     /// Makes the zone from `local_dns` of a config. The config does not need to be valid: a
     /// value that does not parse is skipped and reported.
@@ -305,6 +350,9 @@ impl LocalZone {
         let mut zone = Self::default();
         let l = &config.local_dns;
         for (i, r) in l.records.iter().enumerate() {
+            if !r.enabled {
+                continue;
+            }
             let path = format!("local_dns.records[{i}]");
             let Ok(name) = DomainName::parse_idn(&r.name) else {
                 issue(
@@ -331,6 +379,9 @@ impl LocalZone {
             push_unique(zone.reverse.entry(ip).or_default(), name);
         }
         for (i, c) in l.cnames.iter().enumerate() {
+            if !c.enabled {
+                continue;
+            }
             let path = format!("local_dns.cnames[{i}]");
             let (Ok(name), Ok(target)) = (
                 DomainName::parse_idn(&c.name),
@@ -362,41 +413,10 @@ impl LocalZone {
             if !f.enabled {
                 continue;
             }
-            let path = format!("local_dns.conditional_forwarding[{i}]");
-            let cidr = match Cidr::parse(&f.cidr) {
-                Ok(c) => c,
-                Err(e) => {
-                    issue(format!("{path}.cidr"), format!("{e}; the rule is ignored"));
-                    continue;
-                }
-            };
-            let server = match parse_socket_addr(&f.server, 53) {
-                Ok(s) => s,
-                Err(e) => {
-                    issue(
-                        format!("{path}.server"),
-                        format!("{e}; the rule is ignored"),
-                    );
-                    continue;
-                }
-            };
-            let domain = match f.domain.as_deref().map(DomainName::parse_idn) {
-                None => None,
-                Some(Ok(d)) => Some(d),
-                Some(Err(e)) => {
-                    issue(
-                        format!("{path}.domain"),
-                        format!("{e}; the rule is ignored"),
-                    );
-                    continue;
-                }
-            };
-            zone.forwards.push(Forward {
-                rule: i,
-                cidr,
-                server,
-                domain,
-            });
+            match forward_of(i, f) {
+                Ok(fwd) => zone.forwards.push(fwd),
+                Err((path, message)) => issue(path, message),
+            }
         }
         (zone, issues)
     }
@@ -481,13 +501,14 @@ impl LocalZone {
     /// The conditional forwarding rule with the most specific reverse zone that holds `rev`.
     /// The first rule wins a tie.
     fn reverse_forward_for(&self, rev: &ReverseName) -> Option<&Forward> {
-        let mut best: Option<&Forward> = None;
+        let mut best: Option<(&Forward, u8)> = None;
         for f in &self.forwards {
-            if zone_holds(&f.cidr, rev) && best.is_none_or(|b| f.cidr.prefix > b.cidr.prefix) {
-                best = Some(f);
+            let Some(cidr) = &f.cidr else { continue };
+            if zone_holds(cidr, rev) && best.is_none_or(|(_, p)| cidr.prefix > p) {
+                best = Some((f, cidr.prefix));
             }
         }
-        best
+        best.map(|(f, _)| f)
     }
 
     /// The A and AAAA records of a local name for `qtype`. Another type gives no record

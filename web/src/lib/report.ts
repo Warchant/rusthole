@@ -25,6 +25,9 @@ export function verdictText(v: string | null): string {
   }
 }
 
+/** Timing of the report panel. Tests set `busyWaitMsPerSecond` to 0. */
+export const reportTiming = { busyWaitMsPerSecond: 1000 };
+
 /** The age of a date in whole days at `nowMs`, or null. */
 export function ageDays(iso: string | null, nowMs: number): number | null {
   if (!iso) return null;

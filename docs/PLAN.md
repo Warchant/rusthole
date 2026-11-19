@@ -295,6 +295,7 @@ button on other pages.
 Status (2026-11-19): R1 to R5 are done (docs/API.md section 17). The owner also asked for
 two small features in the same session: a "Name" card on the client page
 (docs/CLIENTS.md, "Client name") and the HTTP to HTTPS redirect on the admin port
-(docs/SECURITY.md section 2). Not verified: the RDAP and Tranco HTTPS client against the
-real services (the unit tests use recorded formats; a live test covers the UDP filters and
-a TLS handshake only), and the full report on the Raspberry Pi.
+(docs/SECURITY.md section 2). Verified by hand on 2026-11-19: a run of the Linux build in
+WSL with the real services gave results for all four sections, also with Quad9 as the
+upstream. Not verified: the new UI in a real browser (component tests run in happy-dom
+only), and the report on the Raspberry Pi.

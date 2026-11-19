@@ -3,11 +3,17 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { changeMock } from '../lib/mock/server';
 import { parseHash } from '../lib/routes';
-import { nav } from '../lib/state.svelte';
+import { reportTiming } from '../lib/report';
+import { nav, toasts } from '../lib/state.svelte';
 import { button, cleanup, json, render, startMockApi, text, until } from '../test/harness';
 import Domains from './Domains.svelte';
 
-afterEach(() => cleanup());
+reportTiming.busyWaitMsPerSecond = 0;
+
+afterEach(() => {
+  cleanup();
+  toasts.length = 0;
+});
 
 const NAME = 'www.shop.example';
 
@@ -128,7 +134,22 @@ describe('Report button', () => {
     expect(text(section(root, 'dns'))).toContain('192.0.2.80');
   });
 
-  it('a failed section shows its error and a retry, and the page stays usable', async () => {
+  it('a busy section waits and asks again by itself, with no global toast', async () => {
+    let busy = 2;
+    await startMockApi((url) => {
+      if (!url.includes('/report/domain/') || !url.includes('/dns')) return null;
+      if (busy <= 0) return null;
+      busy -= 1;
+      return json(429, { code: 'busy', message: 'Too many reports run now.' });
+    });
+    const root = open(NAME);
+    await until(() => [...root.querySelectorAll('button')].some((b) => text(b) === 'Report'), 'the Report button');
+    button(root, 'Report').click();
+    await until(() => text(section(root, 'dns')).includes('192.0.2.80'), 'the records after two busy answers');
+    expect(toasts.length).toBe(0);
+  });
+
+  it('a section that stays busy shows its error and a retry, and the page stays usable', async () => {
     let fail = true;
     await startMockApi((url) =>
       url.includes('/report/domain/') && fail ? json(429, { code: 'busy', message: 'Too many reports run now.' }) : null,

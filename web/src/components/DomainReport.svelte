@@ -6,17 +6,23 @@
   import { api, ApiError, errorText } from '../lib/api';
   import type { DnsReport, RdapReport, ReportResult, ReportSection, ReputationReport, TlsReport } from '../lib/api/types';
   import { formatDateTime } from '../lib/format';
-  import { ageDays, REPORT_SECTIONS, statusText, verdictText } from '../lib/report';
+  import { ageDays, REPORT_SECTIONS, reportTiming, statusText, verdictText } from '../lib/report';
 
   let { name }: { name: string } = $props();
 
-  type View = { state: 'loading' } | { state: 'done'; result: ReportResult } | { state: 'error'; text: string };
+  type View =
+    | { state: 'loading'; waiting?: boolean }
+    | { state: 'done'; result: ReportResult }
+    | { state: 'error'; text: string };
+
+  /** A busy section tries again by itself, at most this many times. */
+  const MAX_BUSY_RETRIES = 3;
 
   let views = $state<Partial<Record<ReportSection, View>>>({});
   let generation = 0;
 
-  function loadOne(section: ReportSection, refresh: boolean, gen: number) {
-    views[section] = { state: 'loading' };
+  function loadOne(section: ReportSection, refresh: boolean, gen: number, tries = 0) {
+    views[section] = { state: 'loading', waiting: tries > 0 };
     api.report
       .domain(name, section, refresh)
       .then((result) => {
@@ -25,6 +31,15 @@
       .catch((e: unknown) => {
         if (gen !== generation) return;
         const busy = e instanceof ApiError && e.status === 429;
+        if (busy && tries < MAX_BUSY_RETRIES) {
+          // The server runs other reports now: wait for its Retry-After, then ask again.
+          const waitMs = Math.min(10, Math.max(1, (e as ApiError).retryAfterSeconds ?? 2)) * reportTiming.busyWaitMsPerSecond;
+          views[section] = { state: 'loading', waiting: true };
+          setTimeout(() => {
+            if (gen === generation) loadOne(section, refresh, gen, tries + 1);
+          }, waitMs);
+          return;
+        }
         views[section] = { state: 'error', text: busy ? 'Too many reports run now. Try again in a few seconds.' : errorText(e) };
       });
   }
@@ -66,7 +81,7 @@
           <span class="badge" class:ok={v.result.status === 'ok'} class:bad={v.result.status === 'failed'}>{statusText(v.result.status)}</span>
           <span class="muted small">{v.result.cached ? 'from cache, ' : ''}{formatDateTime(v.result.fetched_at)}</span>
         {:else if v?.state === 'loading' || !v}
-          <span class="muted small">Loading…</span>
+          <span class="muted small">{v?.state === 'loading' && v.waiting ? 'Waiting for a free place…' : 'Loading…'}</span>
         {/if}
       </h3>
       {#if v?.state === 'error'}

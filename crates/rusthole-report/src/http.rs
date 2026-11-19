@@ -60,6 +60,21 @@ pub fn url_allowed(url: &Url) -> bool {
     }
 }
 
+/// The socket addresses to connect to: only the public IPv4 addresses of `addrs` (the SSRF
+/// guard, docs/PLAN.md R-D10). No public address is an error. Pure.
+pub fn public_only(host: &str, addrs: &[std::net::Ipv4Addr]) -> Result<Vec<SocketAddr>, String> {
+    let public: Vec<SocketAddr> = addrs
+        .iter()
+        .copied()
+        .filter(|a| is_public_v4(*a))
+        .map(|a| SocketAddr::new(IpAddr::V4(a), 0))
+        .collect();
+    if public.is_empty() {
+        return Err(format!("{host} has no public IPv4 address"));
+    }
+    Ok(public)
+}
+
 /// Looks up host names through the upstream pool, and gives only public IPv4 addresses.
 #[derive(Debug, Clone)]
 struct GuardedResolver {
@@ -76,14 +91,7 @@ impl reqwest::dns::Resolve for GuardedResolver {
                 .await
                 .map_err(|_| format!("{host}: name lookup timed out"))?
                 .map_err(|e| format!("{host}: {e}"))?;
-            let public: Vec<SocketAddr> = addrs
-                .into_iter()
-                .filter(|a| is_public_v4(*a))
-                .map(|a| SocketAddr::new(IpAddr::V4(a), 0))
-                .collect();
-            if public.is_empty() {
-                return Err(format!("{host} has no public IPv4 address").into());
-            }
+            let public = public_only(&host, &addrs)?;
             let addrs: reqwest::dns::Addrs = Box::new(public.into_iter());
             Ok(addrs)
         })
@@ -174,6 +182,16 @@ fn short(e: &reqwest::Error) -> String {
 #[allow(clippy::unwrap_used)] // Tests: a failure is a test failure.
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_resolver_keeps_public_addresses_only() {
+        let a = |s: &str| s.parse::<std::net::Ipv4Addr>().unwrap();
+        // A name that points into the LAN (DNS rebinding): no address to connect to.
+        assert!(public_only("rebind.example", &[a("192.168.50.150"), a("127.0.0.1")]).is_err());
+        assert!(public_only("empty.example", &[]).is_err());
+        let mixed = public_only("mixed.example", &[a("10.0.0.1"), a("20.42.65.92")]).unwrap();
+        assert_eq!(mixed, vec!["20.42.65.92:0".parse::<SocketAddr>().unwrap()]);
+    }
 
     #[test]
     fn only_https_and_public_addresses() {

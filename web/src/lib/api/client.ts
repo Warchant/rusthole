@@ -176,7 +176,9 @@ export function createClient(options: ClientOptions): Client {
     }
     const err = new ApiError(response.status, body.code, body.message, body.details ?? [], retryAfter);
     if (response.status === 401 && err.code === 'unauthorized') options.onUnauthorized?.(err);
-    if (response.status === 429 && retryAfter !== null) options.onRateLimited?.(retryAfter, err);
+    // A busy domain report (code `busy`) is not a rate limit of the user: the report panel
+    // shows it and tries again by itself.
+    if (response.status === 429 && retryAfter !== null && err.code !== 'busy') options.onRateLimited?.(retryAfter, err);
     throw err;
   }
 

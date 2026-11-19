@@ -1320,9 +1320,10 @@ Data of `reputation`:
 ```json
 {
   "filters": [
-    { "name": "Quad9", "server": "9.9.9.9:53", "verdict": "blocked", "rcode": 3, "error": null },
+    { "name": "Quad9", "server": "9.9.9.9:53", "verdict": "blocked", "rcode": 3, "ede": [17],
+      "error": null },
     { "name": "Cloudflare for Families", "server": "1.1.1.2:53", "verdict": null, "rcode": null,
-      "error": "Cloudflare for Families: no answer in 4 s" }
+      "ede": [], "error": "Cloudflare for Families: no answer in 4 s" }
   ],
   "tranco": { "domain": "example.com", "rank": 185, "date": "2026-11-18", "error": null },
   "unfiltered_error": null
@@ -1330,9 +1331,13 @@ Data of `reputation`:
 ```
 
 - Signals only, no score (docs/PLAN.md R-D9).
-- `verdict`: `blocked` (Cloudflare gives `0.0.0.0`, or the filter gives NXDOMAIN while the
-  unfiltered answer has an address), `allowed` (a real address), `no_such_name` (NXDOMAIN
-  from both), `unknown`, or `null` with `error` when the filter did not answer.
+- `verdict`: `blocked`, `allowed` (a real address), `no_such_name` (NXDOMAIN and no
+  reference has an address), `unknown`, or `null` with `error` when the filter did not
+  answer. `blocked` is one of: an Extended DNS Error code 15, 16 or 17 (RFC 8914; Quad9
+  sends 17, Cloudflare 16); `0.0.0.0`; or NXDOMAIN while a reference answer has an address.
+  The references are the upstream pool and the other filter, because the upstream can be a
+  filter too (for example Quad9).
+- `ede`: the Extended DNS Error codes of the filter answer.
 - `tranco.rank`: the newest rank in the Tranco top 1 million, or `null` when the domain is
   not in the list. A rank shows popularity, not safety.
 - The UDP query uses a random port and ID, and accepts only a reply from the server
@@ -1345,7 +1350,8 @@ Cache and limits:
   `failed` for 5 minutes, at most 1024 results. `off` is never kept.
 - At most 4 lookups run at a time. A request for the same name and section joins the lookup
   that runs. A request that finds no free place in 1 s gets 429 with the code `busy` and
-  `Retry-After: 2`.
+  `Retry-After: 2`. The UI waits for `Retry-After` and asks again (at most 3 times) before
+  it shows the error; a `busy` answer does not show the global "too many requests" message.
 - A lookup goes on when the browser goes away, and fills the cache.
 - No report service (tests, tools): 503.
 

@@ -56,6 +56,33 @@ pub struct Short {
     pub rcode: u16,
     /// The A records (at most 16).
     pub addrs: Vec<Ipv4Addr>,
+    /// The Extended DNS Error codes of the answer (RFC 8914), at most 8.
+    pub ede: Vec<u16>,
+}
+
+/// The EDE codes that tell that a filter blocked a name: 15 Blocked, 16 Censored,
+/// 17 Filtered (RFC 8914).
+pub const BLOCK_EDE: [u16; 3] = [15, 16, 17];
+
+/// The EDE codes of a reply (option code 15; the first two bytes are the info code).
+pub fn ede_codes(m: &hickory_proto::op::Message) -> Vec<u16> {
+    let Some(edns) = m.edns.as_ref() else {
+        return Vec::new();
+    };
+    let opts: &[(
+        hickory_proto::rr::rdata::opt::EdnsCode,
+        hickory_proto::rr::rdata::opt::EdnsOption,
+    )] = edns.options().as_ref();
+    opts.iter()
+        .filter_map(|(_, o)| match o {
+            hickory_proto::rr::rdata::opt::EdnsOption::Unknown(15, data) => {
+                let b = data.get(..2)?;
+                Some(u16::from_be_bytes([*b.first()?, *b.get(1)?]))
+            }
+            _ => None,
+        })
+        .take(8)
+        .collect()
 }
 
 /// A boxed query future.
@@ -93,10 +120,20 @@ impl Verdict {
 }
 
 /// The verdict of a filter from its answer and the unfiltered answer (pure).
-pub fn verdict(filter: &Short, unfiltered: Option<&Short>) -> Verdict {
+///
+/// A block shows in three ways: an EDE code of [`BLOCK_EDE`]; `0.0.0.0`; or NXDOMAIN while a
+/// reference answer (the upstream pool, or the other filter) has a real address. The pool
+/// can be a filter too (for example Quad9 as an upstream), so the other filter is a second
+/// reference.
+pub fn verdict(filter: &Short, unfiltered: Option<&Short>, other: Option<&Short>) -> Verdict {
     let nx = u16::from(ResponseCode::NXDomain);
-    let unfiltered_has_addr =
-        unfiltered.is_some_and(|u| u.rcode == 0 && u.addrs.iter().any(|a| !a.is_unspecified()));
+    let has_addr = |s: Option<&Short>| {
+        s.is_some_and(|u| u.rcode == 0 && u.addrs.iter().any(|a| !a.is_unspecified()))
+    };
+    let unfiltered_has_addr = has_addr(unfiltered) || has_addr(other);
+    if filter.ede.iter().any(|c| BLOCK_EDE.contains(c)) {
+        return Verdict::Blocked;
+    }
     if filter.rcode == 0
         && !filter.addrs.is_empty()
         && filter.addrs.iter().all(Ipv4Addr::is_unspecified)
@@ -161,6 +198,7 @@ pub async fn run(
             Ok(Ok(a)) => Ok(Short {
                 rcode: a.rcode,
                 addrs: a_records(&a.answers),
+                ede: Vec::new(),
             }),
             Ok(Err(e)) => Err(e),
             Err(_) => Err("no answer".to_owned()),
@@ -187,13 +225,16 @@ pub async fn run(
     let pool_ok = pool.as_ref().ok();
     let mut any_ok = false;
     let mut filters = Vec::new();
-    for ((label, server), r) in FILTERS.iter().zip([q9, cf]) {
+    let answers = [q9, cf];
+    for (i, ((label, server), r)) in FILTERS.iter().zip(&answers).enumerate() {
+        // The answer of the other filter is a second reference.
+        let other = answers.get(1 - i.min(1)).and_then(|o| o.as_ref().ok());
         filters.push(match r {
             Ok(s) => {
                 any_ok = true;
-                json!({ "name": label, "server": server, "verdict": verdict(&s, pool_ok).as_str(), "rcode": s.rcode, "error": null })
+                json!({ "name": label, "server": server, "verdict": verdict(s, pool_ok, other).as_str(), "rcode": s.rcode, "ede": s.ede, "error": null })
             }
-            Err(e) => json!({ "name": label, "server": server, "verdict": null, "rcode": null, "error": safe_text(&e, 200) }),
+            Err(e) => json!({ "name": label, "server": server, "verdict": null, "rcode": null, "ede": [], "error": safe_text(e, 200) }),
         });
     }
     let tranco = match rank {
@@ -264,6 +305,7 @@ impl ResolverAsk for UdpAsk {
                 return Ok(Short {
                     rcode: u16::from(m.metadata.response_code),
                     addrs: a_records(&m.answers),
+                    ede: ede_codes(&m),
                 });
             }
             Err("no valid reply".to_owned())
@@ -301,6 +343,7 @@ pub(crate) mod tests {
         Short {
             rcode,
             addrs: addrs.iter().map(|a| Ipv4Addr::from(*a)).collect(),
+            ede: Vec::new(),
         }
     }
 
@@ -311,19 +354,40 @@ pub(crate) mod tests {
         let real = short(0, &[[104, 18, 4, 35]]);
         // Cloudflare: 0.0.0.0.
         assert_eq!(
-            verdict(&short(0, &[[0, 0, 0, 0]]), Some(&real)),
+            verdict(&short(0, &[[0, 0, 0, 0]]), Some(&real), None),
             Verdict::Blocked
         );
         // Quad9: NXDOMAIN while the name exists.
-        assert_eq!(verdict(&short(NX, &[]), Some(&real)), Verdict::Blocked);
-        assert_eq!(verdict(&real, Some(&real)), Verdict::Allowed);
         assert_eq!(
-            verdict(&short(NX, &[]), Some(&short(NX, &[]))),
+            verdict(&short(NX, &[]), Some(&real), None),
+            Verdict::Blocked
+        );
+        assert_eq!(verdict(&real, Some(&real), None), Verdict::Allowed);
+        assert_eq!(
+            verdict(&short(NX, &[]), Some(&short(NX, &[])), None),
             Verdict::NoSuchName
         );
-        // No unfiltered answer: NXDOMAIN alone is not a block.
-        assert_eq!(verdict(&short(NX, &[]), None), Verdict::Unknown);
-        assert_eq!(verdict(&short(2, &[]), Some(&real)), Verdict::Unknown);
+        // No reference answer: NXDOMAIN alone is not a block.
+        assert_eq!(verdict(&short(NX, &[]), None, None), Verdict::Unknown);
+        assert_eq!(verdict(&short(2, &[]), Some(&real), None), Verdict::Unknown);
+    }
+
+    #[test]
+    fn a_filtering_upstream_does_not_hide_a_block() {
+        // The upstream pool is Quad9 too: it also gives NXDOMAIN.
+        let pool = short(NX, &[]);
+        let cloudflare = short(0, &[[74, 208, 236, 124]]);
+        // The other filter is the second reference.
+        assert_eq!(
+            verdict(&short(NX, &[]), Some(&pool), Some(&cloudflare)),
+            Verdict::Blocked
+        );
+        // An EDE code 15 to 17 is a block by itself.
+        let mut q9 = short(NX, &[]);
+        q9.ede = vec![17];
+        assert_eq!(verdict(&q9, Some(&pool), None), Verdict::Blocked);
+        q9.ede = vec![3];
+        assert_eq!(verdict(&q9, Some(&pool), None), Verdict::NoSuchName);
     }
 
     #[test]
@@ -453,6 +517,7 @@ pub(crate) mod tests {
             .await
             .unwrap();
         assert_eq!(q9.rcode, NX, "Quad9 blocks its test name");
+        assert!(q9.ede.contains(&17), "Quad9 sends EDE 17: {:?}", q9.ede);
         let cf = UdpAsk
             .ask(
                 "1.1.1.2:53".parse().unwrap(),
@@ -486,8 +551,8 @@ pub(crate) mod tests {
         /// A filter answer with a real address is never "blocked".
         #[test]
         fn a_real_address_is_never_blocked(a in 1u32.., rcode_u in 0u16..1) {
-            let s = Short { rcode: rcode_u, addrs: vec![Ipv4Addr::from(a)] };
-            prop_assert_eq!(verdict(&s, None), Verdict::Allowed);
+            let s = Short { rcode: rcode_u, addrs: vec![Ipv4Addr::from(a)], ede: Vec::new() };
+            prop_assert_eq!(verdict(&s, None, None), Verdict::Allowed);
         }
     }
 }

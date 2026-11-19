@@ -87,8 +87,9 @@ server; change it when `UpstreamUrl::parse` changes.
 
 - "Report" opens `src/components/DomainReport.svelte`. It sends one request for each
   section in `REPORT_SECTIONS` (`src/lib/report.ts`) at the same time, and each card fills
-  in when its answer comes. A failed or busy (429) section shows its error and "Try
-  again"; the other sections do not wait. "Refresh" sends `refresh=true` (skip the server
+  in when its answer comes. A busy (429 `busy`) section waits for `Retry-After` and asks
+  again, at most 3 times. A failed section shows its error and "Try again"; the other
+  sections do not wait. "Refresh" sends `refresh=true` (skip the server
   cache). To add a section, add it to `REPORT_SECTIONS`, `ReportSection` and the mock.
 - The UI never calls an outside service. The server does the lookups (docs/API.md
   section 17). Show the report data as text only.

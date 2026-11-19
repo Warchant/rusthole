@@ -125,6 +125,15 @@ describe('createClient', () => {
     expect(onRateLimited).toHaveBeenCalledWith(42, err);
   });
 
+  it('does not call the global rate-limit hook for a busy domain report', async () => {
+    const { client, onRateLimited } = setup(
+      jsonResponse(429, { code: 'busy', message: 'Too many reports run now.' }, { 'Retry-After': '2' }),
+    );
+    const err = (await client.get('/report/domain/a.test/dns').catch((e: unknown) => e)) as ApiError;
+    expect(err).toMatchObject({ status: 429, code: 'busy', retryAfterSeconds: 2 });
+    expect(onRateLimited).not.toHaveBeenCalled();
+  });
+
   it('uses retry_after_seconds on 429 when the header is missing', async () => {
     const { client } = setup(jsonResponse(429, { code: 'rate_limited', message: 'Wait.', retry_after_seconds: 7 }));
     await expect(client.post('/auth/login', {})).rejects.toMatchObject({ retryAfterSeconds: 7 });

@@ -1,11 +1,14 @@
 //! Entry points for the fuzz targets (`fuzz/`). Each must never panic on any input.
 
-/// Runs the RDAP parsers on arbitrary bytes. The first byte picks the parser.
+/// Runs the JSON parsers of outside answers on arbitrary bytes. The first byte picks the
+/// parser: 0 the RDAP bootstrap file, 1 an RDAP domain answer, 2 a Tranco answer.
 pub fn rdap_json(data: &[u8]) {
     let Some((sel, body)) = data.split_first() else {
         return;
     };
-    if sel % 2 == 0 {
+    if sel % 3 == 2 {
+        let _ = crate::reputation::tranco_rank(body);
+    } else if sel % 3 == 0 {
         if let Ok(b) = crate::rdap::parse_bootstrap(body) {
             let _ = b.server_for("www.example.com");
             let _ = b.server_for("a.b.c.d.e");

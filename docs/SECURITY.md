@@ -256,7 +256,9 @@ admin selects. The rules:
 
 - Only a logged-in admin can start a report. The browser talks only to rusthole: the CSP
   stays `connect-src 'self'`.
-- Host names go through the upstream pool, never the system resolver.
+- Host names go through the upstream pool, never the system resolver. One exception by
+  design (R-D9): the reputation section asks Quad9 (`9.9.9.9`) and Cloudflare for Families
+  (`1.1.1.2`) directly by UDP, because their answer is the signal.
 - TLS and HTTP connections of the report go to public IPv4 addresses only
   (`rusthole_report::guard::is_public_v4`): never to loopback, private, link-local, CGNAT,
   documentation or reserved addresses. This stops a report from probing the LAN (SSRF).

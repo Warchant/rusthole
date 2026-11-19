@@ -768,7 +768,7 @@ route('POST', '/lists/:id/update', ({ params }) => {
 });
 
 // Domain report (docs/API.md section 17). Fixed data, no network.
-const REPORT_SECTIONS: T.ReportSection[] = ['dns', 'rdap', 'tls'];
+const REPORT_SECTIONS: T.ReportSection[] = ['dns', 'rdap', 'tls', 'reputation'];
 route('GET', '/report/domain/:name/:section', ({ q, params }) => {
   const name = decodeURIComponent(params[0]!).trim().toLowerCase();
   const section = params[1] as T.ReportSection;
@@ -779,8 +779,20 @@ route('GET', '/report/domain/:name/:section', ({ q, params }) => {
   const parts = name.split('.');
   const base = parts.slice(-2).join('.');
   const fetched_at = new Date().toISOString().replace(/[.][0-9]+Z$/, 'Z');
-  if ((section === 'rdap' || section === 'tls') && !state.settings.report.external) {
+  if (section !== 'dns' && !state.settings.report.external) {
     return { section, name, status: 'off', cached: false, fetched_at, data: null, error: 'turned off in the settings (report.external)' } satisfies T.ReportResult;
+  }
+  if (section === 'reputation') {
+    const bad = name.includes('tracker');
+    const rep: T.ReputationReport = {
+      filters: [
+        { name: 'Quad9', server: '9.9.9.9:53', verdict: bad ? 'blocked' : 'allowed', rcode: bad ? 3 : 0, error: null },
+        { name: 'Cloudflare for Families', server: '1.1.1.2:53', verdict: null, rcode: null, error: 'Cloudflare for Families: no answer in 4 s' },
+      ],
+      tranco: { domain: base, rank: bad ? null : 1234, date: bad ? null : '2026-11-18', error: null },
+      unfiltered_error: null,
+    };
+    return { section, name, status: 'ok', cached: false, fetched_at, data: rep, error: null } satisfies T.ReportResult;
   }
   if (section === 'tls') {
     const nowS = Math.floor(Date.now() / 1000);

@@ -530,6 +530,7 @@ async fn start_admin(
             tls: Arc::new(rusthole_report::tls::TlsClient::new(
                 rusthole_tls::system_roots().0,
             )),
+            ask: Arc::new(rusthole_report::reputation::UdpAsk),
         })),
     };
     let app = AppState::new(deps);

@@ -291,3 +291,10 @@ groups. The owner gave the split and the API shape to the implementer.
 Out of scope (open for a later version): services that need an API key (VirusTotal,
 Safe Browsing), WHOIS on port 43, IPv6 connections, a disk cache, page content, a Report
 button on other pages.
+
+Status (2026-11-19): R1 to R5 are done (docs/API.md section 17). The owner also asked for
+two small features in the same session: a "Name" card on the client page
+(docs/CLIENTS.md, "Client name") and the HTTP to HTTPS redirect on the admin port
+(docs/SECURITY.md section 2). Not verified: the RDAP and Tranco HTTPS client against the
+real services (the unit tests use recorded formats; a live test covers the UDP filters and
+a TLS handshake only), and the full report on the Raspberry Pi.

@@ -1821,6 +1821,7 @@ dependencies = [
 name = "rusthole-report"
 version = "0.0.1"
 dependencies = [
+ "getrandom 0.4.3",
  "hickory-proto",
  "parking_lot",
  "proptest",

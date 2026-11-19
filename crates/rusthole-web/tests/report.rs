@@ -90,6 +90,7 @@ async fn rdap_section_follows_the_setting() {
             tls: Arc::new(rusthole_report::tls::NoTls(
                 "no TLS in this test".to_owned(),
             )),
+            ask: Arc::new(rusthole_report::reputation::NoAsk("none".to_owned())),
         })),
         ..Options::default()
     })
@@ -133,6 +134,7 @@ async fn dns_section_answers_then_comes_from_the_cache() {
             tls: Arc::new(rusthole_report::tls::NoTls(
                 "no TLS in this test".to_owned(),
             )),
+            ask: Arc::new(rusthole_report::reputation::NoAsk("none".to_owned())),
         })),
         ..Options::default()
     })

@@ -33,6 +33,7 @@ use crate::dns::DnsLookup;
 use crate::http::HttpGet;
 use crate::model::{Outcome, Section, SectionReport, Status};
 use crate::rdap::Rdap;
+use crate::reputation::ResolverAsk;
 use crate::tls::TlsProbe;
 
 /// The most jobs at a time.
@@ -77,6 +78,8 @@ pub struct Sources {
     pub http: Arc<dyn HttpGet>,
     /// TLS handshakes (the certificate of a name).
     pub tls: Arc<dyn TlsProbe>,
+    /// Plain DNS queries to the filtering resolvers (reputation).
+    pub ask: Arc<dyn ResolverAsk>,
 }
 
 #[derive(Debug)]
@@ -286,6 +289,9 @@ async fn run_section(inner: &Inner, section: Section, name: &DomainName, req: Re
         Section::Dns => crate::dns::run(Arc::clone(&s.dns), name).await,
         Section::Rdap => inner.rdap.run(name, req.now).await,
         Section::Tls => crate::tls::run(s.dns.as_ref(), s.tls.as_ref(), name, req.wall).await,
+        Section::Reputation => {
+            crate::reputation::run(s.dns.as_ref(), s.ask.as_ref(), s.http.as_ref(), name).await
+        }
     }
 }
 
@@ -298,6 +304,7 @@ mod tests {
     use crate::dns::NAME_TYPES;
     use crate::dns::tests::FakeDns;
     use crate::rdap::tests::FakeHttp;
+    use crate::reputation::NoAsk;
     use crate::tls::NoTls;
 
     fn req(refresh: bool, now_secs: u64) -> Request {
@@ -318,6 +325,7 @@ mod tests {
             dns,
             http: Arc::new(FakeHttp::default()),
             tls: Arc::new(NoTls("no TLS in this test".to_owned())),
+            ask: Arc::new(NoAsk("no DNS in this test".to_owned())),
         })
     }
 
@@ -361,6 +369,7 @@ mod tests {
             dns: Arc::new(FakeDns::default()),
             http: Arc::clone(&http) as Arc<dyn HttpGet>,
             tls: Arc::new(NoTls("no TLS in this test".to_owned())),
+            ask: Arc::new(NoAsk("no DNS in this test".to_owned())),
         });
         let mut r = req(false, 0);
         r.external = false;

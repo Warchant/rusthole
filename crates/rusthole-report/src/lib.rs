@@ -15,6 +15,7 @@ pub mod guard;
 pub mod http;
 pub mod model;
 pub mod rdap;
+pub mod reputation;
 pub mod service;
 pub mod tls;
 

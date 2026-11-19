@@ -1206,6 +1206,7 @@ never the system resolver (docs/LISTS.md, "Name lookup").
 | `dns` | The upstream pool: A, AAAA, MX, TXT, CAA of the name; NS, SOA of the registrable domain; the CNAME chain of the A answer. | 5 s | No (the upstreams only) |
 | `rdap` | The RDAP server of the registry (RFC 9083), found in the IANA bootstrap file `https://data.iana.org/rdap/dns.json`. The query is the registrable domain. | 10 s | Yes: IANA and the registry get the registrable domain |
 | `tls` | A TLS handshake to the first public IPv4 address of the name on port 443 (SNI = the name). No HTTP request. | 8 s | Yes: the host of the name sees a connection from rusthole |
+| `reputation` | An A query to Quad9 (`9.9.9.9`) and Cloudflare for Families (`1.1.1.2`) by plain UDP, compared with the unfiltered answer of the upstream pool; the Tranco rank of the registrable domain (`https://tranco-list.eu/api/ranks/domain/{domain}`, no key). | 8 s (each source 4 s) | Yes: Quad9 and Cloudflare get the name; Tranco gets the registrable domain |
 
 Response 200:
 
@@ -1313,6 +1314,30 @@ Data of `tls`:
   addresses in `data.addresses`. rusthole does not connect to the LAN.
 - Limits: TCP connect 4 s, handshake 4 s. The fuzz target `cert_chain` covers the
   certificate parser.
+
+Data of `reputation`:
+
+```json
+{
+  "filters": [
+    { "name": "Quad9", "server": "9.9.9.9:53", "verdict": "blocked", "rcode": 3, "error": null },
+    { "name": "Cloudflare for Families", "server": "1.1.1.2:53", "verdict": null, "rcode": null,
+      "error": "Cloudflare for Families: no answer in 4 s" }
+  ],
+  "tranco": { "domain": "example.com", "rank": 185, "date": "2026-11-18", "error": null },
+  "unfiltered_error": null
+}
+```
+
+- Signals only, no score (docs/PLAN.md R-D9).
+- `verdict`: `blocked` (Cloudflare gives `0.0.0.0`, or the filter gives NXDOMAIN while the
+  unfiltered answer has an address), `allowed` (a real address), `no_such_name` (NXDOMAIN
+  from both), `unknown`, or `null` with `error` when the filter did not answer.
+- `tranco.rank`: the newest rank in the Tranco top 1 million, or `null` when the domain is
+  not in the list. A rank shows popularity, not safety.
+- The UDP query uses a random port and ID, and accepts only a reply from the server
+  address with the same ID and question (the upstream rules, amendment A5).
+- The section is `ok` when at least one source answered, else `failed`.
 
 Cache and limits:
 

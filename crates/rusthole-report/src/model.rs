@@ -13,11 +13,13 @@ pub enum Section {
     Rdap,
     /// The TLS certificate of the name on port 443.
     Tls,
+    /// Signals from filtering resolvers and the Tranco popularity rank.
+    Reputation,
 }
 
 impl Section {
     /// All sections, in the order of the UI.
-    pub const ALL: [Self; 3] = [Self::Dns, Self::Rdap, Self::Tls];
+    pub const ALL: [Self; 4] = [Self::Dns, Self::Rdap, Self::Tls, Self::Reputation];
 
     /// The section with the API name `s`.
     pub fn parse(s: &str) -> Option<Self> {
@@ -30,6 +32,7 @@ impl Section {
             Self::Dns => "dns",
             Self::Rdap => "rdap",
             Self::Tls => "tls",
+            Self::Reputation => "reputation",
         }
     }
 
@@ -38,7 +41,7 @@ impl Section {
         match self {
             Self::Dns => Duration::from_secs(5),
             Self::Rdap => Duration::from_secs(10),
-            Self::Tls => Duration::from_secs(8),
+            Self::Tls | Self::Reputation => Duration::from_secs(8),
         }
     }
 
@@ -47,7 +50,7 @@ impl Section {
     pub const fn external(self) -> bool {
         match self {
             Self::Dns => false,
-            Self::Rdap | Self::Tls => true,
+            Self::Rdap | Self::Tls | Self::Reputation => true,
         }
     }
 }

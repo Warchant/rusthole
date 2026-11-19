@@ -299,7 +299,11 @@ def main() -> None:
     write(
         "rdap_json",
         {
-            # The first byte picks the parser: even = bootstrap file, odd = domain answer.
+            # The first byte picks the parser: 0 = bootstrap file, 1 = domain answer,
+            # 2 = Tranco rank answer.
+            "tranco": b"\x02"
+            + b'{"ranks":[{"date":"2026-11-18","rank":185},{"date":"2026-11-17","rank":186}],'
+            + b'"domain":"example.com"}',
             "bootstrap": b"\x00"
             + b'{"version":"1.0","services":[[["com","net"],["https://rdap.verisign.example/com/v1/"]],'
             + b'[["test"],["https://rdap.nic.test"]]]}',

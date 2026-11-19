@@ -112,12 +112,18 @@ describe('Report button', () => {
     await until(() => text(section(root, 'tls')).includes('60 days left'), 'the TLS data');
     expect(text(section(root, 'tls'))).toContain('trusted');
     expect(text(section(root, 'tls'))).toContain('Chain: www.shop.example → Example CA R1');
+    await until(() => text(section(root, 'reputation')).includes('Tranco rank'), 'the reputation data');
+    const rep = text(section(root, 'reputation'));
+    expect(rep).toContain('does not block it');
+    expect(rep).toContain('Cloudflare for Families: no answer in 4 s');
+    expect(rep).toContain('of the top 1 million');
     changeMock((s) => {
       s.settings.report.external = false;
     });
     button(root, 'Refresh').click();
     await until(() => text(section(root, 'rdap')).includes('turned off in the settings'), 'the off state');
     expect(text(section(root, 'tls'))).toContain('turned off in the settings');
+    expect(text(section(root, 'reputation'))).toContain('turned off in the settings');
     // DNS still works.
     expect(text(section(root, 'dns'))).toContain('192.0.2.80');
   });

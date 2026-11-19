@@ -451,7 +451,7 @@ export interface SystemInfo {
 // Section 17: domain report
 
 /** The report sections, in the order of the UI. */
-export type ReportSection = 'dns' | 'rdap' | 'tls';
+export type ReportSection = 'dns' | 'rdap' | 'tls' | 'reputation';
 export type ReportStatus = 'ok' | 'failed' | 'off' | 'unavailable';
 
 export interface ReportResult<D = unknown> {
@@ -527,4 +527,18 @@ export interface TlsReport {
   trust_error: string | null;
   version: string | null;
   chain: CertInfo[];
+}
+
+export interface FilterSignal {
+  name: string;
+  server: string;
+  verdict: 'blocked' | 'allowed' | 'no_such_name' | 'unknown' | null;
+  rcode: number | null;
+  error: string | null;
+}
+
+export interface ReputationReport {
+  filters: FilterSignal[];
+  tranco: { domain: string; rank: number | null; date: string | null; error: string | null };
+  unfiltered_error: string | null;
 }

@@ -4,9 +4,9 @@
   // not block the others.
   import { untrack } from 'svelte';
   import { api, ApiError, errorText } from '../lib/api';
-  import type { DnsReport, RdapReport, ReportResult, ReportSection, TlsReport } from '../lib/api/types';
+  import type { DnsReport, RdapReport, ReportResult, ReportSection, ReputationReport, TlsReport } from '../lib/api/types';
   import { formatDateTime } from '../lib/format';
-  import { ageDays, REPORT_SECTIONS, statusText } from '../lib/report';
+  import { ageDays, REPORT_SECTIONS, statusText, verdictText } from '../lib/report';
 
   let { name }: { name: string } = $props();
 
@@ -146,6 +146,24 @@
           {#if d.chain.length > 1}
             <p class="hint">Chain: {d.chain.map((c) => c.subject ?? '?').join(' → ')}</p>
           {/if}
+        {:else if r.data && s.id === 'reputation'}
+          {@const d = r.data as ReputationReport}
+          <dl class="facts">
+            {#each d.filters as f (f.server)}
+              <dt>{f.name}</dt>
+              <dd>
+                <span class="badge" class:bad={f.verdict === 'blocked'} class:ok={f.verdict === 'allowed'}>{verdictText(f.verdict)}</span>
+                {#if f.error}<span class="muted small">{f.error}</span>{/if}
+              </dd>
+            {/each}
+            <dt>Tranco rank</dt>
+            <dd>
+              {#if d.tranco.error}<span class="muted small">{d.tranco.error}</span>
+              {:else if d.tranco.rank !== null}#{d.tranco.rank.toLocaleString()} <span class="muted small">of the top 1 million ({d.tranco.domain}, {d.tranco.date})</span>
+              {:else}not in the top 1 million <span class="muted small">({d.tranco.domain})</span>{/if}
+            </dd>
+          </dl>
+          <p class="hint">Signals only, not a score. A filter block is a strong sign. A high rank shows that a domain is popular, not that it is safe.</p>
         {/if}
       {/if}
     </div>

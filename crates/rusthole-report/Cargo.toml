@@ -9,6 +9,7 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+getrandom = { workspace = true }
 hickory-proto = { workspace = true }
 parking_lot = { workspace = true }
 reqwest = { workspace = true }

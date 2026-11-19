@@ -1222,6 +1222,8 @@ prop_compose! {
         );
         Config {
             config_version: CURRENT_VERSION,
+            // A random bool from a value that the strategy picks anyway.
+            report: Report { external: session_ttl_seconds % 2 == 0 },
             server,
             upstreams: Upstreams {
                 servers,

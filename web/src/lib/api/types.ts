@@ -405,6 +405,8 @@ export interface Settings {
   acl: { extra_cidrs: string[]; local_subnets: string[] };
   stats: { flush_interval_seconds: number; retention_days: number; recent_queries_size: number };
   lists: { refresh_interval_hours: number };
+  /** The domain report: ask outside services (RDAP, TLS, reputation). */
+  report: { external: boolean };
   /**
    * True when a change since the start needs a restart (upstreams, statistics,
    * listeners, TLS). It stays true until the restart. Read-only.
@@ -444,4 +446,43 @@ export interface SystemInfo {
   os: string;
   arch: string;
   listeners: { kind: 'dns' | 'doh' | 'admin'; address: string }[];
+}
+
+// Section 17: domain report
+
+/** The report sections, in the order of the UI. */
+export type ReportSection = 'dns';
+export type ReportStatus = 'ok' | 'failed' | 'off' | 'unavailable';
+
+export interface ReportResult<D = unknown> {
+  section: ReportSection;
+  name: string;
+  status: ReportStatus;
+  cached: boolean;
+  fetched_at: Timestamp;
+  data: D | null;
+  error: string | null;
+}
+
+export interface DnsRecord {
+  name: string;
+  ttl: number;
+  value: string;
+}
+
+export interface DnsTypeResult {
+  type: string;
+  name: string;
+  status: 'ok' | 'nodata' | 'nxdomain' | 'error' | 'failed';
+  rcode: number | null;
+  records: DnsRecord[];
+  truncated: boolean;
+  error: string | null;
+}
+
+export interface DnsReport {
+  name: string;
+  base: string;
+  cname_chain: string[];
+  types: DnsTypeResult[];
 }

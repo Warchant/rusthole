@@ -984,6 +984,9 @@ stateDiagram-v2
   },
   "lists": {
     "refresh_interval_hours": 24
+  },
+  "report": {
+    "external": true
   }
 }
 ```
@@ -1007,6 +1010,7 @@ stateDiagram-v2
 | `stats.retention_days` | 1 to 365. |
 | `stats.recent_queries_size` | 100 to 100000. The config field is `stats.recent_queries`. |
 | `lists.refresh_interval_hours` | 0 (manual only) or 1 to 168. |
+| `report.external` | The domain report asks outside services (section 17). `false` turns the sections `rdap`, `tls` and `reputation` off. Config `[report] external`. An additive field. |
 
 The response never has secrets: no password hash, no TOTP secret, no token hashes, no TLS
 key.
@@ -1150,6 +1154,7 @@ like every other path.
 | GET, PATCH | `/settings` | 12 |
 | GET | `/audit` | 13 |
 | GET | `/system`, `/system/tls`, `/system/tls/ca.pem` | 14 |
+| GET | `/report/domain/{name}/{section}` | 17 |
 
 Not in the API on purpose: password change (A7: `rusthole passwd` only), config reload
 (A9: no), DHCP.
@@ -1180,3 +1185,79 @@ P5 resolved items 1, 2 and 5:
    the API is open.
 8. **IPv6 (A11).** v1 rejects IPv6 values in transport fields and `ip6.arpa` forwarding
    zones. The version that adds IPv6 transport also allows them. This is an additive change.
+
+## 17. Domain report
+
+The Domains page of the UI shows a report for one name. Each section has its own request,
+its own time limit and its own result, so one slow or failed source does not block the
+others (docs/PLAN.md section 9). All lookups run on the server: the browser talks only to
+rusthole, and the CSP does not change. Host names go through the upstream pool of rusthole,
+never the system resolver (docs/LISTS.md, "Name lookup").
+
+### `GET /report/domain/{name}/{section}`
+
+- `name`: a domain name. An IDN name changes to punycode. A bad name gives 400.
+- `section`: one of the table below. Another value gives 400.
+- Query `refresh=true` skips the cache. `refresh=false` is the default. Another value
+  gives 400.
+
+| Section | Source | Time limit | Outside service |
+|---|---|---|---|
+| `dns` | The upstream pool: A, AAAA, MX, TXT, CAA of the name; NS, SOA of the registrable domain; the CNAME chain of the A answer. | 5 s | No (the upstreams only) |
+
+Response 200:
+
+```json
+{
+  "section": "dns",
+  "name": "mobile.events.data.microsoft.com",
+  "status": "ok",
+  "cached": false,
+  "fetched_at": "2026-11-18T10:00:00Z",
+  "data": { },
+  "error": null
+}
+```
+
+| Field | Rule |
+|---|---|
+| `status` | `ok`: the section has data. `failed`: no source answered, or the answer was not usable; `error` tells why. `off`: `report.external` is `false` (section 12); nothing was sent. `unavailable`: the section does not apply to this name (for example a private address); `error` tells why. |
+| `cached` | `true` when the result came from the cache. |
+| `fetched_at` | The time of the lookup. |
+| `data` | The data of the section, or `null`. |
+| `error` | A short reason, or `null`. |
+
+Data of `dns`:
+
+```json
+{
+  "name": "www.example.net",
+  "base": "example.net",
+  "cname_chain": ["www.example.net.cdn.example"],
+  "types": [
+    {
+      "type": "A", "name": "www.example.net", "status": "ok", "rcode": 0,
+      "records": [{ "name": "www.example.net.cdn.example", "ttl": 60, "value": "192.0.2.80" }],
+      "truncated": false, "error": null
+    }
+  ]
+}
+```
+
+- Each type has its own `status`: `ok`, `nodata` (no record of this type), `nxdomain`,
+  `error` (another response code in `rcode`) or `failed` (no answer in 4.5 s, or an
+  upstream error in `error`). The section is `failed` only when all types failed.
+- At most 32 records for each type (`truncated` is `true` when more exist). A TXT value has
+  at most 1024 bytes, another value at most 512 bytes. Control characters change to `?`.
+- The CNAME chain has at most 16 names.
+
+Cache and limits:
+
+- The server keeps each result in RAM: `ok` and `unavailable` for 1 hour, `failed` for 5
+  minutes, at most 1024 results. `off` is never kept.
+- At most 4 lookups run at a time. A request for the same name and section joins the lookup
+  that runs. A request that finds no free place in 1 s gets 429 with the code `busy` and
+  `Retry-After: 2`.
+- A lookup goes on when the browser goes away, and fills the cache.
+- No report service (tests, tools): 503.
+

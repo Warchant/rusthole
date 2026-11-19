@@ -83,6 +83,18 @@ server; change it when `UpstreamUrl::parse` changes.
 - rusthole v1 uses IPv4 transport only. Forms accept IPv4 for client ids, CIDRs and
   servers, and show a hint for IPv6.
 
+## Domain report and Block (Domains page)
+
+- "Report" opens `src/components/DomainReport.svelte`. It sends one request for each
+  section in `REPORT_SECTIONS` (`src/lib/report.ts`) at the same time, and each card fills
+  in when its answer comes. A failed or busy (429) section shows its error and "Try
+  again"; the other sections do not wait. "Refresh" sends `refresh=true` (skip the server
+  cache). To add a section, add it to `REPORT_SECTIONS`, `ReportSection` and the mock.
+- The UI never calls an outside service. The server does the lookups (docs/API.md
+  section 17). Show the report data as text only.
+- "Block" (`src/components/BlockDomain.svelte`) adds an exact deny rule after a
+  confirmation with group check boxes (`default` is ticked).
+
 ## Background polling and the session idle limit
 
 Each API request moves the idle limit of the session (1 h, docs/API.md section 3). A

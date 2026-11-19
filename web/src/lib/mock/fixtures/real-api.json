@@ -1,5 +1,5 @@
 {
-  "_about": "Answers of a real rusthole admin API, recorded in this order with curl from a Windows development build of commit 5022306 on 127.0.0.1 and 127.0.0.2. Host subnets, paths and the CSRF token are replaced. The config had two DNS and two admin listen addresses and the upstreams udp://192.0.2.53:53 and tls://dns.example:853 (with bootstrap). The PUT /blocking case sent a wrong X-CSRF-Token.",
+  "_about": "Answers of a real rusthole admin API, recorded in this order with curl from a Windows development build of commit 5022306 on 127.0.0.1 and 127.0.0.2. Host subnets, paths and the CSRF token are replaced. The config had two DNS and two admin listen addresses and the upstreams udp://192.0.2.53:53 and tls://dns.example:853 (with bootstrap). The PUT /blocking case sent a wrong X-CSRF-Token. The settings field `report` was added by hand later (the server sends it since the domain report, docs/PLAN.md section 9).",
   "cases": [
     {
       "name": "system",
@@ -70,6 +70,9 @@
           "lists": {
             "refresh_interval_hours": 0
           },
+          "report": {
+            "external": true
+          },
           "rate_limit": {
             "burst": 1000,
             "queries_per_second": 17
@@ -121,6 +124,9 @@
           },
           "lists": {
             "refresh_interval_hours": 0
+          },
+          "report": {
+            "external": true
           },
           "rate_limit": {
             "burst": 1000,
@@ -250,6 +256,9 @@
           },
           "lists": {
             "refresh_interval_hours": 0
+          },
+          "report": {
+            "external": true
           },
           "rate_limit": {
             "burst": 1000,

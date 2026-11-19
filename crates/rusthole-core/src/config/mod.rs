@@ -101,6 +101,9 @@ pub struct Config {
     /// TLS certificate for the admin listener and the DoH listener.
     #[serde(default)]
     pub tls: Tls,
+    /// The domain report of the admin UI.
+    #[serde(default)]
+    pub report: Report,
 }
 
 impl Default for Config {
@@ -121,6 +124,7 @@ impl Default for Config {
             local_dns: LocalDns::default(),
             admin: Admin::default(),
             tls: Tls::default(),
+            report: Report::default(),
         }
     }
 }
@@ -622,6 +626,21 @@ impl Default for Stats {
             retention_days: 30,
             recent_queries: 1000,
         }
+    }
+}
+
+/// The domain report of the admin UI (docs/PLAN.md section 9).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct Report {
+    /// Ask outside services (RDAP, TLS, reputation). When `false`, these sections send
+    /// nothing. The DNS section always works. Default: `true`.
+    pub external: bool,
+}
+
+impl Default for Report {
+    fn default() -> Self {
+        Self { external: true }
     }
 }
 

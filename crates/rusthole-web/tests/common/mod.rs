@@ -41,6 +41,7 @@ pub struct Options {
     pub header_timeout: Duration,
     pub stall_timeout: Duration,
     pub with_password: bool,
+    pub report: Option<rusthole_report::Reporter>,
 }
 
 impl Default for Options {
@@ -51,6 +52,7 @@ impl Default for Options {
             header_timeout: Duration::from_secs(10),
             stall_timeout: Duration::from_secs(40),
             with_password: true,
+            report: None,
         }
     }
 }
@@ -156,6 +158,7 @@ pub async fn harness(opts: Options) -> Harness {
         },
         interfaces: Arc::new(StaticInterfaces::default()),
         assets: opts.assets,
+        report: opts.report,
     };
     let app_state = AppState::new(deps);
     let mut settings = AdminSettings::new(vec!["127.0.0.1:0".parse().unwrap()]);

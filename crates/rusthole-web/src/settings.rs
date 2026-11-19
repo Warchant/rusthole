@@ -92,6 +92,13 @@ pub struct ListsS {
     pub refresh_interval_hours: u32,
 }
 
+/// `report` (docs/PLAN.md R-D12).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ReportS {
+    pub external: bool,
+}
+
 /// The `GET /settings` body.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct SettingsOut {
@@ -102,6 +109,8 @@ pub struct SettingsOut {
     pub acl: AclOut,
     pub stats: StatsS,
     pub lists: ListsS,
+    /// The domain report. An additive field.
+    pub report: ReportS,
     /// True when a change since the start needs a restart (listeners, upstreams, statistics
     /// settings). An additive field.
     pub restart_required: bool,
@@ -118,6 +127,7 @@ pub struct SettingsPatch {
     pub acl: Option<AclIn>,
     pub stats: Option<StatsS>,
     pub lists: Option<ListsS>,
+    pub report: Option<ReportS>,
 }
 
 fn mode_str(m: BlockingMode) -> &'static str {
@@ -185,6 +195,9 @@ pub fn settings_of(cfg: &Config, local_subnets: &[Cidr], restart_required: bool)
         lists: ListsS {
             refresh_interval_hours: cfg.lists.refresh_interval_hours,
         },
+        report: ReportS {
+            external: cfg.report.external,
+        },
         restart_required,
     }
 }
@@ -245,6 +258,9 @@ pub fn apply_patch(cfg: &mut Config, p: SettingsPatch) -> ApiResult<()> {
             e.add("lists.refresh_interval_hours", "Use 0, or 1 to 168.");
         }
         cfg.lists.refresh_interval_hours = l.refresh_interval_hours;
+    }
+    if let Some(r) = p.report {
+        cfg.report.external = r.external;
     }
     if e.0.is_empty() {
         Ok(())
@@ -409,6 +425,7 @@ mod tests {
                 }),
                 stats: Some(s.stats.clone()),
                 lists: Some(s.lists.clone()),
+                report: Some(s.report.clone()),
             },
         )
         .unwrap();

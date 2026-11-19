@@ -3,12 +3,13 @@
 //! The list refresher must not use the system resolver: on a host where `/etc/resolv.conf`
 //! points at rusthole itself, the system resolver needs rusthole to work first. This lookup
 //! goes straight to the upstream pool. It does not pass the ACL, the filter or the cache.
-//! It asks for A records only (amendment A11: IPv4 transport in v1).
+//! `resolve_ipv4` asks for A records only (amendment A11: IPv4 transport in v1).
+//! `lookup` asks for one record type of any kind (the domain report).
 
 use std::net::Ipv4Addr;
 
 use hickory_proto::op::{Query, ResponseCode};
-use hickory_proto::rr::{DNSClass, Name, RData, RecordType};
+use hickory_proto::rr::{DNSClass, Name, RData, Record, RecordType};
 use rusthole_core::DomainName;
 use rusthole_core::cache::CacheKey;
 use tokio_util::sync::CancellationToken;
@@ -35,6 +36,17 @@ pub enum ResolveError {
     NoAddress,
 }
 
+/// The records of one [`HostResolver::lookup`].
+#[derive(Debug, Clone, PartialEq)]
+pub struct LookupAnswer {
+    /// The response code (0 NOERROR, 3 NXDOMAIN, ...).
+    pub rcode: u16,
+    /// The answer section.
+    pub answers: Vec<Record>,
+    /// The authority section (for example the SOA record of a NODATA answer).
+    pub authorities: Vec<Record>,
+}
+
 /// Looks up host names through the upstream pool of a running DNS server. Cheap to clone.
 /// When the server stops, each lookup fails at once.
 #[derive(Debug, Clone)]
@@ -48,18 +60,18 @@ impl HostResolver {
         Self { pool, stop }
     }
 
-    /// The IPv4 addresses of `host`, at most [`MAX_ADDRESSES`]. The time limit is the query
-    /// budget of the pool.
-    pub async fn resolve_ipv4(&self, host: &DomainName) -> Result<Vec<Ipv4Addr>, ResolveError> {
+    /// One lookup of `host` with the record type `rtype` through the upstream pool. The
+    /// time limit is the query budget of the pool. An error code (for example NXDOMAIN) is
+    /// not an error here: see [`LookupAnswer::rcode`]. Used by the domain report.
+    pub async fn lookup(
+        &self,
+        host: &DomainName,
+        rtype: RecordType,
+    ) -> Result<LookupAnswer, ResolveError> {
         let fqdn = format!("{}.", host.as_str());
         let name = Name::from_ascii(&fqdn).map_err(|_| ResolveError::BadName)?;
-        let query = Query::query(name, RecordType::A);
-        let key = CacheKey::new(
-            &fqdn,
-            u16::from(RecordType::A),
-            u16::from(DNSClass::IN),
-            false,
-        );
+        let query = Query::query(name, rtype);
+        let key = CacheKey::new(&fqdn, u16::from(rtype), u16::from(DNSClass::IN), false);
         if self.stop.is_cancelled() {
             return Err(ResolveError::Upstream(UpstreamError::Stopped));
         }
@@ -68,12 +80,22 @@ impl HostResolver {
             r = self.pool.resolve(&key, &query, false, Requester::Local) => r,
         }
         .map_err(ResolveError::Upstream)?;
-        let rcode = answer.message.metadata.response_code;
-        if rcode != ResponseCode::NoError {
-            return Err(ResolveError::Rcode(u16::from(rcode)));
+        let m = answer.message;
+        Ok(LookupAnswer {
+            rcode: u16::from(m.metadata.response_code),
+            answers: m.answers,
+            authorities: m.authorities,
+        })
+    }
+
+    /// The IPv4 addresses of `host`, at most [`MAX_ADDRESSES`]. The time limit is the query
+    /// budget of the pool.
+    pub async fn resolve_ipv4(&self, host: &DomainName) -> Result<Vec<Ipv4Addr>, ResolveError> {
+        let answer = self.lookup(host, RecordType::A).await?;
+        if answer.rcode != u16::from(ResponseCode::NoError) {
+            return Err(ResolveError::Rcode(answer.rcode));
         }
         let addrs: Vec<Ipv4Addr> = answer
-            .message
             .answers
             .iter()
             .filter_map(|r| match &r.data {

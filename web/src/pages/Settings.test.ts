@@ -107,4 +107,21 @@ describe('Settings page', () => {
     await until(() => again.querySelector('textarea') !== null, 'the settings form');
     expect(again.querySelector('.restart-notice')).not.toBeNull();
   });
+
+  it('saves the domain report switch (report.external)', async () => {
+    const t = await startMockApi();
+    const root = render(Settings);
+    const card = async () => {
+      await until(() => [...root.querySelectorAll('h2')].some((x) => text(x) === 'Domain report'), 'the report card');
+      return [...root.querySelectorAll('h2')].find((x) => text(x) === 'Domain report')!.parentElement!;
+    };
+    const c = await card();
+    const box = c.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+    expect(box.checked).toBe(true);
+    box.click();
+    button(c, 'Save').click();
+    await until(() => t.calls.includes('PATCH /settings'), 'the save');
+    const saved = await (await t.mockFetch('/api/v1/settings', { method: 'GET' })).json();
+    expect(saved.report).toEqual({ external: false });
+  });
 });

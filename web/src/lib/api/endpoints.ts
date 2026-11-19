@@ -85,6 +85,10 @@ export function makeApi(c: Client) {
     search: {
       domain: (name: string) => c.get<T.DomainVerdicts>('/search/domain', { name }),
     },
+    report: {
+      domain: (name: string, section: T.ReportSection, refresh = false) =>
+        c.get<T.ReportResult>(`/report/domain/${enc(name)}/${section}`, refresh ? { refresh: 'true' } : {}),
+    },
     rules: {
       ...crud<T.Rule, T.RuleInput>(c, '/rules'),
       test: (kind: T.RuleKind, pattern: string, domain: string) =>

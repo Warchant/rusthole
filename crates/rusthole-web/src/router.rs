@@ -106,6 +106,7 @@ route_table! {
     delete "/lists/{id}" Auth => routes::items::lists_delete;
     post "/lists/{id}/update" Auth => routes::items::lists_update_one;
     get "/search/domain" Auth => routes::misc::search_domain;
+    get "/report/domain/{name}/{section}" Auth => routes::report::domain;
     get "/rules" Auth => routes::items::rules_list;
     post "/rules" Auth => routes::items::rules_create;
     post "/rules/test" Auth => routes::items::rules_test;
@@ -389,6 +390,7 @@ mod tests {
             system: crate::state::SystemStatic::default(),
             interfaces: Arc::new(rusthole_dns::StaticInterfaces::default()),
             assets: Arc::new(crate::assets::PlaceholderAssets),
+            report: None,
         })
     }
 

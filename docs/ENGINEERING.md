@@ -27,6 +27,9 @@ flowchart LR
     lists[rusthole-lists] --> dns
     lists --> core
     lists --> tls
+    web --> report[rusthole-report]
+    report --> dns
+    report --> core
 ```
 
 | Crate | Rule |
@@ -36,6 +39,7 @@ flowchart LR
 | `rusthole-dns`, `rusthole-store`, `rusthole-web` | Thin I/O shell around policy from `rusthole-core`. |
 | `rusthole-tls` | TLS certificates and rustls configs ([TLS.md](TLS.md)). Its policy module is pure; certificate dates use the wall clock. |
 | `rusthole-lists` | List refresher: download, disk cache, schedule, engine swap ([LISTS.md](LISTS.md)). The refresh policy is pure code in `rusthole-core::refresh`. |
+| `rusthole-report` | Domain report (docs/API.md section 17). Pure parts (cache, address guard, value parsers) have unit and property tests; the sections are a thin I/O shell. |
 | `rusthole` | CLI and wiring only. |
 
 ## Code rules

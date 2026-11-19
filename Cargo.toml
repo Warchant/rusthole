@@ -8,6 +8,7 @@ members = [
     "crates/rusthole-web",
     "crates/rusthole-tls",
     "crates/rusthole-lists",
+    "crates/rusthole-report",
     "crates/rusthole",
 ]
 default-members = ["crates/rusthole"]
@@ -29,6 +30,7 @@ rusthole-dns = { path = "crates/rusthole-dns" }
 rusthole-tls = { path = "crates/rusthole-tls" }
 rusthole-store = { path = "crates/rusthole-store" }
 rusthole-lists = { path = "crates/rusthole-lists" }
+rusthole-report = { path = "crates/rusthole-report" }
 rusthole-web = { path = "crates/rusthole-web" }
 
 # Third-party crates. Add new ones here, then use `x = { workspace = true }` in a member.

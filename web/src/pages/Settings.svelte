@@ -107,7 +107,7 @@
     void save('acl', { acl: { extra_cidrs: cidrs } }, 'Access control');
   }
 
-  function saveSection(key: 'cache' | 'rate_limit' | 'stats', label: string) {
+  function saveSection(key: 'cache' | 'rate_limit' | 'stats' | 'report', label: string) {
     return (e: SubmitEvent) => {
       e.preventDefault();
       if (!draft) return;
@@ -258,6 +258,23 @@
           <div class="wide">
             <p class="hint">A longer flush interval gives fewer writes to the SD card. A crash loses the data since the last flush.</p>
             {#if errors.stats}<p class="field-error">{errors.stats}</p>{/if}
+            <button type="submit" class="primary">Save</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Domain report</h2>
+        <form class="form" onsubmit={saveSection('report', 'Domain report')}>
+          <label class="check wide">
+            <input type="checkbox" bind:checked={draft.report.external} />
+            Ask outside services (RDAP, TLS certificate, reputation)
+          </label>
+          <div class="wide">
+            <p class="hint">
+              rusthole sends the name to these services, not the browser. When this is off, only the DNS section works.
+            </p>
+            {#if errors.report}<p class="field-error">{errors.report}</p>{/if}
             <button type="submit" class="primary">Save</button>
           </div>
         </form>

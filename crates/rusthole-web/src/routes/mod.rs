@@ -3,6 +3,7 @@
 pub(crate) mod auth;
 pub(crate) mod items;
 pub(crate) mod misc;
+pub(crate) mod report;
 pub(crate) mod stats;
 
 use std::collections::HashMap;

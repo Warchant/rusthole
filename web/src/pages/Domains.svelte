@@ -2,6 +2,7 @@
   // Search a domain: query counts, which clients asked for it, and which list
   // or rule blocks it (docs/API.md 5.7 and 7.1).
   import BlockDomain from '../components/BlockDomain.svelte';
+  import DomainReport from '../components/DomainReport.svelte';
   import HourHistogram from '../components/HourHistogram.svelte';
   import RangePicker from '../components/RangePicker.svelte';
   import Status from '../components/Status.svelte';
@@ -23,6 +24,7 @@
   let verdicts = $state<DomainVerdicts | null>(null);
   let detailError = $state<string | null>(null);
   let detailLoading = $state(false);
+  let reportFor = $state<string | null>(null);
 
   const grouped = $derived(results ? groupByBase(results) : []);
 
@@ -141,8 +143,17 @@
       </div>
 
       <div class="row actions">
+        <button
+          type="button"
+          aria-pressed={reportFor === d.name}
+          onclick={() => (reportFor = reportFor === d.name ? null : d.name)}
+          title="Find facts about this name: DNS records and outside sources">Report</button
+        >
         <BlockDomain name={d.name} onblocked={reloadVerdicts} />
       </div>
+      {#if reportFor === d.name}
+        <DomainReport name={d.name} />
+      {/if}
 
       <section class="card">
         <h2>Lists and rules</h2>

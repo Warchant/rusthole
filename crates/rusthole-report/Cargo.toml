@@ -1,0 +1,26 @@
+[package]
+name = "rusthole-report"
+description = "Domain report of rusthole: facts about one name from DNS and outside sources."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+hickory-proto = { workspace = true }
+parking_lot = { workspace = true }
+rusthole-core = { workspace = true }
+rusthole-dns = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true

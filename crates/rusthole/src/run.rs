@@ -523,6 +523,10 @@ async fn start_admin(
         },
         interfaces: Arc::clone(interfaces),
         assets: Arc::new(rusthole_web::assets::EmbeddedAssets),
+        // The report asks the upstream pool directly, as the list downloads do.
+        report: Some(rusthole_report::Reporter::new(rusthole_report::Sources {
+            dns: Arc::new(server.host_resolver()),
+        })),
     };
     let app = AppState::new(deps);
     rusthole_web::start(AdminSettings::new(listen), tls, app)

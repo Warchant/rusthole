@@ -22,6 +22,7 @@ rusthole-core = { workspace = true }
 rusthole-dns = { workspace = true }
 rusthole-import = { workspace = true }
 rusthole-lists = { workspace = true }
+rusthole-report = { workspace = true }
 rusthole-store = { workspace = true }
 rusthole-tls = { workspace = true }
 rustls = { workspace = true }

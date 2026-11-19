@@ -248,6 +248,23 @@ file and has no extension gets `index.html` (the UI routes); a missing file with
 gets 404, so a script URL never gets HTML. An unknown `/api/` path gets a JSON 404, never the
 UI. The UI has no inline script or style (the CSP refuses them).
 
+## 9a. Domain report (outbound requests)
+
+The domain report (docs/API.md section 17) makes rusthole send requests for a name that an
+admin selects. The rules:
+
+- Only a logged-in admin can start a report. The browser talks only to rusthole: the CSP
+  stays `connect-src 'self'`.
+- Host names go through the upstream pool, never the system resolver.
+- TLS and HTTP connections of the report go to public IPv4 addresses only
+  (`rusthole_report::guard::is_public_v4`): never to loopback, private, link-local, CGNAT,
+  documentation or reserved addresses. This stops a report from probing the LAN (SSRF).
+- At most 4 lookups run at a time, each with a time limit. Results stay in RAM for at most
+  1 hour (RDAP: 24 hours). Nothing goes to disk.
+- `report.external = false` turns off all sections that ask an outside service.
+- Answer data from the network is untrusted: each value is safe text with a size limit,
+  and the UI shows it as text, never as HTML.
+
 ## 10. Tests and fault injection
 
 Integration tests run a real listener on `127.0.0.1` (port 0) over HTTPS with a reqwest

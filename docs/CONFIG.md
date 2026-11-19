@@ -111,6 +111,14 @@ flowchart LR
 | `retention_days` | integer | `30` | Days of history in the database. |
 | `recent_queries` | integer | `1000` | Size of the in-RAM ring of recent queries, at most 1000000. |
 
+### `[report]`
+
+The domain report of the admin UI (docs/API.md section 17).
+
+| Field | Type | Default | Meaning |
+|---|---|---|---|
+| `external` | bool | `true` | Ask outside services for the report: RDAP, the TLS certificate of the name, and reputation services. When `false`, these sections send nothing. The DNS section always works: it uses the upstreams. |
+
 ### `[lists]` and `[[lists.adlists]]`
 
 | Field | Type | Default | Meaning |
@@ -311,6 +319,9 @@ interval_seconds = 60
 flush_interval_seconds = 60
 retention_days = 30
 recent_queries = 1000
+
+[report]
+external = true
 
 [lists]
 refresh_interval_hours = 24

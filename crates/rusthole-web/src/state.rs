@@ -124,6 +124,8 @@ pub struct AdminDeps {
     pub interfaces: Arc<dyn InterfaceSource>,
     /// The UI files.
     pub assets: Arc<dyn AssetSource>,
+    /// The domain report. `None`: report endpoints answer 503.
+    pub report: Option<rusthole_report::Reporter>,
 }
 
 impl fmt::Debug for AdminDeps {

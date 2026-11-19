@@ -52,7 +52,7 @@ pub use identity::{ClientResolver, IdentityService, IdentitySettings};
 pub use interfaces::{InterfaceSource, StaticInterfaces, SystemInterfaces};
 pub use neighbors::{NeighborSource, NeighborTable, StaticNeighbors, SystemNeighbors};
 pub use policy_filter::{BlockingControl, EngineHandle, PolicyFilter, ToggleError, engine_handle};
-pub use resolve::{HostResolver, ResolveError};
+pub use resolve::{HostResolver, LookupAnswer, ResolveError};
 pub use server::{
     BoundListener, DnsServer, DnsSettings, ListenMode, ServerDeps, SettingsError, StartError,
     TcpLimits, start,

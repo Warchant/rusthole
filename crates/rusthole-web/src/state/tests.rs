@@ -34,6 +34,7 @@ fn state_with(store: ConfigStore, live: Arc<CountApply>) -> AppState {
         system: SystemStatic::default(),
         interfaces: Arc::new(rusthole_dns::StaticInterfaces::default()),
         assets: Arc::new(crate::assets::PlaceholderAssets),
+        report: None,
     })
 }
 

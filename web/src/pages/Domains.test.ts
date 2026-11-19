@@ -1,6 +1,5 @@
 // @vitest-environment happy-dom
-// The "Block" button of the Domains page: a confirmation with groups, then an
-// exact deny rule (docs/PLAN.md R-D13).
+// The "Block" and "Report" buttons of the Domains page (docs/PLAN.md section 9).
 import { afterEach, describe, expect, it } from 'vitest';
 import { parseHash } from '../lib/routes';
 import { nav } from '../lib/state.svelte';
@@ -73,5 +72,59 @@ describe('Block button', () => {
     button(root, `Block ${NAME}`).click();
     await until(() => text(root.querySelector('[role="status"]')).includes('exists'), 'the result');
     expect(text(root.querySelector('[role="status"]'))).toBe('An exact deny rule for this name exists. Change it on the Rules page.');
+  });
+});
+
+describe('Report button', () => {
+  function section(root: HTMLElement, id: string): HTMLElement {
+    return root.querySelector<HTMLElement>(`[data-section="${id}"]`)!;
+  }
+
+  it('shows the DNS section, and Refresh skips the cache', async () => {
+    const h = await startMockApi();
+    const root = open(NAME);
+    await until(() => [...root.querySelectorAll('button')].some((b) => text(b) === 'Report'), 'the Report button');
+    expect(root.querySelector('[aria-label="Domain report"]')).toBeNull();
+    button(root, 'Report').click();
+    await until(() => text(section(root, 'dns')).includes('192.0.2.80'), 'the DNS records');
+    const dns = section(root, 'dns');
+    expect(text(dns)).toContain(`CNAME chain: ${NAME} → shop.example.cdn.example`);
+    expect(text(dns)).toContain('no answer in 4500 ms');
+    expect(h.calls).toContain(`GET /report/domain/${NAME}/dns`);
+    button(root, 'Refresh').click();
+    await until(() => h.calls.includes(`GET /report/domain/${NAME}/dns?refresh=true`), 'the refresh request');
+    // A second click closes the report.
+    button(root, 'Report').click();
+    await until(() => root.querySelector('[aria-label="Domain report"]') === null, 'the closed report');
+  });
+
+  it('a failed section shows its error and a retry, and the page stays usable', async () => {
+    let fail = true;
+    await startMockApi((url) =>
+      url.includes('/report/domain/') && fail ? json(429, { code: 'busy', message: 'Too many reports run now.' }) : null,
+    );
+    const root = open(NAME);
+    await until(() => [...root.querySelectorAll('button')].some((b) => text(b) === 'Report'), 'the Report button');
+    button(root, 'Report').click();
+    await until(() => text(section(root, 'dns')).includes('Too many reports'), 'the busy text');
+    fail = false;
+    button(section(root, 'dns'), 'Try again').click();
+    await until(() => text(section(root, 'dns')).includes('192.0.2.80'), 'the records after the retry');
+    // The Block button still works.
+    expect(button(root, 'Block').disabled).toBe(false);
+  });
+
+  it('a section with status "off" shows its reason, not a failure', async () => {
+    await startMockApi((url) =>
+      url.includes('/report/domain/')
+        ? json(200, { section: 'dns', name: NAME, status: 'off', cached: false, fetched_at: '2026-11-18T10:00:00Z', data: null, error: 'turned off in the settings (report.external)' })
+        : null,
+    );
+    const root = open(NAME);
+    await until(() => [...root.querySelectorAll('button')].some((b) => text(b) === 'Report'), 'the Report button');
+    button(root, 'Report').click();
+    await until(() => text(section(root, 'dns')).includes('turned off in the settings'), 'the off text');
+    expect(text(section(root, 'dns'))).toContain('turned off');
+    expect(section(root, 'dns').querySelector('.field-error')).toBeNull();
   });
 });

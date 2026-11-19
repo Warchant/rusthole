@@ -140,6 +140,7 @@ function initialState() {
       acl: { extra_cidrs: ['198.51.100.0/24'], local_subnets: ['192.0.2.0/24'] },
       stats: { flush_interval_seconds: 60, retention_days: 30, recent_queries_size: 1000 },
       lists: { refresh_interval_hours: 24 },
+      report: { external: true },
     } as Omit<T.Settings, 'restart_required'>,
     /** True after a change of upstreams or stats, until a restart (a mock reset). */
     restartRequired: false,
@@ -766,6 +767,38 @@ route('POST', '/lists/:id/update', ({ params }) => {
   return { started: true };
 });
 
+// Domain report (docs/API.md section 17). Fixed data, no network.
+const REPORT_SECTIONS: T.ReportSection[] = ['dns'];
+route('GET', '/report/domain/:name/:section', ({ q, params }) => {
+  const name = decodeURIComponent(params[0]!).trim().toLowerCase();
+  const section = params[1] as T.ReportSection;
+  if (!/^[a-z0-9.-]+$/.test(name) || name.length > 253) throw new HttpError(400, 'bad_request', 'The name is not a valid domain name.');
+  if (!REPORT_SECTIONS.includes(section)) throw new HttpError(400, 'bad_request', `Unknown section. Use one of: ${REPORT_SECTIONS.join(', ')}.`);
+  const refresh = q.get('refresh');
+  if (refresh !== null && !['true', 'false', '1', '0'].includes(refresh)) throw new HttpError(400, 'bad_request', '`refresh` is true or false.');
+  const parts = name.split('.');
+  const base = parts.slice(-2).join('.');
+  const rec = (value: string) => [{ name, ttl: 300, value }];
+  const t = (type: string, n: string, records: T.DnsRecord[]): T.DnsTypeResult => ({
+    type, name: n, status: records.length > 0 ? 'ok' : 'nodata', rcode: 0, records, truncated: false, error: null,
+  });
+  const data: T.DnsReport = {
+    name,
+    base,
+    cname_chain: name.startsWith('www.') ? [`${base}.cdn.example`] : [],
+    types: [
+      t('A', name, rec('192.0.2.80')),
+      t('AAAA', name, []),
+      t('MX', name, []),
+      t('TXT', name, rec('v=spf1 -all')),
+      t('CAA', name, []),
+      t('NS', base, [{ name: base, ttl: 3600, value: `ns1.${base}` }]),
+      { ...t('SOA', base, []), status: 'failed', rcode: null, error: 'no answer in 4500 ms' },
+    ],
+  };
+  return { section, name, status: 'ok', cached: false, fetched_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), data, error: null } satisfies T.ReportResult<T.DnsReport>;
+});
+
 // Domain search: which list or rule blocks a name
 route('GET', '/search/domain', ({ q }) => {
   const name = (q.get('name') ?? '').trim().toLowerCase();
@@ -992,7 +1025,7 @@ route('GET', '/settings', () => settingsOut());
 route('PATCH', '/settings', ({ body }) => {
   const b = obj(body);
   // `restart_required` is read-only: the server refuses it as an unknown field.
-  onlyFields(b, ['upstreams', 'blocking', 'cache', 'rate_limit', 'acl', 'stats', 'lists']);
+  onlyFields(b, ['upstreams', 'blocking', 'cache', 'rate_limit', 'acl', 'stats', 'lists', 'report']);
   const next = structuredClone(state.settings);
   if (b.upstreams) {
     const u = b.upstreams as T.Settings['upstreams'];
@@ -1029,6 +1062,7 @@ route('PATCH', '/settings', ({ body }) => {
     if (s.recent_queries_size < 100 || s.recent_queries_size > 100000) invalid('stats.recent_queries_size', 'Use 100 to 100000.');
     next.stats = s;
   }
+  if (b.report) next.report = { external: Boolean((b.report as T.Settings['report']).external) };
   if (b.lists) {
     const l = b.lists as T.Settings['lists'];
     if (l.refresh_interval_hours < 0 || l.refresh_interval_hours > 168) invalid('lists.refresh_interval_hours', 'Use 0, or 1 to 168.');

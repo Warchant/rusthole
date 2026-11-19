@@ -811,6 +811,7 @@ async fn static_assets_and_spa_fallback() {
     files.insert("favicon.svg".to_owned(), b"<svg/>".to_vec());
     let h = harness(Options {
         assets: Arc::new(MemoryAssets(files)),
+        report: None,
         ..Options::default()
     })
     .await;

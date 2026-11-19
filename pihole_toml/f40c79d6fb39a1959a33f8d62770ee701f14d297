@@ -1,0 +1,15 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams=[1"29  .0..253", 0"192.0.2.54",""2001:db8:
+[dns]
+upstreams=[1"30  .0..253", 0"192.0.2.54",""2001:db8::53", }"2001:db8:1:db8:
+[dns]
+ups .0..253", 0"192.0.2.54",""2001:db8:
+[dns]
+upstreams=[1"29  .0..253", 0"192.0.2.54",""2001:db8::53", }"2001:db8::54"]
+inteface = ""
+li"2001:db8::54"]
+interface = ""
+listunde = 2NULL"
+
+[dns.rash = ""

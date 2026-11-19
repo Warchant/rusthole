@@ -1,0 +1,10 @@
+# Ps]
+upstreams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningModcnameRecmeRecords = []
+upstreamss = []
+
+secrupstreamss = []
+
+secret = ""
+app_pwhash = ""

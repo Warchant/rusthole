@@ -1,0 +1,8 @@
+# rusthole.toml: a full example. docs/CONFIG.md api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# ce"]

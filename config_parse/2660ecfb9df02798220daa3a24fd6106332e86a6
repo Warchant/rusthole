@@ -1,0 +1,18 @@
+# rusthole.toml: a full example. docs/Cgroups_]
+name =a"e fdul_dir = # rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come froth me docu"/var/lib/rusthole"
+
+[server.doh]
+enabled = faloups =mentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv4 only f ["ds of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups_]
+name =a"e fdul_dir = # rusthole.tomefault"or AAA]
+

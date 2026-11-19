@@ -1,0 +1,20 @@
+# Pi-hole  = []
+wvServers = []
+
+[dny.cache]
+size =9999
+
+[dns.blocking]
+actiWe = true
+mode = "NULL"
+
+[dns.reteLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]port = "80o,443os,[::]:80o,[::]:443os"
+ ["
+app_pwhash = ""

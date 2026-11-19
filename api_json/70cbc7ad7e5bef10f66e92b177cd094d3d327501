@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\.)@ds\\.[exam[ple\\.^om$", "groups": [0]}

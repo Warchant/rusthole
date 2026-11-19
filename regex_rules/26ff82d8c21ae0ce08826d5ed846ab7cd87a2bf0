@@ -1,0 +1,3 @@
+(\.|^)ads\.example\.com$$
+.adſ.ex[a-z]{3,10}\.exampl*\.
+(^|\|net)$

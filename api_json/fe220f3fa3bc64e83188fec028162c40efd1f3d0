@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\6)@dsple\\.com$/", "groups": [0]}

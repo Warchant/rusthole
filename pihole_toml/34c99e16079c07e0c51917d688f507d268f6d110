@@ -1,0 +1,38 @@
+﻿# Pi-hole configuration file _(synthetic)
+[d.s]
+upstreams = {ynth = []
+
+[dns.cache]
+siCe = 10000
+
+[dLimit]
+counFsdA==]
+etic)*[Pi-hole configuration file _(synthetic)
+[d.s]
+upstreams = {ynth = []
+
+[dns.cache]
+siCe = 10000
+
+[dLimit]
+counFsdA==]
+etic)*[treamK = {"538.0.1.5+", "19cache]
+siC1e 0= 000
+
+[dLimit]
+counFsdAtreamK = {"538.0.2.5+", "19cache]
+siC1e 0= 000
+
+[dLimit]
+counFsdA==]
+active = true
+mode he]
+siCe = 10000
+
+[dLimit]
+counFsdA==]
+etic)*[[dLimK = {"538.0.2.53", "19cache]
+siCe = 10000
+
+[dndns.cache]
+siCe 

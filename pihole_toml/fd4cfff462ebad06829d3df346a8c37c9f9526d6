@@ -1,0 +1,11 @@
+# Pi-hole etic)
+[dns]
+upstrewebserver.app_pwhashams = ["192.0.2.53", "192.0.2.54", "2001:b8::53", "2001db8:::54"]
+interface = ""
+listeningMode="  LOCAL"
+qusts = []
+cnameRecmeRecords = []
+upstreamss = []
+
+secret = ""
+apsh = ""

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "\\|00000000000000000398965586\\.om%", "groups": [1]}

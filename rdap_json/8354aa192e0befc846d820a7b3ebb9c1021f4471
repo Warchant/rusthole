@@ -1,0 +1,1 @@
+{"objectClassNents":[{"eventAction":"regist4eon","eventDate":"|.NET"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registrar"],"publicIds":[{"identifier":"376"}],"vcardArray":["vcard",[["nn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["em)il",{},"text","abuse@example.net"]]]}]}]}

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(c|pstrs\\.)an`me;ds.ex.es\\.eas.jpa\\/com$:", "groups": [3]}

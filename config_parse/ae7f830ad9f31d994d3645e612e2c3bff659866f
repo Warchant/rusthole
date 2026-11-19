@@ -1,0 +1,10 @@
+# rusthole.toml: a full example. doCONFIG.md explains each field.
+#2.2"]
+port = 8443
+
+[upstreams]
+ [""""eou# rusthole.toml: a full example. doccu*entation ranges
+# 192.0.2.0/24, 198.51.*00.0/24 and 2001:db8::/32. v1 uses IPv6 only _r = "192.0.M.0/24"
+servtyp= "192..admin]
+enabled = true
+lm fi = ["e

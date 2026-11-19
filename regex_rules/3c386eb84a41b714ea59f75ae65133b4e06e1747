@@ -1,0 +1,8 @@
+(\.|s\b
+^[^.]ample\.com$
+^tracker[0-9]*\.
+(^|\.)telemeample\.com$
+^tracker[0-9]*\.
+(^|\.)tlu\.com&
+^tracker[0-9]*\.
+(^|\.)telemevry\.example\.net$.a$

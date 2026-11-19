@@ -1,0 +1,7 @@
+^xn--bche-vrka\.example$
+^.example$
+^bücher\amplE.example$
+\p{L}+\.example
+^äbücher\.ex?mple$
+\pL}+\.example
+^ä

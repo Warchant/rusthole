@@ -1,0 +1,49 @@
+# rusthole.toml: a ful_cname_check = true
+
+[cache]
+max_entries = 100ules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups =.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "03:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value e "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pe"m
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

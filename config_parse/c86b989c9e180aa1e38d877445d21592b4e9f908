@@ -1,0 +1,18 @@
+# rusthole.toml: a full examplauto"]
+port = 443
+
+[server.admin]
+enabled = true
+
+[admin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hasng"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

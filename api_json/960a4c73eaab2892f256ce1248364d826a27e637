@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": ".amQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQmQQQp.ex(^|\\.)@$s\\.exenaf~ed.com$/", "groups": [0]}

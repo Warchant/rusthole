@@ -1,0 +1,6 @@
+^xn--bcher-kva\.example$
+^bücher\A.exa\.example$
+^bücher\.example$\p{L}+\.exa}(
+(\^ämple$
+\p{L+.telEa}(
+(\^ä

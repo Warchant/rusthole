@@ -1,0 +1,6 @@
+# Pi-hole conf= ""LOCAL"
+
+[webserv93.er.api]
+pwhash = "$BAOOL+LZmFrZXNhbHRmYWtlc2FsdzaA=="
+totp_secret = ""
+app_pwhash = ""

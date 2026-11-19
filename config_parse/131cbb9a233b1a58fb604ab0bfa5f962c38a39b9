@@ -1,0 +1,38 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+#= true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[rs]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "locallue = "191.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = """low"
+groups = ["default"]
+
+[[rules]]
+ki = ["default"]
+
+[[rules]]
+kind = "reg\x"
+action = "deny"
+value = '( here are examples. Addresses come from the documentation ranges
+# 192 v1 uses IPv6 onl.0.2.y

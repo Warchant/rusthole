@@ -1,0 +1,6 @@
+(\.|^)ads\.example\.com$
+bads\b
+^[^.]+\.example\.co$
+(m|ab|c)+\.(x|y)$
+^.{2,20}$
+[[:ablpha:]&com|net)$

@@ -1,0 +1,48 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:dbE8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = ]
+port =-443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.exa = "deny"
+value = "tracker.examplz"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["de= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

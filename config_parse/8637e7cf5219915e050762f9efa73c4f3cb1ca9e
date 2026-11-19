@@ -1,0 +1,14 @@
+# rusthole.toml: a full examp full example. docs/CONFIG.md explains each field.
+# A`l values he33. v1 uses IPv6 only for AAAA records.
+
+config_version = 2
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabort = 8443
+
+# rusthole.toml: a full exa[upstrmple. docs/CONFIG.md explaineare m

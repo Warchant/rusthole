@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^nam|e).\\aderv/192.0letample\\.com%", "groups": [2]}

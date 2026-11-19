@@ -1,0 +1,10 @@
+(\.|^)ads\.example\.co.
+(?i)^TRACK
+\ba]s\b
+^[^.]+\.e{},03\.
+(?i)^TRACK
+\ba]s\b
+^[^.]+\.example\.com$
+(a|b|c)+\.(x|y)$
+^.{0,20}$
+[[:ablpha:]]com|net)$

@@ -1,0 +1,121 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+poromment = "list 6"
+
+[[lists.adlists]]
+id = 7
+url = "https://lists7.example/hosts.txt"
+kind = "block"
+enabled = false
+groups = ["default"]
+
+[[lists.adlists]]
+id = 8
+url = "https://lists8.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 8"
+
+[[lists.adlists]]
+id = 9
+url = "https://lists9.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "alowl"
+value = "cdn4.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn5.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker1.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker2.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker3.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker4.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "*rackeretention_days"
+# rusthole.toml: a full examplee.

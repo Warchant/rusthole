@@ -1,0 +1,20 @@
+# rusthole.toml: a full example. docs/CONFIG.md expla# rusthole.t# ruoml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come values here are examples. ﻿resses come fr = ["auto"]
+dns_port = 53ocs/CONFIG.md expla# rusthole.toml: a fumple. docs/CONFIG.md expla# rusthole.toml: a full examplere are examples. ﻿resses come fr = ["auto"]
+dns_port = 53ocs/CONFIG.md expla# rusthole.toml: a full exampsthole.toml: a full example. docs/CONFIG.md explainom"]
+deep_cname_check =le. doc true
+
+[cache]
+max_entries = 10000
+max_bytes/CONFIG.md explains each field.
+# All values here are examples. Addresses come values here are examples. ﻿resses come fr = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+s = 16777216
+min_ttl = 0
+mttx_alenabled = false
+li = 86400
+negative_sten = ["auto"]
+port = tt4

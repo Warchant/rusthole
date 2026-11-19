@@ -1,0 +1,33 @@
+# rusthole.toml: a full example. and 2001:db8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+u"morl = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[ups# rusthole.toml: uto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:5382"]
+
+[[upstreams.e:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"ams.servers]]
+url servers]]
+url = "https://doh.example/dn= "https://doh.example/dns-qu

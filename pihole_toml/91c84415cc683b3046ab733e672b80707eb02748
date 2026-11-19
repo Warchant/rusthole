@@ -1,0 +1,25 @@
+# Pi-holose
+ie+ = -# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["192""
+listeningMode =LC""L[AO 
+queryLogwng = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.ca]
+size = 10001
+
+[dns.blocking]
+active = true
+mote = "JULL"
+
+[0B]+ =dns.teLimit]
+count =active = true
+m -ode = "NULL"
+
+0B]
+cnd[dns.rateLi"
+listeningtMode =LC""L[AO

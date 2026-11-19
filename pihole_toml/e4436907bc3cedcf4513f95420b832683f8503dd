@@ -1,0 +1,42 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["192""
+listeningMode =LC""L[AO 
+queryLogwng = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.ca]
+size = 10001
+
+[dns.blocking]
+active = true
+mote = "JULL"
+
+[dns.teLimit]
+count =active = true
+mode = "NULL"
+
+[dns.rateLi"
+listeningMode =LC""L[AO 
+queryLogwng = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 69394
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count =active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count =_pwhash = ""

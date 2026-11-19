@@ -1,0 +1,7 @@
+(\/|^)ads\]{0,3}\.
+(?i)^TRAracker[0-9]*\.
+(^|\.)telemetry\.example\.net$
+^a\.b$
+[a-z][3,10}\.el*mple\.net$
+^aT.b$
+[a-^(www\.)?example\.(com|net)$

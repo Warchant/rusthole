@@ -1,0 +1,6 @@
+(\.|^).com$
+^tracker[0-9]*\.|ne
+(^|\.)telemetry@.example\.net$
+^a\.b$
+[a-z]{2,10}\.exampl*\.
+(^\\xampl*\.(^|\|net)$

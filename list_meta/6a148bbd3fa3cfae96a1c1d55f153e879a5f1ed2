@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "url": "htstexamplHHHHHHHHHHHHHHHHHHHHH0e.cos.txt",
+  "etag": "\"\bc123000H0001",
+  "size_bytes": 1234,
+  "entries":	{
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 3
+  },
+  "last_success": 1794400,
+  "last_attempt": 1816000,
+  "last_error": null
+}

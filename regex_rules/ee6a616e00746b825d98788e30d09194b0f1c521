@@ -1,0 +1,4 @@
+(\.examply.b$
+[a-z]{3,10}.lan$
+^adc\.exampls\.exa$
+(www\.)?example\.(com|net)$

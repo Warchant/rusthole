@@ -1,0 +1,30 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fi
+[tls]1 uses IPv6 only for AAAA "]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clien00000000000000000000000000000000000"
+
+[tls]1 uses IPv6 only for AAAA "]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

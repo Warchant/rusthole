@@ -1,0 +1,15 @@
+# Pi-hole configuration file (synthetic)
+[dhc]
+upstreams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::]:443os"
+
+[webserver.api]
+# Pi-hpole cow

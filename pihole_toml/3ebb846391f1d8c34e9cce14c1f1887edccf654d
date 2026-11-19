@@ -1,0 +1,9 @@
+w# Pi-hole cns.cache]
+sizeng]
+active =u t{"384.0.2.53", "192.0.2e
+*[webserver]
+]
+active =u t{"192.0.2.53", "192.0.2.54", "2001:db8::53", "2001Ae
+dnssec = true
+hosts = []
+cnameR""

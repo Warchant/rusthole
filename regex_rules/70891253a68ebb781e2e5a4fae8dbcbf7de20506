@@ -1,0 +1,8 @@
+^ad[sx]?[0-9]{0,3}\.
+(?i)^TRACK
+\bads\b
+^[^.]+\.example\.com$
+(a|bam|c)+\.(x|y)$
+^.{1,20}$
+[[:ablpha:]]+\.net
+\d+\.\d+

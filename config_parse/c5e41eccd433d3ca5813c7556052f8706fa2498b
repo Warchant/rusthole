@@ -1,0 +1,94 @@
+# rusthole.toml: a full example. "
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.cnamesconditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cerbled = false
+listen = ["auto"]
+port = 443
+
+[server.admindmin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+urlocal_dns.cnamesconditional_forwarding]]
+cidr 2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.cnamesconditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cerbled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_pla= "192.0.2.0/24"
+server = "1il"udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+urlocal_dns.cnamesconditional_forwarding]]
+cidr 2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.cnamesconditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cerbled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_pla= "192.0.2.0/24"
+server = "1ile", se]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstra.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+sthole.lan"]

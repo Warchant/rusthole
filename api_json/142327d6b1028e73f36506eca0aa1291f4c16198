@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "\\|Z(.)ads\\.example9999999999999999%", "groups": [1]}

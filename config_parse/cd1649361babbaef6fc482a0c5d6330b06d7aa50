@@ -1,0 +1,11 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/2#le.toml: a full example. docs/CONFIG.md explains eachme from the documentation rangrecent_queries/2# rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32.ses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server#]
+dns_listell example v1 uses IPv6 only for AAAA recle.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPvrver#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = "/var/lib/G.md explaruis

@@ -1,0 +1,8 @@
+(
+[^ad^ad[sx]?[0-9]{0,3}\.
+(?i)^TRAC[
+\bads\b
+^[^.]+\.exampa[sx]?[0-9]{0,3}\.
+(?i)^TRACK
+\bads\b
+^[^.]+\.exampa

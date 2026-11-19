@@ -1,0 +1,10 @@
+^.|^e\.com$
+^trle\
+^trle\.com$
+^tracker[0-9]*\.|ne
+&
+\p{L}+\.examp.com$
+^tracker[0-9]*\.|ne
+&
+\p{L}+\.example
+^ä

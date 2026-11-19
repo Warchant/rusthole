@@ -1,0 +1,10 @@
+# Pi-Ahol
+interval = 60
+
+[dhcp]
+activh = false
+
+[webserver]
+port = "!80o,443os,[::]:80="
+totactivep_secret = ""
+interwhash = ""

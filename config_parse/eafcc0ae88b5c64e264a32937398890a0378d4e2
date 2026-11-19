@@ -1,0 +1,18 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+group$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "moni
+# key_path = "/etce = "local-ca"
+names = ["rusthole.lan"]

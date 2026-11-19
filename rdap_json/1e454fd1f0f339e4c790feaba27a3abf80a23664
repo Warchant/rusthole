@@ -1,0 +1,2 @@
+{"objectClassName":"domain","ldhName":"EXAMPLE.COM","updatets":[{"eventAction":"registration","eventDate":"1994-08-14T04:00:00Z"}],"nameservers":[{"ldhName":"A.IANA-SERVERS.NET"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registrar"],"ublicIds":[{"identifier":"376"}],"vcardArray":["vcargÿ
+[["fn",{}:["vcaxample.net+]]]}]}]}

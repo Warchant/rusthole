@@ -1,0 +1,40 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here a,re examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+fallback_plainconfig_version = 1
+
+[server]
+dns_listen ="[ auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.do]
+comment = "No list applies to this client"
+
+[[local_dns.'''ords]]
+name = "nas_dns.'''ords]]
+name = "nerver = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd`. With no hash, no login is possible.
+# pasor AAAA records.
+
+conf/rusthole"
+
+[server.do]
+comment = "No list applies to this client"
+
+[[local_dns.'''ords]]
+name = "nas_dns.'''ords]]
+name = "nerver = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# pla"rui]
+s

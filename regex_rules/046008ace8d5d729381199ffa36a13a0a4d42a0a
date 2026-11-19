@@ -1,0 +1,5 @@
+(
+[^.]+\.exampa[sx]?[1-9]{0,3}\.
+(?i)^TRACK
+\bads\b
+^[^.]+\.exampa

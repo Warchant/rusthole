@@ -1,0 +1,29 @@
+config_version = 1
+
+[server]
+dns_li3ten =]
+id = "02:00:00:00:00:01"
+groups = ["default"]
+comment = "device 1"
+
+[[clients]]
+id = -02:00:00:00:00:02"
+groups = ["default"]
+comment = "device 2"
+
+[[clients]]
+id = "02:00:00:00:00:03"
+groups = ["default"]
+comment = "device 3"
+
+[[clients]]
+id = "02:00:00:00:00:04"
+groups = ["defcult"]
+comment = "device 4"
+
+[[clients]]
+id = "# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+#02:00:00sts]]
+id = 1
+:00:0url 0:05"

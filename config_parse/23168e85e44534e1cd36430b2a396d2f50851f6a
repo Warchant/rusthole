@@ -1,0 +1,229 @@
+# rusthole.tom-l: a full example.$docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation rangemax_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 2#AA records.
+
+config_versior]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8ly for AAAA records
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[li= false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+gd = "192.0.@.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["ioranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/327 [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fa0lse
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["19.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0= "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl "]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[n = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/va full example. docfield.
+# All values r/libhrtsolu/e"
+
+[here ares efault"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)as = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "ht# rusthole.toml: a full# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come frtps://lists.exampom the documentation ranges
+# 096.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for r/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthOle"
+
+[server.doh]
+enabled # rusthole.toml: a full example. docs/CONFIle/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+ds\.example$'
+groups = ["default",ges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/pusthole"
+
+[server.= 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+ghe documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_p# rustort = 53
+data_dir = "/G.md explains each field.
+# All values here are examplevar/lib/rusthol

@@ -1,0 +1,22 @@
+[dns]
+upstreams = ["0ue
+hosts = []
+cnameRecords = []
+revServers  10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count t 900
+Interval = 60
+
+[dhcp]
+a t 9 1000
+Interval = 60
+
+[dhcp]
+active = []
+= 2.0.
+2.54", "2

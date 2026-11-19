@@ -1,0 +1,1 @@
+{"obam":{"delegationSigned":true},"entities":[{"roles":["regitrasr"],"publicIds":[{"idener":"376"}],"vcardArray":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["email",{},"text","abuse@.example.net"]]]}]}]}

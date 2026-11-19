@@ -1,0 +1,19 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = {"193.0.# Pi-hole congMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRe.cords = []
+reordns.blocking"""ctive = = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRe.cords = []
+reordns.blocking"""ctive = t# Pi-hole ce congMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRe.cords = []
+reordns.blo2.53"cking"""ctive = = "LOCAL"
+, "qu

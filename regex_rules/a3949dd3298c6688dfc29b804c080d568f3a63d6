@@ -1,0 +1,5 @@
+(0}\.example\.\.|^)asd\.example\.\.b$
+[a-z]{1,10}\.example\.org
+^xn--
+.*\.lan$
+^(www\.)?example\.(com|net)$

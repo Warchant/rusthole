@@ -1,0 +1,8 @@
+(
+[^ad[R
+CK
+\bads\b
+^[^.\bads\b
+^[^.]+\.exa\b
+^[^.\bads\b
+^[^.]+\.exampa

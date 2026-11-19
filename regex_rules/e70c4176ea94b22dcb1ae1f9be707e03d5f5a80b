@@ -1,0 +1,6 @@
+(\.|^)ads\.example\.com$wads\b
+^[^.]+\.example\.com$
+(a|b|c)+\.(x|y)$
+^.{1,20}$
+[[:1abl$
+[a-z]{3

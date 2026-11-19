@@ -1,0 +1,6 @@
+config_version = 0
+
+[server]
+dns_listen = ["auto"]
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All vadns_porlues

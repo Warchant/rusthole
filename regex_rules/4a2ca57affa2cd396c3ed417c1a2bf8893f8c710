@@ -1,0 +1,6 @@
+(\.|^)ads\.example\.com$
+^tracker[0-9]*\.
+(^|\.)telemevry\.example\.net$.a
+racker[0-9]*\.
+(^|\.)telemevry\.example\.net$.a
+\ww\.)?example\.(com|net)$

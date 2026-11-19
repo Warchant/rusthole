@@ -1,0 +1,3 @@
+(\.|^)ads\.example\.com$
+^tracker[0-9]*\.
+(^|\.)telemetry\.emple\.(com|net)$

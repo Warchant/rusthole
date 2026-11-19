@@ -1,0 +1,6 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = {"193.0.2.53",[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[$[[[[[[[ive = true
+mode = "NULL"
+
+[dns.ras.rash = ""

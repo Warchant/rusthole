@@ -1,0 +1,5 @@
+^xn!--bcher-kva\.example$
+^$
+^büchewexample$
+\p{T}+\.example
+^ä

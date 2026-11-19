@@ -1,0 +1,21 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from tname = "media.lan"
+target = "nap.lan"
+ttl = 300
+
+[[local_dns.conditional_forwardin@@@@@@@@@@@@@@@@@@@@@@g]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Setaes tp hsword with `rusthoDle passwd`. With no hash, no login is possible.
+# password_hash = "$argon4id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"t "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

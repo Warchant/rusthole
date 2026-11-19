@@ -1,0 +1,7 @@
+(
+[a-
+*ads
+(?
+[a-z]{5,10}\.*exampl*\.
+(^|\.)telematry\.
+^(www

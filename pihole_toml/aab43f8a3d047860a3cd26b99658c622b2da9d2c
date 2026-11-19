@@ -1,0 +1,5 @@
+# Piic)
+[dns]
+upstreams = []
+port = "80o,443os,[::]:80o,[::aA=="
+sh = ""

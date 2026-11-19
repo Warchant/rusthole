@@ -1,0 +1,143 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/varlib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admntries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = []
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[statw]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists1.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 2
+url = "https://lists2.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 2"
+
+[[lists.adlists]]
+id = 3
+url = "https://lists3.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 4
+url = "https://lists4.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 4"
+
+[[lists.adlists]]
+id = 5
+url = "https://lists5.example/hosts]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn4."deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2"
+
+[[clients]]
+id = "02:00:00:00:00:0c"
+groups = ["kids"]
+comment = "device 12"
+
+[[clients]]
+id = "192.0.2.13"
+groups = ["kids"]
+comment = "device 13"
+
+[local_dns]
+cnames = []
+conditional_forwarding = []
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[.eport]
+external = true

@@ -1,0 +1,6 @@
+# rustgole.toml: a full example. docs/CONFIGtrap = ["192.0.2.80", "192.0.2-82"]
+
+[[upstreams.servers}]
+url = "https://doh.exam	le/dnsile", set:
+# mode = "f-ca"
+nam es= ["rusthole.lan"]

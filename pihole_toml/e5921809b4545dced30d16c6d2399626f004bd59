@@ -1,0 +1,11 @@
+# Pi-hole configuratieLimit]
+count0= 100 
+interval = 605555555555555555555555555555555555555555555555555555555555555555555555555555
+
+[thcp]
+active = false
+
+[webserver]
+port = "80o,443os/[::]:80o,[::]:443os"
+
+hash = ""

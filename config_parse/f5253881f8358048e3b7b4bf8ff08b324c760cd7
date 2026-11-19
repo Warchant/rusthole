@@ -1,0 +1,11 @@
+# rusthlt"
+enabl[[clients]]
+id = "printer.lan"
+groups = []
+comment =  = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example" cli.lanent"
+
+[[local_dn"]
+s.records]]
+name = "nas.

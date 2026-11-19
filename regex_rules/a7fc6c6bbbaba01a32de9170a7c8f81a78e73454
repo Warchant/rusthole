@@ -1,0 +1,7 @@
+(\.|^)ads\.example\.com$
+^tracker[0-9]*\.
+(^|\.)telemevry\.example{1,20}$
+[[:alp[a-z]{4,10}\.exam5le\.org
+^xn--
+.*\.lan$
+^(www\.)?example\.(com|net)$

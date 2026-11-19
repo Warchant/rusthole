@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "psaswordads\\<om$", "groups": [2]}

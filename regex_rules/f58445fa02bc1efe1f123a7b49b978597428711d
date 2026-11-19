@@ -1,0 +1,4 @@
+(\.|^).com$
+^tracker[0-9]*\.|ne
+(^|\.)telemetry@.example\.net$
+^(^|\|net)$

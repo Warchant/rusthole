@@ -1,0 +1,3 @@
+^xPexample$
+^bücher\.example$
+\p{L}+\.e|ample[^.]

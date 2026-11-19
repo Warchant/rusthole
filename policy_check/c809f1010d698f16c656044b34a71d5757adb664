@@ -1,0 +1,19 @@
+gd
+eads.example.com
+Eok.ads.example.com
+r(^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\.net$
+00.0.0.0 r(^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\.net$
+00.0.t
+qsafe.tracker.example.net
+abqnner.example.com
+qkids-only.exampample.com
+0# a comment
+0ads.example.org
+1kids-only.example.org
+2||abp.example.net^
+2@@||ok.abp.example.net^
+qads0.0.0.0 banner.example.com
+0# a comment
+0ads.exaok.am

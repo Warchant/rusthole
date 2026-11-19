@@ -1,0 +1,7 @@
+^xn--bcher-kva\.example$
+^.example$
+^bücher\.example$
+\p{L}+\.example
+^äbücher\.exampleLp\$
+}+\.exampMle
+^ä

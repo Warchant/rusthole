@@ -1,0 +1,4 @@
+# rusthole.toml: a fe.
+# password_hash = "$argon2id$v=19$m=194"file", set:
+# mode = "f-ca"
+names = ["rusthole.lan"]

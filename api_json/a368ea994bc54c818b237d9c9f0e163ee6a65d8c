@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^@&s.eX|\\.)(^|\\.)a", "groups": [2]}

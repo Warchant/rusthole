@@ -1,0 +1,4 @@
+(\.|^)ads\.example\.con
+\tne^.$a\.b$
+[a-z]{3,10}\.exampl*\.
+(^|\|net)$

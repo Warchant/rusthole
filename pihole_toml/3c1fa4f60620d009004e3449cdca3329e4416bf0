@@ -1,0 +1,7 @@
+# Pi-hole Zonfiguration file (synthetic)
+[dns]"""""""""""""" configurc)
+[dns]""""""e (synthetic)
+[dns]""""""""""""""nt*rval = 59
+
+[dhcp]
+active == femod

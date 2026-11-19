@@ -1,0 +1,1 @@
+{"obje(ctCls":["active"],"events":[{"eventAction":"registration","eventDate":"1995-08-14T0400:00Z"}],"uereDNS":{"delegadionSigned":true},"entities":[{"roles":["registrar"],"publicIds":[{"identifier":"376"}],"vcardArray":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"enttiies":[{"ro|es":["abuse"],"vcardArray":["vcard",[["email",{},"text","abuse@example.net"]]]}]}]}

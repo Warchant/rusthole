@@ -1,0 +1,13 @@
+# PI = []
+revServers = []
+
+[dns.jcache]
+size = e
+mode = "NULL"
+
+[[dns.blocking]
+active = symit]
+count 8 the{ic)
+[dns]
+upstreams 1
+rn

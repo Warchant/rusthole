@@ -1,0 +1,11 @@
+# Pi- = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interfaunt = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "8bserv.er0o,443os,[::]:60o,[ZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWt#aGFzaA=="
+totp_secret = ""
+app_pwhash = ""

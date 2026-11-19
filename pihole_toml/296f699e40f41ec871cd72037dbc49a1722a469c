@@ -1,0 +1,6 @@
+# Pis.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+# Pmode = hNU

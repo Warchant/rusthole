@@ -1,0 +1,7 @@
+(
+[^ad^ad[sx]?[0-9,]{\}.03
+(?i)^TRACpa[sx]^TRACK
+\bads\b
+^[^.]+\^TRACK
+\bads\b
+^[^.]+\.exam-pa

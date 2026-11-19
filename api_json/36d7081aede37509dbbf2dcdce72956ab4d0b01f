@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(i^|ps.@ſ.exen)   A   example\\/com$:", "groups": [2]}

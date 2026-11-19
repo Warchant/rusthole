@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|pstre;ds.exAams\\.enafled)ads\\.exam@le\\/com$:", "groups": [2]}

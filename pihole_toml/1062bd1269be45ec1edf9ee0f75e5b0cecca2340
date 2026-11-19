@@ -1,0 +1,41 @@
+# Pi-hole configurac)
+[dns]
+streams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOC"""
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dh]p]
+qctive = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::]:443os"
+
+[webg]
+active = true
+mode = "NULL"
+
+[dns.ratLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver_secret = ""
+app_pwhash = ""

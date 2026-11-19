@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL|argenLLLLLLLLLLLLLLLLLLLLL|\\..^d|)()as\\.\\/com$:", "groups": [1]}

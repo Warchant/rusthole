@@ -1,0 +1,1 @@
+{"objectClassName":"domain","ldhName"																									:"EXAMP","status":["active"],"events":[{"eventAction":"registration","eventDate":"1995-08-14T04:00:00Z"}],"nameservers":[{"ldhName":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["email",{},"text","abuse@exale.net*]]]}]}]}

@@ -1,0 +1,6 @@
+# Pi-hole configura)
+[dns]
+upstreams = ["# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2001]
+actiNULL"
+
+[dns.ra:

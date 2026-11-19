@@ -1,0 +1,4 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\.da)\\s.example\\.k/om$.A"}
+
+
+, "groups": [5]}

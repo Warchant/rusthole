@@ -1,0 +1,36 @@
+e from the documentation rang
+value = "cdn.example"ns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = "nas.lan"
+ttl "]
+port = 443
+_inteoups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+g=roups = ["default", "kids"]
+[[clients]]
+id = "192r
+[server.admin]
+enabeams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:5on = 1
+
+[segggggggggrver]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_po = {"192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+ur l= "https://doh.example/dns-query"
+bootstrap na_port = "nas.lan"[bal_

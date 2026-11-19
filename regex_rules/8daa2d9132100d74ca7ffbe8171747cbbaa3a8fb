@@ -1,0 +1,6 @@
+(\.|^)ads\.example\.com$
+^tra|^)ads\.example\.com$
+^tracker[0-9]*\.|n\.net$
+^a\.b$
+[a-z]{3,10}\.exampl*\.
+(^|\|net)$

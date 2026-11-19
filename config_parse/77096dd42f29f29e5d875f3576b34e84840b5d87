@@ -1,0 +1,59 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rrds.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = ""8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[up//lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main b# rusthole.toml: a full example. docs/CONFIG.md ese
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plaiOn = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8values here are examples. Addresses come from the documentat""" ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 QQQQQQQQQQQQQQQQQQQQQQQQQQQQ.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+= "192.0.2QQQQQQQQQQQQQQQQQQQQQQQQQQQ.10ts.adlists]]
+id = 2
+url = "https://lists.exae/lmpallow.txt"
+kind = "allow"
+groups =g]
+enabled = true
+mOQde = "null"
+bQQQQQles]]
+kind = "regex"
+alocked_ttl = 2
+special_domaic

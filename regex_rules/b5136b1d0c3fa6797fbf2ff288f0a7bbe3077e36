@@ -1,0 +1,5 @@
+(\.|^)ads\.example\.\.b_
+[a-z]{5,10}\.example\.org
+^xn/-
+.*\.lan$
+^(www\.)?epxlame\.(com|net)$

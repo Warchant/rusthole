@@ -1,0 +1,9 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+cn'''amupstreams = {	"193.0.2.53", "192.0.2.e = 10ing]
+act[[[[[[[[[[[[[[[[[[[~[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[L"
+
+[dnsers = []
+
+[dns.cache]
+size = 10000

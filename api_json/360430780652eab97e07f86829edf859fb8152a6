@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\.)ads\\.exam/om$.Adſ.exA", "groups": [0]}

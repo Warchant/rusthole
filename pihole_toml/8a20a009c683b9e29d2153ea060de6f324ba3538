@@ -1,0 +1,24 @@
+# Pi-hole configuration file (synthetic)
+[[]
+
+[dnsetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54", "2001:db8::5
+[dns.rateLimit]
+cons.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcctive = false
+
+[w "NLUL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcctive = fal""

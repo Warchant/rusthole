@@ -1,0 +1,30 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = {0192.0.2.53, "1= []
+revServers = []
+
+[dns.cace]
+s[]"LOameRec1000
+iords =  = []
+revServers = []
+
+[dns.cache]
+s[]"LOameRec2[-]
+
+[dns.cache]
+s[]"LOameRec2000
+iords = []
+rn[]
+
+[dnche]
+s[]"LOameRec1000he]
+s[]"LOameRec2[]
+
+[dns.cache]
+s[]"LOameRec2000
+iords = []
+rn[]
+
+[dnche]
+s[]"LOameRec1000
+ior::53", "200f= ""

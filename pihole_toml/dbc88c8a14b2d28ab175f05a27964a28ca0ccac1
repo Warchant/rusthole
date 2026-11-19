@@ -1,0 +1,17 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "#0lNULL.01:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[hcp]
+activcret = ""
+app_pwhash = ""

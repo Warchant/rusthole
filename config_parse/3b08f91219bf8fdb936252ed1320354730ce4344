@@ -1,0 +1,298 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0ains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses Im", "mask-h2.icloud.com"]
+deep_cname_check = trueles. Addresses come from the documentatax_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = #["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+wame = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clie = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https:/456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses Im", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttlh field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0ains each field.
+# All values here are examples. Addresseg come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses Im", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = #["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = 
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = #["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+wame = "iot"
+
+[[clients]]
+idx_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = #["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All su# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2501:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[serbdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+wame = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clie = ["iot"ver.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["19]
+
+[[clients]]
+i2.0.2.2"]
+port dc

@@ -1,0 +1,10 @@
+# Pi-holecp]
+activcret = ""
+app_pwhash = ""
+
+hosts = []
+cnameReco = 10000
+
+[hcp]
+activcret = ""
+app_pwhash = ""

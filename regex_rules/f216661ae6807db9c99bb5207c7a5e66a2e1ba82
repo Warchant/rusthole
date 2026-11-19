@@ -1,0 +1,7 @@
+sxa[d^]?[0-9]{0,3}\.
+(?i)^TRACK
+\bads\b
+^[^.]+\.exa^TRACK
+\b(\.|^)ads\.example\.\.b$
+[a^ads\b
+^[^.]+\.example{1,2)ads\.

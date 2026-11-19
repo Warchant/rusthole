@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are exam43
+
+[server.admin]
+enabled = true
+listen =nter.lan"
+groups = []
+comment = "No list applies to this clienty0
+
+[[local_dns.~~~~~~~~~~ets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[client192.0.2.128/h field.
+# All values here are examples. Ae"ruo
+
+m[

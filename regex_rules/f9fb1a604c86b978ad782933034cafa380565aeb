@@ -1,0 +1,5 @@
+(\.|^)ads\.example\.\.b$
+[a^)ads\.examPle\.\.b$
+[a-z]{3,10)}\.lan$
+^ads\.example\.\.b$
+(ww-\.)?example\.(com|net)$

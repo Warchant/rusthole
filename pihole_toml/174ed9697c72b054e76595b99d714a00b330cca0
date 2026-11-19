@@ -1,0 +1,32 @@
+# Pi-hole con`iguration file (synthetic)
+[dns]
+upstreams = ["096.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 09999
+
+[dns.bloc{ing]
+active = true
+mode = "NULL"
+
+[dle (synthetic)
+[dns]
+upstreams = ["096. "192.0.2.54", "2001:d8::54"]
+interface =erface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 099et = ""
+app_pwhash = ""

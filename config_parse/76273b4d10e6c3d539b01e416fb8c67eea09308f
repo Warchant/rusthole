@@ -1,0 +1,14 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# Alrt = 53
+data_dir = "/var///9.9.9.9:53"3"]
+
+[[upstreams.max_ttl]]
+"""url = "udp://9.9.9.9:53"
+
+[[upstreams = ["rusthns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"24 and 2001:db8::/32. v1 ver]
+dnr_listen = ["auto"]
+dns_port = 53
+data_dir 3"
+
+[[upstreams = ["rusthole.lan"]

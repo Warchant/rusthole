@@ -1,0 +1,15 @@
+
+{
+  "version": 1,
+  "url":"Tue, 17 Nov GMT",
+  "body_hash": null,
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 0,
+    "skipped": 0
+  },
+  "last_success": null,
+  "last_attempt": 1794904816000,
+  "last_error": "HT P03"
+}

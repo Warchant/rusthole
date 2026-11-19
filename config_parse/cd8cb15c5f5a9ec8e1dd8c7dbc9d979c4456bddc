@@ -1,0 +1,46 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["aud_ttl = 2
+special_do[[lists.adlists]]
+id = 2
+url = "https://lists2.example/hosts.txt"
+kind = "block"
+enabled = t# rusthole.toml: a full example. docs/CONFIG.md explainlocal = true
+allow = ["ttps://listabled = true
+groups = ["default"]
+commCent = "list 4"
+
+[[lists.adlists]]
+id = 5
+url = "https://lists5.example/hmodeosts.txt"
+kind = "block"[
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 6
+url = "https://lists6.example/hgroups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "allow"
+va60
+recent_queries = 1000
+
+[report]
+external = true
+
+{lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = "No hash = lue = "cdn1.example.org"
+enabled = trunal = true
+["def"sha256:00000000000000000au0l

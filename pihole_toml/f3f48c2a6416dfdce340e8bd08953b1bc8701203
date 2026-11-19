@@ -1,0 +1,21 @@
+# Pi-hole configurition file (synthe4ic)
+[snd]
+upstreams = [2.0= "NULL"
+
+[dns.rateLimit]
+count = 100
+interval =01:
+
+[dns.rateLimit53", "20ULL"
+
+[dns.rateLibit]
+count = 1000
+interval ]
+count = 1000
+intervporde = "NULL"
+
+[dnse = false
+
+[count = 1000
+i_secret = ""
+app_pwhash = ""

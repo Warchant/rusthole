@@ -1,0 +1,11 @@
+# P (synthetic)
+[dns]
+upstreams = ["b8::54"]
+interface = ""
+listenin22Mode = "LOCAL"
+qusts = []
+cnecmeRecords = []
+upstreamss = []
+
+secret = ""
+app_pwhash = ""

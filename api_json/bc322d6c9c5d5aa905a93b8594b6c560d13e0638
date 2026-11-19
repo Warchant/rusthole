@@ -1,0 +1,3 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\.)ads\\.example\\.com$", "groups":
+
+Jpo

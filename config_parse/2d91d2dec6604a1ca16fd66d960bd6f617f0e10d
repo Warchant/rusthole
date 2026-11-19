@@ -1,0 +1,64 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_versio field.
+# Alrt = 53
+data_dir = "/var///9.9.9.9:53"3"]
+
+[[upstreams.max_ttl]]
+"""url = "udp://9.9.9.9:53"
+
+[[upstreams = ["rust# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# Alrt = 53
+data_dir = "/var///9.9.9.9:53"3"]
+
+[[upstreams.max_ttl]]
+"""url = "udp://9.9.9.9:53"
+
+[[upstreams = ["rusthns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"24 and 2001:db8::/32. v1 ver]
+dnr_listen = ["auto"]
+dns_port = 53
+data_dir 3"
+
+[[upstreams = ["rusthole.lan"]
+s]]
+url = "https://doh.example/dns-query"
+bootstrap = ["997.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+speciword_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# Alrt = 53
+data_dir = "/var///9.9.9.9:53"3"]
+
+[[upstreams.max_ttl]]
+"""url = "udp://9.9.9.9:53"
+
+[[upstreams = ["rusthns.exabootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upath = "/etc/rusthole/key.pem"
+momple:853"
+bootstrap = ["1de =92.0.2.80", "192.0.2.82"24 and 2001 "local-ca"
+names = ["ru:db8::/32. v1 ver]
+dnr_listen = ["auto"]
+dns_port = 53
+datasthole.lan_dir 3"
+
+[[upstrea"]
+ms = ["rusthole.la[up

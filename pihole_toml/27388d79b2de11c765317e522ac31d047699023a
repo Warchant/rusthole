@@ -1,0 +1,28 @@
+# Pi-hole con`iguratii folne (synthetic)
+[dns]
+upstreams = ["0ogging = true
+dnssec = true
+hosts = []
+cnameRecords = []revServers = [`
+
+[dns.caogging = true
+dnssec = tr= true
+mode = "NUeams = ["0oggServerche]
+size = 09999
+
+[d
+[dns.bloc{ing]
+active = true
+mode = "NUeams = ["0oggServers = []
+
+[dns.cacxe]
+szi =e 099et = "
+
+[d
+[dns.bloc{ing]
+active = true
+mode = "NUeams = ["0oggServers = []
+
+[dns.cacxe]
+szi =e 099et = ""
+app_pwhash = ""*

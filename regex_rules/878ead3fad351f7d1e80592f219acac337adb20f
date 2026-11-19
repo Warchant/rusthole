@@ -1,0 +1,4 @@
+^xn--bcher-kva\^bücher$
+^bücher\.example$
+\p{L}+\.example
+^ä

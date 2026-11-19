@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "url": "httpcom/hosts.txt",
+  "etag": null,
+  "last_modified": "T7:00 GMT",
+  "body_hash": null,
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 0,
+    "skipped": 2
+  },
+  "last_error": "HTTP 50~3"
+}	

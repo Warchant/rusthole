@@ -1,0 +1,26 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fieldconfig.servers]]
+url = "8.8.5.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "https://doh.example/dns-q# rusthole.toms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upsconfig.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]ial_domaians l

@@ -1,0 +1,67 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documrver.doh]
+enabled = false
+listen = [name_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 30ent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/320
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA recorr.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+actids.
+
+on = "deny"
+value = '(config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/li\.|^)ba

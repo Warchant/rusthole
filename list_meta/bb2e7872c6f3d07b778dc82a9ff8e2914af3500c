@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "url": "ht00002",
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 98,
+    "invalid": 1,
+    "skipped": 2
+  },
+  "last_success": 1794902400,
+  "last_attempt": 1794902400,
+  "changed_at": 1794816000,
+  "last_error": null
+}								

@@ -1,0 +1,25 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fieinterval_hours = 24
+
+[[lists.adlists]]
+id = 00:00201"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[cliing]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rue. IPv6 only for AAAA records.
+
+config_portion = 1
+
+[server]
+dns_listen = ["au'o"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"

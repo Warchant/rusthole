@@ -1,0 +1,20 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["4", "2001:db8::53", "2001:db8::54"]
+inter= 10000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::laGFzaA=="
+totp_secret = ""
+app_LLOON- = ""

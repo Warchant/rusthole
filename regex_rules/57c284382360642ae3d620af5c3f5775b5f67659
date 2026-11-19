@@ -1,0 +1,11 @@
+(
+[a-
+*ads
+(?
+[a-z]{3,10}\.exampl*\.
+(^|\.)tel.]+\.exampl.
+(?i)^TRAK
+\bads\b
+^[^.]+\.example|c)+\.(x|y)$
+^ematry\.
+^(www

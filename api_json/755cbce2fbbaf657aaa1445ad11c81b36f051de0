@@ -1,0 +1,1 @@
+{"upstreams": {"servers": ["udp://.@ds.E:.1:53"], "timeout_ms": 1500}}

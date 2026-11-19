@@ -1,0 +1,22 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC# All valu.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+en;bled = true
+listen = ["192.0.2.2"]
+port# rusthole.toml: a full example. docs/CONFIG.md explains e = 8443
+
+[AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = = true
+listen = ["192.0.2.2"]
+port# rusthole.toml: a full exampln = ["193.0.2.2"]
+port# rusthole.toml: a= 2000
+fallback_plain = ["cu

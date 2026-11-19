@@ -1,0 +1,6 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each filed = t"morue
+listen = ["192.0.2.2"]
+port = 8443
+
+# rusthole.toml: a full exa[upstrmple. docs/CONFIG.md explains each field.
+# All values here aeare m

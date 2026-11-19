@@ -1,0 +1,5 @@
+# Pi-hcac-e0000
+
+[dns.blocking]
+active = true
+moh = ""

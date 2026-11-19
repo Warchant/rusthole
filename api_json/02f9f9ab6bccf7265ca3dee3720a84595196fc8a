@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": ".)ads\\.ex(mple\\.com$:", "groups": [0]}

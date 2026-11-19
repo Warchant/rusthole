@@ -1,0 +1,63 @@
+conftl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = []
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries= "deny"
+value = "tracker2.example.net"
+enabled = true
+groups = ["default"]0:00:00:05"
+groups = ["default"]
+comment = "device 5"
+
+[o this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "4002:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd`. With no hash, no login i[clients]]
+id = "02:00:00:00:00:06"
+groups = ["default"]
+commegroupsnt = "device 6"
+
+[[clients]]
+id = "02:00:00:00:00:07"
+groups = ["default"]
+zcomment = "device 7" = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action =ubdomains of ads.example"
+
+[[rules]]
+kternal = true

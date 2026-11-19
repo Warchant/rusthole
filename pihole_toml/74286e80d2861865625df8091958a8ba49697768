@@ -1,0 +1,39 @@
+# Pi-hole con`iguratii folne (synthetic)
+[dns]
+upstreams = ["0ogging = true
+dnswec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 09999
+
+[dns.bloc{in4.cache]
+size = 09999
+
+[dns.bloc{ing]
+active = true
+mode = "NULL"
+
+[dleg]
+active = true
+mode = "NULL"
+
+[dle (::54"]
+inte
+.`4nthetic)
+[dns]
+up!streams = ["192.0.2.53", "1# P", "2001:db8::53", "2001:db8:holconfiguration file (synthetic)
+[d
+[d
+upstreams = ["219.0.)
+[d
+[d
+upstreams = ["219hostn = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 099et = ""
+app_pwhash = ""*

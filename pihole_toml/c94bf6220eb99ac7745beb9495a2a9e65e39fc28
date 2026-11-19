@@ -1,0 +1,7 @@
+# Pi-hole conf=iguration file (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54", "001:db8::46"]
+interface = ""
+listeningMode = "LOCAL"
+querytotp_secret = ""
+app_pwhash = ""

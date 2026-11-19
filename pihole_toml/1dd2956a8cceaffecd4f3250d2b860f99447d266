@@ -1,0 +1,14 @@
+# Pi-hole con`ietic)[dn!s]
+upstreams = ["096.0.2.53", []
+revServers []
+ 
+=[dns.c0
+ival = 68
+
+[dhcp]
+active = false
+
+[webserver]
+port = 280o,443os,[::]:80o,[::]:443os"
+
+[web""

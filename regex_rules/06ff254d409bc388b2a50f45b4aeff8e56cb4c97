@@ -1,0 +1,4 @@
+(\.|^)ads\.er[0-9]*\.|ne
+(^|\.)telemetry@.example\.net$
+s\.er[0-9]*\.|ne
+(^|\.)telemetry|\|net)$

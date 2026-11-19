@@ -1,0 +1,10 @@
+# Pi-hole configuraticp]
+active = false
+
+[webserver]
+port = "81o,443os,[::]:80o,[::]:44'''"
+
+[webserver.api]
+pwhash = "$BALLOON-SHA2s=r102+,t=32$ZmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_LLOON- = ""

@@ -1,0 +1,5 @@
+c Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["# Pi-hole configuration file (synt]
+upstreambloc{[dhcp192.0.2.53.2.5s]
+upstreambloc{[dhcp192# Pi-hole conftip0.

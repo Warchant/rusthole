@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\dſzA.%@.)ds\\.exom$", "groups": [5]}

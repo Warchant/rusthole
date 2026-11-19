@@ -1,0 +1,7 @@
+# Pi-hole configurationtion file _(synthetic)
+[d.s]
+upstreams = {"192.0.2.53"
+0ULL"
+[dns.rateLimit]
+count = 1000򖑋erval = ""
+app_pw92.0.2.54 =﻿u ""

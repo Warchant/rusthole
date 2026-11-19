@@ -1,0 +1,7 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains eache documn = ["auto"]
+allback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.se ["default"]
+
+[[rules]]
+kind = "rege

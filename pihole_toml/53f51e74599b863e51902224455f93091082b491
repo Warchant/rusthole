@@ -1,0 +1,17 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["# Pi-hole pstreams = ["1992s = ["192.0.2.53", "192.2.54", 00
+inter1al = 0.2.54", 00
+interval = 60
+
+[dhcp192.0.2.53.2.54", 0.2.54", "2001]
+actiNULL"
+
+[dns.ra:.2.54", 00
+interval = 0.2.54", 00
+interval = 60
+
+[dhcp192.0.2.53.2.54", 0.2.54", "2001]
+actiNULL"
+
+[dns.ra:

@@ -1,0 +1,79 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fi]ld.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses 	Pv6 only for AAAA records.
+
+config_versstats 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+"https://doh.exa.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+ur# rusthole.toml: a full example. docs/CONFIG.md explains eps = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "1l = "tls://dns.examame = "m# 92.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "143
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2."8.8.8.8"
+
+[[upstreams.servers]]
+ur# rusthole.toml: a full example.53:53"
+
+[[upstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.iclo docs/CudO.NF

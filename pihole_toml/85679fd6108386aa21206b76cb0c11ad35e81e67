@@ -1,0 +1,31 @@
+# Pi-hole connthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54", "2001:d:8b:53", "2001:db8::54"]
+interface = ""
+Logging = true
+dnssec = true
+hosts = []
+cnameRe= []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:80o,#[::]:221os"
+
+[webserver.api]
+pwhash = #$c2hmYWtlaBALfiguration filaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

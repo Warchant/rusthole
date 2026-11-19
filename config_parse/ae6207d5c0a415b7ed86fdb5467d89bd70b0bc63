@@ -1,0 +1,8 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each firoups = ["default", "kids"]
+c "https://lists.example/allow.txt"
+kind = "allow"
+ghe documenges
+# 1
+dns_port = 53
+data_dir = "/853"
+bootstrap = 0.2.80", "192.[0.2"

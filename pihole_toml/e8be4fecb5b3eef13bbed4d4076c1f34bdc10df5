@@ -1,0 +1,32 @@
+# Pi-hole cofile (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54"4"]
+interfaceryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+coc = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 6"

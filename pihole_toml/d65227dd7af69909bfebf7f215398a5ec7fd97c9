@@ -1,0 +1,10 @@
+# Pi-hole conft 9 1d.s]
+upstreams = {"193.2.e = 10000
+
+[dns.blocking]
+act[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ive = true
+mode = "NULL"
+
+[dns.rateLi[[[[[[ive = true
+meams = {'"192.0.2.53", "king]
+a1

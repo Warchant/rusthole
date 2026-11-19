@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^.;ds.eH|pstreams\\.)^ds\\.e|argenxamp.e|argenxamj1920.1$:ml", "groups": [1]}

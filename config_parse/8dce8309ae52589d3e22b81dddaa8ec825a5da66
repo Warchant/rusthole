@@ -1,0 +1,22 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# e examples. Addresses come from the documentation ranges
+# 645.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[configserver]
+data_diren = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthuto_local = true
+allow = ["198s = 60
+
+Zstats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 10ttps:/ault"]
+/lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment 
+[[gso=u

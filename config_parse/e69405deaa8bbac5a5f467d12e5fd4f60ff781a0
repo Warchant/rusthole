@@ -1,0 +1,7 @@
+# rusthole.toml: a full example. drusthole"
+
+[server.doh]
+enclients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this clienthi

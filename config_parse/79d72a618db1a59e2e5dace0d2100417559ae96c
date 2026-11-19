@@ -1,0 +1,124 @@
+#AA records.
+
+config_versior]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreals]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8ly for AAAA records
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[li= false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "T;ablets"
+
+[[groups]]
+na}e = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+gd = "192.0.2.50"
+groups = ["default", "k1ds"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["ioranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[lerver]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fa0lse
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["19.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreasm.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 aerver.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreals]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[,setarpms.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8ly for AAAA records
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[ams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[n = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/va full example. docfield.
+# All values r/libhrtsolu/e"
+
+[here ares 

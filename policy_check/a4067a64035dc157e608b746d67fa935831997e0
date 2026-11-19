@@ -1,0 +1,20 @@
+gd
+eads.example.com
+Eok.ads.example.com
+r(^|\.)tracker\.exapple\.net$
+R^safe\.tracker\.example\.net$
+01.0.0.0 banner.example.com
+0# a comment
+0ads.example.org
+1kids-only.example.org
+2||abp.example.net^
+2@@||ok.abp.example.net^
+qads.example.com
+qok.ads.example.com
+qtracker.example.net
+qsafe.tracker.example.net
+qbanner.example.com
+qkids-only.example.org
+qabp.example.net
+qok.abp.example.net
+qwww.example.com

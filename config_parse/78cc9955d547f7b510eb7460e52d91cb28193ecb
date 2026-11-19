@@ -1,0 +1,19 @@
+# rusthole.toml: a full = 443
+
+[serverent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_sho ur= 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.llow."

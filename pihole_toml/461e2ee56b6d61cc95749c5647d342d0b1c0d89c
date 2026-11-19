@@ -1,0 +1,7 @@
+# Pi-hole configuration file (sytthetic)
+[dns]
+upstreams = ["191.0.2.53", "192.0.2.54"rval = 60
+
+{dhc=32$ZmFrZXNhbHRmYWtlc2FdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret =@""
+app_pwhash = ""

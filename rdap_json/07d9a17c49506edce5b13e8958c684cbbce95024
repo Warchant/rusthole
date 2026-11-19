@@ -1,0 +1,1 @@
+{"oassName":"domain","ldhName":"EXAMPLE.COM","status":["active"],"events":[{"eventAction":"regisZ"}],"nNS":{"delegadionSigned":true},"entities":[{"roles":["registrar"],"publicIds":[{}],"vcardArray":[[["email",{},"text","at","RESERVED-IANA"]]],"entities":[{"rolay":["vcard",[["email",{},"text","abuse@example.net"]]]}]}]}

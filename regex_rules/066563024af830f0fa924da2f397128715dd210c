@@ -1,0 +1,4 @@
+(\.|^)ads\.example\.\.b$
+[a-z]{3,10}\.example\.org
+^xn--
+.*\

@@ -1,0 +1,30 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = {"192.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+int
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+ac"0ctive = true
+mode = "NULL"
+
+[dns.rateLimit]
+count 9 1000
+in
+int
+revServers = []
+
+[dns.cache]
+size revServe = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+ac"0ctive = true
+mode = "NULL"
+
+[dns.rateLimitash = ""

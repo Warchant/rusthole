@@ -526,12 +526,30 @@ async fn start_admin(
         // The report asks the upstream pool directly, as the list downloads do.
         report: Some(rusthole_report::Reporter::new(rusthole_report::Sources {
             dns: Arc::new(server.host_resolver()),
+            http: report_http(server),
         })),
     };
     let app = AppState::new(deps);
     rusthole_web::start(AdminSettings::new(listen), tls, app)
         .await
         .context("cannot start the admin listener")
+}
+
+/// The HTTPS client of the domain report: the system roots (or the bundled roots) and the
+/// upstream pool for names. When it cannot start, the outside sections fail with the reason.
+fn report_http(server: &DnsServer) -> Arc<dyn rusthole_report::http::HttpGet> {
+    let client = rusthole_tls::client_config(vec![b"http/1.1".to_vec()])
+        .map_err(|e| e.to_string())
+        .and_then(|(tls, _)| rusthole_report::http::HttpsClient::new(tls, server.host_resolver()));
+    match client {
+        Ok(c) => Arc::new(c),
+        Err(e) => {
+            tracing::error!(error = %e, "the HTTPS client of the domain report did not start");
+            Arc::new(rusthole_report::http::NoHttp(format!(
+                "the HTTPS client did not start: {e}"
+            )))
+        }
+    }
 }
 
 /// Applies a config change of the API to the DNS server, the client identity and the

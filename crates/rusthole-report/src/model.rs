@@ -9,11 +9,13 @@ use serde_json::Value;
 pub enum Section {
     /// DNS records through the upstream pool.
     Dns,
+    /// Registration data from the RDAP server of the registry.
+    Rdap,
 }
 
 impl Section {
     /// All sections, in the order of the UI.
-    pub const ALL: [Self; 1] = [Self::Dns];
+    pub const ALL: [Self; 2] = [Self::Dns, Self::Rdap];
 
     /// The section with the API name `s`.
     pub fn parse(s: &str) -> Option<Self> {
@@ -24,6 +26,7 @@ impl Section {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Dns => "dns",
+            Self::Rdap => "rdap",
         }
     }
 
@@ -31,6 +34,7 @@ impl Section {
     pub const fn limit(self) -> Duration {
         match self {
             Self::Dns => Duration::from_secs(5),
+            Self::Rdap => Duration::from_secs(10),
         }
     }
 
@@ -39,6 +43,7 @@ impl Section {
     pub const fn external(self) -> bool {
         match self {
             Self::Dns => false,
+            Self::Rdap => true,
         }
     }
 }

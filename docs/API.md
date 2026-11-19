@@ -1204,6 +1204,7 @@ never the system resolver (docs/LISTS.md, "Name lookup").
 | Section | Source | Time limit | Outside service |
 |---|---|---|---|
 | `dns` | The upstream pool: A, AAAA, MX, TXT, CAA of the name; NS, SOA of the registrable domain; the CNAME chain of the A answer. | 5 s | No (the upstreams only) |
+| `rdap` | The RDAP server of the registry (RFC 9083), found in the IANA bootstrap file `https://data.iana.org/rdap/dns.json`. The query is the registrable domain. | 10 s | Yes: IANA and the registry get the registrable domain |
 
 Response 200:
 
@@ -1251,10 +1252,39 @@ Data of `dns`:
   at most 1024 bytes, another value at most 512 bytes. Control characters change to `?`.
 - The CNAME chain has at most 16 names.
 
+Data of `rdap` (`null` for a field that the registry does not give):
+
+```json
+{
+  "domain": "microsoft.com",
+  "server": "https://rdap.verisign.com/com/v1/",
+  "registrar": "MarkMonitor Inc.",
+  "registrar_iana_id": "292",
+  "registrant": "Microsoft Corporation",
+  "abuse_email": "abusecomplaints@markmonitor.com",
+  "created": "1991-05-02T04:00:00Z",
+  "updated": "2025-01-01T00:00:00Z",
+  "expires": "2027-05-03T04:00:00Z",
+  "status": ["client delete prohibited"],
+  "nameservers": ["ns1-39.azure-dns.com"],
+  "dnssec": false
+}
+```
+
+- `registrant`: the organization (or the name) of the owner, only when the registry shows
+  it. A hidden value ("REDACTED", "privacy", ...) gives `null`.
+- The dates are the text of the registry (RFC 3339).
+- No RDAP server for the TLD (for example `.lan`), or HTTP 404: `unavailable`.
+- The IANA file stays in RAM for 24 hours. An RDAP result stays in the cache for 24 hours.
+- HTTPS only, at most 3 redirects (HTTPS only), at most 256 KiB for an answer and 512 KiB
+  for the IANA file. The connections go to public IPv4 addresses only.
+- The parsers keep a fixed set of fields. Each text has at most 256 bytes; each list at
+  most 16 items. The fuzz target `rdap_json` covers both parsers.
+
 Cache and limits:
 
-- The server keeps each result in RAM: `ok` and `unavailable` for 1 hour, `failed` for 5
-  minutes, at most 1024 results. `off` is never kept.
+- The server keeps each result in RAM: `ok` and `unavailable` for 1 hour (RDAP: 24 hours),
+  `failed` for 5 minutes, at most 1024 results. `off` is never kept.
 - At most 4 lookups run at a time. A request for the same name and section joins the lookup
   that runs. A request that finds no free place in 1 s gets 429 with the code `busy` and
   `Retry-After: 2`.

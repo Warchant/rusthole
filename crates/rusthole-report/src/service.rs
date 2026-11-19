@@ -30,7 +30,9 @@ use tokio::sync::{OwnedSemaphorePermit, Semaphore, watch};
 
 use crate::cache::{Cache, Key};
 use crate::dns::DnsLookup;
+use crate::http::HttpGet;
 use crate::model::{Outcome, Section, SectionReport, Status};
+use crate::rdap::Rdap;
 
 /// The most jobs at a time.
 pub const MAX_JOBS: usize = 4;
@@ -70,11 +72,14 @@ pub struct Request {
 pub struct Sources {
     /// DNS lookups through the upstream pool.
     pub dns: Arc<dyn DnsLookup>,
+    /// HTTPS GET (RDAP).
+    pub http: Arc<dyn HttpGet>,
 }
 
 #[derive(Debug)]
 struct Inner {
     sources: Sources,
+    rdap: Rdap,
     cache: Mutex<Cache>,
     slots: Arc<Semaphore>,
     jobs: Mutex<HashMap<Key, watch::Receiver<Option<SectionReport>>>>,
@@ -110,6 +115,7 @@ impl Reporter {
     pub fn new(sources: Sources) -> Self {
         Self {
             inner: Arc::new(Inner {
+                rdap: Rdap::new(Arc::clone(&sources.http)),
                 sources,
                 cache: Mutex::new(Cache::new()),
                 slots: Arc::new(Semaphore::new(MAX_JOBS)),
@@ -211,7 +217,7 @@ impl Reporter {
             let section = guard.key.0;
             let outcome = match tokio::time::timeout(
                 section.limit(),
-                run_section(&guard.inner.sources, section, &name),
+                run_section(&guard.inner, section, &name, req.now),
             )
             .await
             {
@@ -271,9 +277,10 @@ async fn wait(
 }
 
 /// Runs one section (no time limit here; the caller has one).
-async fn run_section(sources: &Sources, section: Section, name: &DomainName) -> Outcome {
+async fn run_section(inner: &Inner, section: Section, name: &DomainName, now: MonoTime) -> Outcome {
     match section {
-        Section::Dns => crate::dns::run(Arc::clone(&sources.dns), name).await,
+        Section::Dns => crate::dns::run(Arc::clone(&inner.sources.dns), name).await,
+        Section::Rdap => inner.rdap.run(name, now).await,
     }
 }
 
@@ -285,6 +292,7 @@ mod tests {
     use super::*;
     use crate::dns::NAME_TYPES;
     use crate::dns::tests::FakeDns;
+    use crate::rdap::tests::FakeHttp;
 
     fn req(refresh: bool, now_secs: u64) -> Request {
         Request {
@@ -300,7 +308,10 @@ mod tests {
     }
 
     fn service(dns: Arc<FakeDns>) -> Reporter {
-        Reporter::new(Sources { dns })
+        Reporter::new(Sources {
+            dns,
+            http: Arc::new(FakeHttp::default()),
+        })
     }
 
     const TYPES: usize = NAME_TYPES.len() + crate::dns::BASE_TYPES.len();
@@ -334,6 +345,30 @@ mod tests {
             .unwrap();
         assert!(!d.cached);
         assert_eq!(s.free_slots(), MAX_JOBS);
+    }
+
+    #[tokio::test]
+    async fn an_external_section_is_off_when_the_setting_is_off() {
+        let http = Arc::new(FakeHttp::default());
+        let s = Reporter::new(Sources {
+            dns: Arc::new(FakeDns::default()),
+            http: Arc::clone(&http) as Arc<dyn HttpGet>,
+        });
+        let mut r = req(false, 0);
+        r.external = false;
+        let off = s.report(&name("a.test"), Section::Rdap, r).await.unwrap();
+        assert_eq!(off.outcome.status, Status::Off);
+        assert_eq!(http.calls.load(Ordering::SeqCst), 0);
+        // DNS is not an outside service: it works.
+        let dns = s.report(&name("a.test"), Section::Dns, r).await.unwrap();
+        assert_eq!(dns.outcome.status, Status::Ok);
+        // With the setting on, RDAP asks (and fails here: the fake has no answer).
+        let on = s
+            .report(&name("a.test"), Section::Rdap, req(false, 0))
+            .await
+            .unwrap();
+        assert_eq!(on.outcome.status, Status::Failed);
+        assert_eq!(http.calls.load(Ordering::SeqCst), 1);
     }
 
     #[tokio::test(start_paused = true)]

@@ -1525,6 +1525,7 @@ dependencies = [
  "rusthole-core",
  "rusthole-dns",
  "rusthole-import",
+ "rusthole-report",
  "rusthole-tls",
  "rusthole-web",
  "rustls-pki-types",
@@ -1567,8 +1568,10 @@ version = "0.0.1"
 dependencies = [
  "hickory-proto",
  "parking_lot",
+ "reqwest",
  "rusthole-core",
  "rusthole-dns",
+ "rustls",
  "serde_json",
  "thiserror",
  "tokio",

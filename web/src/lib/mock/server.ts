@@ -768,7 +768,7 @@ route('POST', '/lists/:id/update', ({ params }) => {
 });
 
 // Domain report (docs/API.md section 17). Fixed data, no network.
-const REPORT_SECTIONS: T.ReportSection[] = ['dns'];
+const REPORT_SECTIONS: T.ReportSection[] = ['dns', 'rdap'];
 route('GET', '/report/domain/:name/:section', ({ q, params }) => {
   const name = decodeURIComponent(params[0]!).trim().toLowerCase();
   const section = params[1] as T.ReportSection;
@@ -778,6 +778,30 @@ route('GET', '/report/domain/:name/:section', ({ q, params }) => {
   if (refresh !== null && !['true', 'false', '1', '0'].includes(refresh)) throw new HttpError(400, 'bad_request', '`refresh` is true or false.');
   const parts = name.split('.');
   const base = parts.slice(-2).join('.');
+  const fetched_at = new Date().toISOString().replace(/[.][0-9]+Z$/, 'Z');
+  if (section === 'rdap') {
+    if (!state.settings.report.external) {
+      return { section, name, status: 'off', cached: false, fetched_at, data: null, error: 'turned off in the settings (report.external)' } satisfies T.ReportResult;
+    }
+    if (base.endsWith('.lan')) {
+      return { section, name, status: 'unavailable', cached: false, fetched_at, data: { domain: base }, error: `IANA lists no RDAP server for ${base}` } satisfies T.ReportResult;
+    }
+    const rdap: T.RdapReport = {
+      domain: base,
+      server: 'https://rdap.example/',
+      registrar: 'Example Registrar Inc.',
+      registrar_iana_id: '9999',
+      registrant: null,
+      abuse_email: 'abuse@registrar.example',
+      created: '2001-05-02T04:00:00Z',
+      updated: '2025-01-01T00:00:00Z',
+      expires: '2030-05-03T04:00:00Z',
+      status: ['client transfer prohibited'],
+      nameservers: [`ns1.${base}`, `ns2.${base}`],
+      dnssec: false,
+    };
+    return { section, name, status: 'ok', cached: false, fetched_at, data: rdap, error: null } satisfies T.ReportResult;
+  }
   const rec = (value: string) => [{ name, ttl: 300, value }];
   const t = (type: string, n: string, records: T.DnsRecord[]): T.DnsTypeResult => ({
     type, name: n, status: records.length > 0 ? 'ok' : 'nodata', rcode: 0, records, truncated: false, error: null,

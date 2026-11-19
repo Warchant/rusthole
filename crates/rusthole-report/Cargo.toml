@@ -11,8 +11,10 @@ publish.workspace = true
 [dependencies]
 hickory-proto = { workspace = true }
 parking_lot = { workspace = true }
+reqwest = { workspace = true }
 rusthole-core = { workspace = true }
 rusthole-dns = { workspace = true }
+rustls = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }

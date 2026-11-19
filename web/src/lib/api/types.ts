@@ -451,7 +451,7 @@ export interface SystemInfo {
 // Section 17: domain report
 
 /** The report sections, in the order of the UI. */
-export type ReportSection = 'dns';
+export type ReportSection = 'dns' | 'rdap';
 export type ReportStatus = 'ok' | 'failed' | 'off' | 'unavailable';
 
 export interface ReportResult<D = unknown> {
@@ -485,4 +485,19 @@ export interface DnsReport {
   base: string;
   cname_chain: string[];
   types: DnsTypeResult[];
+}
+
+export interface RdapReport {
+  domain: string | null;
+  server?: string;
+  registrar: string | null;
+  registrar_iana_id: string | null;
+  registrant: string | null;
+  abuse_email: string | null;
+  created: Timestamp | null;
+  updated: Timestamp | null;
+  expires: Timestamp | null;
+  status: string[];
+  nameservers: string[];
+  dnssec: boolean | null;
 }

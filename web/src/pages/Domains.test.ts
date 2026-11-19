@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 // The "Block" and "Report" buttons of the Domains page (docs/PLAN.md section 9).
 import { afterEach, describe, expect, it } from 'vitest';
+import { changeMock } from '../lib/mock/server';
 import { parseHash } from '../lib/routes';
 import { nav } from '../lib/state.svelte';
 import { button, cleanup, json, render, startMockApi, text, until } from '../test/harness';
@@ -96,6 +97,25 @@ describe('Report button', () => {
     // A second click closes the report.
     button(root, 'Report').click();
     await until(() => root.querySelector('[aria-label="Domain report"]') === null, 'the closed report');
+  });
+
+  it('shows the RDAP section next to DNS, and "off" when the setting is off', async () => {
+    const h = await startMockApi();
+    const root = open(NAME);
+    await until(() => [...root.querySelectorAll('button')].some((b) => text(b) === 'Report'), 'the Report button');
+    button(root, 'Report').click();
+    await until(() => text(section(root, 'rdap')).includes('Example Registrar Inc.'), 'the RDAP data');
+    const rdap = text(section(root, 'rdap'));
+    expect(rdap).toContain('not public');
+    expect(rdap).toContain('ns1.shop.example, ns2.shop.example');
+    expect(h.calls).toContain(`GET /report/domain/${NAME}/rdap`);
+    changeMock((s) => {
+      s.settings.report.external = false;
+    });
+    button(root, 'Refresh').click();
+    await until(() => text(section(root, 'rdap')).includes('turned off in the settings'), 'the off state');
+    // DNS still works.
+    expect(text(section(root, 'dns'))).toContain('192.0.2.80');
   });
 
   it('a failed section shows its error and a retry, and the page stays usable', async () => {

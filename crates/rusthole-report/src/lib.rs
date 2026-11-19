@@ -10,8 +10,11 @@
 
 pub mod cache;
 pub mod dns;
+pub mod fuzzing;
 pub mod guard;
+pub mod http;
 pub mod model;
+pub mod rdap;
 pub mod service;
 
 pub use model::{Outcome, Section, SectionReport, Status};

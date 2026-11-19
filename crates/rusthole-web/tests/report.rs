@@ -24,6 +24,7 @@ use reqwest::{Method, StatusCode};
 use rusthole_core::DomainName;
 use rusthole_dns::LookupAnswer;
 use rusthole_report::dns::{DnsLookup, LookupFuture};
+use rusthole_report::http::{GetFuture, HttpAnswer, HttpGet};
 use rusthole_report::{Reporter, Sources};
 use serde_json::json;
 
@@ -56,12 +57,70 @@ impl DnsLookup for FakeDns {
     }
 }
 
+/// A fake HTTPS: the IANA bootstrap file and one RDAP answer.
+#[derive(Debug)]
+struct FakeHttp;
+
+impl HttpGet for FakeHttp {
+    fn get<'a>(&'a self, url: &'a str, _max_bytes: usize) -> GetFuture<'a> {
+        Box::pin(async move {
+            let body = match url {
+                rusthole_report::rdap::BOOTSTRAP_URL => {
+                    r#"{"services":[[["test"],["https://rdap.nic.test/"]]]}"#
+                }
+                "https://rdap.nic.test/domain/example.test" => {
+                    r#"{"ldhName":"example.test","events":[{"eventAction":"registration","eventDate":"2020-01-01T00:00:00Z"}]}"#
+                }
+                _ => return Err(format!("no answer for {url}")),
+            };
+            Ok(HttpAnswer {
+                status: 200,
+                body: body.as_bytes().to_vec(),
+            })
+        })
+    }
+}
+
+#[tokio::test]
+async fn rdap_section_follows_the_setting() {
+    let h = harness(Options {
+        report: Some(Reporter::new(Sources {
+            dns: Arc::new(FakeDns::default()),
+            http: Arc::new(FakeHttp),
+        })),
+        ..Options::default()
+    })
+    .await;
+    let s = h.login().await;
+    let r = h
+        .get("/api/v1/report/domain/www.example.test/rdap", &s)
+        .await;
+    assert_eq!(r.status, StatusCode::OK, "{}", r.text);
+    assert_eq!(r.body["status"], "ok");
+    assert_eq!(r.body["data"]["domain"], "example.test");
+    assert_eq!(r.body["data"]["created"], "2020-01-01T00:00:00Z");
+    let r = h
+        .req(
+            Method::PATCH,
+            "/api/v1/settings",
+            Some(json!({ "report": { "external": false } })),
+            &s,
+        )
+        .await;
+    assert_eq!(r.status, StatusCode::OK, "{}", r.text);
+    let r = h.get("/api/v1/report/domain/other.test/rdap", &s).await;
+    assert_eq!(r.body["status"], "off");
+    assert_eq!(r.body["data"], serde_json::Value::Null);
+    h.stop().await;
+}
+
 #[tokio::test]
 async fn dns_section_answers_then_comes_from_the_cache() {
     let dns = Arc::new(FakeDns::default());
     let h = harness(Options {
         report: Some(Reporter::new(Sources {
             dns: Arc::clone(&dns) as Arc<dyn DnsLookup>,
+            http: Arc::new(FakeHttp),
         })),
         ..Options::default()
     })

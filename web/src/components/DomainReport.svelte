@@ -4,9 +4,9 @@
   // not block the others.
   import { untrack } from 'svelte';
   import { api, ApiError, errorText } from '../lib/api';
-  import type { DnsReport, ReportResult, ReportSection } from '../lib/api/types';
+  import type { DnsReport, RdapReport, ReportResult, ReportSection } from '../lib/api/types';
   import { formatDateTime } from '../lib/format';
-  import { REPORT_SECTIONS, statusText } from '../lib/report';
+  import { ageDays, REPORT_SECTIONS, statusText } from '../lib/report';
 
   let { name }: { name: string } = $props();
 
@@ -103,6 +103,26 @@
               </tbody>
             </table>
           </div>
+        {:else if r.data && s.id === 'rdap'}
+          {@const d = r.data as RdapReport}
+          {@const age = ageDays(d.created, Date.now())}
+          <dl class="facts">
+            <dt>Domain</dt><dd class="mono">{d.domain ?? '—'}</dd>
+            <dt>Registrar</dt><dd>{d.registrar ?? '—'}{#if d.registrar_iana_id} <span class="muted small">(IANA {d.registrar_iana_id})</span>{/if}</dd>
+            <dt>Owner</dt><dd>{d.registrant ?? 'not public'}</dd>
+            <dt>Created</dt>
+            <dd>
+              {d.created ? formatDateTime(d.created) : '—'}
+              {#if age !== null}<span class="badge" class:bad={age < 30}>{age < 1 ? 'today' : `${age} days ago`}</span>{/if}
+            </dd>
+            <dt>Expires</dt><dd>{d.expires ? formatDateTime(d.expires) : '—'}</dd>
+            <dt>Updated</dt><dd>{d.updated ? formatDateTime(d.updated) : '—'}</dd>
+            <dt>Status</dt><dd class="small">{d.status.length > 0 ? d.status.join(', ') : '—'}</dd>
+            <dt>Name servers</dt><dd class="mono small">{d.nameservers.length > 0 ? d.nameservers.join(', ') : '—'}</dd>
+            <dt>DNSSEC</dt><dd>{d.dnssec === null ? '—' : d.dnssec ? 'signed' : 'not signed'}</dd>
+            <dt>Abuse contact</dt><dd class="mono small">{d.abuse_email ?? '—'}</dd>
+          </dl>
+          {#if d.server}<p class="hint">Source: {d.server}</p>{/if}
         {/if}
       {/if}
     </div>
@@ -124,6 +144,19 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0.5rem 0 0;
+  }
+  .facts dt {
+    color: var(--muted);
+  }
+  .facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
   }
   .values {
     overflow-wrap: anywhere;

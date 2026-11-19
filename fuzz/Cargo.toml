@@ -14,6 +14,7 @@ rusthole-core = { path = "../crates/rusthole-core" }
 rusthole-import = { path = "../crates/rusthole-import" }
 rusthole-dns = { path = "../crates/rusthole-dns" }
 rusthole-tls = { path = "../crates/rusthole-tls" }
+rusthole-report = { path = "../crates/rusthole-report" }
 rusthole-web = { path = "../crates/rusthole-web" }
 rustls-pki-types = "1.16"
 
@@ -142,6 +143,13 @@ bench = false
 [[bin]]
 name = "http_redirect"
 path = "fuzz_targets/http_redirect.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "rdap_json"
+path = "fuzz_targets/rdap_json.rs"
 test = false
 doc = false
 bench = false

@@ -2,7 +2,18 @@
 
 import type { ReportSection, ReportStatus } from './api/types';
 
-export const REPORT_SECTIONS: { id: ReportSection; title: string }[] = [{ id: 'dns', title: 'DNS records' }];
+export const REPORT_SECTIONS: { id: ReportSection; title: string }[] = [
+  { id: 'dns', title: 'DNS records' },
+  { id: 'rdap', title: 'Registration (RDAP)' },
+];
+
+/** The age of a date in whole days at `nowMs`, or null. */
+export function ageDays(iso: string | null, nowMs: number): number | null {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return null;
+  return Math.floor((nowMs - t) / 86_400_000);
+}
 
 /** Text for a section state. */
 export function statusText(s: ReportStatus): string {

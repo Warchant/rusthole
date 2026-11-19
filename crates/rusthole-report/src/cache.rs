@@ -12,6 +12,8 @@ use crate::model::{Section, SectionReport, Status};
 pub const MAX_ENTRIES: usize = 1024;
 /// How long an `ok` or `unavailable` result stays.
 pub const OK_TTL: Duration = Duration::from_hours(1);
+/// How long an RDAP result stays: registration data changes rarely.
+pub const RDAP_TTL: Duration = Duration::from_hours(24);
 /// How long a `failed` result stays, so a click does not ask a slow source again at once.
 pub const FAILED_TTL: Duration = Duration::from_mins(5);
 
@@ -19,8 +21,9 @@ pub const FAILED_TTL: Duration = Duration::from_mins(5);
 pub type Key = (Section, String);
 
 /// How long a result with `status` stays in the cache. `None`: do not keep it.
-pub const fn ttl(_section: Section, status: Status) -> Option<Duration> {
+pub const fn ttl(section: Section, status: Status) -> Option<Duration> {
     match status {
+        Status::Ok | Status::Unavailable if matches!(section, Section::Rdap) => Some(RDAP_TTL),
         Status::Ok | Status::Unavailable => Some(OK_TTL),
         Status::Failed => Some(FAILED_TTL),
         // `off` depends on the setting, not on the name.

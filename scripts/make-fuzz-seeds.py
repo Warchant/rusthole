@@ -296,6 +296,22 @@ def main() -> None:
             "no-host": "GET / HTTP/1.0\n\n",
         },
     )
+    write(
+        "rdap_json",
+        {
+            # The first byte picks the parser: even = bootstrap file, odd = domain answer.
+            "bootstrap": b"\x00"
+            + b'{"version":"1.0","services":[[["com","net"],["https://rdap.verisign.example/com/v1/"]],'
+            + b'[["test"],["https://rdap.nic.test"]]]}',
+            "domain": b"\x01"
+            + b'{"objectClassName":"domain","ldhName":"EXAMPLE.COM","status":["active"],'
+            + b'"events":[{"eventAction":"registration","eventDate":"1995-08-14T04:00:00Z"}],'
+            + b'"nameservers":[{"ldhName":"A.IANA-SERVERS.NET"}],"secureDNS":{"delegationSigned":true},'
+            + b'"entities":[{"roles":["registrar"],"publicIds":[{"identifier":"376"}],'
+            + b'"vcardArray":["vcard",[["fn",{},"text","RESERVED-IANA"]]],'
+            + b'"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["email",{},"text","abuse@example.net"]]]}]}]}',
+        },
+    )
     write("dns_request", dns_request_seeds())
     write("doh_request", doh_request_seeds())
     write("dot_frames", dot_frames_seeds())

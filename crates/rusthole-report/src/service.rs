@@ -33,6 +33,7 @@ use crate::dns::DnsLookup;
 use crate::http::HttpGet;
 use crate::model::{Outcome, Section, SectionReport, Status};
 use crate::rdap::Rdap;
+use crate::tls::TlsProbe;
 
 /// The most jobs at a time.
 pub const MAX_JOBS: usize = 4;
@@ -74,6 +75,8 @@ pub struct Sources {
     pub dns: Arc<dyn DnsLookup>,
     /// HTTPS GET (RDAP).
     pub http: Arc<dyn HttpGet>,
+    /// TLS handshakes (the certificate of a name).
+    pub tls: Arc<dyn TlsProbe>,
 }
 
 #[derive(Debug)]
@@ -217,7 +220,7 @@ impl Reporter {
             let section = guard.key.0;
             let outcome = match tokio::time::timeout(
                 section.limit(),
-                run_section(&guard.inner, section, &name, req.now),
+                run_section(&guard.inner, section, &name, req),
             )
             .await
             {
@@ -277,10 +280,12 @@ async fn wait(
 }
 
 /// Runs one section (no time limit here; the caller has one).
-async fn run_section(inner: &Inner, section: Section, name: &DomainName, now: MonoTime) -> Outcome {
+async fn run_section(inner: &Inner, section: Section, name: &DomainName, req: Request) -> Outcome {
+    let s = &inner.sources;
     match section {
-        Section::Dns => crate::dns::run(Arc::clone(&inner.sources.dns), name).await,
-        Section::Rdap => inner.rdap.run(name, now).await,
+        Section::Dns => crate::dns::run(Arc::clone(&s.dns), name).await,
+        Section::Rdap => inner.rdap.run(name, req.now).await,
+        Section::Tls => crate::tls::run(s.dns.as_ref(), s.tls.as_ref(), name, req.wall).await,
     }
 }
 
@@ -293,6 +298,7 @@ mod tests {
     use crate::dns::NAME_TYPES;
     use crate::dns::tests::FakeDns;
     use crate::rdap::tests::FakeHttp;
+    use crate::tls::NoTls;
 
     fn req(refresh: bool, now_secs: u64) -> Request {
         Request {
@@ -311,6 +317,7 @@ mod tests {
         Reporter::new(Sources {
             dns,
             http: Arc::new(FakeHttp::default()),
+            tls: Arc::new(NoTls("no TLS in this test".to_owned())),
         })
     }
 
@@ -353,6 +360,7 @@ mod tests {
         let s = Reporter::new(Sources {
             dns: Arc::new(FakeDns::default()),
             http: Arc::clone(&http) as Arc<dyn HttpGet>,
+            tls: Arc::new(NoTls("no TLS in this test".to_owned())),
         });
         let mut r = req(false, 0);
         r.external = false;

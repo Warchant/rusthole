@@ -20,6 +20,17 @@ pub fn rdap_json(data: &[u8]) {
     }
 }
 
+/// Runs the certificate parser on arbitrary bytes (one DER certificate).
+pub fn cert_chain(data: &[u8]) {
+    if let Ok(v) = crate::tls::cert_json(data, 0) {
+        let n = v
+            .get("names")
+            .and_then(|x| x.as_array())
+            .map_or(0, Vec::len);
+        assert!(n <= crate::tls::MAX_SANS);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -32,5 +43,7 @@ mod tests {
         let mut d = vec![1u8];
         d.extend_from_slice(crate::rdap::tests::DOMAIN.as_bytes());
         super::rdap_json(&d);
+        super::cert_chain(b"");
+        super::cert_chain(&[0x30, 0x82, 0x01]);
     }
 }

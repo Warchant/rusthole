@@ -109,11 +109,15 @@ describe('Report button', () => {
     expect(rdap).toContain('not public');
     expect(rdap).toContain('ns1.shop.example, ns2.shop.example');
     expect(h.calls).toContain(`GET /report/domain/${NAME}/rdap`);
+    await until(() => text(section(root, 'tls')).includes('60 days left'), 'the TLS data');
+    expect(text(section(root, 'tls'))).toContain('trusted');
+    expect(text(section(root, 'tls'))).toContain('Chain: www.shop.example → Example CA R1');
     changeMock((s) => {
       s.settings.report.external = false;
     });
     button(root, 'Refresh').click();
     await until(() => text(section(root, 'rdap')).includes('turned off in the settings'), 'the off state');
+    expect(text(section(root, 'tls'))).toContain('turned off in the settings');
     // DNS still works.
     expect(text(section(root, 'dns'))).toContain('192.0.2.80');
   });

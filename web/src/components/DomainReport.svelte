@@ -4,7 +4,7 @@
   // not block the others.
   import { untrack } from 'svelte';
   import { api, ApiError, errorText } from '../lib/api';
-  import type { DnsReport, RdapReport, ReportResult, ReportSection } from '../lib/api/types';
+  import type { DnsReport, RdapReport, ReportResult, ReportSection, TlsReport } from '../lib/api/types';
   import { formatDateTime } from '../lib/format';
   import { ageDays, REPORT_SECTIONS, statusText } from '../lib/report';
 
@@ -123,6 +123,29 @@
             <dt>Abuse contact</dt><dd class="mono small">{d.abuse_email ?? '—'}</dd>
           </dl>
           {#if d.server}<p class="hint">Source: {d.server}</p>{/if}
+        {:else if r.data && s.id === 'tls'}
+          {@const d = r.data as TlsReport}
+          {@const leaf = d.chain[0]}
+          <p>
+            <span class="badge" class:ok={d.trusted} class:bad={!d.trusted}>{d.trusted ? 'trusted' : 'not trusted'}</span>
+            <span class="muted small">{d.address}{d.version ? `, ${d.version}` : ''}</span>
+          </p>
+          {#if d.trust_error}<p class="muted small">{d.trust_error}</p>{/if}
+          {#if leaf && !leaf.error}
+            <dl class="facts">
+              <dt>Subject</dt><dd class="mono">{leaf.subject ?? '—'}{#if leaf.subject_org} <span class="muted small">({leaf.subject_org})</span>{/if}</dd>
+              <dt>Issuer</dt><dd>{leaf.issuer ?? '—'}{#if leaf.issuer_org} <span class="muted small">({leaf.issuer_org})</span>{/if}{#if leaf.self_signed} <span class="badge bad">self-signed</span>{/if}</dd>
+              <dt>Valid</dt>
+              <dd>
+                {formatDateTime(new Date(leaf.not_before * 1000).toISOString())} – {formatDateTime(new Date(leaf.not_after * 1000).toISOString())}
+                <span class="badge" class:bad={leaf.days_left < 14}>{leaf.days_left < 0 ? 'expired' : `${leaf.days_left} days left`}</span>
+              </dd>
+              <dt>Names</dt><dd class="mono small">{leaf.names.join(', ') || '—'}{leaf.names_truncated ? ' …' : ''}</dd>
+            </dl>
+          {/if}
+          {#if d.chain.length > 1}
+            <p class="hint">Chain: {d.chain.map((c) => c.subject ?? '?').join(' → ')}</p>
+          {/if}
         {/if}
       {/if}
     </div>

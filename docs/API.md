@@ -1205,6 +1205,7 @@ never the system resolver (docs/LISTS.md, "Name lookup").
 |---|---|---|---|
 | `dns` | The upstream pool: A, AAAA, MX, TXT, CAA of the name; NS, SOA of the registrable domain; the CNAME chain of the A answer. | 5 s | No (the upstreams only) |
 | `rdap` | The RDAP server of the registry (RFC 9083), found in the IANA bootstrap file `https://data.iana.org/rdap/dns.json`. The query is the registrable domain. | 10 s | Yes: IANA and the registry get the registrable domain |
+| `tls` | A TLS handshake to the first public IPv4 address of the name on port 443 (SNI = the name). No HTTP request. | 8 s | Yes: the host of the name sees a connection from rusthole |
 
 Response 200:
 
@@ -1280,6 +1281,38 @@ Data of `rdap` (`null` for a field that the registry does not give):
   for the IANA file. The connections go to public IPv4 addresses only.
 - The parsers keep a fixed set of fields. Each text has at most 256 bytes; each list at
   most 16 items. The fuzz target `rdap_json` covers both parsers.
+
+Data of `tls`:
+
+```json
+{
+  "address": "20.42.65.92:443",
+  "trusted": true,
+  "trust_error": null,
+  "version": "TLSv1_3",
+  "chain": [
+    {
+      "subject": "*.events.data.microsoft.com", "subject_org": "Microsoft Corporation",
+      "issuer": "Microsoft Azure RSA TLS Issuing CA 04", "issuer_org": "Microsoft Corporation",
+      "names": ["*.events.data.microsoft.com"], "names_truncated": false,
+      "not_before": 1767225600, "not_after": 1782864000, "days_left": 181,
+      "self_signed": false, "key": "1.2.840.113549.1.1.1", "signature": "1.2.840.113549.1.1.12"
+    }
+  ]
+}
+```
+
+- `chain`: the certificates as the server sent them, leaf first, at most 8. A certificate
+  that cannot be read has only `error`. `names`: the DNS names and IPv4 addresses of the
+  SAN extension, at most 32. `not_before`, `not_after`: Unix seconds. `key`, `signature`:
+  the algorithm OIDs.
+- `trusted`: the system roots (or the bundled Mozilla roots) trust the chain for the name.
+  An untrusted, expired or self-signed certificate is data: the section is `ok`, `trusted`
+  is `false` and `trust_error` tells why.
+- The name has no public IPv4 address (for example a LAN name): `unavailable`, with the
+  addresses in `data.addresses`. rusthole does not connect to the LAN.
+- Limits: TCP connect 4 s, handshake 4 s. The fuzz target `cert_chain` covers the
+  certificate parser.
 
 Cache and limits:
 

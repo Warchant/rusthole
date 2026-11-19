@@ -87,6 +87,9 @@ async fn rdap_section_follows_the_setting() {
         report: Some(Reporter::new(Sources {
             dns: Arc::new(FakeDns::default()),
             http: Arc::new(FakeHttp),
+            tls: Arc::new(rusthole_report::tls::NoTls(
+                "no TLS in this test".to_owned(),
+            )),
         })),
         ..Options::default()
     })
@@ -99,6 +102,12 @@ async fn rdap_section_follows_the_setting() {
     assert_eq!(r.body["status"], "ok");
     assert_eq!(r.body["data"]["domain"], "example.test");
     assert_eq!(r.body["data"]["created"], "2020-01-01T00:00:00Z");
+    // The fake DNS gives a documentation address: the TLS section does not connect.
+    let r = h
+        .get("/api/v1/report/domain/www.example.test/tls", &s)
+        .await;
+    assert_eq!(r.body["status"], "unavailable", "{}", r.text);
+    assert_eq!(r.body["data"]["addresses"][0], "192.0.2.7");
     let r = h
         .req(
             Method::PATCH,
@@ -121,6 +130,9 @@ async fn dns_section_answers_then_comes_from_the_cache() {
         report: Some(Reporter::new(Sources {
             dns: Arc::clone(&dns) as Arc<dyn DnsLookup>,
             http: Arc::new(FakeHttp),
+            tls: Arc::new(rusthole_report::tls::NoTls(
+                "no TLS in this test".to_owned(),
+            )),
         })),
         ..Options::default()
     })

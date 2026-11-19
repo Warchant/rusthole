@@ -16,6 +16,7 @@ pub mod http;
 pub mod model;
 pub mod rdap;
 pub mod service;
+pub mod tls;
 
 pub use model::{Outcome, Section, SectionReport, Status};
 pub use service::{ReportError, Reporter, Request, Sources};

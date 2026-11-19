@@ -527,6 +527,9 @@ async fn start_admin(
         report: Some(rusthole_report::Reporter::new(rusthole_report::Sources {
             dns: Arc::new(server.host_resolver()),
             http: report_http(server),
+            tls: Arc::new(rusthole_report::tls::TlsClient::new(
+                rusthole_tls::system_roots().0,
+            )),
         })),
     };
     let app = AppState::new(deps);

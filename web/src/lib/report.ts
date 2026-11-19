@@ -5,6 +5,7 @@ import type { ReportSection, ReportStatus } from './api/types';
 export const REPORT_SECTIONS: { id: ReportSection; title: string }[] = [
   { id: 'dns', title: 'DNS records' },
   { id: 'rdap', title: 'Registration (RDAP)' },
+  { id: 'tls', title: 'TLS certificate (port 443)' },
 ];
 
 /** The age of a date in whole days at `nowMs`, or null. */

@@ -451,7 +451,7 @@ export interface SystemInfo {
 // Section 17: domain report
 
 /** The report sections, in the order of the UI. */
-export type ReportSection = 'dns' | 'rdap';
+export type ReportSection = 'dns' | 'rdap' | 'tls';
 export type ReportStatus = 'ok' | 'failed' | 'off' | 'unavailable';
 
 export interface ReportResult<D = unknown> {
@@ -500,4 +500,31 @@ export interface RdapReport {
   status: string[];
   nameservers: string[];
   dnssec: boolean | null;
+}
+
+export interface CertInfo {
+  subject: string | null;
+  subject_org: string | null;
+  issuer: string | null;
+  issuer_org: string | null;
+  names: string[];
+  names_truncated: boolean;
+  /** Unix seconds. */
+  not_before: number;
+  /** Unix seconds. */
+  not_after: number;
+  days_left: number;
+  self_signed: boolean;
+  key: string;
+  signature: string;
+  /** Set when the certificate cannot be read. */
+  error?: string;
+}
+
+export interface TlsReport {
+  address: string;
+  trusted: boolean;
+  trust_error: string | null;
+  version: string | null;
+  chain: CertInfo[];
 }

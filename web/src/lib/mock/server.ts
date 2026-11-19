@@ -768,7 +768,7 @@ route('POST', '/lists/:id/update', ({ params }) => {
 });
 
 // Domain report (docs/API.md section 17). Fixed data, no network.
-const REPORT_SECTIONS: T.ReportSection[] = ['dns', 'rdap'];
+const REPORT_SECTIONS: T.ReportSection[] = ['dns', 'rdap', 'tls'];
 route('GET', '/report/domain/:name/:section', ({ q, params }) => {
   const name = decodeURIComponent(params[0]!).trim().toLowerCase();
   const section = params[1] as T.ReportSection;
@@ -779,6 +779,23 @@ route('GET', '/report/domain/:name/:section', ({ q, params }) => {
   const parts = name.split('.');
   const base = parts.slice(-2).join('.');
   const fetched_at = new Date().toISOString().replace(/[.][0-9]+Z$/, 'Z');
+  if ((section === 'rdap' || section === 'tls') && !state.settings.report.external) {
+    return { section, name, status: 'off', cached: false, fetched_at, data: null, error: 'turned off in the settings (report.external)' } satisfies T.ReportResult;
+  }
+  if (section === 'tls') {
+    const nowS = Math.floor(Date.now() / 1000);
+    const tls: T.TlsReport = {
+      address: '203.0.113.80:443',
+      trusted: true,
+      trust_error: null,
+      version: 'TLSv1_3',
+      chain: [
+        { subject: name, subject_org: null, issuer: 'Example CA R1', issuer_org: 'Example CA', names: [name, base], names_truncated: false, not_before: nowS - 30 * 86400, not_after: nowS + 60 * 86400, days_left: 60, self_signed: false, key: '1.2.840.10045.2.1', signature: '1.2.840.10045.4.3.2' },
+        { subject: 'Example CA R1', subject_org: 'Example CA', issuer: 'Example Root', issuer_org: 'Example CA', names: [], names_truncated: false, not_before: nowS - 900 * 86400, not_after: nowS + 900 * 86400, days_left: 900, self_signed: false, key: '1.2.840.10045.2.1', signature: '1.2.840.10045.4.3.3' },
+      ],
+    };
+    return { section, name, status: 'ok', cached: false, fetched_at, data: tls, error: null } satisfies T.ReportResult;
+  }
   if (section === 'rdap') {
     if (!state.settings.report.external) {
       return { section, name, status: 'off', cached: false, fetched_at, data: null, error: 'turned off in the settings (report.external)' } satisfies T.ReportResult;

@@ -11,11 +11,13 @@ pub enum Section {
     Dns,
     /// Registration data from the RDAP server of the registry.
     Rdap,
+    /// The TLS certificate of the name on port 443.
+    Tls,
 }
 
 impl Section {
     /// All sections, in the order of the UI.
-    pub const ALL: [Self; 2] = [Self::Dns, Self::Rdap];
+    pub const ALL: [Self; 3] = [Self::Dns, Self::Rdap, Self::Tls];
 
     /// The section with the API name `s`.
     pub fn parse(s: &str) -> Option<Self> {
@@ -27,6 +29,7 @@ impl Section {
         match self {
             Self::Dns => "dns",
             Self::Rdap => "rdap",
+            Self::Tls => "tls",
         }
     }
 
@@ -35,6 +38,7 @@ impl Section {
         match self {
             Self::Dns => Duration::from_secs(5),
             Self::Rdap => Duration::from_secs(10),
+            Self::Tls => Duration::from_secs(8),
         }
     }
 
@@ -43,7 +47,7 @@ impl Section {
     pub const fn external(self) -> bool {
         match self {
             Self::Dns => false,
-            Self::Rdap => true,
+            Self::Rdap | Self::Tls => true,
         }
     }
 }

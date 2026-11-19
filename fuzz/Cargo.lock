@@ -1562,6 +1562,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusthole-report"
+version = "0.0.1"
+dependencies = [
+ "hickory-proto",
+ "parking_lot",
+ "rusthole-core",
+ "rusthole-dns",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "rusthole-store"
 version = "0.0.1"
 dependencies = [
@@ -1611,6 +1625,7 @@ dependencies = [
  "rusthole-core",
  "rusthole-dns",
  "rusthole-lists",
+ "rusthole-report",
  "rusthole-store",
  "rusthole-tls",
  "rustls",

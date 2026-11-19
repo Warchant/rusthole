@@ -17,6 +17,7 @@ pub mod fuzzing;
 pub mod host;
 pub mod model;
 pub mod password;
+pub mod redirect;
 pub mod router;
 pub(crate) mod routes;
 pub mod server;

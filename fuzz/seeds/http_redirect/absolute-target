@@ -1,0 +1,3 @@
+GET http://evil.example/ HTTP/1.1
+Host: rusthole.lan:8443
+

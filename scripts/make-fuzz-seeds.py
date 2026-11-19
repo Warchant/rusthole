@@ -286,6 +286,16 @@ def main() -> None:
             "upper-dot": "RUSTHOLE.LAN.",
         },
     )
+    write(
+        "http_redirect",
+        {
+            "get-ip": "GET /#/domains HTTP/1.1\r\nHost: 192.0.2.2:8443\r\n\r\n",
+            "get-name": "GET /api/v1/system?x=1 HTTP/1.1\r\nhost: rusthole.lan:8443\r\n\r\n",
+            "foreign-host": "GET / HTTP/1.1\r\nHost: evil.example:8443\r\n\r\n",
+            "absolute-target": "GET http://evil.example/ HTTP/1.1\r\nHost: rusthole.lan:8443\r\n\r\n",
+            "no-host": "GET / HTTP/1.0\n\n",
+        },
+    )
     write("dns_request", dns_request_seeds())
     write("doh_request", doh_request_seeds())
     write("dot_frames", dot_frames_seeds())

@@ -39,6 +39,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tower::ServiceExt;
 
+use crate::redirect::{self, FirstByte};
 use crate::state::{AppState, ClientAddr};
 
 /// Limits and time limits of the admin listener.
@@ -419,9 +420,76 @@ async fn idle_watchdog(act: Arc<Activity>, idle_limit: Duration, stall_limit: Du
     }
 }
 
+/// The first byte of a connection, without reading it. `None` at EOF.
+async fn first_byte(tcp: &TcpStream) -> std::io::Result<Option<u8>> {
+    let mut b = [0u8; 1];
+    let n = tcp.peek(&mut b).await?;
+    Ok(if n == 1 { b.first().copied() } else { None })
+}
+
+/// Reads a plain HTTP request head (at most [`redirect::MAX_HEAD`] bytes) and writes the
+/// redirect answer. The caller gives the time limit.
+async fn plain_redirect(mut tcp: TcpStream, ctx: &AcceptCtx) {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    let mut head = Vec::with_capacity(1024);
+    let mut chunk = [0u8; 1024];
+    // Bounded: each pass reads at least one byte, and the head has at most MAX_HEAD bytes.
+    for _ in 0..redirect::MAX_HEAD {
+        if redirect::head_complete(&head) || head.len() >= redirect::MAX_HEAD {
+            break;
+        }
+        match tcp.read(&mut chunk).await {
+            Ok(0) | Err(_) => break,
+            Ok(n) => head.extend_from_slice(chunk.get(..n).unwrap_or_default()),
+        }
+    }
+    head.truncate(redirect::MAX_HEAD);
+    let answer = redirect::answer(&head, &ctx.state.net().hosts);
+    let _ = tcp.write_all(&answer).await;
+    let _ = tcp.shutdown().await;
+}
+
+/// Looks at the first byte of a connection: TLS goes on (`Some`); plain HTTP gets a
+/// redirect answer and the connection ends (`None`); other bytes close it.
+async fn tls_or_redirect(tcp: TcpStream, peer: SocketAddr, ctx: &AcceptCtx) -> Option<TcpStream> {
+    let first = tokio::select! {
+        () = ctx.hard.cancelled() => return None,
+        () = ctx.cancel.cancelled() => return None,
+        r = tokio::time::timeout(ctx.settings.handshake_timeout, first_byte(&tcp)) => r,
+    };
+    match first {
+        Ok(Ok(Some(b))) => match redirect::classify(b) {
+            FirstByte::Tls => Some(tcp),
+            FirstByte::Http => {
+                tokio::select! {
+                    () = ctx.hard.cancelled() => {}
+                    () = ctx.cancel.cancelled() => {}
+                    r = tokio::time::timeout(ctx.settings.handshake_timeout, plain_redirect(tcp, ctx)) => {
+                        if r.is_err() {
+                            tracing::debug!(%peer, "plain HTTP request head timed out");
+                        }
+                    }
+                }
+                None
+            }
+            FirstByte::Other => {
+                tracing::debug!(%peer, "admin connection is not TLS or HTTP; closed");
+                None
+            }
+        },
+        // EOF, an error or the time limit: close.
+        _ => None,
+    }
+}
+
 async fn serve_conn(tcp: TcpStream, peer: SocketAddr, slot: Slot, ctx: AcceptCtx) {
     let _slot = slot;
     let _ = tcp.set_nodelay(true);
+    // Plain HTTP on the TLS port gets a redirect to HTTPS (docs/SECURITY.md section 2).
+    let Some(tcp) = tls_or_redirect(tcp, peer, &ctx).await else {
+        return;
+    };
     let handshake = tokio::select! {
         () = ctx.hard.cancelled() => return,
         () = ctx.cancel.cancelled() => return,

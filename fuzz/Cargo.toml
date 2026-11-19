@@ -138,3 +138,10 @@ path = "fuzz_targets/host_header.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "http_redirect"
+path = "fuzz_targets/http_redirect.rs"
+test = false
+doc = false
+bench = false

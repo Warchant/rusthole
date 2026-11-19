@@ -118,6 +118,27 @@ pub fn host_header(data: &[u8]) {
     );
 }
 
+/// Runs the plain HTTP redirect on arbitrary bytes. It must never panic, and a redirect
+/// never points to a host that the Host check refuses.
+pub fn http_redirect(data: &[u8]) {
+    static ALLOW: OnceLock<HostAllow> = OnceLock::new();
+    let allow =
+        ALLOW.get_or_init(|| HostAllow::new(8443, ["rusthole.lan"], [Ipv4Addr::new(192, 0, 2, 2)]));
+    let out = crate::redirect::answer(data, allow);
+    let text = String::from_utf8(out).unwrap_or_default();
+    let headers = text.split("\r\n\r\n").next().unwrap_or_default();
+    for line in headers.split("\r\n") {
+        assert!(
+            !line.contains('\n') && !line.contains('\r'),
+            "header injection"
+        );
+        if let Some(loc) = line.strip_prefix("Location: https://") {
+            let host = loc.split('/').next().unwrap_or_default();
+            assert!(host_allowed(host, allow), "a redirect to a refused host");
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -131,6 +152,8 @@ mod tests {
             api_json(&d);
         }
         host_header(b"localhost:8443");
+        http_redirect(b"GET / HTTP/1.1\r\nHost: rusthole.lan:8443\r\n\r\n");
+        http_redirect(&[0xff, b'\r', b'\n']);
         host_header(&[0xff, 0xfe]);
         host_header(b"https://rusthole.lan:8443\0same-origin");
         host_header(b"null\0cross-site");

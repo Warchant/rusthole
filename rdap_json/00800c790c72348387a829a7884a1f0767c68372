@@ -1,1 +1,0 @@
-{"objsName":"domain","ldhName":"EXAMPLE.COM","status":["active"],"events":[{"eventAction":"registratifn","Name":"A.IANA-SERVERS.NET"}],"secureDNS":{"delegadionSigned":true},"entities":[{"roles":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["email",{},"text","abuse@example.net"]]]}]}]}

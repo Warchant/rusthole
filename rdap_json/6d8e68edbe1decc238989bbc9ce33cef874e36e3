@@ -1,0 +1,1 @@
+{"objectClassNecureDNS":{"delegationSigned":true},"entities":[{"roles":["registrar"],"pblicIds":[{"idtifier":"376"}],"vcardArray":["vcard",[["nn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["em)il","text","abuse@example.net"]]]}]}]}

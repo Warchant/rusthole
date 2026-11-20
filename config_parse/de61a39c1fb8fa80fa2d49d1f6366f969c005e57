@@ -1,0 +1,11 @@
+# rustho01:db8::/32. r/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 0ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddendddd_ttl = 86400
+negative_ttl = 300
+
+[acl]
+au_local = truetsn"]
+:

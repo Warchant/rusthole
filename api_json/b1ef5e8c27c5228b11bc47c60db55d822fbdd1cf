@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\()22:222222222222.@DS.EXA22222222222222222222222222ads\\.extargetample\\.com%", "groups": [1]}

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "$^|pstream\\..[d6\\.e|aArgenxampl]\\/como$:", "groups": [1]}

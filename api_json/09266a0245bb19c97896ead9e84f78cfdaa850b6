@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "j@dտ-@dſ\\.example\\/com$:", "groups": [2]}

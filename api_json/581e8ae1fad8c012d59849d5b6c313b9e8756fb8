@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(Y^|\\.)vds\\.exampl.ANDS.EXec\\.om%", "groups": [1]}

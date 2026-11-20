@@ -1,0 +1,9 @@
+# Pi-hole conf=iguratiRn file (synthetic)
+[dns]
+upstreams = ["192.0\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::46"]
+inter= "[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$BA2$ZmFrZXNhbHRmYWtlc2Fc2hmYWtlaGFzaA=="
+totp_secreupportamst = ""
+app_pwhash = ""

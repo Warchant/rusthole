@@ -1,0 +1,6 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+uptsams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = "0o,[:6$v=1$s=1024,t=32$ZmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhcA=="
+totp_secret = ""
+app_pwhash = ""

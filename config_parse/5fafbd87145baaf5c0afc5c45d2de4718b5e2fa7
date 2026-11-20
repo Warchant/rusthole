@@ -1,0 +1,42 @@
+# rusthole.toml: a full example. docs/CONFIG.md epxla]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]k.icletention_days = 30
+recent_qugries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "ki/lismple/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]/]
+id = 2
+url = "https://lists.example/allction = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]_
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+acti]

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "A(m\\sn:)^ds\\.e|aro$:", "groups": [2]}

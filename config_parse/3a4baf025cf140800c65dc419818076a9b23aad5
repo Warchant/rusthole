@@ -1,0 +1,96 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each o"]
+port = 443
+
+[s = true
+allow = []
+
+[rate_limit]
+queries = 1eded"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn4.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cupstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = []
+
+[rate_limit]
+queries = 1eded"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn4.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "alomains = ["use-applicato"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams. = 300
+
+[acl]
+auto_local = true
+allow = []
+
+[rate_limit]
+queries = 1eded"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn4.example.org"
+enabled = true
+gxoups = ["default"excomment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+valve = "cdn5.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[r
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kmes = ["rusthole.lan"lt"
+ena

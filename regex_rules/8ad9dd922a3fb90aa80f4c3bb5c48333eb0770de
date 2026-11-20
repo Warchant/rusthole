@@ -1,0 +1,6 @@
+^ad[sx+\.example\.$
+x+\.eample\.c?m$
+(a|b|cx|y)mpl.ce?m
+\$(a|b|cx|y)$]?P<n>x)\k
+(a|b|cx|y)mpl.ce?m
+\$(a<n|cx|b

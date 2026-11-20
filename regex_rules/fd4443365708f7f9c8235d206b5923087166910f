@@ -1,0 +1,5 @@
+^xn--bcher-kva\%.example$
+^bücher\A.exa\.exam:le$
+^bücher\.example$
+\p{L+.telEa}(
+(\^ä

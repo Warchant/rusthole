@@ -1,8 +1,0 @@
-# Pi-hole configurationinterface = ""
-listeningMode = "DOCAL"
-queryLo= false
-
-[webserver]
-port = "8o,0443os,=32$ZmFrZXrNHhRmYWtlc2FsdA==$ZmFrZupWhhc2hmYWzaA=="
-totp_secret = ""
-app_pwhash = ""

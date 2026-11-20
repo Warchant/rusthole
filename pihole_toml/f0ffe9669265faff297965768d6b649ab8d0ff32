@@ -1,0 +1,6 @@
+# Pifile
+[dns]
+upstreams = ["191.0.2.53", "192.Z.2.54", ]
+
+se= ""
+app_pw = ""

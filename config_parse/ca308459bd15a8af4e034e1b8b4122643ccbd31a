@@ -1,0 +1,22 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documrver.doh]
+enabled = false
+listen = [name_check = trueype}}}}}}}} = "A"
+value = "384.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA 4"]
+
+[rate_limit]
+querecmple"
+groups = ["default"]
+
+[[rules]]
+kind=  "regex"
+actids.
+
+on = "deny"
+value = '(config_version = 1
+
+[srusthole.toml:n = ["auto"]
+dns_port = 53
+data_dir = "/var/li\.|^)ba

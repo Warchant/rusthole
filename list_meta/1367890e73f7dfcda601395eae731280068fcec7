@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "https://{{{{{{{{ GMT",
+  "body_hash": null,
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 5,
+   "skipped": 3
+  },
+  "last_success":816000,
+  "last_error": "last_`tp\\\t_TTP 502"
+}

@@ -1,1 +1,0 @@
-{"objectClassName":"domain","ldhName":"EXAMPLE.COM)","status":["active"],"events":[{"eventAction":"3990-08-14T000Z"}],"nameservers":[{"ldhName":"A.IANA-SERVERS.NET+++++++++++++++/++++++status++++++++++++++++++++"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registrar"],"pAblicIds":[{"cardArray":["vcard",[["le.net"]]]}]}]}

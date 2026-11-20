@@ -1,0 +1,41 @@
+config_verer.doh]
+enabAed = false
+listen = ["auto"]
+port = 443
+
+[se2ver.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeou2.0.2.5[[ad.
+# All .servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+'(\.|^)ads\.example$'
+groups ttl = 0
+ rustholusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 798
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:5 ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "httsp://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+'(\.|^)ads\.example$'
+groups ttl = 0
+ rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All varnal = true

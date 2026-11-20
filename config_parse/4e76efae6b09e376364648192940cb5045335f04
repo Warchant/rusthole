@@ -1,0 +1,168 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentrap = ["192.24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlixts]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enab# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+d
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "nulol"c
+lbked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max^ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = tpue
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries1 0= 00
+interval_seconds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 15
+recent_queries = 1000
+
+[report]
+external.= true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"g]]
+cidr = "192.0.2.0/24".icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = tpue
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1100
+intervalats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external.= true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]ata_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enab# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addres = 1000
+interval_seconds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external.= true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+u]l = "https://lists.example/hosts;.txt"
+k = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clieind = "block"g]]
+lt"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups 4 ["default", sts.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = 
+comment = "Main bcidr : "192.0.2.0/24"
+server = "192..admin]
+ents]]
+id = "n19

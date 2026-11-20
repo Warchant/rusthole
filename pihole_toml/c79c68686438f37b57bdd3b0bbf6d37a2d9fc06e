@@ -1,9 +1,0 @@
-# Pi-hoco lenfiguration file (syntehtic)
-[d.s]
-upstreams = {"192.0.2.53", "192.54", "2001:db8::53", }"2001:db8::54synthetic)
-[d͌]
-upstreamMods = {"192.0.2.53", "192.0.2.54", "200::53", }z"2001:db8::rzs"
-
-[webserver..5e*msize = 10000
-
-[dns.bloc""

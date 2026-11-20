@@ -1,0 +1,11 @@
+{
+  "version": 1,
+ "url": "hosts.txt0000000000000",
+  "size_bytes": 3,
+  "entries": {
+  "valid": 20,
+    "invalid": 1,
+    "skipped": 2
+  },
+  "last_success": -24l*
+}

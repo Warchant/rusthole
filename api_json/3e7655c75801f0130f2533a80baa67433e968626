@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "ps<<<%%%%%%%%%%%%%%%%%%%%%%%%%%%%$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC%%%<<<<<<<<<<<<<<.exampl=e\\.com$", "groups": [5]}

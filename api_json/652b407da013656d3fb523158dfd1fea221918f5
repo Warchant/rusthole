@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": ":(^|\\.(^|\\.)aNds\\.exN\\sda.)exa?<mple\\.c/om$", "groups": [0]}

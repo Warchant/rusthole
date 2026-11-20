@@ -1,0 +1,15 @@
+# rusthole.toml: a full example. docs/Ciot"]
+
+[[clients]]
+id = "printer9456,t=2,p=1$...$..."
+session_ttl_seconds = 288333333333333333333333333333333333333333333333333333333333333333333333333333333333333333300
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000id00?0000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs medo "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/c"
+names = ["rusthole.lan"]

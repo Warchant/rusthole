@@ -1,0 +1,13 @@
+# rusthots"
+
+[[groups]]
+name = "iot"
+
+[= "nas.lan"
+type = "A"
+value = "384.0.2.10"
+e = "kids"comment = "Tablets"
+
+[[g key_path = "pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

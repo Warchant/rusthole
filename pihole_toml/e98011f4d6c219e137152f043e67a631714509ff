@@ -1,6 +1,0 @@
-# s.blocfalse
-
-[webserver]
-port = "80oaGFzaA=="
-totp_secret = ""
-whash = ""

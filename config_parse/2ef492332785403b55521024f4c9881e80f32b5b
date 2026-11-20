@@ -1,0 +1,17 @@
+# rusthole.toml: a lt"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[= "2001:db8::10"
+
+[,[local_dns.cnames]]
+name = "media.lan"
+target = "e = "file"
+# cert_pae = "local-ca"
+names = ["rusthole.lan"]

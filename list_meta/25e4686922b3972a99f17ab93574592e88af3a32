@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "url": "htt/ho NovT",
+  "body_hash": null,
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 0,
+    "skipped": 2
+  },  "last_attempt": 179490240794816000,
+  "last_error": "HTTP03"
+}

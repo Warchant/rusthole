@@ -1,0 +1,11 @@
+#003:db8::5
+[dns. 1000dns. 10001
+in']
+active =ue
+mode = "NULL"
+
+[dns. 10002
+
+active = 
+[dns. 100 1
+l = 6"

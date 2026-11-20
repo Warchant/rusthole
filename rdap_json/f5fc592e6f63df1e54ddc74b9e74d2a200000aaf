@@ -1,1 +1,0 @@
-{"objectClassservers":[{"ldhName":"A.IANA-SERVEstasET"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registRar"],"publvcardArray":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["idenabuse"],"vcardrAray":["vcar~d",[["email",{},"text","abuse@example.net"]]]}]}]}

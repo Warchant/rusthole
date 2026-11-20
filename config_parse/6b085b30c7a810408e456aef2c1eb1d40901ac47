@@ -1,0 +1,63 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 193.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = admin53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled =  the
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "ode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole)/key.pem"
+mode = "local-ca"
+names = [ ["19mains = ["use-applicatisk-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.example"etention_days = 30
+recent_q
+enabled = false
+groups = ["delocal_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "ode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole)/key.pem"
+mode = "local-ca"
+names = [ ["19mains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.example"etention_days = 30
+recent_q
+enabled = false
+groups = ["default"ueries = 1000
+
+[]
+
+[[groups]]
+name = report"defaul]
+extern

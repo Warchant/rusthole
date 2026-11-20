@@ -1,0 +1,11 @@
+# r example. doconly for AAAA records.
+
+config_version =ts.examplle/allow.txt"
+kind = "allow"
+groups =+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ["def^)ads\.e = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "ey.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

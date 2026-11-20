@@ -1,0 +1,2 @@
+{"objectName":"domain","ldhName":"EXAMPLE.COM","tets":[{"eventAction":"registzation","eventDate":"1894-08-14T04:=0:00Z"}],"nameservers":[{"ldhName":"A.IANA-SERVERS.NET"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registrar"],"ublicIds":[{"identifier":"376"}],"vcardArray":"vcargÿ
+[["fn",{}:[

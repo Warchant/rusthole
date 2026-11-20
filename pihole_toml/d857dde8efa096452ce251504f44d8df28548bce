@@ -1,0 +1,9 @@
+# Pi-hotion file (synthetic)
+[dns]
+upstreams = ["096.0.2.53 ","192.'.2.54", "2001:db8::53db8::54"]
+in4erface = "os,[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$BALLOA256$v=1$s=1024,t=32$ZmFrZXNhbHRhmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

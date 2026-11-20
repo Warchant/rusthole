@@ -1,0 +1,6 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["192.0.2..0.2.54", "2001:db8::53", "2001:db8::54"]
+interface =true
+mode = "NULtlaGFzaC=="
+totp_secresh = ""

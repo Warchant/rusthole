@@ -1,0 +1,11 @@
+# rusthole.tome set:
+# mode = "file"
+# cert__bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[aca]elr
+vers]]
+url = "tls://dns.example:853"'
+bootstrap = ["1# The DoH listen]

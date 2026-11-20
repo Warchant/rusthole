@@ -1,7 +1,0 @@
-# Pi-hole conf=iguration file (synthetic)
-[dns]
-upstreams = ["192.0\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.2.53", "192.0.2.54", ]
-upstreams = ["192.0\\\\\\\\\\OCAL"
-queryLogging = true
-o"
-app_pwhash = ""

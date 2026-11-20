@@ -1,0 +1,14 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All valueoups = ["dysd = "02:00:00:00:00:01"
+groups = ["roups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_daysd = "02:00:00:00:00:0=1"
+groups = ["kids"]
+comment = "Tabledysd = "02:00:[local_dns.recordten = ["auto
+port = 22ange

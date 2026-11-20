@@ -1,0 +1,16 @@
+# Pi-holc)
+[dhc]
+upstreams = ["192.08::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnss.c = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.rateLimit]
+count = 1000
+intervhash = "$BALLON-SHA256$v=1$s=1024,t=32$ZmFrZXNhbHRmYWtlc$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_LLOON- = ""

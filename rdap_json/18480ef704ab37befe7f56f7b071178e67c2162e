@@ -1,1 +1,0 @@
-{"objectClassName":"domainOM","status":["active"],"events":[{"evction":"registration","eventDate":"14T04IANA-SERVERS|.NET"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registrar"],"publicIds":[{"identifier":"376"}],"vcardArray":["vcard",[["fn",{},"textext","R","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"vcardArray":["vcard",[["ple.net"]]]}]}]}

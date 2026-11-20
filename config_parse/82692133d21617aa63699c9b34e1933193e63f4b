@@ -1,0 +1,26 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.h100.0/5555555555555555555555555555555555555555555555555555555555555555555555555555555524 and 2001:db8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[wupstreams]
+timeout_ms = 2000
+fal|back_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.sera full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[w2.0.2.82"]
+
+[[upstreams.serversoh.eocal-ca"
+names = ["rusthole.lan"]

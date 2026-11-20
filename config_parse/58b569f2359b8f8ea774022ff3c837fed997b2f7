@@ -1,0 +1,240 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+mi._ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.1act"
+action = "allow"
+value = "cdn3.example.org"
+enabled = tru ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "c6400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+externa53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains =config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+poromment = "list 6"
+
+[[lists.adlists]]
+id = 7
+url = "https://lists7.example/hosts.txt"
+kind = "block"
+enabled = false
+groups = ["default"]
+
+[[lists.adlists]]
+id = 8
+url = "https://lists8.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 8= "tls://dns.example:853"oh]
+enabled = false
+listen = ["auto"]
+poromment = "list 6"
+
+[[lists.adlists]]
+id = 7
+url = "https://lists7.example/hosts.txt"
+kind = "block"
+enabled = false
+groups = ["default"]
+
+[[lists.adlists]]
+id = 8
+url = "https://lists8.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 8"
+
+[[lists.adlists]]
+id = 9
+url = "https://lists9.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = tru ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "c6400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = dn4.examp"
+
+[[lists.adlists]]
+id = 9
+url = "https://lists9.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = tru ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "c6400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = dn4.example.org"
+enabledtrue
+
+[lists]
+refresh_interval_ = trueh

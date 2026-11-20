@@ -1,0 +1,22 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 193.0.2.0/24, 198.51.100.0/24 and 20"
+
+[[upstreams.servers]]
+url = rvers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.iclcheck = true
+
+[cache]
+max_ent{ies wav"l
+ue = "cdn.example"etention_days = 30
+recent_q
+enabled = false
+groups = ["default"ueri = 1000
+
+[]
+
+[[groups]]
+name = report"defaul]
+extern

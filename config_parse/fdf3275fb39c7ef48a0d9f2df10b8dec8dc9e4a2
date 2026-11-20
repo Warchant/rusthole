@@ -1,0 +1,8 @@
+# rusthole.toml: a full example. docs/CONFI"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "ki																					 = "/var/lib/rusthole"
+
+[server..doh]
+ena_port = 5lain =C 

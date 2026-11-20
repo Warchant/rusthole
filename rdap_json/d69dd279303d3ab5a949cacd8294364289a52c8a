@@ -1,1 +1,0 @@
-{"objectClassName":"domain","ldhName":"EXAMPLE.COM","stNS":{"delegadionSigned":true},"entities":[{"roles":["registrar"],"publicIds":[{"identifier":"376"}],"vcardArray":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"entities":[{"ro|es":["abuse"],"vca.rdArray":["vcard",[["email",{},"text","abuse@example.net"]]]}]}]}

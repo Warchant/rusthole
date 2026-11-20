@@ -1,0 +1,209 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstre---------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4--------------------en = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+exdocumentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.examplev1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 26
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+list--------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = fsten = ["auto"]
+dns_port = 26
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+list--------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.exampl;ev1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 26
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+list--------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4--------------------en = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+extm"]
+deep_cn)me_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_byt = 8640/ rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4-------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.examplev1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 26
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+list--------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = fsten = ["auto"]
+dns_port = 26
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+list--------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-qu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = faqu------------------------------------------------------------------------------------0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAar/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 4--------------------en = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+extm"]
+deep_cn)me_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 1677721
+[[upstreamslush.

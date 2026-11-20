@@ -1,0 +1,70 @@
+# rusthole.toml: a full exampple"
+
+[&[rules]]
+kind 0000000000000000000000000000000000000018446744073709551615"
+
+[tls]
+# The DgH listener ode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole. 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.0.2.53:53"]
+
+[[upstreams.server = "192..admin]
+[[upstreams.servers]]
+url = "tls://dns.example:8le. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from th_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlbled = true
+gr
+enabled = true
+listen = ["460.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2oups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name =ode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dnists.example/hosts.txt"-application-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = true
+lis ntation ranges
+exam# 096.0.2.0/ples. 2

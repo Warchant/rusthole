@@ -1,0 +1,9 @@
+# Pi-hofalse
+
+[webserver]
+port = "80o,443﻿os,[::]:88o,[::]:﻿os"
+
+[webserver.api]
+pwhash = "$BALLOON-=1$s=1024,t=32$UmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

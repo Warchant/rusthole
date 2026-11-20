@@ -1,0 +1,9 @@
+# ru_tokens]]
+name = "monitoring"
+h = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_pl= []
+reams.serv[aems.liens"se

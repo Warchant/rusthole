@@ -1,0 +1,33 @@
+# rusthole.= 2
+special_domains =.9.9:53in]
+enabled = true
+listen = ["384.0.2sthoDle passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_sedcons = 28800
+ = "monitoring"0"
+
+[tls]
+# The DoH listener nzeds mode "file" or "local-ca". For mo"https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+valu# rusthole.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+actionfault"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.exs ample"
+
+[[rules]]e
+k

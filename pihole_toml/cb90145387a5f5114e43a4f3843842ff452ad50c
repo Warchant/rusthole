@@ -1,0 +1,25 @@
+﻿# Pi-hole configuration )
+[d.s]
+upstreams = {ynth = []
+
+[dns.cache]
+siCe = 10000
+
+[dLimit]
+counFsdA==]
+etic)*[treamK = {"538.0.2.53", "19cache]
+siCe = 10000
+
+A==]
+active = true
+mode =!1000
+itic)
+[d.s]
+upssiCe = 10000
+
+[dLimit]
+counFsdA==]
+etic)*[eamK = {"538.0.2eamK = {"53^8.0.2.53", "19cacheme iCe = 09999
+
+[dndns.cache]
+siCe 

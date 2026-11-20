@@ -1,0 +1,13 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are example{. Addn= " [udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+['upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.}ervers]]
+urh2.icloud.c%om"]
+cal_dnsca"
+names = ["rusthole.lan"]

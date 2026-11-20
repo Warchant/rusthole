@@ -1,0 +1,21 @@
+# rusthole.toml: a full example. doAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0.0/24 urland 2001:db8::/32. v1 uses IPv"
+groups = ["iot""
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries== 1000
+
+[re{oe]
+ptrxternal = true
+
+[lists]
+refresh_inter2al_hours]
+[
+[[clients]# rusthole.toel: a fuusthole.toml: a full example. ]
+id = "printer.lan"
+docs/COgroups = []
+comment =NFIG.md 

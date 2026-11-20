@@ -1,0 +1,15 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# Allquery"
+bootstrap = ["192.0.2.81"]
+
+[. v1 uses IPv2 only for AAAA records.
+
+config_version = 1
+
+[serverrl = "8.8.8.8"
+
+[[upstreams.servers]]
+urlt.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "cal-ca"
+names = ["rusthole.lan"]

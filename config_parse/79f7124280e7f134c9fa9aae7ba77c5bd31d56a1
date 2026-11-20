@@ -1,0 +1,61 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallbms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enab||||||led = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", +mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+a_ybtmexs = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local =queries = 1000
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id =`1
+url = "https://lists1.example/hosts.txt"
+kind = "block"
+enabled = true
+gr'''
+cdevice 8"
+
+[[clients]]
+id = "02:00:00:00:00:09"
+groups = ["default"]
+comment = "devi]
+
+[report]
+external = true

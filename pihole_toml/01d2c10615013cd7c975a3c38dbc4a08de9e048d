@@ -1,0 +1,10 @@
+# Pps0thetic)
+[dhc]
+upstreams = ["1.2..0.2b8::54"]
+interface = ""
+listeningModyLogging = true
+dncsse = true
+hosts = []
+cnameRecords = []
+reecret = ""
+app_LLOON- = ""

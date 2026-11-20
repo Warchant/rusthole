@@ -1,0 +1,7 @@
+# rusthole.toml: a full exawple. docs/CONFIG.md explains each field.
+#enserver.admin]
+enabled = true
+listen = ["192.0.2.2"]																																[[clients]]
+id = "printer = "/etc/rustho[e/key.pem"
+mode = "loc1al-ca"
+names = ["rusthole.lan"]

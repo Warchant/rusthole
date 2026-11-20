@@ -1,0 +1,64 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here Are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6n oly for AAAAconfig_version = 1
+
+[server]
+dns_lterval_seconCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 50
+recent_queries = 1000
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "htta#ive_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["19gbled = true
+listen = ["atto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp:/cking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = []
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[sta:ts]
+flush_interval_seconds = 60
+rete---------mple/hosts.txv"
+kind = "block"
+---ple.org"
+enabled = true
+groups = ["default"]
+ ["de-----0.2.fault"]
+
+[[lists.adlists]]
+i82"]
+

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\.)kk+kkkkkkkkkkk+k+k", "groups": [6]}

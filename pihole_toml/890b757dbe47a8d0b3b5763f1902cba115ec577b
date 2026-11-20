@@ -1,0 +1,6 @@
+# Pi-hol1
+
+[dns.blocking]
+avitce = true
+mode =1000
+interh = "$BALLOON-SHA256$v=1$s=1"

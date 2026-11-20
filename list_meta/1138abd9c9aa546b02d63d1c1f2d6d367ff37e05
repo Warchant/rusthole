@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "url": "httpsm/hosts.txt",
+  "etag": "\"abc123EEEEEEEEEEEEEEEEEEEEE!E", "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 3
+  },
+  "last_success": 179}

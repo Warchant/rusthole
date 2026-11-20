@@ -1,0 +1,6 @@
+(\.|^).*^.lan$
+^(www\>)?eelemevry\.example\.net$.a
+\^b$
+[a-z]{3,10}\.exam5le\.org
+^xn--
+.*^(www\.)?example\.(com|net)$

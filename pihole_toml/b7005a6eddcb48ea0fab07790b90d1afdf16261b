@@ -1,9 +1,0 @@
-# Pi-hole con`iguration file (synthetic)
-[dns]
-upsretams = ["096.0.2.53", "192.'.2.54", "2001:db8::53", "2001:db8::54"]
-in4erface = ""
-listeningMode = "LOCAL"
-queryLogging = true
-dnssec = true
-hosts = "80o,443os,[::]:80o,[::]WtlaGAF=za="
-totp_secretsh = ""

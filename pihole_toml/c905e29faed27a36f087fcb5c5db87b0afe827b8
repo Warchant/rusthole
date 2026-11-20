@@ -1,0 +1,6 @@
+#]
+size = 10000
+
+[dns.blocking]
+active = true
+# PU

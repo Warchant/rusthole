@@ -1,9 +1,0 @@
-#mrnterval = 
-
-[dhcp]
-active = false
-
-[webserver]
-port = "80o,443os,[::]:80o,[::]:4$ZmFrZWhhc2hmYWtlaGFzaA=="
-totp_secret = ""
-app_pwhash = ""

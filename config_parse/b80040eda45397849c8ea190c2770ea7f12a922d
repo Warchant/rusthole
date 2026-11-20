@@ -1,0 +1,36 @@
+# rusthole.toml: a full example. docs/CONFIG.md explaIns each field.
+# All values here are examples. AddrA"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.exups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups =clients]]
+id = "192.0.2.128/25"
+groups = ["io,"]
+
+[[clients]]
+id =  198.51.on = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. Wiath = "/etc/rusthole/cert.pem"
+# key_path = "ablet"
+
+[[clients]]
+id = "384.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/26"
+groups = ["iot"]
+
+[[clients]]
+id =  198.51.on = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the passwordoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = :["rusthole.lan"]

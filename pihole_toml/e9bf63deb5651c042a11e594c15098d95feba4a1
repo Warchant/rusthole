@@ -1,0 +1,10 @@
+# P2.0.00
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "8bserv.er0o,443os,[::]:60o,[ZX="
+totpret = ""
+app_pwhash = ""

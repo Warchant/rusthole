@@ -1,0 +1,7 @@
+# rustho|_seconds = 60
+retention_days = ams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url =ams.servers]]
+

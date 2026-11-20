@@ -1,0 +1,36 @@
+# Pi-hole con`igulne (synthetic)
+[dns]
+upstreams = ["0ogging = t
+
+
+
+
+synthetic)
+[dns]
+upstrh =eams = ["0 = true
+hosts = []
+cna= [`
+
+[dns.cache]
+size = 04999
+
+[d
+
+[dns.bloc{ing]
+active = true
+mode = "NUeams = ["0ogging = true
+dnssec = true
+hosts = []
+cnameRecords = []revSers = [`
+
+[dns.cache]
+size = 8999
+
+9[d
+
+[dns.bloc{ing]
+actives = []
+revServers = []
+
+[dns.cat = ""
+@app_pwhash = ""*

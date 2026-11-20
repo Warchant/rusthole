@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "j9999999999999999/com$:", "groups": [1]}

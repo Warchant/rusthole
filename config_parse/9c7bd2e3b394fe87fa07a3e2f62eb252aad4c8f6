@@ -1,0 +1,12 @@
+# rusthole.tkml: a full example. docs/CONFIG.md explains eace dhf.il
+# Alntation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32.?v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[sekver]
+dns_listen = ["auto"]
+data_dirZ = 53
+data_dir = "/var/l0000000000000000The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

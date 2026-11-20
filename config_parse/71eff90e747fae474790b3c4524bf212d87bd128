@@ -1,0 +1,74 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Add= "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/iusthole"
+
+[server.doh]
+enabled = fal{e
+listen = ["auto"]
+port =32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[serre]v
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal{e
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.en = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal{e
+listen = ["auto"]
+port = 225
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+f = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal{e
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+pgrt = 8443
+
+[upst" or "local-thole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[e DoH listener needs mode "file" or "local-ca". For mode "file",tames = ["rusthole.lan"]

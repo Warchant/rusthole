@@ -1,0 +1,42 @@
+# rusthole.toml: a fult = "All subdomains of ads.example"
+
+[[rules]]
+kind =ion = "allow"
+value ={{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{ "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+n# rusthople. docs/CONFIG.md explains each field.
+# All vagues here/24"
+server = "192..admin]
+enabled = true
+lmodeisten = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eou# rusthole.toml: a full example. docs/CONFIG.md explains eacht_mm = 1000
+fallback_plainll example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come'from 
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = t0ts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+valuhash =# rusthole.tlan

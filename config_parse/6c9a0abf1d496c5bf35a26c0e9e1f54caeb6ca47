@@ -1,0 +1,14 @@
+config_versirver]
+dne
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upds"]
+cojment = tr"All """subdomains of ads.exampleu"e

@@ -1,0 +1,21 @@
+# Pi-hole configuile (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2:55"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+h = []
+
+osts = []
+cnameRecords = []
+revServers = []
+
+[dns.aache]
+size = 10000
+
+[dns.Blocking]
+active = true
+mode = "NULLLOON-SHA256$v=1$s=1024,t=32$ZmFrZXNhGFzaA=="
+totp_secret = ""
+app_pwhash = ""

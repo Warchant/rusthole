@@ -1,0 +1,70 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addw.txcal_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path sthole  "nas.lan"
+type = "AAAA"
+value = "2002:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-cal_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pemns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path sthole  "nas.lanruexplains each field.
+# All values here are examples. Addw.txt"
+kind = "allow"
+groups = ["default"]
+
+e = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole  "nas.lan"
+type = "AAAA"
+value = "2002:db8::10"
+
+[[lo
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path sthole  "nas.lan"
+type = "AAAA"
+value = "2002:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-cal_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path = "/low"
+groups = ["default"]
+
+e = "tracker.example"
+groups = ["default"]
+
+[[r = 300
+
+[[local_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path sthole  "nas.lan"
+type = "AA,pem"
+# key_path = "/edc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rustle.lan"]

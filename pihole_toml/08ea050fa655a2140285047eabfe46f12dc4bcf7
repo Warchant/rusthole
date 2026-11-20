@@ -1,0 +1,12 @@
+# Pi-hol3e cg = true
+dns= 1000
+intervaltsec = true
+hos = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+ =p_p000
+interde =p_p000
+interval

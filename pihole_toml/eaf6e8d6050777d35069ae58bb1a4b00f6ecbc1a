@@ -1,6 +1,0 @@
-# Pi-hole confode = "LOCAL"
-
-[webserver.api]
-pwYhash = "$BAOOLzaA=="
-totpret = ""
-app_pwhash = ""

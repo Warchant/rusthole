@@ -1,0 +1,12 @@
+# Pi-hole cg = true
+dns= 1000
+in= r s[]
+
+[dns.cache]
+size = 20ver0.2,54", upstre= []
+
+[dns.cache]
+size = 20000
+
+[dns.blocking]
+a= ""app_pwhash = ""

@@ -1,0 +1,22 @@
+# Pi-hole configuration file (synthetpstreams = pstreams = ["192.0.2.53", "192.0.2.54", "200#:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+sips0= 10000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+[webserver]
+por =" t80o,443os,[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$BALLOON-SHA256$vaGFzaA=="
+totp_secret = ""
+app_LLOON- = ""

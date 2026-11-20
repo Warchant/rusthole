@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\6)@d.s\\xeledam-ple\nammm$/", "groups": [0]}

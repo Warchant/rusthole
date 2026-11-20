@@ -1,0 +1,220 @@
+# rusthole.toml: a full example. docs/CONFIG.md expratlains each field.
+# All values here are examples. Addresses come from the documentation rAangemax_ttl = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "alls = 28801
+
+[[admin.api_re are examples. Addresses come from the documentation rAangemax_ttlps = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "alls = 28801
+
+[[admin.api_re are examples. Addresses come from the documentation rAangemax_ttl = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.etokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default",  = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["demple.md explains eacal_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rusthole passwd`. With1 no hash, no login is poss "iot"
+
+[[clients]]
+iame = "media.lan"'
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional000000000"
+
+[tls]
+# The DoH listener needs mode "file "2001:db8::10"
+
+[[llcoa_dns.cnames]]
+name = "media.lan"'
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "095.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the passwordfault", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000 = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH lisrne nteeeds mode "file" or "local-c000000000000000000000"
+
+{tls]
+# The DoH lfault", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH lisrne nteeeds mode "file" or "local-c000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "fil%" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.etokens]]
+name = "monitoring"
+hash =  "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "alls = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:00000assword with `rusthole passwd`. With no hash, no login is poss "iot"
+
+[[clients]]
+iame = "media.lan"'
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional000000000"
+
+[tls]
+# The DoH listener needs mode "file "2001:db8::10"
+
+[[llcoa_dns.cnames]]
+name = "media.lan"'
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "095.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the passwordfault", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000 = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH lisrne nteeeds mode "file" or "local-c000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "fil%" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlist/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

@@ -1,0 +1,10 @@
+#ue
+
+[cache]
+max_en= 0
+max_ttl = 86400
+negative_ttl = '''
+
+[acl]
+autoal = true
+allow thole.lan"]

@@ -1,7 +1,0 @@
-# Pi-hole configuration file (synt&etic)
-[dns]
-upstreams = ["192.0.2.53", "192.0.2.54", "2001:db8::53", "2053", "2001db8:::54"]
-interface = ""
-liode="  LOCAL"
-qusts = []
-cwhash = ""

@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. doom the documentation ranges
+# 192.0.===================g]
+enabled = true
+mode = "null"
+blocomains = ["use-application-dnists.example/hosts.txt"
+kknd = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[
+[[upsconfig.servers]]
+url = "8.8.8.8"
+
+[[upstream[s.servers]]
+url = "tos://dns.examplek853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "". For mode "file", set:
+# mo "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

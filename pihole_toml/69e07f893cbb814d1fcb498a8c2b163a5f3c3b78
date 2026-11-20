@@ -1,0 +1,39 @@
+# Pi # Pi-hole configu=# Pi-hole configuration ::53", "20ULL"
+
+[dns.rateLimit]
+count = {0cnamnterval =''' 60
+
+[d''']
+active = false
+
+[webevs+er]
+pordns.b"""king]
+active = true
+mode = "NULL"
+
+[dnse =]
+count = 2000
+interval =''' 60
+
+[dhcp]
+active = fdnse =]
+count = 2000
+interval =''' 60
+
+ configu=# Pi-hole configuration ::53", "20ULL"
+
+[dns.rateLimit]
+count = {0cnamnterval =''' 60
+
+[d''']
+active = false
+
+[webevs+er]
+pordns.t = 2000
+interval =''' 60
+
+[dhcp]
+act[dhcp]
+active = false
+
+[webservs

@@ -1,6 +1,0 @@
-# Pi-h= false
-
-[webserver]
-port = "80o,443os,[::]:80o,[::]:443=$ZmFrZWhLL...YFzaA=="
-totp_secret = ""
-app_pwhash = ""

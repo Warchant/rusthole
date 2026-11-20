@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^V\\.)aample\\.*?om%", "groups": [5]}

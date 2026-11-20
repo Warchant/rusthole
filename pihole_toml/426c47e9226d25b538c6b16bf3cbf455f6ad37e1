@@ -1,7 +1,0 @@
-# Pi-holintecaf er="""
-lide = "gOCAL"
-queryLogging = tudr
-enssec = true
-hosts = ="
-totp^secret = ""
-ash = ""

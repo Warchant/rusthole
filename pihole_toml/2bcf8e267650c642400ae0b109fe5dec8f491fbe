@@ -1,0 +1,5 @@
+# Pi-hole co/nfiguration filenthetic)
+[dns]
+upstreams = ["192.0.2.53", "# 2001:db8::53", "0#01:db8::54"]
+interface = ""
+ac= ""

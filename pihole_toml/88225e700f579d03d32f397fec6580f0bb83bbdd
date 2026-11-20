@@ -1,0 +1,16 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+uptsreams = ["192.0.2.53b8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+AZmFrZWhhc2hcnameRecords = []
+revSee = 10000
+
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+couash = ""

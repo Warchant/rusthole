@@ -1,3 +1,0 @@
-# Pi-hole configuration file (syntehtic)
-[d.s]
-upstreams = {"192.0.2.53",0.2.54", "2001:db8::52"3",} 001:db8:: ""

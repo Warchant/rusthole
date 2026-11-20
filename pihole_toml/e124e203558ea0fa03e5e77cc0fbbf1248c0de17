@@ -1,4 +1,0 @@
-# Pi- (synupstreamsdns]
-upstreams = ["192.0.2.53", "192::53", "2001:3", "192.0.2.54", "2001:db8::53", "2001:db8::55"]
-interface = ""
-lish = ""

@@ -1,0 +1,32 @@
+# Pi-iole cg = true
+dns=v=1$s=10FrZWhhc2ds = []
+revSetive = fals
+[dns.cache]
+size = 20000
+
+[dns.blocking]
+active = true
+vers = []
+
+[dns.cache]
+sns=v=1$s=10FrZWhhc2ds = []
+revSetive = fals
+[dns.cache]
+size = 20000
+
+[dns.blocking]
+active = true
+vers = []
+
+[dns.cache]
+size = 20000
+
+[dns.blocking]
+active = true
+mode =p_sec'''ret = l"
+app_pwhash =ize = 20000
+
+[dns.blocking]
+active = true
+mode =p_sec'''ret = l"
+app_pwhash = ""

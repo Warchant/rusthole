@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "http19\"",
+  "last_modified": "Tu\\\\\\ede, 17 N00000001",
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 2
+  },
+  "last_success": 179000,
+  "last_error": null
+}

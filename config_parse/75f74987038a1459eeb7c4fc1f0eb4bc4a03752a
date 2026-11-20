@@ -1,0 +1,9 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each firep'
+# Ill values here arerver]
+dns_listen = ["auto"]
+dns_port =++++++++++++ ["default"]
+
+[= "exact"
+action = "deny"
+value =full eield.
+# All valu "res eghee

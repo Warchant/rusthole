@@ -1,0 +1,11 @@
+{
+"version": 1,  "url": "t",
+  "etag": "ab",
+"last_modified": "T",
+  "body_hash": "0000000000000000000000000000000000000000000000000000000000000001",  "size_bytes": 1234,
+  "entries": {
+"valid": 10,
+  "invalid": 1,
+   "skipped": 2
+  }
+}

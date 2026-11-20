@@ -1,0 +1,101 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation rAangemax_ttl = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+omment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.etokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default",  = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:000000000fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main b0000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names =0000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+fpsp= ["default", "kids"]
+comment = "Main b0000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

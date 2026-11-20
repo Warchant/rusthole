@@ -1,0 +1,14 @@
+# Pi-hole blockgurion filec)
+[dns]
+upstreams = ["192.0.2.53", "192..2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listServers = []
+
+[dns.aache]
+size = 20000
+
+[dns.blocking]
+active = true
+mode = "NFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

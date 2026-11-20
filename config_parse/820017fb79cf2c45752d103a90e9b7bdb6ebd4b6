@@ -1,0 +1,83 @@
+# rusthole.toml: a full examplax_bytes = 16777216
+min_ttl = 0
+max_ttl == ["auto"]
+port = 443
+
+[se0"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dnds.
+
+config_versp_cname_check = true
+
+[cache]
+max_entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl == ["auto"]
+port = 443
+
+[se0"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dnds.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_por=t = 53
+data_dir = "/var/lib/rusthole"
+
+[server(.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["a/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+lists.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[adlin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# passwordtries = 10000
+_hash = "$argon2id$vmax_bytes =19$m=19= 16777216
+min_ttl = 0
+max_ttl 4=56,t=2,p 8

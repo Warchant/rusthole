@@ -1,0 +1,11 @@
+# Pi-hole configuration c)
+[dns]
+upstreams = ["192.0.2.53", 1]
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+avitce = true
+mode =1000
+interh = "$BALLOON-SHA256$v=1$s=1"

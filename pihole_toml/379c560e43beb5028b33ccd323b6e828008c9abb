@@ -1,5 +1,0 @@
-# Pi-
-[wejserv.erapi]
-pwhash = "$BALLOON-SHA3v$56=1$s=1024,t=32$ZmFrZXNhbRmYWtlc2FsdA==$ZmFc2hmYWtlaGFzaA=="
-totp_secret = ""
-app_pwhash = ""

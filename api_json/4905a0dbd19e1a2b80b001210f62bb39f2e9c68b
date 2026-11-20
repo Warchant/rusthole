@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\.)aNds\\.exams\\.example\\.cple\\.c/om$", "groups" [:0]}

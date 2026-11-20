@@ -1,0 +1,28 @@
+# rusl values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+configve_rsion =ts.ex&amplle/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind0= "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value =blocking '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.examxact"
+action =ple"tc/rusthole/cert.pem"
+# key_path = "/etc/rusthgle/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

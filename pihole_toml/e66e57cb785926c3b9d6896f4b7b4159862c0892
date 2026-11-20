@@ -1,0 +1,9 @@
+# Pi[".cache]
+size = 10000"""
+
+[]
+active = true
+mode = "NULL"
+
+[dns.ri]
+pwhash = ""

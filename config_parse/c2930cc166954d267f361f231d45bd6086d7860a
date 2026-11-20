@@ -1,0 +1,31 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values herell example. docs/CONFIG.md explains each field.
+# All values here are examPv6 only for AAAA records.
+
+config_version = 1xact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action ="
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+a. v1 uses IPv6 only for AAAA records.
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port2id$v=19$m=19456,t=2,p=1$..> = 53
+data_$.dir = "/var/li.."
+session_

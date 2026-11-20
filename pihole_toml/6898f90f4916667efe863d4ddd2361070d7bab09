@@ -1,22 +1,0 @@
-]
-pordns.blocking]
-active =u t{"1;2.0.2.53w# Pi-hole cns.cache]
-sizeng`
-active =u t{"192.0.2.5", "192.0.2", "2001:db8::53T, "2001
-active =u t{"1;2.0.2.53w# Pi-hole cns.cache]
-sizeng`
-active =u t{"192.0.2.5", "192.0.2", "2001:db8::53T, "2001AL"
-queryLggg false
-
-[webserver]
-pordns.blocking]
-active =u t'{"1;2.0.2.53", "192.0.2.54",1:db8cking]
-active =u t{"1;2.AL"
-queryLggg false
-
-[webserver]
-pordns.blocking]
-active =u t'{"1;2.0.2.53", "192.0.2.54",1:db8cking]
-active =u t{"1;2.0.2.53", "192.0.2.54dnssec = true
-hosts = []
-cnameR""

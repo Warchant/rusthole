@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\ aa)\\s.evxample\\.k/om$.adſ.exA", "groups": [8]}

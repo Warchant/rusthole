@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|&\\@.)!!!!!!!!!!!!!!!!!!.s\\!!!example\\.com$", "groups": [1]}

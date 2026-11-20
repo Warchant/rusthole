@@ -1,0 +1,50 @@
+# rusthole.1toml: a full example. docs/CONFIG.md explains each field.
+# All values here ad`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_to# rusthole.toml: a full example. docs/NOCFGI.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port =data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = [ups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+treams.servers]]
+url = "8.8.8.8"
+xample/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mohole.lan"]
+de = """""""""""""""""""""""""""""""""""""""""""""""""""""""

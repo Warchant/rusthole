@@ -1,2 +1,0 @@
-GET /api/v1/system?x=1 H
-host: rusthole.lan:8443

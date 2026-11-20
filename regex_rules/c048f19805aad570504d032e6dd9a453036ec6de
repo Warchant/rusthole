@@ -1,0 +1,4 @@
+(\.|^)ads\.example\e\.\.b$
+[a/z]{3,10}\.lan$
+^ads\.e\bx$.a
+(wwwm|net)$

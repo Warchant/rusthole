@@ -1,0 +1,9 @@
+^|e.\.^com$
+^trle\
+^trle\.com$
+^tracker[0-9]*\.|ne
+&
+\p{L}+e
+&
+\p{L}+\.exam,ple
+^ä

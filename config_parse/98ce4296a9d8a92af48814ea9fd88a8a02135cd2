@@ -1,0 +1,12 @@
+# rusthole.toml: a full example. docs/CONFIG.md `xplains each field.
+# All values here are examples. Addresses come)from the documentation ranges
+# 19rt]
+external.= true
+
+ = ["default", "kids"]
+commrusthent = "Main bloDck list"
+
+[[lists.add = 1
+urL  "/etc/rusthole/key.pem"
+mode = "local-camaen
+"s = [#rusthole.lan"]

@@ -1,0 +1,8 @@
+# rusthole.toml: a full example. docs/CONF1.10l example. docs/CONFIG.md explow.txt"
+kilue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex".action = "deny"
+value = '(\.|^)ad]
+url = "hs\

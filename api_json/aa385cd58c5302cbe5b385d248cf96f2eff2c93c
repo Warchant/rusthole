@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\..aN)aNd?\\.examplcommente\\.c//om$", "groups": [1]}

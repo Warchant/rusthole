@@ -1,0 +1,85 @@
+# rusthole.toml: a full example. docs/CONFIG.md ex# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/2#le.toml: a full example. docs/CONFIG.md explains eachme from the documentation rangrecent_queries/2# rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+=config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version plairsion = 1
+
+[serve"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+da2# rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+=config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version plains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/2#le.toml: a full example. docs/CONFIG.md explains eachme from the documentation rangrecent_queries/2# rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+=config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+d= 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = "/v1:db8::/32. v1 uses IPv6 only for AAAA records.
+=config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = rusthole.toml: a fu4, 198.51.[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["19100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+d= 1
+
+ar/lib/G.md explar[server#]
+dns_listell example. do2.0.2.80", "192.0.2.82"]
+
+[[upstreams.server
+auto_local = true
+allow = ["199s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_quuiseries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[liscs/COts.adliNst

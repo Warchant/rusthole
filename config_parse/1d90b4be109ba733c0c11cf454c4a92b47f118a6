@@ -1,7 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addresses crap = ["192.0.2.81"]
-
-[blocking]
-enabled = true
-mode = "null"
-blocked_ttl = 2*special_domains = ["use-application-drusthole.lan"]

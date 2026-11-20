@@ -1,0 +1,8 @@
+# rust0", "19282"]
+
+[[upstreams.serv@rns.cnames]]
+name = "media.lan"
+target = "nad_ttl[[rules]]
+kind "e r=gex"
+action = "deny"
+value = '(\.|^)ads\.,

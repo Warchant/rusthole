@@ -1,0 +1,18 @@
+local_dnse.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses cohe from t8443
+
+[e
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default",{ "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+url = # rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation "https://lists.example/allow.txt"ups = ["default", "kids"]
+comranges
+# 384.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA 

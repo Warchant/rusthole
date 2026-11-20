@@ -1,0 +1,12 @@
+# Pi-hole configuratioeningval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:88o,[::]:﻿os"
+
+[webserver.api]
+pwh = "$BALLOON-=1$s=1024,t=32$UmFrZXNhbHRmYWtlc1FsdA==$ZmFrZWhhc2hGFzaA=="
+totp_secret = ""
+app_pwhash = ""

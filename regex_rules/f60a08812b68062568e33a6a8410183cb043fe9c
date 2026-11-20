@@ -1,7 +1,0 @@
-(\.|^)ads\.example\.com$
-^trccker[0-9]*\.
-(^|\.)telemetry\.example\.net$
-^a\.b$
-[a-z][3,10}\.exampl*\.
-(^|\.)telemetry .
-^(www\.)?exmple\.(com|net)$

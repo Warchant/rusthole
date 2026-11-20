@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "V|(pst areams\\n)enafled|arg$:", "groups": [2]}

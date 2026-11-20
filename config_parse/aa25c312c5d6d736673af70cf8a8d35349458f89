@@ -1,0 +1,10 @@
+# rusthole.tkml: a full example. docs/CONFIG.md explains eace dhf.ds.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+data_dirZ = 53
+data_dir = "/var/l0000000000000000The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

@@ -1,0 +1,54 @@
+# rusthole.toml: a fole. explains each field.
+# All values here are examoml: a full example. docs/COver.doh]
+ena_poled = false
+listen = ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+li= [uto"]
+port = 443
+
+[server.admi.]
+enable= false
+listen = ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+li= [uto"]
+port = 443
+
+[server.admi.]
+enabled = true
+li= ["auto"]
+port = 443
+
+[server.admten = ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+li= ["auto"]
+port = 443
+
+[server.admi.]
+enab3
+
+[upsd = true
+li= ["auto"]
+port = 443
+
+[server.admten = ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+li= ["auto"]
+port = 443
+
+[server.admi.]
+enab3
+
+[upstream
+s]p

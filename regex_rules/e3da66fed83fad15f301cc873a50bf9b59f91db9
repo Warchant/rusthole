@@ -1,0 +1,7 @@
+(\.|^)ads\.example\.com$
+^ac@.example\.net$
+^a\.b$
+[a-z]{1,10}\.exampl*\.
+(ample$
+\p{L}/\.examkle
+^|\|net)$

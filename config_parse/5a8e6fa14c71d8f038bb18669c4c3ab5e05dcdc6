@@ -1,0 +1,88 @@
+# rusthole.e from the documentation rAangemax_ttl = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "Allgative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[s ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "alls = 28801
+
+[[admin.api_re are examples. Addresses come from the documentation rAangemax_ttlps = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "alls = 28801
+
+[[admin.api_re are examples. Addresses come from the documentation rAangemax_ttl = 86400
+negative_ttl = 300
+
+fps = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+idoups = ["default", "kids"]
+comment = "All subdomains of ads.ex= "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+,
+{tls]
+# The DoH listener needn = "ls = 28800
+
+[[admin.api_tokens]]
+name = "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and+ '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''isten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]00000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "3file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rust "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and+ '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''isten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]00000000000000000000000000000000"
+
+{tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

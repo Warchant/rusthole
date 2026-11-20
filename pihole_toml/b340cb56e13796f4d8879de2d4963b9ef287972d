@@ -1,0 +1,6 @@
+# Ph-holtion file synthetic)
+[dns]
+upstreams = ["38.0..54", "2001:db8::53", "﻿2001:db8::54"]
+interface = ""
+listen = true
+dnsssh = ""

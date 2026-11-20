@@ -1,0 +1,52 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentlt", "kids"]
+comment = '''"All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groupTablet"
+
+[[clients]]
+id = "19con.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = A"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+valps = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+v
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

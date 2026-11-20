@@ -1,0 +1,5 @@
+# Pic)
+[dns]
+upstreams = ["192.0.2.53", "#080:54"]
+interface = ""
+ac= ""

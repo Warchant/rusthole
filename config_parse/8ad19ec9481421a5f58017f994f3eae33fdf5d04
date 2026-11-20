@@ -1,0 +1,25 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses dn.example"
+e= false
+groups = ["dysd = "02:00:0groups0:40:00:01"
+groups = ["roups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_daysdd.
+# All values here are examples. Addresses dn.example"
+e= false
+groups = ["dysd = "02:00:0groups0:40:00:01"
+groups = ["roups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention = "02:00:00:00roup.lan"]

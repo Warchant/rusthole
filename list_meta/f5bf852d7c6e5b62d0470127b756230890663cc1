@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "https://versio24\t23\t_\t_modPPPPskIp`edPPPPPPPPPPPPP:0MT",
+  "body_hash": null,
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 0,
+    "skipped": 2
+  },
+  "last_success":  1794902,
+  "last_error": "HTTP"
+}

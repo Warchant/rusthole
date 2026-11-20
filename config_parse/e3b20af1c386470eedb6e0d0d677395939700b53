@@ -1,0 +1,64 @@
+#AA records.
+
+config_versior]
+dns_listen =id = "192.0.2.128/25"
+groups = ["ioranges
+# [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAdns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fa0l_se
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["19.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallhback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001= "A"
+value = "192.0.2.10"admin
+
+[[ = "nas.lan"
+ttl "]
+port = 221
+
+[server.admin]
+enabled streams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[n = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/va full example. docfield.
+# All values r/libhrtsolu/e"
+
+[here ares 

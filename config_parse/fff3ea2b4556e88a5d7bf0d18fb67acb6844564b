@@ -1,7 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addresses come from the documentation ranges
-# 192.0.2.0/24, 198.51# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-.1# All values here are examples. Addresses come from the documentation ranges
-# 100.0/24 and 2001:db8::/32. v1 uses IPv6 only for 92.0.2.0/24,AAAA records.
-
- 1

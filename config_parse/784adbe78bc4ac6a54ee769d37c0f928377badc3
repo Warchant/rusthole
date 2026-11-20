@@ -1,0 +1,14 @@
+# rusthole.toml: a full example. dcso/CONFIG.md explain001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[servede = "file"
+#(ce#t_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "loeal-ca"
+names = [ ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeoggggggggggggguggggggggggggggg passwd`. With no hash, 
+# The DoH listener needsblocre are examples. A]

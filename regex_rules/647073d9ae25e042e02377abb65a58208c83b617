@@ -1,8 +1,0 @@
-(
-[^ad[R
-CK
-\bads\b
-^[^.\bads\b
-^[^.]+\.exa\z
-^[^.\bads^\b
-^[^.]+\.exampa

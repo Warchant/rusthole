@@ -1,0 +1,9 @@
+a^d[sx]?[019]{0,3}\.
+(i)?^TRQCK
+\bads\b
+^[^.]+\.exampl.
+(?i)^TRAK
+\bads\xxxxxxXb
+^[^.]+\.example\.\.(x|y)$
+^
+]

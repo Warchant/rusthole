@@ -1,0 +1,109 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each o"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upstreams.ser)ers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 864config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 0d6
+ata_dir = "/vblockingusthole"
+
+[server.doh]
+enenabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enabled = truezzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 864config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 0d6
+ata_dir = "/vblockingusthole"
+
+[server.doh]
+enabded = false
+listen = ["auto"]
+po'rt = 443
+
+[serve = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"# rusthole.toml: a fullr.admin]
+enabled = true
+listen = ["auto"]
+por= "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exacking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-applicato"]
+port = 8443
+
+[upult", "kids$]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+url = ules]]
+kind = "exact"
+action = "deny"
+v!lue = "tracker1.example.net"
+enabled = true
+groups = ps = ["default"]
+
+[[groups]]
+na&me = "default"
+enabled = true
+
+[[dgrou.

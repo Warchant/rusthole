@@ -1,6 +1,0 @@
-# Pi-hole configuration file (synthetic)
-[dns]
-uptsreams = ["192.0.2.53", "192.001:db8::54"]
-interface = ""
-listenide = "NU$BALLOON-SHA25"
-app_pwhash = ""

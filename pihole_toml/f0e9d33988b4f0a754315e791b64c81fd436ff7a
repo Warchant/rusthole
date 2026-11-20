@@ -1,0 +1,17 @@
+# Pi-hole congMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRe.cords = []
+reordns.blocki = true
+hosts = []
+cnameRe.cords = []
+reordns.bdocking"ve = t# Pi-hole ce congMode = "LOCAL"
+queryLogameRe.cords = []
+reordns.blocking"""ctive = = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRe.cords = []
+reordns.blocking"""ctive = t# Pi-hole ce congMode = "LOCAL"
+queryLogging = nsrs

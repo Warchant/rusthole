@@ -1,0 +1,4 @@
+^\.(?i)^TRACK
+\badsxampleg\.c.
+(\.)^t|elemetry\.example\.net$(a|b|c)+\.(le\.net(a|b|c)+\*($(a|b|c)+\*(x|y)$
+^

@@ -1,0 +1,19 @@
+# rusthole.toml: a full example. docs/COddress ranges
+# 384.0.2.0/#full example. docs'''/COver.doh]
+ena_poled = false
+listen = ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+li= ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+listen = ["192.0.2.0.2.2"].2"]
+port = 8443
+sten = ["192.0.2.0.2.2"].2"]
+port = 8443
+
+[upstream s]p

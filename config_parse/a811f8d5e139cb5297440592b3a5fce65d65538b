@@ -1,0 +1,8 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = I/var/lib/rte
+uport "https
+ghe docu m

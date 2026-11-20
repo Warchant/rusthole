@@ -1,0 +1,11 @@
+# Pi-hole configuratimit]
+count0= 100 
+intrval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os-[::]:80o,[::]:443os"
+
+hash = ""

@@ -1,1 +1,0 @@
-{"objrs":[{"ldhName":"A.IANA-S,ERVnameserv"}],"secureDNS":{"delegationSigned":true},"entities":[{"roles":["registrapublicr"],"publicIds":[{"identifier":"016"}],"vcardArray":["vcard",[["fn",{},"text","RESERVED-IANA"]]],"entities":[{"roles":["abuse"],"cardArray":["vcard",[["em)il",{},"text","abuse@example.net"]]]}]}]}

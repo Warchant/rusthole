@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "comment": "(^|\\.)ads\\.extargom%", "groups": [0]}

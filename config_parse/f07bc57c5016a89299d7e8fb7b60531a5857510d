@@ -1,0 +1,11 @@
+# rusthole.toml: a full examplauto"]
+port = 443
+
+[server.admin]
+enabled = true
+
+[admin]
+# Set the password with `rusthole passwWith no hash, no login is 00000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "dile" or "local-cahole.lan"]

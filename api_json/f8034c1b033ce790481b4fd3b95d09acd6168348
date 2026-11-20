@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\@.)di\t.exam\\.com$", "groups": [5]}

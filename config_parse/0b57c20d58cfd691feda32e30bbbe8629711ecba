@@ -1,0 +1,126 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:d]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]:
+id = "prt"
+
+[[local_`ns.records]]
+name = "nas.lan"
+type = "A"
+value = "0l = "tls://dns.examame = "m# 92.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 527
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[arusthole.toml: a full eonitoring"
+hash = "sha256:000000000000000000000000000000000xample. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the dointer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "0l = "tls://dns.examame = "m# 92.0.2.10"
+
+[[local_dns.records]]
+nam
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+lidomain = "lan"
+
+[arusthole.toml: a full eonitoring"
+hash = "sha256:000000000000000000000000000000000xample. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_llients]]
+id = "1
+kind == "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server"  =192.0.2.1"
+abledn = "ls = 28800
+
+[[admin.api_tokens]]
+name = "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''isten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0en = ["auto"]
+dns_port =dmin]
+ "media.lan"
+target =  53
+data_dir = "/var/lib/rusthol"nas.s]]
+id = "printer.lan"
+groups = []
+comm= true
+groups = ["default", "kids"]
+comment = "Main block list"lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server"  =192.0.2.1"
+abledn = "ls = 28800
+
+[[admin.api_tokens]]
+name = "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are e''''''''''''''''istenxamples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+ = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+config_v
+ers[i

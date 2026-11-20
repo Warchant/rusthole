@@ -1,0 +1,7 @@
+#| Pi-hole configuration `ile (synthetic)
+[dns]
+upstreams = ["192.2.53", "192z0.2.54", "2001:db8::53", "."," 2.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAVdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_sgcret = ""
+app_pwhash = ""

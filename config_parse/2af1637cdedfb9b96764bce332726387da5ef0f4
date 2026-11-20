@@ -1,0 +1,14 @@
+# rusthole.toml: a full example. docs/CONe = "null"
+blocked_ttl = 2
+special_domains = ["use-attl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rtl = 2
+special_domains = ["use-attl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needblocked_ttl = 2
+special_domains = ["use-application-dns.net"00000000000000000000000000[confilists]
+refresh_interval_ = trueh

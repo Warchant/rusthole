@@ -1,0 +1,118 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_pFFFFFFFFFFFFFFFFFFort = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ = "exact"
+action = "allow"
+vent = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn5.example.org"
+enabled =example$'
+groups = ["default", "kid= "media.a"ln
+target = "nas.lan true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker1.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallback_plain = ["udp://192ny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreamsn = "allow"
+value = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.examracker1.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+acmple/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallback_plain = ["udp://192ny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallback_plain = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.examracker1.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = tr= "device 13"
+
+[local_dns]
+cname.servers]]
+url = "u[[rules]]
+kind = "exact"
+actimment = "devil = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tlson = 

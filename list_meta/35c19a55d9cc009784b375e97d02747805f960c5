@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "ht0A",
+  "body_hash": "00200000000000000000000000000000000entrius0000body_haersion00001",
+  "size_bytes": 1234,  "entries": {
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 2
+  },
+  "last_success": 17902400,
+  "changed_at": 1789410600,
+  "last_error": null
+}

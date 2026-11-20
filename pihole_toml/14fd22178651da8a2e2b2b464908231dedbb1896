@@ -1,0 +1,13 @@
+# Pi-hole configuratrue
+mode ="NULL"
+
+[dns.rateLimit]
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:48o,[43os"
+
+[webserver.api]
+pwhash = "$BALLOO"

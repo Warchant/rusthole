@@ -1,0 +1,1 @@
+{"kind": "regex"		, "action": "deny", "pattern": "V|(|||||||||||||||||||||||||||||pstre@ms\\n)enafled|arg$:", "groups": [2]}

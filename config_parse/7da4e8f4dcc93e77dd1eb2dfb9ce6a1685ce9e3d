@@ -1,0 +1,12 @@
+# rusthoach field.
+# All values here are examples. Add2esses come from theer.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+serv = ["udp://192.0.2.5:353"]
+
+[[usetarpms.servers]]
+url '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''= "udp://9.9.9.9:53"r.admin]
+enabled = true
+A reclisten = ["auto"]
+port = 8ords.r

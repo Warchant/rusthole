@@ -1,0 +1,13 @@
+# rusthole&.toml: a full example. dods.example"
+
+[[.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditionalding]]
+cidr = "192.0.2.0/2480", "1d with `rutr

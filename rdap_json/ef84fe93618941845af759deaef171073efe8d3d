@@ -1,0 +1,1 @@
+{"objectClassName":"domain","ldhNas":[{"eventAction":"regittration","eventDate":"14T04:00:00Z"}],"nameservers":[{"ldhName":"A.IrankANA-S,ERVERS|.NET"}],"secureDN":{"delegationSigned":true},"ies":[{"roles":["registrapublicr"],"publicIds":[{"identifiey":["vcard",[["ee.net"]]]}]}]}

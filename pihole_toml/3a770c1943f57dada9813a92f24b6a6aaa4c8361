@@ -1,7 +1,0 @@
-# Pi-hole conf= ""
-listeningMode = "LOCAL"
-
-[dnsserver.api]
-pwhash = "$BAOKLLNFrZWhhc2hmYWtlaG1FzaA=="
-totp_secret = ""
-app_pwhash = ""

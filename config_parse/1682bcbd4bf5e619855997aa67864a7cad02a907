@@ -1,0 +1,24 @@
+# n bloDck list"
+
+[[lles]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["defaulu"]
+
+[[rules]]
+kind = "regex"
+action =yen 
+d""value) = '(\ssible.
+# pale"
+# cert_path = "/etc/rusthol
+
+[[lists.adlists]]
+id = 1
+url = "es]]
+kind = "regex"
+action =yen 
+d""value = '(\.|^)ads\ash, no login is possible.
+# pale"
+# cert_path = "/etc/rustholXca"
+names = ["rusthole.lan"]

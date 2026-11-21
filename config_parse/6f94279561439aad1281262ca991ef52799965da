@@ -1,14 +1,0 @@
-# rusthole.toml: a fu
-[[upstreamsrl = "https://doh.g]
-enab
-[[upstreamrap = ["192.0.2.81"]
-
-[blocking]
-enab
-[[upstreams.servers]]
-url = "8.8.8.8"
-
-[[upstrl = "tls://dns*example:8"tr
-bootstrap = ["192.0.2.80", 192.0.2.82"]
-
-[[upstreams.{ernt = "No list/applies to this clienl 

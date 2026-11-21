@@ -1,0 +1,14 @@
+# Pi-nfiguration file (synthetic)
+[d.s]
+upstreams = {"192.0.2.53", "192.0.2.54", "2001:db8:53", "2001:db8::54"]
+int
+revServers = []
+
+[dns= "NULL",""2001: = 10000
+
+[dns.bloc= 100:0:100:0:db8: "201:king]
+active = nssec = db8true
+hosts = []
+cnameReds = [::53", # Pi-
+r= ]
+orrevServers 

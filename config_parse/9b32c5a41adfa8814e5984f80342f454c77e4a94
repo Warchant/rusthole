@@ -1,0 +1,12 @@
+# rusthole.toml: a full example. docs/Cists.example/allow.txt"
+kind = """low"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackaction = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `
+rusthole passwd`. With no hash, nwor
+confilowg"

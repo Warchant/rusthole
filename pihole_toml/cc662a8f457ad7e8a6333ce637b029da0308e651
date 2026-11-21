@@ -1,0 +1,11 @@
+# P (synthetic)
+[dns]
+reams = ["b8::54"]
+interface = ""
+listenin22Mode = "LOCAL"
+qusts = []
+cnecmeRecords = []
+upstremss = []
+
+secret = ""
+app_pwhash = ""

@@ -1,16 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addresses come 1:db8::/32. v1 use/var/lib/rusthole"upspstreams]
-"""eout_ms = 2000
-fallback_ple/dns-query"
-bootstrap = ["192.0.2.81"]
-
-[blocking]
-enabled = true
-mode = "null"
-blocked_ttl = 2
-special_domains = ["useapplication-dns.net"ain = ["udp://192.0.2.53:53"]
-
-[2upstreams.servers]]
-url = "udp://9.9.9.9:53"
-
-[, "mask.icloud.com", "mask-h2.icloud.com

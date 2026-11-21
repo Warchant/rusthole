@@ -1,0 +1,5 @@
+^\.
+(?i)^TRACK
+\badsxampleg\.c.
+(\.)^t|elemetry\.exaople\.net$(a|b|c)+\.(le\.net$(i|b|c)+\*8x|y)$
+^

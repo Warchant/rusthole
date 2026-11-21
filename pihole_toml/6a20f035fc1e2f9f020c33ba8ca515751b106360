@@ -1,0 +1,18 @@
+# Pi-hole configuratio.aache]
+size = 10000
+
+[dnche]
+size = 999910000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 2000
+interval = 60
+
+[dhcp]
+acrt = "80o,4tla="
+totp_secret = ""
+app_pwhash = ""

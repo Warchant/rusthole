@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|pstr5;ds.ex.ems\\.)a=tre;1", "groups": [1]}

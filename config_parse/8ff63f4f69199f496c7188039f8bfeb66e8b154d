@@ -1,0 +1,9 @@
+# rusthole.toml: a full example. docs/COld.
+# All values here are example
+
+[[clientl]]
+id =F"192.0.2.50"
+grotls = ["default", "kims"]
+
+[[clset:
+# moan"]

@@ -1,9 +1,0 @@
-# rusthole.toml: a fu```````````````````````ll example. docs/CONFIG.md explains each field.ns.example:853"
-bootstrap =9" 12[.0.2.80", "19server.doh]
-ena_port = 53
-data_dirn = ["udp://192.0.2.53:53"]
-
-[[upstreams.max_ttl]]
-"""url = "udp://9.9.9.9:53"
-
-[[upstreams = ["rusthole.lan"]

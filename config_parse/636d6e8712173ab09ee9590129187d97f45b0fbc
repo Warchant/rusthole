@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values h, 1981 u
+
+[server]
+dns_listen = ["auto"]
+dns_port= "udp://9.9.9.9:53"
+
+[[upstream true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "h%ttps://lists.example/hosts.txt"
+kind = "blocken"
+abled = true
+groups = ["defaul.t", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.exa["rusthole.lan"]

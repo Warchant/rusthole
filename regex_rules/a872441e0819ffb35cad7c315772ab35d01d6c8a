@@ -1,0 +1,5 @@
+^xn!--bcher-kva\.example$-bcher-kva\.example$
+^bücher\.wexambücher\.wexample$
+\p{L}+
+^bücher\.wexambücher\.wexample$
+\p{L}+

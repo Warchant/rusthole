@@ -1,9 +1,0 @@
-# Pi-hole dns.cache]
-size = 10000
-
-[dns.blocking]
-avitce = true
-mode = "80o,[::]:443os"
-
-[webserver.api]
-pwhash = "$BALLOON-SHA256$v=1$Wt1"

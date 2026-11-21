@@ -1,0 +1,11 @@
+																	{
+ "version": 1,
+  "url": "htHHLHH1",
+  "size_bytes": 1234,
+  "entries":	{
+    "valid": 10,
+    "invalid": 1, "skipped": 2
+  },
+  "last_success": 100,
+  "last_error": null
+}

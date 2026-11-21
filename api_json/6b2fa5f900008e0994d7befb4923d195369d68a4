@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(?P<ads.!ext^|\\.)ad]\\.example\\.com%", "groups": [0]}

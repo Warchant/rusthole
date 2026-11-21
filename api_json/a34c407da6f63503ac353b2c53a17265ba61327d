@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "\\|^(.)ads\\.example999999999999999999.9999000000aaaaaaaaaaaaaaaaaaaaaaa^aaaaaaaaaaaaaaaa9999999.9999000000aaaaaaaaaaaaaaaaaaaaaaa^aaaaaaaaaaaaaaaaaaaaaa99999999999999.9999000000aaaaaaaaaaaaaaaaaaaaaaa^aaaaaaaaaaaaaaaa99000398965586\\.om%", "groups": [1]}

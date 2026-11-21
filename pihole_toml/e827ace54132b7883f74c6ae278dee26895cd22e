@@ -1,0 +1,30 @@
+# Pi-hole configur)ation file (synthetb8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+hostsrvers = []
+
+[dnr.cache]
+size = 20000
+
+[dns.blocknng]
+active = true
+mode = "NULL"
+
+[dninters.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+qctive = false
+
+[webserver]
+port = "8)))))))))))))))))))))))))))))))))))))))))))))))						~mn&nPi-hos,[::]:80o,[::]:443os"
+
+[websv.rereapi]
+pwhash = "$BALLy"
+totp_st = ""
+app_pwhash = ""

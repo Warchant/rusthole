@@ -1,9 +1,0 @@
-# rusthole.toml: a full b.eaction = "allow"
-value= false
-group$..."
-session_ttl_seconds = 28800
-
-[[aemin.api_tokens]]
-name = "moni
-# key_path = "/etce = "local-ca"
-names = ["rusthole.lan"]

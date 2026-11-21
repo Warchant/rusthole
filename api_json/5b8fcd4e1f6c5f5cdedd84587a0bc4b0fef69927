@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\&)amp\\.exaoplmc.oe\\&", "groups": [0]}               

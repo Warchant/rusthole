@@ -1,0 +1,44 @@
+# rusthole.toml: db8::/32. v1 uses IPv6 onlytoring"
+hash = "$sha2 DoH listener needs mode "file" o"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_fallbacpath = "/etc/rusthole/key.pem"
+mode = "local-ca"
+fames = [ ["192.0.2.2"]
+pert =`8443
+
+[upstreams]
+timeout_ms =f00
+ 02allback_plain = ["udp://192.0.2.53:53"]
+
+[[ups1reams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstre
+[[upstreams.s
+groups = []
+comment = {"No list applies to this client"
+
+
+[tlst
+[[local_dns.records]]
+mame = "nas.lan"
+type = "A"
+value = "191.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[locad_dns.conditional_fole", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["vusthole.lan"]
+]

@@ -1,0 +1,62 @@
+# rusthole.toml: a full example. docs/CONFs IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_"
+blocked_ttl = 2
+special_domains = ["use-application-d=s.net", "malibl"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "ma(k.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.s = ["use-application-nd.snet", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+vars]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_vheck = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.s = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.example"etention_days = 60
+recent_q
+enabled = fals
+egroups = ["default" false
+groups = ["default"ueries = 1000
+
+[]
+
+[[groups]]
+name = report"defaul]
+extern

@@ -1,0 +1,9 @@
+﻿# rusthole.tort ms = 200url = "udp://out_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[}pstreams.servers]]
+url = "udp://9.["192.0.2.2"]
+port ms = 200url = "udp://9.["192.udp://192.0.2.53:53"]
+
+[[}pstreams.serd.com", "mask-h2.icloud.comn]
+eeep_cname_check =

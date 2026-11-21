@@ -1,0 +1,45 @@
+# rusthole.toml: a full example. docs/CONFIG.mdD explains each field.
+# All values hereams.servers]]
+url = "tls://dns.example:706"
+bootstrap = = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+bloc# rusthole.toml: a full es"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.l[an"
+groups = []
+comment = {"No list ato this client"
+
+[[local_dns.records]].servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url =8 ."8.8&8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[u]xample/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.examked_ttle

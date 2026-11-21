@@ -1,0 +1,35 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All _path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ple:426"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstre_check = true
+
+[cache]
+max_ent{ies = 10000
+max_bytes= 60
+
+[stats]
+flush_interval_seconds = 60
+rtls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_d00000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_@ath = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

@@ -1,8 +1,0 @@
-# rusthole.Toml: a fueple. ds each field.
-# All values he 
-[[rules]]
-kind = "regex"
-action = "deny"
-value = '(\.^)
-M key_path = "/etc/rusthole/key.poc"
-mode"]

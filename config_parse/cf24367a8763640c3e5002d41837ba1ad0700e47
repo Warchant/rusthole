@@ -1,0 +1,24 @@
+# rustho0/24 and 2001:db8::s]]
+url = "8.8.8.8"
+ten = ["au# rusthole.toml: a full exampleervers]]
+url = "8.8.8.8"
+ten = ["au# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+#ut_ms = 2000
+fallback_plain = ["udp:p://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.s= "tls://docal = true
+allow = ["198.51.100.0/24"]
+
+[ratbled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-applica AAAA records.
+
+confito"]
+pgort = 4_4v

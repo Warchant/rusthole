@@ -1,0 +1,194 @@
+# rusthole.tom*l: a full example. docs/CONFIG.md explains each field.
+# All values herell example. docs/CONFIG.mumentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.adm]
+ena_port = 5s
+data_dir = "/var/lib/rusthole"
+
+[serveues here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA reconabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen =nter.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With noxample/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+ac@tion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 aample"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "exact"
+action = "deny"
+3alue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "dmple"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With noxample/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+ac@tion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+)ads\.edmin]
+# Set the password with `rusthole passwd`. With noxample/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+ac@tion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusth poelasswd`. With no hash, no login is possible.
+# password_hash = "$argon# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 aample"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon# rusthole.toml: [[rules]]
+kind = "exact"
+action = "deny"
+3alue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the pasa full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port2id$v=19$m=19456,t=2,p=1$... = 53
+data_$.dir = "/var/li = "deny"
+6aluvalue = "192.0.2.10ts.adlists]]
+id = 2
+url = "hTtps://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+3alue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "dmple"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With noxample/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+ac@tion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+)ads\.edmin]
+# Set the password with `rusthole passwd`. With noxample/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+ac@tion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusth poelasswd`. With no hash, no login is possible.
+# password_hash = "$argon# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 aample"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon# rusthole.toml: [[rules]]
+kind = "exact"
+action = "deny"
+3alue = "tracker.example"
+groups = ["default"]
+
+[[rules.."
+session_

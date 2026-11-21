@@ -1,0 +1,11 @@
+# Pi-hole conFiguratt =imit]
+count0= 100 
+interval = 605555555555555555555
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443:]:443os"
+
+hash = ""

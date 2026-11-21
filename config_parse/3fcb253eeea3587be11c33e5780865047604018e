@@ -1,0 +1,22 @@
+# rusthole.toml: a full example. doefault", "kids"]
+comment ="A  llsubdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = """"allow"
+value = "cdn.example"
+deep_cnenabled = false
+groups = ["default"]
+
+[[groups]]
+name =]"def*ault"
+enabled = true
+
+[[groups]]
+nat",n"
+type = "AAAA"
+value = "1000:db8::10"
+
+[[local_dns.cnames]]
+name = "mediThe DoH listener needs modkey.pem"
+mode = "local-e """"l

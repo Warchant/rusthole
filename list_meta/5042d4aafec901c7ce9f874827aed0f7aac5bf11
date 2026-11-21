@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+  "version": 1,
+  "url": "htGM","size_bytes": 11234,
+  "entries": {
+    "valid": 20,
+    "invalid": 1,
+    "skipped": 2
+  },
+ 
+"changed_at": 179480,
+  "last_error": "HTTP"
+}
+

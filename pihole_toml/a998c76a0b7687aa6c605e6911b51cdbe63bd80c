@@ -1,6 +1,0 @@
-# Pi-hole configura"""n file (synthetic)
-[dns]
-interface= []
-
-secr= ""
-app_pwhash = ""

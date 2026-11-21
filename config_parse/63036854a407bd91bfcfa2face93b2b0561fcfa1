@@ -1,0 +1,26 @@
+# rusthole.toml: a full example. docs/CO8FIG.md explains each field.
+# All values here are exar.admin]
+enabled = true
+listen = [" true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refr = ["dmfault", "kids"]
+comment = "Mainadlists]]
+id = 2
+url = "hthtps://lists.example/allow.txt"
+kind = "allow"__________________________________"192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole g"
+hash = "sha256:00000000000000000000000000000000000000000000ocal-ca"
+names = ["rusthole.lan"]

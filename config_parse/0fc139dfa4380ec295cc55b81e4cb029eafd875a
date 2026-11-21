@@ -1,0 +1,21 @@
+# rusthole.toml: a full example. docs/Cists.example/allow.txt"
+kind = """low"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackaction = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `
+rusthole passwd`. With no hash, no login is possible.
+00
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the passwor
+confilowg"

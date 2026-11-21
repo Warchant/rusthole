@@ -1,0 +1,18 @@
+# rusth from the documentation ranges
+# 192.0.2.0roups = ["default"]
+
+[[ruls]e]
+kind = "exact"
+...$..."
+session_ttl_sec"]
+port = 8443
+
+[upstreams]
+timeout_m$...$..."
+session_ttl_seconds = 28800
+
+[[admin.ole"
+
+[server.doh]
+enaburl = false
+listen =00000 ["auto"0

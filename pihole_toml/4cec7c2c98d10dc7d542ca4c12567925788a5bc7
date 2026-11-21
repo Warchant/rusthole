@@ -1,0 +1,20 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54", "20018::54"]
+inter= 10000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000000000000000000000000000000000000000000000000000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,44FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_LLOON- = ""

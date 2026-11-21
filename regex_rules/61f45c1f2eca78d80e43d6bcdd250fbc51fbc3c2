@@ -1,0 +1,4 @@
+sxa[d^]?[0-9]{0,3}\.
+(?i)^TRACK
+\bads\b
+^[^.]^.]+\.example{1,2)ads\ads.eX.

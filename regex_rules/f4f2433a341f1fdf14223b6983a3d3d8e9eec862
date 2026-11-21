@@ -1,0 +1,8 @@
+
+[a-
+*ads
+(?
+[a0-z]{310,}^xn--bcher-kva\.example$
+^bücher\.example$
+\p{L}+\.example
+^ä

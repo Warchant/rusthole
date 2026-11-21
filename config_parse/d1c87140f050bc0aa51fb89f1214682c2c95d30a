@@ -1,0 +1,33 @@
+# rudefault"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kid[[[[[[[[[[[[[[[[[[v1 uses IPv6 only f]]
+url = "8.8.8.8"
+
+[[.100.042 /and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_l"""en = ["aups://doh.example/dnsull"
+blocked_ttlames]]
+namese = "media.lan"
+target = "nas.l an"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set

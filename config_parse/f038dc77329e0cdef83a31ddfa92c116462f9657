@@ -1,0 +1,8 @@
+# rust0", "19282"]
+
+[[upstreams.serv@rns.cnames]]
+n = 300
+
+[["192.0.2.81"blocked_ttl[[rules]]
+kind "e r=gex"
+action.,

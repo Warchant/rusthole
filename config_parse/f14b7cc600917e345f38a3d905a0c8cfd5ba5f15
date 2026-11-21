@@ -1,0 +1,70 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.t"
+
+[[lists.adlists]]
+id = 4
+url = "https://lists.example/allow.txt"
+kind = "asts.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+!ction = "deny"
+value = "tracker.example"
+groups = ["def00t"
+
+[[lists.adlists]]
+id = 4
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&ault"]
+
+[[r]slued = "regex"
+action = "deny"
+eny"
+value = '(\.^)
+# key_path = "/etc/rusthole/0000000000000000000000018446744073709551615"
+
+[tl198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AA
+id = 1
+u.md explains each field.
+# All values here are examples. Address.lan"
+groups = []
+comment = "Nolist!applies to this 1lient"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+typeQ= "AAAA"
+value = "2001:db8::10"]
+
+[[rules]]
+kind = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&ault"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.^)
+# key_path = "/etc/rusthole/00000000ids"]
+comault"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.^)
+mes = ["rusthole.lan"]

@@ -1,0 +1,150 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains =4
+
+[[lists.adlists]]
+id = 1
+url = "https://lists1.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 2
+url = "https://lists2.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 2"
+
+[[lists.adlists]]
+id = 3
+url = "https://lists3.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 4
+url = "https://lists4.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 4"
+
+[[lists.adlists]]
+id = 5
+url = "https://lists5.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 6
+url = "https://lists6.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 6"
+
+[[lists.adlists]]
+id = 7
+url = "https://lists7.example/hosts.txt"
+kind = "block"
+enabled = false
+groups = ["default"]
+
+[[lists.adlists]]
+id = 8
+url = "https://lists8.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 8"
+
+[[lists.adlists]]
+id = 9
+url = "https://lists9.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn4.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = ""
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker2.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker3.example.net"
+enabled = true
+#g

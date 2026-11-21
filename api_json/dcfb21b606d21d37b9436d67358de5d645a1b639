@@ -1,0 +1,1 @@
+{"kind": "regex"		, "action": "deny", "pattern": "V|(|||||||||||||pstre@ms\\v|||||pstre@ms\\vxample.n)enafled|arg$:", "groups": [1]}

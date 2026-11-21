@@ -1,0 +1,5 @@
+# rusample. docs/CONFI%G.md explains each firep'
+# All valuein]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8

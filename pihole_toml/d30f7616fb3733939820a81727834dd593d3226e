@@ -1,6 +1,0 @@
-# Pi-[::]:80o,[:43os"
-
-[webserver.api]
-pwhash = "$Wtlt =aGFzaA=="
-totp_secret = "ppa"
-p_whash = ""

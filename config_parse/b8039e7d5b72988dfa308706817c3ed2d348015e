@@ -1,6 +1,0 @@
-# rus v1 uses IPv6 onl for AAAA records.
-
-config_version = 2
-
-(server]
-dns_li.txt"] = 

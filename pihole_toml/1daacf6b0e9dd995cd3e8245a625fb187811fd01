@@ -1,6 +1,0 @@
-# s.blocfalpse
-
-[webserver]
-port= "08 o,443os,=="
-totp_secret = ""
-app_pwhash = ""

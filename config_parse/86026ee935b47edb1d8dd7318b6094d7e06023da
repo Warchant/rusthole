@@ -1,0 +1,28 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documanges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001dir = ""8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[up//lists.example/hosts.txt"
+kind = "block"
+enabms.s= "tls://dns.exals://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[up//lists.example/hosts.txt"
+kind = "block"
+enabms.s= "tls://dns.example:862"
+bootstrap = ["192.0.2.80", "92.0.2.80", "129.0.2.82"]
+
+= "192.0.2QQQQQQQQQQQQQQQQQQQQQQQQQQQ.10ts,adlists]]
+id = 2
+url = "https://lists.exae/lmpallow.txt"
+kind = ow"
+groups =g]
+enabled = true
+mOQde = "null"
+bQQQQQles]]
+kind = "regex"
+alocked_ttl = 2
+special_domaic

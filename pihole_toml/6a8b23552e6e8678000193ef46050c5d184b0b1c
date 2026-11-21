@@ -1,5 +1,0 @@
-# Pi-hole config:= 1000
-resolver = 60
-
-[dhcppi]
-pwhash = "$BALLOON-SHA256$v=2$s=102#,t=32$ZmFrZXhash = *"

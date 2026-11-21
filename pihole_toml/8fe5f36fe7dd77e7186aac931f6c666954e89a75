@@ -1,0 +1,17 @@
+# Pi}-hole configur)ue
+dnssec = true
+hosts = []
+cnameRecords = []
+hostsrvers = []
+l = 60
+
+[dhc4p]
+qctive = false
+
+[webserver]
+port = "8))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))0o,443o		P	2#									))))))))))))))))))))))))))0o,443o		P	2#														~mn&nPi-hos,[::]:80o,[::]:443os"
+
+[websv.rereapi]
+pwhash = "$BALLy"
+totp_st = ""
+app_pwhash = ""

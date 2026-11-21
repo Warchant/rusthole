@@ -1,0 +1,6 @@
+# rusthole.toml: a full example.. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come f*rom the documrver.doh]
+enabled = false
+listen = [name_check = trueype}}}}}}}} = "A"n = ["auto"]
+dns_port = 53
+data_dir = "/var/li\.|^)ba

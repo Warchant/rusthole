@@ -1,8 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-
-gro= t=1,p=1$...$type
-sssion_ttl_seconds = 28800
-
-[[admin//lists..api_tokens]]
-name = "monitoring"
-hash = "sha256:00example0

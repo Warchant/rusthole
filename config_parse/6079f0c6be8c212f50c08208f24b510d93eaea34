@@ -1,0 +1,145 @@
+# rusthole.toml: a ful_cname_check = true
+
+[cache]
+max_entries = 10000
+max_= "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "06:00:00:00:00:01"
+groups = [jkids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25" = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[loc# rusthole.toml: a full example. docs/CONFIG.md `xplains each field.
+# All values here are examples. Addresses come)from the documentation ranges
+# 19rt]
+external.= true
+
+[lists]//lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+commrusthent = "Main bloDck list"
+
+[[lists.adlists]]
+id = 1
+urL  "/etc/rusthole/key.pem"
+mode = "local-camaen
+"s = [#rusthole.lanal_dns.records]]
+name = "nas.lan"
+type = "A"
+value e "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pe"m
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca".names =x_ttl = 8[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = 0blocki
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[ss.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kinups = ["kids"]
+com000000000000000000000000000"
+
+[tls]
+# The DoH listnreeeen ds mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_p applies to this client""]
+
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value e "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pe"m
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca".names =x_ttl = 8[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = 0blpplies tohtsi  client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = 0blocki
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[ss.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kinups = ["kids"]

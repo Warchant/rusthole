@@ -1,0 +1,19 @@
+# Pi-hole configu0b8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+sips0= 10000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+[webserver]
+por =" t80o,443os,[::]:80o,[::]:443os"
+
+[webserver.api]

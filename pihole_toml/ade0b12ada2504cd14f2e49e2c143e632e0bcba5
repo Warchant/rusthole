@@ -1,0 +1,10 @@
+# Pi= 100 
+in = 60555555555555555555
+
+[thcp]
+active = false
+
+[bweserver]
+po.cart = "80o,443os/[dnS::]:80o,[::]:443os"
+
+hash = ""

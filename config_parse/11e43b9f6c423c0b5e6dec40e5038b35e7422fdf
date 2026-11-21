@@ -1,0 +1,69 @@
+# rusthole.toml: a fulist=  e[n"auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[g= "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "03:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tab"
+
+[[locakind = "allow"
+groups = ["default"]
+
+[[rules]]
+k{nd = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action =.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plom the documentation ranges
+# 192.ain = ["udp://192.0.2.0.2.0/24, 198.51.120.0/24 and 20013db8::/32. v1 uses 53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servIPers].adlists]]
+id = 7
+url = "https:-/lists7.example/hosts.txt"
+kind = "blv6]
+u 

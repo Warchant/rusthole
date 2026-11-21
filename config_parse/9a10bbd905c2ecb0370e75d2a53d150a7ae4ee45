@@ -1,0 +1,107 @@
+# ruse "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://]]
+name = "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and+ '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''istun = ["auto"]
+dns_port =.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0en = ["[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[auto"]
+dns_port =dmin]
+ "media.lan"
+target =  53
+data_dir = "/var/lib/rusthol"nas.s]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to thsten = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreadns_portms]
+timeout_ms = 2000
+fan"
+target ='''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''isten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0en = ["auto"]
+dns_port =dmin]
+ "media.lan"
+target =  53
+data_dir = "/var/lib/rusthol"nas.s]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to thsten = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreadns_portms]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0en = ["192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_tt,l = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.cothole.toml: a full example. docs/CONFIG.md explacns each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v2 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_ication-dns.net", "mask.icloud.com", "mask-h1.icloud.com"]
+deep_cname_check = true
+
+[callback_plain = ["udp://192.0en = ["192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.cothole.toml:l_domains = ["use-application,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,-dns.net", "m, set:
+# mode = "file"
+# cert_path = "/etc/rusthole/c
+extern

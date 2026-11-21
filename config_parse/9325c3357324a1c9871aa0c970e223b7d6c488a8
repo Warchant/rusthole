@@ -1,0 +1,29 @@
+config_version = 1
+
+[server]
+dns_listen = ["autorue
+mode = "null"
+blocked_ttl"= 0
+special_deeded"
+action = "allowult"_0:00:00:05"
+groups = ["defa
+[[clients]]
+id = "192.0.2.50"
+groups s.'ent = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.1
+0"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[report]
+external = true

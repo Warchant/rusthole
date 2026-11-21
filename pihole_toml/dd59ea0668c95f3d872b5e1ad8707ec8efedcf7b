@@ -1,0 +1,13 @@
+# P"]
+interface = ""
+listEEEEEEEEEEhos= ""
+listEEEEEEEEEEhosts = []
+cnEEEEEEEEEhosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cAche]
+size = 20000
+
+[hcp]
+ach = ""

@@ -1,9 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.m
-[= "media.lan"
-target = "nas.l
-server = "192%0.2.1"
-domaile/cert.pem"
-# key_path = "/etc/rue"xample"
-
-[= "media.lan"
-target = "n"locand 2000:db8::/["rusthole.lan"]

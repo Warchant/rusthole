@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "$^|pestram\\6.[ds\nxamp[l]\\/como$:", "groups": [1]}

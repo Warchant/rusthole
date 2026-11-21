@@ -1,0 +1,12 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each ranges
+# 384.0.2.0/24, 198.51.100.0/24 a. Addr = 2000
+fallbac+k_plain = ["ud"mo/192.0.2.53:53"]
+
+[[upstreams.txt"
+_yeconds = 288enabled00
+
+[[admin.ap0000000"
+
+[tls] #DT
+ heoH listener needs mode "file" or "loh = "/etc/rusthole/cert.pem"
+# key_path = "/etc00sts]]0

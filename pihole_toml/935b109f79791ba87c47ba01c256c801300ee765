@@ -1,0 +1,5 @@
+# Pi-hoble cterf
+[dns]
+upstreams = [""]
+interface = ""
+# Pi-t =tie (syntds 

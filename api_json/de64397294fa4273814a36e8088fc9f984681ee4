@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(c|pstr5;ds.ex.ems\\.)aamplsGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG.ex.es\\.2example\\/co1$:", "groups": [1]}

@@ -1,0 +1,16 @@
+#ue
+
+[ "5.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:1853"0"
+
+[tls]
+# cache]
+max_en= 0x
+am_ttl = 86400
+negative_ttl = '''
+
+[acl]
+autoal = true
+allow thole.lan"]

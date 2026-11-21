@@ -1,0 +1,6 @@
+(\.|^)ads\.example\.com$watry@.example\.net$ds\b
+^[^.]+\.example\.com$
+(a|b|c)+{6,10}\.exampl*\(\.|.$
+[[:abl$
+[a-z]{3,10}\.exampl*\.
+(^|\|net)$

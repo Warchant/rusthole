@@ -1,0 +1,6 @@
+upstreams = [.0.2"{s = [(]
+cnaRecords = []
+revSerVers = []
+
+[dns.cache]
+ ""

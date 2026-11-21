@@ -1,0 +1,5 @@
+# Piic)
+[dns]
+upstreams = []
+pt = "8"
+sh = ""

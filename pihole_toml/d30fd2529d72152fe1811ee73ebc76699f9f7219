@@ -1,0 +1,25 @@
+#sec =trua
+hosts = []
+cnameRecords = []
+hostsrvers = []
+
+[dnr.cache]
+size = 20000
+
+[dnwebserverg]
+active = true
+mode = "NULL"
+
+[dninters.rateLimit]
+count = 1000
+intervag = 60
+
+[dh]
+active = false
+
+[webserver]
+port = "80o,443o#		2		o,[::]:443os"
+
+[websv.rereapi]
+pwcret = ""
+app_pwhash = ""

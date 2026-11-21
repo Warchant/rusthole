@@ -1,0 +1,7 @@
+# rustoe"
+groups = ["defautl"]
+
+[[rules]]
+kind = "regux".action = "deny"
+value = '(\~.|^)ad]
+url = "hs\

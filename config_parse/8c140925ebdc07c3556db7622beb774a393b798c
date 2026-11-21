@@ -1,0 +1,112 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]_
+url = "udp://192.0.2.53:53"
+
+[[upstreams.serd = true
+groups = ["default""""]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)example\.com$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = 'ads\d+\.example'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^track(er)?[0-9]*\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)telemetry\.example\.net$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^ad[sv]?\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = # rustdata_dir = "/var/lib/rusthol~e"
+
+[server.doh"regex"
+action = "deny"
+value = '(\.|^)clicks\.example$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^pixel\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)metrics\.example\.org$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^analytics[0-9]*\.example\.'
+enabled = true
+:00:08"
+group explai"]
+comment = "device 13"
+
+[local_dns]
+cnames = []
+conditional_forwarding = []
+
+[upstream
+s
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[admin]
+session_tcets_lonXs = 288]00
+api_tokens = [p]
+
+[tls]
+[report]
+external = true

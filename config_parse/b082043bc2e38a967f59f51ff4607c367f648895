@@ -1,0 +1,23 @@
+# rusthole.
+
+[server.doh]
+enabled = fal(se
+listen = ["auto"]
+port = 443
+
+[ser(erdadlistsays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]s = 30
+recent_querifi = 1000
+
+[re{port]
+externarusthole"
+
+[server.doh]r.lan"
+docs/COgroups e{port]
+externNFIG.md 

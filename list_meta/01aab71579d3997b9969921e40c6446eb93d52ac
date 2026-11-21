@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "hos.txt",
+  "etag": "\"\bc13000H0001",
+  "size_bytes": 1234,
+  "entries":	{
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 3
+  },
+  "last_success": 1794400,
+  "last_attempt": null
+}

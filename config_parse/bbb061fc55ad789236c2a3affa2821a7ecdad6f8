@@ -1,0 +1,12 @@
+# rustho01:db8::/32. v1 us/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 0ddddddd@ddddd?dddddddddddddddd/096.0.2.53:53"
+
+[[upstains = ["use-#gggggggggggggg# ru= ["udp://19ggggggggg2.gggg0.2.5g3:

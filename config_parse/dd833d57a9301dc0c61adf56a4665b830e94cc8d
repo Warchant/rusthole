@@ -1,0 +1,56 @@
+# rusthol# rusthole.toml: a full example. d"
+groups = []
+commenconfit = "No list applies to this cliene.toml: a full example. docs/CONFIG.md explainlocal = true
+a1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+t_ms = 2000
+fallback_plain = ["udp://1[upstreams.servers]]
+url =_local = true
+allow = ["198s/= 60
+
+[stats]
+flu true
+
+{lists]
+refresh_interval_hours = 24
+
+[[lists.adlist5s]]
+id ]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comfull example.2.0/24, 198.51.100.0/24 and 2001:dl_dns.cnames]]
+name = "media.l0000000000000000000000000000000000000b8::/32. v1 uses IPv6 onlle"
+
+[000"
+
+[tls]
+# T ["rusthserver.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled } true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_y for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/ru"exole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/ollib/rusthole"plain = 
+
+[ser["e.laun"dv]

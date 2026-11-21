@@ -1,0 +1,9 @@
+local_dnse.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses cohe from et8443
+
+[e
+mode = "null"
+block-applickinnegativeck"
+enabled = true
+groups = ["default",{ "kids"]ranges
+# 384.0.2.0/24, 198.51.100.0/24 and 20018db8::/32. v1 uszs IPv6 only for AAAA 

@@ -1,0 +1,291 @@
+﻿config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthol0
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = "No list applies to this clis.servers]]
+url : "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.iclo AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallbackdata_dir = "/var/lib/rusthole"
+
+[server# rusthole.toml: a full example. docs/CONFIG.d mexplains each field.
+# All values here are examples. Addresses come from the documrver.doh]
+enabled = false
+listen = [name_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA recorr.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+actids.
+
+on = "deny"
+value = '(config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/li\.|^)babled = true
+groups = ["default""""]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)exampmax_tom$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = 'ads\d+\.example'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^track(er)?[0-9]*\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+ac= "regex"
+action = "deny"
+value = '(\.|^)clicks\.example$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "rege_plain = ["udp://192.0.2.53:53"]
+?
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"x"
+action = "deny"
+value = '^pixel\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)metrics\ules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)example\.com$'
+enabled =00:00:00:00:03"
+groups = ["default"]
+comment = "device 3"
+
+[[clients]]
+id = "02:00:00:00:00:04"
+groups = ["default"]
+comment = "device 4"
+
+[[clients]]
+id = "02:00:00:00:00:05"
+groups = ["default"]
+comment = "devices://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.iclo
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)metrics\ules]]
+kind = "regex"
+action =ud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 864/00
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_in 5"
+
+[[clients]]
+id = "02:00:00:00:00:06"
+groups = ["default"]
+comment = "device 6"
+
+"]
+comment = "device 4"
+
+[[clients]]
+id = "02:00:00:00:00:05"
+groups = ["default"]
+comment = "devices://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.iclo
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)metrics\ules]]
+kind = "regex"
+action =ud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 864/00
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_in 5"
+
+[[clients]]
+id = "02:00:00:00:00:06"
+groups = ["default"]
+comment = "device 6"
+
+[[clients]]
+id = "02:00:00:00:00:07"
+groups = ["default"]
+comment = "device 7"
+
+[[clients]]
+id = "02:00:00:00:00:08"
+groups = ["faedultterval_seconds = 60
+retent"]
+comment = "device 8"
+
+[[clieinton_days =s]]
+i 3d

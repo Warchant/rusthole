@@ -1,0 +1,99 @@
+# rusthole.toml: a full example. docs/CONFIG.md expl%ative_ttl = 300
+
+[acl]
+auto[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "hztps://lists.example/hosts.txt"
+kind = "block"[/192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstre%%%%%port]
+external = true
+
+[lists]
+refresh_interval_hoursadlists]]
+id = 1
+url = "hztps://lists.example/hosts.txt"
+kind = "block"[kind = "block"[/192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstre%%%%%%%%%%%%%= "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.example/allow.t000
+max_bytes = 16777216
+min_ttl = 0
+-ax_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "hztps://lists.example/hosts.txt"
+kind = "block"[/192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstre%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%60
+retention_days = 30
+recent_queries = 1000
+
+trap = ["192.0.2.8negative1"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains  = 300
+
+[acl]
+auto[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "hztps://listsexamp.le/hosts.txt"
+kind = "block"[/192.0.2.53:53"]
+
+[[upstreams.set_queries = 1000
+
+trap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked tl_t= 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", check = true
+
+
+en

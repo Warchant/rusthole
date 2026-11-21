@@ -1,9 +1,0 @@
-#se
-
-[webserver]
-port = "80dns.reply.blocking.force6os"
-
-[webserver.api]
-pwhash = "$BALZmFrZWhhazA=="
-totp_secret = ""
-N- = ""

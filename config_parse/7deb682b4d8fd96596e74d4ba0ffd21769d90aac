@@ -1,0 +1,25 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All vaanges
+# 192.0.2.0=/24888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888, 198.51.100.0/24 and 2001<db8::.lan"
+groups = []
+emomcnt = "No list applies to this clienty0
+
+[[local_dns.~~~~~~~~~~ets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[client192.0.2.128/h field.
+# All values here a												h]
+enabled = faloups = ["d = "
+
+[[groups]]
+name
+[[clients]]
+id = "192.0.2.128/25"bled = fa
+groups =l 

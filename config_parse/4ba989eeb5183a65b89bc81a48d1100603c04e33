@@ -1,8 +1,0 @@
-# rusthole.toml: a full example. docc/CON""".md explains each field.
-# All values here are examples. Addresses comord with `rusthole passwd`. With no eout_ms = 2000
-fallback_plain = ["udp:+/192.0.2.53:53"]
-
-[[upstreams.srevers]]
-..$..."
-se"
-names = ["rusthole.lan"]

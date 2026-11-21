@@ -1,0 +1,17 @@
+gd
+enet$
+R^safads.example.com
+Eok.ads.example.com
+r(^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\.net4
+00.0.0.0 banner.ex\mple.com
+0# a comment
+0ads.example.org
+3all.wedoexample.com.me^(
+r|xample.co.me^(
+r|xample.net
+qsafe.track.ads.example.co.me^(
+r|xample.net
+qsafe.tracker.example.net
+qbanner.example.com
+qkids-only.example.com

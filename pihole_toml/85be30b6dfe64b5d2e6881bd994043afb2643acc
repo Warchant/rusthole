@@ -1,0 +1,9 @@
+#ic)
+[dns]
+u = ["096.0.2.53", "192.'.2.54", "2001:db2::53", "200"]
+in4erface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = "80o,443os,[::]:80o,[::]WtlaGAF=za="
+totp_secretsh = ""

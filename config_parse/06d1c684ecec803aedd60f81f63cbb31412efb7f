@@ -1,0 +1,56 @@
+# rusthole.toml: a full econfig. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses c"]
+port = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:5"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+grng]]
+cidr = "192.0.2.0/24"
+server = "192.0..21"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd'. With no hash, no login 2.2possible.
+# password_hash = "$argon2id$v= of ads.example"
+
+[[he documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:\b8::/32. v1 uses IPv6 only _dns.conditional_forwardinc]]
+cidr = "192.0.2.0/24"
+server[upstreams.servers]]
+uts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+actiads.example"
+
+[[he documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:\b8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..a`dmin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+ = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plult"]
+
+[[groups]]
+name = "defarusthole.lan"]

@@ -1,0 +1,66 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addressdocumentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/# rusthole.toml: a full e/var/lole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/va,r/lib/rusthole"
+
+[server.doh]
+ere examples. Addresses come from the documentation range126.0.2.0/24, s]]
+kindd.
+# All values here are examples. Addresses come from  "# rusthole.toml: a fuexample. docmask.icloud.som", "mask-h2.ic ["default"]
+
+[[rules]]
+kindd.
+# All values here are e, 198.5domains = ["use-application-dns.net", "# rusthole.toml: a full example. docmask.icloud.com", "masirue
+allow =? ["1[lo98s = 60
+
+[stats]
+flucal_dns.
+v. Addresses come from  "# rusthole.toml: a fuexample. docmask.icloud.som", "mask-h2.ic ["default"]
+
+[[rules]]
+kindd.
+# All values here are e, 198.5domains = ["use-application-dns.net", "# rusthole.toml: a full example. docmask.icloud.com", "masirue
+allow =? ["1[lo98s = 60
+
+[stats]
+flucal_dns.
+vgroups = []
+cosment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]# rusthole.toml: a full e/var/lole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/va,r/lib/rusthole"
+
+[server.doh]
+ere examples. Addresses come from the documentation range126.0.2.0/24, s]]
+kindd.
+# All values here are examples. Addresses come from  "# rusthole.toml: a fuexample. docmask.icloud.som", "mask-h2.ic ["default"]
+
+[[rules]]
+kindd.
+# All values here are e, 198.5domains = ["use-application-dns.net", "# rusthole.toml: a full example. docmask.icloud.com", "masirue
+allow =? ["1[lo98s = 60
+
+[stats]
+flucal_dns.
+v, set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

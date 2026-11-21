@@ -1,0 +1,21 @@
+# rusthole.toml: a full examp 0
+max_ttl = 86400
+negative_ttl = 301
+
+[acl]oua
+t_local = true
+allow = ["198s = 60
+
+[stats]
+fl = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+externams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+[[upstreams.servers]]
+

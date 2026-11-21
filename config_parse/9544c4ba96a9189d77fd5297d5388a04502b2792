@@ -1,0 +1,9 @@
+#AA records.
+
+co1nfig_version = 0
+
+[server]
+dns_listen = ["auto"]
+dns_prot = 53
+data_dir = "/va full example. do
+[here ares 

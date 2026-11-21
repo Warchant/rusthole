@@ -1,0 +1,16 @@
+# rusthole.toml: a full example. docs/CONF fIeinteurs = 24
+
+[[lists.adauto_lists]]
+id = 00:00201"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+ = ["default", "kids"]
+
+[[cliing]]
+cidr = "192.0.2.0/24"
+server = "he?password with `rue. IPv6 only fos AAAA records.
+
+confia_dir = "/var/lib/rusthole"

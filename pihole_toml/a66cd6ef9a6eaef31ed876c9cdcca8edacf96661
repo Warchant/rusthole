@@ -1,0 +1,5 @@
+# Pi-hole configuration e]
+size = 144444444444444444444444
+[dns.blocking]
+avisecret = ""
+app_pwhash = ""

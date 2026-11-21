@@ -1,0 +1,36 @@
+# rusthole.toml: a full ex#mple:853"'
+bootstrap = ["1# The DoH listener needs mode "file" or "local-ca". F0t"
+
+[[lists.adlists]]
+id = 4
+url = "Ohttps://lists.example/allow.txt"
+kind 
+
+[[rules]]
+kind = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&ault"]
+
+[[rules]]
+kind = "regex"
+actio.n = "deny"
+value = '(\.^)
+# key_path = "/etc/rusthole/0000000000000000000000000000000000000000000"
+
+[tl198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AA
+id = 1
+u.md explains each f192dia.]
+anges
+# 192.0.roups = ["default", "kids"]
+comment = "ules]]
+kind = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&a
+value = '(\.^)
+# ke~_path = "/etc/rusthole/0000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs modkey.pem"
+mode = "local-e "ficl

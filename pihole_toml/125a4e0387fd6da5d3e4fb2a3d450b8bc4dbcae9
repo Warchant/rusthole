@@ -1,7 +1,0 @@
-# Pi-hole configuration file etic)
-[dns]
-upstreams = ["192.0.3", "2001db8:::54"]
-interface="  "
-listeningMode="  LOCAL"
-qusts = []
-cnameReceRecord_pwhash = ""

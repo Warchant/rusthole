@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|pesartms\\n): [.4].r$|gea:", "groups": [2]}

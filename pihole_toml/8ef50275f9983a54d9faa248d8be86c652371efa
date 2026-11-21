@@ -1,0 +1,6 @@
+# Pi-hole conf=iguraton file (synthetic)
+[dns]
+us = ["515.0.2.53", "192.0.2.54", "001:db8:846"]
+interfage = ""
+listeningMode = "LOCAL"
+querytpp_pwhash = ""

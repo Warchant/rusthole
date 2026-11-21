@@ -1,0 +1,155 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are r = "/var/lib00000000000000000000000000000000000000"
+
+[tls] #DT
+ heoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rustho= "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups "All subdw"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+gr.53:53"]
+
+[[upstreams.shttps://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups "All subdw"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls] #DT
+ heoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rustho= "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups "All subdw"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action ne ="dy"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+sesOops = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny" password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls] #DT
+ heoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rustho= "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups "All subdw"
+groups = ["default"]
+
+[[rules]]
+kindne ="dy"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_secnods = 28800
+
+[[admin.api_tokens]]
+name = "monitgni"
+orhash = "sha256:0oups = ["default"]
+
+[[rules]]
+kind = "regex"
+action ne ="dy"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitgni"
+orhash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]tion ne ="dy"
+value = '(\.|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitgni"
+orhash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

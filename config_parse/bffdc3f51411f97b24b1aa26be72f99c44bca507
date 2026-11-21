@@ -1,0 +1,91 @@
+#s.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["true
+
+[lists]
+refresh_interval_hourshole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 221
+
+[serverdays = 30
+recent_queries = 1000
+
+[reen = ["192.0.2.2"]
+port = 8443
+
+# rusthole.toml: a full exa[upstrmple. docs/CONFIG.md explains each field.
+# All va2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+conf,ig_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 3
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+actionfor AAAA records.
+
+conf,ig_version = 1
+
+[s/lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 1
+url = "ht# rusthole.toml: a full exampl*e. docs/CONFInges
+# 192.0.2.0/24, 198.51.100.0/24 and # A`l values here are examples. Addresses come from the documentation ra"""s
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[serction = "allow"
+value = "cdn.example"
+enabled = falseallow.txt"
+kind = "allow"
+ghe documentation ranges
+1
+
+[server]
+dnrate_s_listen = ["auto"]# 192.
+0dn

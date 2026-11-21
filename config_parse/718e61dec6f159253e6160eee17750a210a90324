@@ -1,0 +1,13 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fihttps://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabstrap  .1"92=[0.2.8.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = " = ["096.0.2.81"]
+
+[blocking]
+enabstrap  .1"92=[0.2.81"]
+
+[b"]

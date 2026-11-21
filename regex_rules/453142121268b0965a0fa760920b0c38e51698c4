@@ -1,0 +1,9 @@
+(\.|^)ads\.example\.com$
+^tracker[0-9]*\.
+(^|\.)telemetry\.exaUUUUUUUt$
+^a\.b$
+[a-z]{3,10}\.example\.org
+^xn--
+.*?
+9(\.wn^$
+la(ww\.)?exampe\.(com|net))$

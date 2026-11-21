@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(?<pstKKKKKKKKKKKKKKKKKKK[KKKKKKKKKKKKKKKKKKKKKK????????com$:", "groups": [1]}

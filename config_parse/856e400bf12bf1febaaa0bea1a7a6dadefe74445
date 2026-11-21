@@ -1,6 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All val
-data_dir = "/var/lib/rusthole"
-
-[server.doh]
-# rusthole.toml: a full example. docs/CONFIG.md eu 52

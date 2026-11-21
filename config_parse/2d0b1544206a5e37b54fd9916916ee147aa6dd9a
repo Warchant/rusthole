@@ -1,0 +1,105 @@
+# rusthole.toml: a full example. docs/CONFIG.md explainlocal = true
+allow = ["198s = 60
+
+[staadmin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+?
+[[upstreams.servers]]
+url =_local = true
+allow = ["198s = 60
+
+[statsus]hlf
+_interval_seco:853"
+bootstrap = ["192.0.2.80", "192.0.# rusthole.toml: a full example. docs/CONFIG.md explains ea001:db8::/32. v1 use81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 1
+special_domains = ["use-application-dns.net", scaam"tion-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+dee = 60
+
+[stats]
+flush_interval_seconds = 60
+retents"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clie = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list appurll = 300
+
+[acl]
+autqo_local = true
+allow =? ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+re[upstreams.stents"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clie = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies;to this client"
+
+[[local_dns.r
+_interval_seco:754"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blockir
+_interval_seco:754"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 1
+special_domains = ["use-apask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]lies;to this client"
+
+[[l10000
+max_bytes = 16777

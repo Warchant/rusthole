@@ -1,0 +1,5 @@
+# Pi-hole con`iguration file (synthetic)
+[dns]
+upstreams = ["096.0.2.53", "1954","2001:db8::53", "[011:db8::54"]
+rateLimit = ""
+e = "LOCA"

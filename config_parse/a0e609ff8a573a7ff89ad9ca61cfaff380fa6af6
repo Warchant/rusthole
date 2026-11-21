@@ -1,0 +1,14 @@
+# rusthole.toml: mple. docs/CONFIG.md explains each field.
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC# All valu.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+en;bled = tru
+listen = ["192.0.2.2"]
+port# rusthole.toml: a fulns e = 8
+listen = ["192.0.2.2"]
+port# rusthole.toml: a full ex]
+port# rusthole.toml: a= 2000
+fallback_plain = ["cs

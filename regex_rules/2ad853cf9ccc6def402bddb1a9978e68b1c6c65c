@@ -1,4 +1,0 @@
-^ad[sx]?[0-9]{0,3}\.
-(?i)^TRACK
-\badsx.example\.net$(a|b|c)+\.(x|y)$
-^

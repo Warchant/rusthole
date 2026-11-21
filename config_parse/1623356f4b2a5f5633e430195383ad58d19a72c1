@@ -1,0 +1,5 @@
+# rusthole.toml: a full example. tion = "depath = "]
+dnsport = 53
+data_dqr = "/v
+mode = "local-ba"
+names = """["rusthole.lan"]

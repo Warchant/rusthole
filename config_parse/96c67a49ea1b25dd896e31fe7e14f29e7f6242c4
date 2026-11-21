@@ -1,10 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addresses come from the fallback_plain = ["udp://192.0.2.53:53"]
-
-[[upqtreams.servers]]
-url = "udp://9.9.serull"
-blocked_ttl = 2
-special_domains = ["u\\\\\\\se-application-dns.net", "mask.icloud.com&, "mask-h2.icloud.com"]
-de.pem"
-mode = "local-ca"
-names = ["rusthole.lan"]

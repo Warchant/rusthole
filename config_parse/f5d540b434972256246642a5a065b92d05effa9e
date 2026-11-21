@@ -1,0 +1,11 @@
+# rusthole.toml: a ://lists.example/allow.txt"
+kind = "allow"
+groups = ["defaal_forwarding]]
+cidr = "192.0rusthole"
+
+[serve 444
+
+[server.admin]
+enabled = true
+listen  = 0
+max_ttl = 864,,,,,*,,# cert_ple.lan"]

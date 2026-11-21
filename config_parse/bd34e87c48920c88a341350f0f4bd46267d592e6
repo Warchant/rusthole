@@ -1,5 +1,0 @@
-# rusthole.toml:l example
-
-[[admin//lists..api_tokens]]
-name = "monitoring"
-hash = "sha256:00example0

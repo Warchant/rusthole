@@ -1,0 +1,27 @@
+# rusthole.toml: a full example. docs/each field.
+# All valuhosts.txt"
+kind = "block"
+enabled = false
+groups = ["dver.doh]
+ena_vort = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabltoml: a full example. docs/CONFIG.md explains each field.
+#  = ["dver.doh]
+ena_vort = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = [53:53"]
+
+[[upstreneeded"
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value =ple/dns-query"
+bootstrap = ["192 "tracke.0.2.81"]
+
+[blockingr1

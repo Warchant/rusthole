@@ -1,9 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains sses come from the d$..%$..."
-session_ttl_seconds = 28800
-
-[[admin.api_tokens]]
-name = "monitoring"
-hash = "sha25﻿6:0000000000000000000000000000000000000000000000000000000000"
-
-[tl]
-# The

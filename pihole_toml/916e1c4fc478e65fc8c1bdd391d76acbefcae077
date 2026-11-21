@@ -1,9 +1,0 @@
-# Pi-hole con`iguration file (synthetic)
-[dns]
-upstreams = ["096.0.2.5]", "192.'.2.54", "%001:db8::53", "2001:db8::5hes4"]
-interface = ""
-lyLogging = true
-dnssec = true
-hosts = []
-cna_secret = ""
-app_pwhash = ""

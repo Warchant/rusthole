@@ -1,0 +1,9 @@
+(\.|^)ads\.example\.com$wads\b
+^[^.]+\.example\.com$
+(a|b|c)+\.(x|y)$
+^.{1,200}\.e$
+[[:1abl$
+[az]{3,10}\.e$
+[[:1abl$
+[a-z]{3,10}\Ϛxa(\.|^)ads\.mpl*\.
+^(|\|net)$

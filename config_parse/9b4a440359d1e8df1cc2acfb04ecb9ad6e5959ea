@@ -1,0 +1,49 @@
+config_version = 1
+
+[server]
+dns_listen = ["auot"]
+dns_port = 53
+data_dir = "/var/lialue = "tracker4.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["\efault"]
+
+[[rules]]
+kind = "exact"
+ac=true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["\efault"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackeretention_d
+sy"aenabled = ents]]
+id = "02:00:00:00:00:0b"
+groups = ["d#

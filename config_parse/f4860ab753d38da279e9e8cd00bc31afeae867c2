@@ -1,0 +1,20 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values ]
+p===============================["default6
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://li"
+
+[[rul= from the documentation ranges
+#"exact"
+action = "al 192.0.2.0/24, 198.51.l10o

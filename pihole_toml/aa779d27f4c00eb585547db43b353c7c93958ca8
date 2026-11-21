@@ -1,0 +1,6 @@
+# Pi-hole connthetic)
+[dns]
+upstreams = ["096.0.2.5]", "192.'.2.01:db8::5hls4"]
+irface = ""
+lyLogging = true
+dnsseapp_pwhash = ""

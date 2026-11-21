@@ -1,8 +1,0 @@
-# Pi-Hole ns]
-upstreams = ["194.0.2.53-", "192.db8::54"]
-interfats = []
-cnameRecmeRecords  = []
-cstreamss = []
-
-secret = ""
-app_pwhas =  ""

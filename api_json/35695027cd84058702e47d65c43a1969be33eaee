@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^===============0=m|e)2\\U ads\\.extargettre;dS======", "groups": [0]}

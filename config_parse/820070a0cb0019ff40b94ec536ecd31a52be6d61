@@ -1,8 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.mdamples. Addresses cos]]
-url = "udp://8.9.9.9:5"""
-[[upstreams.servers]]
-url = "8.8.8.8"
-
-[[upmax_tTlstreams.servers]]
-url = "tls://dns.example:853"'
-bootstrap = ["1# The DoH listen]

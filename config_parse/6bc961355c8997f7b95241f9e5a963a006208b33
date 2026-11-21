@@ -1,0 +1,21 @@
+#stholu.tom2. v1 # :usthole.tomdeistcom=c ["43.
+"""e"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.examples]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "Ang]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["u\\\\\\\se-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+de.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

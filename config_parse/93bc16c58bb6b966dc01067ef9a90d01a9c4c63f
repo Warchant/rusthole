@@ -1,0 +1,90 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen =[ "219.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.seist"nd 2001:db8::/32. v1 uses IPv6 only _dns.conditiue
+listen =[ "219.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms ding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen =[ "219.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upst.2.2"]
+port = 8443
+
+[upstreams]
+"""e$out_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.seist"nd 2001:db8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen =[ "219.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+]
+
+[[rules]]
+kind = "regex"
+action ='''eny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind 0000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = ".example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exacnames = ["rusthole.lan"]

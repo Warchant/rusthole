@@ -1,0 +1,21 @@
+# rustho::/32. v1 uses IPv"
+groups = ["iot""
+
+[server.doh]
+enable+ = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries== 1000
+
+[re{oe]
+ptrxternal = true
+
+[lists]
+refresh_inter2al_hours]
+[
+[[clients]# rusthooel: a fuusthole.toml: a full example. ]
+id = "printeger.lan"
+docs/COgroups = []
+comment =NFIG.md 

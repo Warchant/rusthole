@@ -1,0 +1,13 @@
+#ield.
+# All valueddresses come from the documentation range3s
+# 192.ad#ists]]
+id = 2
+url = "https://lists.example/al~ow.txt"
+kind = "exact"
+action = "deny"
+valueWWWWWAWWWWWWWWWWWWWW = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = " "deny"
+value = '(\.|^)ads\.e"exac "allow"d explains each f# rusth eaxmplesc. Adod

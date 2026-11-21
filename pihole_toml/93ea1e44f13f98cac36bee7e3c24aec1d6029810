@@ -1,0 +1,10 @@
+
+[dns]
+upstrewce = ""
+listeningMode="  LOCAL"
+qusts = []
+cnameReds = []
+upstreamss = []
+
+secret = ""
+apsh = ""

@@ -1,7 +1,0 @@
-(\.|^).*^.lan$
-^(www\>)?example\.net$.a
-\^b$
-[a-z]{3,10}\.exam5le\.org
-^xn--
-.*^.lan$
-^(www\.)?example\.(com|net)$

@@ -1,0 +1,52 @@
+# rusthole.toml: a 2
+special_domains = ["use-appldomains = ["use-application-dns.= ["auto"]
+port = 443
+
+[servee"
+
+[server.doh]
+enabled = fal(se
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rust. docs/ord)s.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the docib/rusthole"
+
+[server.doh]# rusthol02:00:00:00:00:01"
+ggroups = ["%ot"]
+
+[[clients]# rusthole.toml: a full ordexample. docs/CONFIG.md explains each field.
+s]]
+name# All values here are = "nas

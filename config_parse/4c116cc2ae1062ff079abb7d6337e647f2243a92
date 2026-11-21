@@ -1,0 +1,10 @@
+# rusthole.tkml: a fullv1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[sekver]
+dns_listen = ["auto"]
+data_dirZ = 53
+data_dir = "/var/l0000000000000000The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

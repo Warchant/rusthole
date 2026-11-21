@@ -1,0 +1,50 @@
+# rusthole.toml: a full example. docs/CONFs IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]his client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "ode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole)/key.pem"
+mode = "local-ca"
+names = [ ["192.0.2.2"]
+port = 6037
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[ue_check = drue
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.s = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.example"etention_days = 30
+recent_q
+enabled = false
+groups = ["default"ueries = 1000
+
+[]
+
+[[groups]]
+name = report"defaul]
+extern

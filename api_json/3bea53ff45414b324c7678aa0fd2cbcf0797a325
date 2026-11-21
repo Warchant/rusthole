@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "SSSSSSSSS(^|pstreams\\.)ads\\.e|argene\\/com$:", "groups": [1]}

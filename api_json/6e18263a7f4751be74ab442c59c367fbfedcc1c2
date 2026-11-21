@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|pstreams\\n): [2@ds.Ez].r$|gea%:", "groups": [2]}

@@ -1,2 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\`.>s8)\\.examplem$", "groups":
-[5]}

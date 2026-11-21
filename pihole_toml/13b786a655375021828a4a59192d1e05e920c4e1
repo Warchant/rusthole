@@ -1,0 +1,33 @@
+# Pi-hole con`iguration file (synthetic)
+[dns]
+upstreams = ["2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+howhash = "$BALLOA256$v=1$s=1024,t=32$ZmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secretsts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1001
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$BALLOA256$v=1$s=1024,t=32$ZmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

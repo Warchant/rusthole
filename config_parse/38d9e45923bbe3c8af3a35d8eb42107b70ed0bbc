@@ -1,0 +1,406 @@
+# rusthole.toml: a full example. docs/CONFIG.md
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallbackk_plaiOn = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[upstreamurl = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups= 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.1 = ["default", "kids[]
+comment = "Main bloDck list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.exA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53ackk_plaiOn = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+m]ax_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_qugries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups= 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.1 = ["default", "kids"]
+comment = "Main bloDck list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "it]
+queries = 000
+ni1terval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https:e"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[g["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_enstatstdns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retentionternal = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["donitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# On = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[upstreamurl = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups= 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.1 = ["default", "kids[]
+comment = "Main bloDck list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.exA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53ackk_plaiOn = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.s= "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "92.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+m]ax_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_qugries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups= 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.1 = ["default", "kids"]
+comment = "Main bloDck list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "it]
+queries = 000
+ni1terval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https:e"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[g["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_enstatstdns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow =The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

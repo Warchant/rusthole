@@ -1,0 +1,320 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentatio"reanges
+# 192.0.2.0/2#le.toml: a full example. docs/CONFIG.md explains eachme from the documentation rangrecent_queries/2# rustolhe.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server#]
+dns_listell example. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = rusthole.toml: a fu4, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server#]
+dns_listell exmment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn4.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn5.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker0.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker2.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker3.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker4.example.net"
+enabled = true
+groups2 = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackeretention_days"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker8.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker9.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker10.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker11.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker12.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker13.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker14.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker15.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker16.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker17.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker18.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker19.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker20.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = tion = "deny"
+value = '(\.|^)example\.com$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regexoti"a
+nc = "deny"
+value = 'ads\d+\.example'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^track(er)?[0-9]*\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)telemetry\.example\.net$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^ad[sv]?\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)clicks\.example$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^pixel\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)metrics\.example\.org$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^analytics[0-9]*\.example\.'
+enabled = true
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+comment = "The default group"
+
+[[groups]]
+name = "kids"
+enabled = true
+comment = "Tablets"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["default"]
+comment = "device 1"
+
+[[clients]]
+id = "02:00:00:00:00:02"
+groups = ["default"]
+comment = "device 2"
+
+[[clients]]
+id = "02:00:00:00:00:03"
+groups = ["default"]
+comment = "device 3"
+
+[[clients]]
+id = "02:00:00:00:00:04"
+groups = ["default"]
+comment = "device 4"
+
+[[clients]]
+id = "02:00:00:00:00:05"
+groups = ["default"]
+comment = "device 5"
+
+[[clients]]
+id = "02:00:00:00:00:06"
+groups = ["default"]
+comment = "device 6"
+
+[[clients]]
+id = "02:00:00:00:00:07"
+groups = ["default"]
+comment = "device 7"
+
+[[clients]]
+id = "02:00:00:00:00:08"
+groups = ["default"]
+comment = "device 8"
+
+[[clients]]
+id = "02:00:00:00:00:09"
+groups = ["default"]
+comment = "device 9"
+
+[[clients]]
+id = "02:00:00:00:00:0a"default"]
+comment = "device 10"
+
+[[clients]]
+id = "02:00:00:00:00:0b"
+groups = ["default"]
+comment = "device 11"
+
+[[clients]]
+id = "02:00:00:00:00:0c"
+groups = ["kids"]
+comment ample. docs/CONFIn = ["auto"]
+dns_port = 80
+data_dir = "/var/lib/G.md explaruis

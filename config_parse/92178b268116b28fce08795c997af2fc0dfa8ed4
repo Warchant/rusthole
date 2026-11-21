@@ -1,0 +1,3 @@
+con_listen = ["auto"]
+dns`_port = 53
+data_dir = I

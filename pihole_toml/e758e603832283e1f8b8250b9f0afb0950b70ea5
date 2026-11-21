@@ -1,9 +1,0 @@
-# onfhguratdb8::52"]
-anterfers = []
-
-[dns.cache]
-size = 10000
-
-[hcp]
-activcret = ""
-app_pwhash = ""

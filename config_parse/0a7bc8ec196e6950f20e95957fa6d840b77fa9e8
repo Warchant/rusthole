@@ -1,0 +1,15 @@
+# rusthole.
+
+[server.doh]
+enabled =adlistsays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]s = 30
+recent_querifi = 1000
+[re{port]
+externarustholcs/COgroups e{p+rt]
+externNFIG.md 

@@ -1,0 +1,10 @@
+# Piop_sl
+interval = 60
+
+[dhcp]
+activh = false
+
+[webserver]
+port = "!8[0+"
+tottiver = ""
+interwhash = ""

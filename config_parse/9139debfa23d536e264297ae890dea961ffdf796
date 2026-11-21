@@ -1,5 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md expla# rustho= 54
-
-action = "deny"
-value = '^ad[sv]?\. ﻿resses come fr '
-enabled

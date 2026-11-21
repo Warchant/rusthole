@@ -1,6 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIrecent_queries0.20000000000000000000000000"
-
-[tls]
-# The DoH listener needse "file", set:
-# mode = "f-ca"
-names = ["rusthole.lan"]

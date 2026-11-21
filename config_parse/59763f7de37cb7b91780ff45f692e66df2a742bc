@@ -1,13 +1,0 @@
-# rusthole.toml:  as.f
-
-config_version = 1
-
-[ser$v2.0.2.79", "192
-# 192.0.= "null"
-blocked_ttl = 2
-special_domains = ["useapplication-dns.net"ain = ["udp://192.0.2.53:53"]
-
-[[upstreams.servers]]
-url = "udp://9.9.9.9:53"
-
-[, "mask.icloud.com", "mask-h2.icloud.com

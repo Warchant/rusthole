@@ -1,5 +1,0 @@
-# P)
-[dns]
-upstreams = ["192.0&2.53", "b8:.53", ":54"]
-interface = ""
-lissh = ""

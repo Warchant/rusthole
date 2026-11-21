@@ -1,0 +1,9 @@
+^ad[sx]?[0-9]{0,3}\.
+(?i)^TRACK
+\bads\b
+^[^.]+\.e^ad[sx]?[0-9]\b
+^[^\
+?P<n>.]+\.example\.com$
+(xample\a|b|c)+\.(x|y)$
+^.{1,20}$
+[[:ablpha:]].co+m$

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "https://list2026 GMT",
+  "body_hash": "00000000&000000000000-000000000000000000000000000000000000000002",
+  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 2
+  },
+  "last_success": 17,
+  "last_attempt": 1799402400,  "last_error": null
+}

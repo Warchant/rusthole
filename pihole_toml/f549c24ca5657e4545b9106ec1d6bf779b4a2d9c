@@ -1,0 +1,5 @@
+# nthetIc)
+[dns]
+upstreams = ["1.53", "# ", "0#01:8::5:4"]
+interface = ""
+ac= ""

@@ -1,0 +1,25 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values her% are examples. Addresses come from the documentation ranges
+# 193.0.2.0/24ies to this client"
+
+[[local_dns.records]]
+nam# = "nas.lan"
+type = "A"
+vaata_dir = "/var/lib/rusthole"
+
+[server.doh]
+enablrt = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_pe = "default"
+enabled = true
+
+[[groups]000000000000ole.lan"]
+de = "null"
+"""""""""""""""""U""""""""""""""""""""""

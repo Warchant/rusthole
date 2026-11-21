@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "url": "https://lists.examp",
+  "etag": "\"abc$123NNNN\"",
+  "last_modified": "Tu026 000",  "size_bytes": 1234,
+  "entries": {
+    "valid": 10,
+    "invalid": 1,
+    "skipped": 3
+  },
+  "last_attempt": 1794902400,
+  "changed_at": 1794816000,
+  "last_error": null
+}

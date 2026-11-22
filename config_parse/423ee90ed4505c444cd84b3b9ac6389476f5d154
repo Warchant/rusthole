@@ -1,6 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md api_tokens]]
-name = "monitoring"
-hash = "sha2000000"
-
-[tls]
-# The DoH listener# ce"]

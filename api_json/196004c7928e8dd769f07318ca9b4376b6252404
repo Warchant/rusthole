@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\@.)ds\\x?P<e come*come", "groups": [0]}

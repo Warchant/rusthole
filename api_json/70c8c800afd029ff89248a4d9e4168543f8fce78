@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "V|(\\@.)ds\\\\.com&", "groups": [5]}

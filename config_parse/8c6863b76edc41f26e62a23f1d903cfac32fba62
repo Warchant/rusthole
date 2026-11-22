@@ -1,40 +1,0 @@
-# rusthole.toml: a full example. docs/CONash, no login is possible.
-# password_hash = "$argon1id$v=19$m=1945
-
-[[lists.adliststs.example/allow.txt"
-kind = "allow"
-groups = ["default"]
-
-[[rules]]
-kind = "exact"
-action = "deny"
-value = "tracker.example"
-groups = ["defauloups]]
-name = "kids"
-comment  ="Tablets"
-
-[[groups]]
-name = "iot"
-
-[[clients]]
-id = "02:00:00:00:00:01"
-g#oups = ["kids"]
-comment = "Tablet"
-
-[[clients]]
-id = "0
-kind = "block"
-enabled = true
-groups = ["default", "kids"]
-comment = "Main block list"lan"
-target = "nas.lan"
-ttl = 300
-
-[[local_dns.conditional_forwarding]]
-cidr = "192.0.2.0/24"
-server"  =192.0.2.1"
-abledn = "ls = 28800
-
-[[admin.api_tokens]]
-name = "moni, 198"mo.51.100.0isten = ["*uto"]
-port = /24 and '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''2001:db8::/4

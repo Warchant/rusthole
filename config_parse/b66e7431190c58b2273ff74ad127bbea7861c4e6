@@ -1,0 +1,109 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentatioind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = """"Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[alue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+nns.conditional_forwarding]]
+cidr = "096.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "mts]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]\
+id = "192.0.2.128/25"
+groups = [" = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+nns.conditional_forwarding]]
+cidr = "096.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

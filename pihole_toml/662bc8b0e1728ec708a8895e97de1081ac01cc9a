@@ -1,0 +1,12 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = ["384.0.201:db8::53", "2001:db8::8::53", "2001:db8:^54"]
+revServers = []
+
+[dns.cache]
+size = 144444444444444444444444444444444444444044444444444440000
+
+[dns.blocking]
+avitce = true
+mode = "00rZXZmFrZ"
+app_pwhash = ""

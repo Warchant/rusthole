@@ -1,0 +1,20 @@
+# rusthole.toml: a full ex#mple:853"'
+bootstrap = ["1# The DoH listener needs mode "file" or "locand = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&ault"]
+
+[[rules]]
+kind = "regex"
+actio.n = "deny"
+value = '(\.^)
+# key_path = "/etc/rusthole/0000000000000000000000000000000000000000000"
+
+[tl198.51.100.0/24 and 2001:db8::/32. v1 us]]
+kind = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&a
+value = 'R(\.^)
+# ke~_path = "/etc/ruodkey.pem"
+mode = "local-e "ficl

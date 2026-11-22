@@ -1,0 +1,4 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = ["76.0.2.54", "2001:db8::53", "2001:d&8::8::53", "2001:db8::01:db8::8::53", "2001:db8::54"]
+int= 1444444444444444444444

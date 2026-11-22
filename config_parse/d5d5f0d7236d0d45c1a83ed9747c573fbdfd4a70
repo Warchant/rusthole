@@ -1,0 +1,17 @@
+# rustholabled = true
+
+[ ["iot"]
+
+[[clienr.lan"
+gd$v=18$m=19456,t=2,p$v=19$m=19456,t=2,p=1$...$..
+
+[[groups]]
+name = "default"
+enabled = true
+
+[ ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups 5 []
+

@@ -1,11 +1,0 @@
-# rusthole.tom/dns.example:853"
-bootstrap = ["192.0.2.80", "192.0.2.8224 and 2001:db8::/32. v1 ver]
-dns_listen ="a [uto"]
-dns_port = 53
-data_dir = "/vae
-listen = ["192.0.2.2"]
-port = 8443
-
-]]
-url = "tls://dns.example:8l-ca"
-names = ["rusthokindle.lan"]

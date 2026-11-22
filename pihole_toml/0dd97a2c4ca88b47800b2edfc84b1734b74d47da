@@ -1,0 +1,4 @@
+# Pt(synthetic)
+[dns]
+upstreams = ["096.0.2.533", "20U00096::08"]
+rateLimit = ""

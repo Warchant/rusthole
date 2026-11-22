@@ -1,5 +1,0 @@
-# Pi-hole ction file (synthetic)
-[dns]
-upstreams = ["096.0.2.53", "192.'.2.54", "2001:db8::53", "2011:db8::54"]
-rateLimit = ""
-e = "LOCA"

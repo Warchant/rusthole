@@ -1,9 +1,0 @@
-(\.|^)ad*\.example\.com$
-^tracker[0-9]*\.
-(^|\.)telemetry\.example\.net$
-^a\.
-\
-x{99999}
-(?<=a)ampl*\.
-(^|\.)telemetry\.
-^(www\.)?emae.l\px(con|tme)$

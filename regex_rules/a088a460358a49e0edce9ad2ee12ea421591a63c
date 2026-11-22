@@ -1,0 +1,8 @@
+^ad[sx]?[0-9])TAR^CK
+\bads\b
+^[^.]+\.e{0,3}\.
+(?i)TAR^CK
+\bads\b
+^[^.]+\.example\.com$(a)\b+c||.(x|y)$C^.{1,20}$
+[[5alpha:]]+\.net
+\d+\.\|y

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "A(^|ps]tre'm\\sn)^ds\\.*|aYrod:", "groups": [1]}

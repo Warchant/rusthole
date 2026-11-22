@@ -1,0 +1,37 @@
+# rustho01:duto"]
+port = 0192.0.2.53:53"
+
+[[upstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[blocking]
+enabl" = true
+mode = "null"
+blocked_ttlresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+l =ru "httpskind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|bdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[																										[groups]]
+namddddddtch# rustho01:db8::ten = ["auto"]
+port = 0ddddddddddddddddulocal veZ= 

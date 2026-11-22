@@ -1,0 +1,78 @@
+# rusthole.toml: a full exexamples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lyb/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+p = "Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[grouts]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iid = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value="  192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.l/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthAle.lan"]

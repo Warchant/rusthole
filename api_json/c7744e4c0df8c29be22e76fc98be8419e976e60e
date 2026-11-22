@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\.)(^|\\ppppppppppppppppppppppppppppppppppppppppppppppppppppppppp(^|\\.)(^|\\pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp.)^^^^^^^^^^^^^^^^^^^^^^^^?^^^^^ppppp.)^^^^^^^^^^^^^^^^^^^^^^^^?^^^^^^^^^^^^^", "groups": [1]}

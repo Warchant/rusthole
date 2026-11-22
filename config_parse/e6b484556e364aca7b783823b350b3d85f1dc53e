@@ -1,0 +1,28 @@
+# rusthole.
+
+[server.doh]
+enabled = fal(se
+listen = ["auto"]
+port = 443
+
+[ser(erdadlistsays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_int]
+port = 443
+
+[ser(erdadlistsays = 30
+recent_queries = 100es = 1000
+
+[re{port]
+externarusthole"
+
+[server.doh]
+ example. ]
+id = "printer.lan"
+docs/COgroups e{port]
+externNFIG.md 

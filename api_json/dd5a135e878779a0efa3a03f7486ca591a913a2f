@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|ps.@ſ.exen)adms\\.example\\/com$:", "groups": [1]}

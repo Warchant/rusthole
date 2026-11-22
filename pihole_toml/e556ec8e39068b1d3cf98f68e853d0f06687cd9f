@@ -1,9 +1,0 @@
-# Pi-hole con"""uratio.aache]
-size = 10000
-
-[dns.blocking]
-actrval = 60
-
-[dh2p]
-aggggport = "80o,443os,[::]:8t=32$ZmFrZXlaGFzaA=="
-totp_se= ""

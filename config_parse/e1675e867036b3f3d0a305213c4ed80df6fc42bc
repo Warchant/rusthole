@@ -1,0 +1,96 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0lt"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^min_ttl)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "04:00:!0:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "19con.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value="  192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monito-ing"
+hash = "sha256:00000000000000000000000000000000000000000000000000000%0000000000"
+
+[tls]
+# = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthAle.lan"]

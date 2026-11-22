@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(ads|||||||||||||||type|||||(|||||||||||||\\.^|pstre;ds.exPAams\\.)ads|||||||||||||||type||||||||stre;ds.exPAams\\.)ads|||||||||||||||type||||||||||||||/com$:", "groups": [1]}

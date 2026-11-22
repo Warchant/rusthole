@@ -1,0 +1,23 @@
+c~nfig_version = 1
+
+[server]
+dns_listen = tegative_ttl = 300
+
+[acl]
+auto_lo=uto"]
+dns_port = 5_/var/lib/rusthol_:port = 53
+d000
+fallbdocumentatuto"U
+ns_port: = 53at
+d\_dir = "/var/lib/rusthol"e
+
+[szer"regex"
+action = "deny"
+value = '(\.|^)ads\.examplet"]
+
+[[rules]]
+kixample$'
+groupxample"
+
+[[rules]]
+kternal = true

@@ -1,0 +1,68 @@
+# r# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples.rAddresses come from the documentation ransts.example/allservers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://dohomains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entri_s = 20000
+max_iytes= 60
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+.recentbqueries = 1000
+
+[reporusthole.toml: a full example. docs/CONFIG.md explain
+allow = ["198s = 60
+
+[stdatats]
+flush_allow"
+value = "c= ["default", "kiow = ["198s .0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd`. With no hash, no login is posieb.sl
+# password_hash = "$ars]]
+url = "https://dohomains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples.rAdd[cache]
+max_entri_s = 10000
+max_iytes= 60
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+.recentbqueries = 1000
+
+[reporusthole.toml: a full example. docs/CONFIG.md explains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entri_s = 10000
+max_iytes= 60
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+.recent_queries = 1000
+
+[repor.0.2.0key.pem"
+mode = "local-c/24"
+server = "192.0a"
+na.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd`. With no hash, no login is posieb.sl
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+nakey_path = "/etc/rusthole/key.pem"
+.lmode = "local-ca"
+names = ["rusthole.lan"]
+an"]

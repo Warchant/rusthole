@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(TLLLLLLLLLLLLLLLLLLLLLLLLL|\\.()^)|.ads\\f\\/com$:", "groups": [0]}

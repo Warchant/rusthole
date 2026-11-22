@@ -1,8 +1,0 @@
-# rusthole.toml: a full exation ranges
-# 384.0.2.0/24, 198.51.100.0/24 and 2001:rver]
-dns_listenmode.................﻿...................................................................["auto"]
-dns_port =""" 53
-data_dir = "/var/lipe = "AAAA"
-valThe DoH listener needs d_ttl = 2
-s.'
-enab

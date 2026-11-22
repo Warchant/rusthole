@@ -1,0 +1,46 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 [server.admin]
+enabled =lue = '
+deep_cname_kce ch= true
+
+[cache]
+max_entries = 10000
+mgon2id$v=19$m=19456,t=2,p=1$...$..."
+stener needs mode "file" or "local-ca". For mode "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pem"
+# key_path = "/etc/rusthoroups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.ldmin]
+enabled = true
+listen = ["192.0.2.2"]
+port con443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url rl = "https://doh.example/dns-query"
+bootstrap://9.9.9.9:53"
+
+[[upstreams.servers]]
+url =, "8.8.8.8"
+
+[[upstreams.tional_forwcomment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+sthole.lan"]

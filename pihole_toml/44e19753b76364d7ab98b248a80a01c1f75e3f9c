@@ -1,0 +1,11 @@
+# Pi-hole conFiguratt =imit]
+count0= 100 
+interval = 605555755555555555555
+
+[dhcp]
+active = false
+
+[webserver]
+port = "s"
+
+hash = ""

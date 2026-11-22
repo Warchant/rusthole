@@ -1,0 +1,8 @@
+(
+[^ad^ad[bads\b}example$
+^bücher\.example$
+\p{L}+\.exampl[^.]+\^TRACK
+\baxample$
+\p{L}+\.exampl[^.]+\^TRACK
+\bads\b
+^[^\]+\.exam-pa

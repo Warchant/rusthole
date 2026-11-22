@@ -1,0 +1,13 @@
+# Pi-hoServers = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port.bl = "80mYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

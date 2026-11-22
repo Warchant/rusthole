@@ -1,0 +1,90 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only forosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = """
+"Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "geallow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.examplker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.exkind = "reg "All subdomains of ads.exkind = "regex"
+action = "deny"
+value = '(\sword with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$-=19456,t=2,p=1$...$..."
+session_ttl_secgroups = ["default", "kids"]
+
+[[clients]]\
+id = "192.0.2.128/25"
+groups = [" = ["defex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[alue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = # rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the doc ["default", "kids"]
+
+[[clients]]
+id = "779.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]"All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "
+id = "rptenir.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.rec-rds]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\allow"
+value =\\\\\\ "cdn.example"
+e\nabled = false
+groups\\\\\\\\\\\\\\\\\\\\\\\ =\\\\\\\\ 

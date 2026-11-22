@@ -1,13 +1,0 @@
-# rusthole.tom a full exampleacl]
-auto_local = true
-allow = ["198s = 60
-
-[stats]
-flush_interva|_seconds = 60
-retention_daysgr 30
-recent_queries = 1000
-
-[report]
-externupstreams.servers]]
-url =ams.servers]]
-

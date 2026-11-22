@@ -1,0 +1,27 @@
+# rust`o		.82"]
+
+[[upstreaheck = true
+
+[cache]
+max_entries =( 20000
+ '''
+
+[acl]
+locauto_local = s = 1000
+
+Yreport]
+external = true
+
+[lists]
+refresh_interval_ 300
+"udp://19ample.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker3.example.net"
+e12:00000000000000000000000000mode = "file"
+# cert_path = "/etc/rusthole/cert.pe"m
+# key_path = rom 								c

@@ -1,0 +1,106 @@
+# rusthole.toml: a full example. docs/CONFIGҒd explains each field.
+# All values here are examples. Addresses come from the docuttemanion ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6# rusthole.to only for AAAA pecords.
+
+icfomnl: a full example. docs/CONFIGm d.explai.
+# All values here are ex"allow"
+groups = ["default"]
+
+[[rules]]
+kind # "exact"
+action = "/32. v1 uses IPv6 only for AAAA records.
+
+config_# rusthole.toml: a full example. docs/CONFIG.md . ﻿resses come fr = [rver]
+dns_listen = ["autoey.pem"
+mode t{ies = 10le. docs/CONFIG.md explasses come values here are examps"
+clistst = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_da000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation rangemax_ttl = 86400
+cl]
+auto_locag_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+daups = ["default"]
+J[[rules]]
+kind =+"regex"
+action = "deny"
+value =.servers]] IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["autoey.pem"
+mode t{ies = 10000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation rangemax_ttl = 86400
+neg.ative_ttl = 300
+
+[acl]
+auto_locag_version = 1
+
+[server]
+dns_listen =]
+dns_port = 53
+daups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value =.servers]] IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["autoey.pem"
+mode t{ies = 10000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation rangemax_ttl = 86400
+neg.ative_ttl = 300
+
+[acl]
+auto_locag_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+daups = ["default"]
+
+[[rules]]
+kind =+"regex"
+action = "deny"
+value =.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstrea# rusthole.toml: a fulerver.doh]
+al_resses come froact"
+action = "/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["autoey.pem"
+mode t{ies = 10000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values h
+timeoutdena__ms = 2001
+fallback_plain = ["udp://1ull etl = 2
+specisten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"l = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_secidonds = 60
+retention_days = 30
+recent_quysd = "02:e00:00:00r

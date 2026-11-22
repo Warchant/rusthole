@@ -1,9 +1,0 @@
-# Pi-hofalse
-
-[webserver]
-port = "80o,443﻿os,[::]:88o,[::]:﻿os"
-
-[webserver.api]
-pwhash = "$BAL2$UmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYwtlaGFzaA=="
-totp_secret = ""
-a = ""

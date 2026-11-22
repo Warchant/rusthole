@@ -1,0 +1,12 @@
+# Pi-ration file (syntheticA)
+[dns]
+usreams = [":54"]
+interface = ""
+listeningMode = "LOžL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+reval = 60
+ecret = ""
+app_pwhash = ""

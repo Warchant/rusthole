@@ -1,0 +1,7 @@
+(\.|^)adsom$
+^tracker[0-9]*\.
+(^|\.)tele\.example\.com$
+^tracke0-9]*\.
+(^|\.)tele\.r[0-9]*\.
+(^|\.)telemevry\.ampaxen$
+^(www\.)?example\.(com|net)$

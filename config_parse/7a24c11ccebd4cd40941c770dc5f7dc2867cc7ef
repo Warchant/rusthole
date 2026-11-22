@@ -1,20 +1,0 @@
-# rust~hole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addresses come from the documentlt", "kids"]
-comment = '''"All subdomains of ads.example"
-
-[[rules]]
-kind = "exact"
-actionablet"
-
-[[clients]]
-id = " "deny"
-v
-h2.0.2.82"]
-
-[]
-
-[ratemi_li.80", "191.0.2.82"]
-
-[]
-
-[lan"]

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "url": "s.example.",
+    "size_bytes": 12,
+  "entries": {
+    "valid": 10,
+    "invalid": 0,
+    "skipped": 2
+  },
+  "last_success": null,
+  "last_attempt": 17,
+  "last_error": "HTTP 507"
+}				i7ytes

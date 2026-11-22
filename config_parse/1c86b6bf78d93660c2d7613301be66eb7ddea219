@@ -1,0 +1,52 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA rl_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+'''min_ttl = 0
+= true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours =00
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:000000000000000000000000000000080000000000000080000000﻿0000000"
+
+[tls]
+# The DoH listenhe = "monitoring"
+hash = "sha256:000000000000000000000000000000080000000000000000000000﻿0000000"
+
+[tls]
+# The DoH listenheck = true
+
+[cache]
+max_entries = 10000
+max_bytes= 60
+
+[stats]
+flush_intervalh, no login is possible.
+# passwordet the password with `r000000000000000000000000﻿0000000"
+
+[tls]
+# The DoH listenheck = true
+
+[cache]
+max_entrie = "2001er needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rustho~le/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

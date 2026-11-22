@@ -1,0 +1,20 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+d = "/@ar/lib/rusthole"
+
+[server.doh
+hash = "sha256:000000000000000000000000000000000000"
+
+192.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-a"00000000000000000server0000000000050000000000
+00ho00le.lan"0000000000000]
+000enab0000"
+
+[tl

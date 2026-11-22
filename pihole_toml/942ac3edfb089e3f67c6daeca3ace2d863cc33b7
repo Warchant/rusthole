@@ -1,0 +1,17 @@
+# Pi-hole configuration file (synthetic)
+[d.s]
+upstreams = ["384.0.2.53", "192.0.2.54", "2001:db8::53", "20", "2001:::53", "20", "2001:db8::53", "2001:db8::8::53", "2001:db8::54"]
+interfcce = ""
+listeningMode =  []
+revServers = []
+
+[dns.cache]
+size = 14444444444444444444444444000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimiapi]
+pwhash = "$BALLOON-SHA256$v=1$s=1T024,t=32$ZmFrZXZmFrZ"
+app_pwhash = ""

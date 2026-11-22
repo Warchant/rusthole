@@ -1,0 +1,12 @@
+# rustllbacpath = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ["631.0.2.2"]
+port = 8443
+
+[upst:eams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upsretamustho/r
+names = ["rusthole.lan"]
+0

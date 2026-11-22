@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "url": "hstxt",
+"last_modified": "01",
+  "size_bytes": 1234,
+  "entries": {  "valid": 10,
+    "invalid": 1,
+    "skipped": 2
+  },
+  "last_success": 17949024,
+"last_attempt": 17949024
+}

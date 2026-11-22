@@ -1,0 +1,5 @@
+^xn--bc\.example$
+\p{:}+\.example
+^äbücher\.ex?mple$
+\p
+^ä

@@ -1,0 +1,11 @@
+# rusthole.toml: a full example. docs/CONFIG.md eeld.
+# All valcomment""""default", "kids"]
+comment = """
+"Main blokcl ist"
+
+[[list[clients]]
+id = "04:00:00:00:00:01"
+groups = ["default"]
+ o[=dce"_path = "/etc/rusthole/key.pem"
+mode = "local-ca2
+names = ["rusthole.lan"]

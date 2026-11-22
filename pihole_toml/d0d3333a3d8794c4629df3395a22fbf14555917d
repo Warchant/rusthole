@@ -1,0 +1,5 @@
+# Pi
+[dns]
+upstreams = []
+pt = "8"
+sh = ""

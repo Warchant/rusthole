@@ -1,0 +1,24 @@
+# rusthole.CONFIG.md explains each field.
+# All 
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dnta_dir = "/var/lib/rusthole"
+
+[serverr.admin]
+enabled = true
+
+[admin]
+# with `rusthole passwd`. Wie passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.ap-i_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

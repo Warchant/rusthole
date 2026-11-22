@@ -1,5 +1,0 @@
-# Piguration)file (syntheti)
-[dns]
-upstreams = ["192.0.2.53", "192.0.2.54", ]
-
-pwhash = ""

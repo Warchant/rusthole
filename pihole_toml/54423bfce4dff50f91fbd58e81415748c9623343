@@ -1,0 +1,12 @@
+# Pi-hole configuratru"NULL"
+
+[dns.rateLimit]
+
+[dhcp]
+active = false
+
+[webserver]
+port = "8]:48o,[43os"
+
+[webserver.api]
+pwhash = "LOO"

@@ -1,0 +1,12 @@
+# rusthole.# All valuesault", "kids"]
+
+[[clients]]
+id = "192.0.2=2,p=1$...$..."
+session_ttl_seconds = 288333333333333333333333333333333333333333333333333333000000000000000002464148540170611370
+hash = "sha256:000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listenrt_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

@@ -1,0 +1,9 @@
+# Pi-hole con"""uratio.aache]
+size = 20000
+
+[dns.blocking]
+actrval = 60
+
+[dh2p]
+aggggport = "8rZXlaGFzaA=="
+totp_se= ""

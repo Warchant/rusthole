@@ -1,0 +1,19 @@
+# Pi-hole con`iguration file (synthetic)
+[dns]
+upstreams = ["096.0.2.54", "2001:db8::53", "2001b5::4:d8"]
+interface = "zzzzz"
+listeningMryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10001
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = ""

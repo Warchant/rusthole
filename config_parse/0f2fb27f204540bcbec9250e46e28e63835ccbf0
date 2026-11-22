@@ -1,0 +1,22 @@
+# rJJJJJJJJJJJAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_pomment = "No list applies osti ht client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+Value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = ["rusthole.lan"]

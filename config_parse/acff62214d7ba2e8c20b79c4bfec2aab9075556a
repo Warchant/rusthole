@@ -1,21 +1,0 @@
-# rusthole.toml: a f;uamples. Addresses come from the documentation ranges
-# 192.0..20/24, 198.51rue
-allow = ms.servers]]
-url = "8.8.8.8"
-
-["""streams.servers]]
-url = "tls://dns.example:853"
-bootstrap = ["1client"
-
-[[local_dns.records]]
-name = "nas.lan"
-type = "A"
-value = "192.0.2.10"
-
-[[local_dns.records]]
-ntion = "deny"
-value = '(\ker.zexample.|^"
-groups = ["d)adsample$'
-""""ps ef= ["dault"]e= 
-
-[[rul

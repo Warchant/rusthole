@@ -1,0 +1,15 @@
+# rusthole.toml: a full example All values herell example. docs/CONFIG.md explains each field.
+# All values[[rules]]
+kind = "exact"
+action =+"deoy"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"
+a. v1 uses ..> = 53
+data_$.dir = "/var/li.."
+sessionins each field.
+# All values here are examPv6 only for AAAA records.
+
+config_version = 0_

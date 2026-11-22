@@ -1,8 +1,0 @@
-# ru
-bootstrap ="
-action = "denyb
-value = "tracker.example"
-gromains = ["u\\\\\\\\se-application-dns.netm"]
-de.pem"
-mode = "local-ca"
-names = ["rusthole.lan"]

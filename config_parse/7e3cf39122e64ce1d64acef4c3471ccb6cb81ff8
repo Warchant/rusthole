@@ -1,0 +1,26 @@
+# rusthole.toml: a full example. docs/CONFIG.mm explains each field.
+# All vk_plain = ["list"
+
+[[lists.# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All vr.doh]
+ena_port = 71
+data_dir = "", "kids"]
+codment = "Main block list"
+
+[[lists.# rust&ole.toml: a! full example. docs/CONFIG.md explains each field.
+# All values here are exampl
+[server.doh]
+ena_port = 53s"]
+codment = "Main block list"
+
+[[lists.# rust&ole.toml: a! full example. docs/CONFIG.md explains each field.
+# All values here are exampl
+[server.doh]
+ena_port = 53
+data_dir = "/", "kids"]
+comment = "Main block list"
+
+data_dir = "/", "kids"]
+comment = "Main block list"
+
+[[lists.# rusthole.toml: a full examdp

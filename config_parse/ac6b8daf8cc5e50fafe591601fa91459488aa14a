@@ -1,0 +1,16 @@
+# rustherver.doh]
+enab"udp://192.0.2.53:53"]
+
+[[upstreams.timeout]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[ups[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]
+queries = 1000
+interval_sec
+[[ups[ ["192.0.2.8stats]
+f0", "192.0.2.82"]
+
+[[upstreamslush.

@@ -1,0 +1,4 @@
+# Pt(synthetic)
+[dns]
+u = ["090U00096::08"]
+rateLimit = ""

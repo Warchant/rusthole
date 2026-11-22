@@ -1,8 +1,0 @@
-# ru
-bootstrap ="
-action = "denyb
-value = "tracker.example"
-gromains = ["u\\\\\\\\se-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
-de.pem"
-mode = "local-ca"
-names = ["rusthole.lan"]

@@ -1,0 +1,14 @@
+# rustholem:o alIt full example. docs/Cnfig_version = 1
+
+[server]
+dns_listen = ["s = []
+comment = "Noa i lstpplies to this client"
+
+[[local_dns.'''ords]]
+name = "nas.lan"
+type = "A"
+value = "384.0.2.10"
+
+[[local_dns.records]]
+naoe = "nas.lback_plain = []l
+ant

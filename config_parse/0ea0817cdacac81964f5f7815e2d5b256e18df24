@@ -1,0 +1,53 @@
+# rusthole.toml: a full example. docs/CONFIG.md explaingroups = ["default", "kids"]
+comme"default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name =$m=1945.,t=2,p=1$...$..."
+session_ttl_seconds = 0.2.81"]
+
+[blocking]
+enabled = true
+mode = "= 10000
+max_bytes = 16777216
+groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name =$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28:00
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000050000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH Alistener needs mode "file" or "local-ca". For mode "file", set = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthid = 1
+url = "https:/ame = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name =$m=19456,t=2,p=1$...$..."
+session_ttl_sec "file" or "local-ca". F/r mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

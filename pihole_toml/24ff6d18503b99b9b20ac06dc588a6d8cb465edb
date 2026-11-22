@@ -1,0 +1,9 @@
+
+[dns]
+ups = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::]:4f"
+
+[webse2ver.api]
+pwhash = "$BALLO'"

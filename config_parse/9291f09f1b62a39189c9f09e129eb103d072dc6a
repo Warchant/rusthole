@@ -1,8 +1,0 @@
-config_version = 1
-
-[server]
-dns_listen = ["auto"]
-dns_port = 53
-# rusthole.toml: a full edata_dir = "/var/lib/rusthole"
-
-[server.xample. ddoh]

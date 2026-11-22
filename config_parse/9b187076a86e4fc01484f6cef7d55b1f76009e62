@@ -1,0 +1,70 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains eacm the nd 2001:db8::/32. v1 uses IPv6 only for AAAA = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"ten = ["1 field.
+CCCCupstreams01:db8::/32. v1 uses FPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_po
+timeout_ms = 2000
+fallbdocumenxample. docs/CONFIG.md explains e = 8443
+
+[upstreamsach field.
+# Arecords.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_po
+timeout_ms = 2000
+fallbdocumenxample. docs/CONFIG.md explains e = 8443
+
+[upstreamsach fieAll va]lues here are examples. Addresses come from the d91.0.2.2"]
+port# rusthole.toml: a full example. docs/CONFIG.md explains e = 8443
+
+[upstream8444
+
+[upstreams01:db8::/32. v1 uses FPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_po
+timeout_ms = 2000
+fallbdocumenxample. docs/CONFIG.md explains e =C 8443
+
+[upstreamsach field.
+# All va][ues here are examples. Addresses come from the do
+timeout_ms = 8449
+fxample. docs/COFING.md explains e = 8443
+
+[upstreamsach field.
+# All va]luee = 8443
+
+[upstreams01:db8::/32. v1 uses FPv6 only for AAAA records.
+
+config_version = 1
+
+[server]va]lues here are examples. Addresses come from the d92.0.2.2"]
+port# rusthole.toml: a full example. docs/CONFIG.md explains e = 8443
+
+[upstreams01:db8::/32. v1 uses FPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_po
+timeout_ms = 2000
+fallbdocumenxample. docs/CONFIG.md exp3
+
+[upstreamsach field.
+# All va]lues here are examples. Addresses come from the do
+timeout_ms = 8449
+fallback_plain = ["cu

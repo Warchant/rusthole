@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^|\\.)3709551615s0000104564986240558624055.eHco.: .<dc.eHco.m$", "groups": [5]}

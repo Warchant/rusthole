@@ -1,0 +1,20 @@
+# rusthole.tomlc: a full example. docs/CONFIG.md explainsche a field.
+# All _path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ple:852"
+bootstrap!= ["192.0.2.80", "192.0.2.82"]
+
+[[upstnt{ies = 10000
+max_bytes= 60
+
+[stats]
+flush_interval_seconds = 60
+rtls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.h = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

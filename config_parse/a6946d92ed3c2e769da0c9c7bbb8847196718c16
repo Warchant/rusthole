@@ -1,0 +1,12 @@
+'''''streams.servers]]
+url = "8.8.8ootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-applices = 16777216
+min_ttl = 0
+maxal_seconds = 60
+retention_days = 30
+r''

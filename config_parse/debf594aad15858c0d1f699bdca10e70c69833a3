@@ -1,0 +1,9 @@
+# rusthole.toml: a full rvers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8eple:853"
+bootstrap = [$m=19456,t=2,p=1$...$.ms]
+timeout_ms = 2000
+fa[groups]]dn.example"
+enabled =

@@ -1,0 +1,8 @@
+# P= 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "8%o,443os,[::]:80:443osaA=="
+totp_sechash = ""

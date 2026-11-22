@@ -1,0 +1,28 @@
+# rusthole.toml: a full example. docs/2.0.2.128/25 to this client"
+
+[[local_dns.rdb8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target """= nsnal"a."
+ttl %]
+porname = "nas.lan"
+ypte = "A"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type =l "]
+port = 444
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = [udp/:/192"""2.53:53"]
+
+# rusthole.tg"
+ha[[upstreash = "shm

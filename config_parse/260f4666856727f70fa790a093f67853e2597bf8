@@ -1,0 +1,8 @@
+1"]
+
+[. v1 u*es IPv2 only for AAAt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exole.lan"]

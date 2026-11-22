@@ -1,0 +1,58 @@
+# rusthole.toml: a full session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monit0]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_daysd = "02:00:00:00ple"
+enabled = false
+groups = ["d\fault"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+coMment = "Tabletsdia.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.200000ent = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_daysd = "0e"
+enabled = false
+groups = ["d\fault"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comme"  =tnTabletsdia.lan"
+target = "nas.lan"
+ttl =
+00
+[ 3[local_dns.conditional_forwarding]] 1vers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servIPers]v6]
+u 

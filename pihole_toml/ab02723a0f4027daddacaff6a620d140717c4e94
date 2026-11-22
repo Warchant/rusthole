@@ -1,0 +1,6 @@
+# Pi-holdE = "LOCAL"
+
+[webserver.api]
+pwYhash = "$BAOOLzaA=="
+totpret = ""
+app_pwhash = "\\\\\\\\\\\f"

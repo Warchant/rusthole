@@ -1,0 +1,71 @@
+# rusthole.toml: a full example. docconfig_versionplains each field.
+## rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All valuev here are examples"]
+
+[[cata_dir = "/var/lib/rus_senterval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "b)lock" "192.0.2.0/24"
+server"  =192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=1945
+
+[[lists.adliststs.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["defauloups]]
+name = "kids"
+comment  ="Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "1
+kind = "block"
+enabled = true
+grock list"lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server"  =192.0.2.1"
+abledn = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd`. With no hash, no login is possible.
+# password_.hash = "$argon2id$v=19$m=1945
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+ghe documentation ranges
+# 192.sten = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true1$...$..."
+selan"
+
+[a.100.0isten = ["auto"]
+port = /24 and ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''2001:db8::/4

@@ -1,0 +1,48 @@
+# rusthole.toml: a full exampl01:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_porten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dn2.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rusthole passwd`. With no hash, no login is possible.
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file"local-ca". For modeem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

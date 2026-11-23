@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "SSSSSSSSS(^lpstreamc\\.)ads\\.e|aCC;|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCkkkkkkkkkkkkkkkom$:", "groups": [2]}

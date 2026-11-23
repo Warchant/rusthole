@@ -1,0 +1,11 @@
+# Pi-hole configuratio.aache]
+size = 10000
+
+[dnche]
+size = 999910000
+
+[dns.blocking]
+active = true
+mode = "a="
+totp_secret = ""
+app_pwhash = ""

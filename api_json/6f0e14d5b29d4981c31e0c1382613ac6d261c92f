@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "SSS-SSS|_S(Spstreams\\.)a;|ds\\.e|aegqrnxmple\\/com$:", "groups": [1]}

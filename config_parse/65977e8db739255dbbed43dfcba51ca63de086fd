@@ -1,0 +1,23 @@
+# rusthole.toml:m 
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[serverr.admin]
+enabled = true
+
+[admin]
+# with `rusthon3id$v=19$m=19456,t=2,p=...$..."
+session_ttl_seconds = 28800
+
+[[admin.ap-i_tokens]]
+name = "monitoring"
+hash = "sha256:000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

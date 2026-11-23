@@ -1,0 +1,80 @@
+# rusthole.toml: a full example. docs/CONFs IPv2 only fordns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled =  the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/3"
+names = [ ["192.0.2.2"]
+port = 6037
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain A ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = .88".8.8"
+
+[[upstreams.servers]]
+url
+max_ent{ies w"
+value = "cdn.s = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.i#loud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.example"etention_days "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+value = "cdn.s = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_ache]
+max_ent{ies w"sk.icloud.com" "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ie.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com",.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+co_cname_check mment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "ki																																																								x_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = '''
+
+[acl]
+auto_local = trueion = "allow"
+value = "cdn.100.0/24"]
+
+[rate_limit]
+queries = 100["use0-

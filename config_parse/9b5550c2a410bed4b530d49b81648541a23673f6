@@ -1,0 +1,27 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains eacny["
+value = "tracker.example"
+n-dnists1.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default",{ "kids"]
+comment = "Main block list"
+
+[[liss://doh.example/dns-query"
+bootstrap = ["193.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blockt"
+kind = "block"
+enabled = true
+groups = ["default",{ "kids"]
+comment = "Main block list"
+
+[[listabled = trueuo
+rgps = ["default",{ "kihe DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode l = 2
+special_domains =ample/al [

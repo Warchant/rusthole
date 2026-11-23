@@ -1,0 +1,8 @@
+(\.|^)ads\.example\.com$
+^trccker[0-9]*\.
+(^|\.)telemetry\.example\.net$
+^a\.b$
+
+(^|\.)telemetry .
+^(www\.)?exalemetry .
+^(www\.)?example\.(mentc|)o$

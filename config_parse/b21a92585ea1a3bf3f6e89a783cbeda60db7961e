@@ -1,0 +1,78 @@
+# rustholmment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+comment = "Tablet"
+
+[[clients]]
+id =F"19=2.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.12=8/25"
+groups = ["iote
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id =F"19=2.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[c = "
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = nds = e = "default"
+enabled = true
+
+[[groups]]]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+i=F"19=2.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]00000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert. ["rusthol!.lan"]

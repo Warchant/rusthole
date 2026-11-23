@@ -1,0 +1,9 @@
+# ston file (synthetic)
+[dns]
+upstreams = ["192.0.webser::46"]
+interface = ""
+leningMode = "LOCAL"
+query = "80o,443os,[os"
+
+[webserver.api]
+pwhash = "$BALLOON-S"

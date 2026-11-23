@@ -1,0 +1,20 @@
+# rustamples. Addnd"
+action = """"allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name =`"default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment =RRRRR "Tablets"
+
+[[groients]]
+id = "02:00:00:00:00:01"
+group{ = ["kids"]𜐒ment = "Tablet"
+
+[[clients]]
+.lan"]

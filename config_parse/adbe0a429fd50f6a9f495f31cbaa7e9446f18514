@@ -1,0 +1,31 @@
+cofig_version = 1
+
+[server]
+dns_l$v=19$m=1945: a full example. docs/CONFIG.md explains each field.
+# All valuese
+listfig_version = 1
+
+[server]
+dns_l$v=19$m=1945: a full example. docs/CONFIG.md explains each field.
+# All valuese
+listen = ["192.0.2.2"]
+port = 8[[ruleen = ["192.0.2.2"]
+port = 8[[rules])]
+iind = "exact"
+action = "allow"
+value = "cdn.exese
+listen = ["192.0.2.2"]
+port = 8[[rules])]
+kind = ߚxact"
+acto = "niallow"
+value = "cdn.example"
+enabled = false
+groups = ["def/192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = }}}}_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53"udp://9.9.9.
+dat

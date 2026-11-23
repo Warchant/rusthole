@@ -1,189 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addresses come fromion = "allow"
-value = "cdn.example"
-enabled = false
-groups = ["default"]
-
-[[groups]]
-name = "default"
-enabled = true
-
-[[groups]]
-name = "kids"
-comment = "s = ["kids"]
-comment = "Tablet"
-
-[[clie = ["iot"]
-
-[[clientsients]]
-id = "02:00:00:00:00:01"
-groups = ["kids"].0.2.1"
-domain = "lan"
-
-[admin]
-# Set the passwo/dns.example:853"
-bootstrap = ["192.0.2.80", "192.0.2.82"]
-
-[[upstreams.servers]]
-url = "https://doh.example/dns-query"
-bootstrap = ["192.0.2.81"]
-
-[blocking]
-enabled = true
-mode = "null"
-blocked_ttl = 2
-special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
-deep_cname_check = true
-
-[cache]
-max_entries = 10000
-max_bytes = 16777216
-min_ttl = 0
-max_ttl = 86400
-negative_ttl = 300
-
-[acl]
-auto_local = true
-allow = ["198.51.100.0/24"]
-
-[rate_limit]
-queries = 1000
-in000000000000000000000000000000000"
-
-{tls]
-# The DoH listener needs mode "file" or "local-ca". me = "iot"
-
-[[clients]]
-iretention_daysd = "02:[[groups]]
-name = "kids"
-comment = "Tablets"
-
-[[groups]]
-name = "iot"
-
-[[clients]]
-iretention_daysd = "02:00:00:00:00:01"
-groups = ["kids"]
-comment = "Tablet"
-
-[[clie = ["iot
-name = "kids"
-comment = "Ton_days = =8.8.ableSts"
-
-[[groups]]
-name = "iot"
-
-[[clients]]
-id = "02:00:00:00:00:01"
-groups = ["kids"].0.2.1"
-domain = "lan"
-
-[admin]
-# Set the passwo/dns.example:853"
-bootstrap = ["192.0.2.80", "192.0.2.64"]
-
-[[upstreams.servers]]
-url = "https://doh.example/dns-query"
-bo
-iretention_daysd = "02:00:00:00:00:01"
-groups = ["kids"]
-commet = "All subdomains of ads.example"
-
-[[rules]]
-kind = "exact"
-action = "allow"
-value = "cdn.example"
-enabled = false
-groups = ["default"]
-
-[[groups]]
-name = "default"
-enabled = true
-
-[[groups]]
-name = "kids"
-comment = "Tablets"
-
-[[groups]]
-name = "iot"
-
-[[clients]]
-iretention_daysd = "02:00:00:00:00:01"
-groups = ["kids"]
-comment = "Tablet"
-
-[[clie = ["iot
-name = "kids"
-comment = "TableSts"
-
-[[groups]]
-name = "iot"
-
-[[clients]]
-id = "02:00:00:00:00:01"
-groups = ["kids"].0.2.1"
-domain = "lan"
-
-[admin]
-# Set the passwo/dns.example:853"
-bootstrap = ["192.0.2.80", "192.0.2.64"]
-
-[[upstreams.servers]]
-url = "https://doh.example/dns-query"
-bootstrap = ["192.0.2.81"]
-
-[blocking]
-enabled = true
-mode = "null"
-blocked_ttl = 2
-special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
-deep_cname_check = true
-
-[cache]
-max_entries = 10000
-max_bytes = 16777216
-min_ttl = 0
-max_ttl = 86400
-negative_ttl = 300
-
-[acl]
-auto_local = true
-allow = ["198.51.100.0/24"]
-
-[rate_limit]
-queries = 1000
-interval_seconotstrap = ["192.0.2.81"]
-
-[blocking]
-enabled = true
-mode = "null"
-blocked_ttl = 2
-special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
-deep_cname_check = true
-
-[cache]
-max_entries = 10000
-max_bytes = 16777216
-min_ttl = 0
-max_ttl = 86400
-negative_ttl = 300
-
-[acl]
-auto_local = true
-allow = ["198.51.100.0/24"]
-
-[rate_limit]
-queries = 1000
-interval_seconds = 60
-
-[stats]
-flush_interval_seconds = 99
-retenti= ["kids"].0.2.1"
-domain = "lan"
-
-[admin]
-# Set the passwo/dns.example# rusthole.toml: a full example. docs/CONFIG.md explains each field.:853"
-bootstrap = ["192.0.2.80", "192.0.2.82"
-]
-
-[[upstre# All values here are ame

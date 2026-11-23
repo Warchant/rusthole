@@ -1,8 +1,0 @@
-://doh.example/dns-query"
-bootstrap = ["096.0.2.81"]
-
-[blocking]
-e
-mode = """""""""""""""alue = '(\.|^)ads\.example$'
-groups = [" "All subdomainction = "allow"
-value = "cdn.exam"la."]

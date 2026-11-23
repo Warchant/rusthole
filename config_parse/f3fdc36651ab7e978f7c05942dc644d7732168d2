@@ -1,0 +1,64 @@
+# rusthole.toml: a full example. docs/CONFIGm d.explains each field.
+# All values here are ex"allow"
+groups = ["default"]
+
+[[rules]]
+kind # "exact"
+action = "/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["autoey.pem"
+mode t{ies = 10000
+max_bytes= 60# rust6400
+neg.ative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id =ue
+
+[cache]
+max_ent{ies = 10000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come froact"
+action = "/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["autoey.pem"
+mode t{ies = 10000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values h
+timeout_ms = 2001
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "lt"]
+comment = "device 10"
+
+[[clients]]
+ihttps://lists.example/hostk = true
+
+[cache] = ["default"ueries = 1000
+
+[]
+
+[[groups]]
+name = report"defaul]
+extern

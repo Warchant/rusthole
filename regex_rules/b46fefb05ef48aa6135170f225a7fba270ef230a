@@ -1,8 +1,0 @@
-^xn--va\*example$
---^xva\.examplen-cher-kva\.example$
-^.example$
-^bücher\.example$
-\p{L}+\.example
-^äbücher\.ex?mple$
-\pL}+\.exampl$
-^-bcher-kva\.e

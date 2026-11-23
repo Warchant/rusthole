@@ -1,8 +1,0 @@
-# ru
-bootstrap ="
-action = "denyb
-value = "tracker.example"
-gromains = ["u\\\\\\\\se-anet", "mask.icloud.com", "mblockiask-h2.icloud.com"]
-de.pem"
-mode = "local-ca"
-names = ["rusthn"]

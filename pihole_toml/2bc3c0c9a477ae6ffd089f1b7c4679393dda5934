@@ -1,0 +1,18 @@
+# Piole configurans.cache]
+size = 14444444444444444444444444444444444444444444444444444444444444444444444044444444444440000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+
+[webserver.api]
+pwhash = "$BALLOON-SHA256$v=1$sXNhbHRmYWtlc2FsdA==$ZmFrZ"
+app_pwhash = ""

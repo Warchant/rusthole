@@ -1,0 +1,117 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rustholusthole.tomstats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[lists]
+refresh_i443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+?
+[[upstreams.servers]]
+url =_local = true
+allnw = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+{lists]
+refresh_interval_hours = 24
+
+[[lists.adli*sts]]
+iists.adlists]]
+id = 1
+url = "https://lists1.example/hosts.txt"
+kind = "block"
+enabled = true
+grou["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker2.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 4"
+
+[[listgs.adlisrs]]
+id = 5
+}rl = "https://lists5.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 6
+url = "https://lists6.example/hosts.txt"
+kind = "block"
+enable[lioups 
+var/lib/rustholusthole.tomstats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[lists]
+refresh_i443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+?
+[[upstreams.servers]]
+url =_local = true
+allow = ["1# rusthop://192.0.2.?53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.# rusthole.toml: a full exa98s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+{lists]
+refresh_interval_hou2.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 4"
+
+[[listgs.adlisrs]]
+id = 5
+}rl = "https://lists5.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 6
+url = "https://lists6.examplmple. docs/CONFIG.e/hosts.txt"
+kind = "block"
+enabled = true
+groupsmd expla

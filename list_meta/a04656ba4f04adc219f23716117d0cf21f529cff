@@ -1,11 +1,0 @@
-{
-  "version": 1,
-	  "url": "SSSxa.txt",
-  "etag": "\"a000000000000000000001",
-  "size_bytes": 134,
-  "entries": {
-    "valid": 10, "invalid": 2,
-    "skipped": 2 },
-  "changed_at": 816000,
-  "last_error": null
-}

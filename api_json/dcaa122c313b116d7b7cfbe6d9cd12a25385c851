@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(ats|||||||||||,||type|||||||s\\.)ad|$:", "groups": [0]}

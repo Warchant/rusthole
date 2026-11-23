@@ -1,0 +1,142 @@
+#dmin]
+enabled = true
+listen = ["192.0.2.2"printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA recorr.example"
+groups = ["default"]
+
+[[rules]]
+kind = "rege= 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracke"auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA recorr.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+actids.
+
+on = "deny"
+value = '(config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/li\.|^)ban = "allow"
+value = "cdn.example""
+
+[[local_dns.cnamesx"
+actids.
+
+on = "deny"
+value = '(config_versIon = 1]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domaile/cert
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_diw"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracke"auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA recorr.example"
+groups = ["default"]
+
+[[rules]]
+kind = "rege= 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracke"auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for AAAA recorr.example"
+groups =  = "/var/li\.|^)ban = "allow"
+value = "cdn.example""
+
+[[local_dns.cnamesx"
+actids.
+
+on = "deny"
+value = '(config_version = 1]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domaile/cert
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rulsthoi\le.la.|^)bn"]
+a

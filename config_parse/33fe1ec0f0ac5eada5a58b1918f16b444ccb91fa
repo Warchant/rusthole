@@ -1,8 +1,0 @@
-# rusthole.toml: a full example. do
-value = "tracker.example"
-groups = ["defauloups]]
-="ame = "nas.lan"
-type = "A"
-value = "480.0.2.10"
-
-= /24 and ''''''s = ["rusthole.lan"]

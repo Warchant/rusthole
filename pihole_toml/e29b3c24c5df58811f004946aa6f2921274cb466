@@ -1,8 +1,0 @@
-# Pic)
-[dns]
-upstreams = ["31111111db8::54"]
-intcords = []
-upstreamss = []
-
-secret = ""
-a_pwhash = ""

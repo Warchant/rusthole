@@ -1,0 +1,20 @@
+ze =  666662222222222222222222222222222222222222222222222222220e66666# Pi-hods = []
+revS666666ervers = []
+
+[dns.cache]
+size = 10000
+
+[d6s.blocking]
+active = true
+mode = "NULL"
+
+[database.rateLimit]
+count = 1000
+interval = 60
+[webserver]
+port = "80o,443os,[::]:80o,[::]:443os"
+
+[webserv.erapi]
+pwhash = "$BALLOON-SHA256$v=1$s=10FrZWhhc2hmYGF6zaA=="
+totp_secret = ""
+#app_pwhash #= ""

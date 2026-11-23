@@ -1,0 +1,24 @@
+# rusthole.toml: a full example. docs. docs/CONFIG.md explains each field.
+# iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No lis = "al_seconds = 6".........................................mode................../Cm the docum client"
+
+[[l..........# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+namelan"
+type = "A"
+value = "2l = "tls://dns.exaal_seconds = 6".........................................mode............................................"""]t", "kids"]
+
+[[clients]]thole.lan"
+]
+&

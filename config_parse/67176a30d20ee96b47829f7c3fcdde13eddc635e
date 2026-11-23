@@ -1,0 +1,43 @@
+# rusthole.toml: a full example. docs/CONFIG.md expl and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version =+++++++++++++++++++++++++++++++++++++++++++++++++++ ["default"]
+
+[[rules]]
+kind0= "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[bules]]
+kind = "regex"
+action = " = "regex
+a"ction = "deny"
+value =blocking '(\.|^)ads\.example$'
+groups = ["def.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version =ts.examplle/allow.txt"
+kind = "allow"
+groups =++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ["defaulreport"]
+
+[[rules]]
+kind0= "exact"
+action = "deny"
+value = "tracker.example"
+kind = "exact"
+action =ct"
+action = "allow"
+valueet:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = ault", "kids"]
+commeot = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action =ct"
+action = "allow"
+valueet:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthglcal-ca"
+names = ["rusthole.lan"]

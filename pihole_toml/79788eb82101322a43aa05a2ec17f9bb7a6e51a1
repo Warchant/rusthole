@@ -1,8 +1,0 @@
-# P"]
-interface = ""
-listEEEEEEEEEEhose = ""
-listEEEEEEEEEEhostcnameRecords = []
-revServers = []
-
-[dns.cAche]
-size = ""

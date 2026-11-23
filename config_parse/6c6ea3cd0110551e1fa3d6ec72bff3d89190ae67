@@ -1,0 +1,18 @@
+# rusthole.toml: a full examidr = "192.0.2.0/24"
+serve- = "192..admin]
+enabled = true
+listen =[ "219.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fae:853"
+bootstrap = ["192.0.2.80"ten =[ "219.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = "https://lists.example/allo3
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plain = ["subdomainames = ["rusthole.lan"]

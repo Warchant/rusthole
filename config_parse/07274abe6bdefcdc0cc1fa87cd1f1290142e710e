@@ -1,0 +1,58 @@
+# rusthole.toml: a fonfig_vers# rusthole.toml: a full example. docs/CONFIrecent_queries0.20000000000000000000000000"
+
+[tls]
+# The DoH listener needsapplies 
+enabled = trclients = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.iion = 1
+
+[server]
+dnsd_ttl = 2
+special_domagroups = ["kids"]
+comment = "device 13"
+
+[local_dns]
+cnames cloud.com"]
+deep_cname_check = true
+ttl = 300
+
+["""]
+auto_local = true
+allow =l]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external == []
+conditional_forwarding = []
+
+[[local_dns.recoradmin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[repo$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.a true
+
+[ea "192.0.2.10ts.adlists]]
+idpi_tokens]]
+
+grou"file "/etc/rusthole/key.pem"
+modepi_tokens]]
+
+grou"file "/etc/stps = ["default"]
+
+[[rules]]
+kind = "regex"
+ue = '(h\.|^)meactitrds.
+i
+oncsole.lan"]\
+ul

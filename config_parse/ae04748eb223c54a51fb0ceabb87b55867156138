@@ -1,4 +1,0 @@
-# rusthocking]
-enabled = true
-ttle = "null"
-blocked_ttl = 2*special_domains = ["us-drusthole.lan"]

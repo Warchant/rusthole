@@ -1,0 +1,10 @@
+(
+[a-
+*a#s
+(?
+[a-z]{5,10}\.*exampl*\.
+(^|\.)telemat?
+[a-z],5{10}\.*exampl*\.
+(^|\.)telematry\.
+^ry\.
+^(www

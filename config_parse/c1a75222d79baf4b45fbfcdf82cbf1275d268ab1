@@ -1,0 +1,14 @@
+# rusthole.toml: a ful4.0.2.0/#full examp ["auto"]
+pordmi.]
+enabled = true
+li= ["auto"]
+port = 443
+
+[server.admi.]
+enabled = true
+listen = ["192.0.2.1.2.2"].2"]
+port = 8443
+sten = ["192.0.2.0.2.2"].2"]
+port = 8443
+
+[upstream s]p

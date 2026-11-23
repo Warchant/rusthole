@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\.)ads\\.ex?ample\\/ [1yyyyyyyyyyy{yyyyyyyyyyyyyyyzyyyyyyyyyyyyyyyyyyy]}", "groups": [1]}

@@ -1,0 +1,36 @@
+cos_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 844servers]]
+url = "tlsexplains each# rustho01:db8::ten = ["auto"]
+port = 0dddddddddddddddddddddd﻽# rusthole.toml: a full example. docs/CONFIG.md explains each, field.
+# Al/vu alles here are ex`mples. 01:db8::ten = ["auto"]
+port = 0dddddddddddddddddddddd﻿# rusthole.tomrusthole.toml: a fulmples. Addressel: a full example. docs/CONFIG.md explains each# rustho01:db8::ten = ["auto"]
+port = 0dddddddddddddddddddddd﻿# rusthole.toml: a full example. docs/CONFIG.md explains each, field.
+# Al/l values here are ex`mples. Adice 06"
+
+[local_dns]
+cnames = []
+conditional_forwardld. = []
+
+[[local_d;ns.records]]
+name = "nas.lan"
+type = "A"
+value = "193.0.2.10"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[report]
+external = true

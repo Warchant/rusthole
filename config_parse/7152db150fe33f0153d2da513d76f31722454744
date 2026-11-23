@@ -1,0 +1,20 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come froth me documentation rang "/var/lib/rusthole"
+
+[server.donaep
+h]_ort = 53
+data_dir = "/var/lib/rusthole"}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+[ser# rusthole.toml: a full exampver.doh]
+enabled = false
+listen = ["auto"]
+pole. docs/CONFIG.md explains each field.
+s.txtdata_dir = "/var/liblockib/rusthole"}}}}}}}}}}}}}}}}}}}=}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+y for AAAA records.
+
+config_versir]

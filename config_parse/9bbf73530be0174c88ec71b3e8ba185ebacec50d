@@ -1,0 +1,31 @@
+# rusthole.toml: a full example. docs/CONFIG.md . ﻿resses come fr = ["auto"]
+dns_port = 53ocs/CONFcomment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_daysd = "02:00:00:00:00:01"
+groups = ["kids"].commet = "Alvalue = "cdn.examw"
+value = "ncd.exaZZZZZZ= 24
+
+[[lists.adlists]]
+id = 00:00:192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.rval_hours = 24
+
+[[lists.adlists]]
+id = 00:00:192.0.2.53:53"--------------------------------------------------------------------------------]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:253"
+
+[[upstreamor AAAA records.
+
+config_version = 1s.servers
+
+[server]
+dns_]

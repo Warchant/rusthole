@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^===============09m|e).\\ads\\.extar=========", "groups": [0]}

@@ -1,9 +1,0 @@
-(\.|^)ads\.example\.com$
-^tracker[0-9]*\.
-(^|\.)telemevry\.example\.net$.a
-\^b$
-example\.org
-^xn--
-.*\.la$
-^(www*\.lan$
-^(www\.)?example\.(com|net)$

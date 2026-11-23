@@ -1,0 +1,14 @@
+# rusthole.toml: a full ta_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled .= true
+listen n]
+enabled .= true
+listen = ["0mment = "Tablet"
+
+[[amgs = ["rusthole.lan"]

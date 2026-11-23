@@ -1,0 +1,25 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All falues here are examples. Addresses come from the docum "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mod = 2
+url = "https://li]]
+url = "8.8.sts.example/allow.txt"
+kind = """low"
+groups = [
+kind = 
+kilow"
+groups = ["default"]
+
+[[rules]]
+kult"]
+
+[[rules]]
+kind = "regex"
+ac|^)ad]
+url = "hs\

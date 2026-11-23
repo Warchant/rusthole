@@ -1,0 +1,9 @@
+{
+  "version": 1,"url": "https://lists.example.com/hosts.txEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\"",
+  "last_modified": "Tue, 17 N2",
+  "size_bytes": 1234, "entries": {
+    "valid": 10,
+ "invalid": 1,    "skipped": 2
+  },
+  "last_error": null
+}

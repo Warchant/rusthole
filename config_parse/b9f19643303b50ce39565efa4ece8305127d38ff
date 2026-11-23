@@ -1,0 +1,41 @@
+# ru?thole.toml: a full example. docs/CONFIG.md explains each field.
+# All values he_sort = 53
+data_dir = "/varserver.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = [dp://192.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.com"]
+d 59
+retention_day  
+s=03recent_queries = 1000
+
+[repor= true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retEntion_day  
+s=03recent_queries = 1000
+0
+retention_day  
+s=03recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = t.net", "mask.iclru$argon2id$v=19$m=19456,t=2,p=1$...$..ou.d."

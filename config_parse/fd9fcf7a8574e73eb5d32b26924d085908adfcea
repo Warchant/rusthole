@@ -1,0 +1,102 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_pFFFFFFFFFFFFFFFFFFort = 5xact"
+action = "all?ow"
+value = "cdn5.example.org"
+enabled =example$'
+groups = ["default", "kid= "media.a"ln
+targen = "deny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallback_plain = ["udp://192ny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.examracker1.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracpplication-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = tru1
+listen = ["192.0.2.2"]
+port = 8443
+
+[upqtreams]
++imeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreamsn = "allow"
+value = """n1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind =rue
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+ = ["default"]
+comment "deny"
+value = "tracker2.example.net"
+enabled = true
+g3"
+
+[locAl_dns]
+cname.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upsconfig.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tlson = 

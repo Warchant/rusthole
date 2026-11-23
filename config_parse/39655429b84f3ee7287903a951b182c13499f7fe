@@ -1,0 +1,13 @@
+e from the dfault", "kids"]
+[[clients]]
+id = var/lib/rusthole"
+
+[server.doh]
+ena_po = {"id = var/lib/rusthole"
+
+[server.doh]
+ena_po = {"192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+ur l= "https://doh.example/dns-query"
+bootstrap na_port = "nas.lan"[bal_

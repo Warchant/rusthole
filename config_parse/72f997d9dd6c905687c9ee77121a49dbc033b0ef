@@ -1,5 +1,0 @@
-config_version = 0
-
-[server]
-dns_listen = ["auto"]
-# rusthole.pl

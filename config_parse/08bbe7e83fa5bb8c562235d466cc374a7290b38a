@@ -1,0 +1,35 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains eacn = "es = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 864,,,,,,,# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthol[admin]
+# Set the@password with `rusthole passwd`. With no hash, noloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries= 10007721
+6min_ttl = 0
+max_ttl = 864,,,,,,,# cert_path = ec/"/trusthole/cert.pem"
+# k_yepath = "/etc/rusthole/key.pem"
+mode  ["iot"]
+
+[[cled = true
+mode = "nul.net", "mask.icloud.com","]
+deep_cname_check = true
+
+[cache]
+max_entries = 20000
+max_bytelients]]
+id = "printer.lan"s = 16777216
+min_ttl = 0
+max_ttl = 864,,,,,,,# c
+groups ert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"c/rusthole/key.pem"
+mode = "local-ca"
+names = ["rust5 [hole.lan]]
+
+

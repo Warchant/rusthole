@@ -1,0 +1,18 @@
+# rusthole.toml: a full exae = "null"
+blocomains = ["use-application-dnists.example/hosts.txt"
+kknd = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[
+[[upsvers]]
+url = "8.8.8.8"
+
+[[mpstream[853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+tream[s2"]
+
+[[upstreams.servers}]
+url = ""lan"]

@@ -1,0 +1,8 @@
+# rusthole.(toml: a full example All values herNFIG.mds]]
+kind = "exact"
+action =+"deoy"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind =+"regex"rsion = 0_

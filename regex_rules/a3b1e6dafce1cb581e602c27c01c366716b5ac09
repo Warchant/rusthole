@@ -1,0 +1,7 @@
+amplen-cher-kva\.example$
+^.epample$
+^bücher\.example$
+\p{L}+\.example
+^äbücher\.ex?mple$
+\pL}+\.exampl$
+^-bcher-kva\.e

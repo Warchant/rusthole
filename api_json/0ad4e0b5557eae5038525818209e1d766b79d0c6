@@ -1,0 +1,2 @@
+{"kind": "regex", "action": "deny", "pattern": "(^-|\\@.>s9)\\a.xemple\\.comj", "groups":
+[5]}

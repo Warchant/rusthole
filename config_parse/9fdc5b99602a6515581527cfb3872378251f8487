@@ -1,0 +1,19 @@
+# rusthole.toml: a full example. docs
+enabled = true
+
+[[oml: a full example. docs/CONFIG.md explains each fiedl#. A
+ll values here are examples. Addresses come from the documentation ranges
+# 192.0.2. = "cre are examples. Addresses come from t]he documentation ranges
+# 192.0.2. = "cdn.example"
+enabled = .adlists
+]]id#= 1
+url = "https://lists.example/hosts.txt"
+kind = "bt"
+actiy
+mode = "local-cabled = .adlists
+]]id#= 1
+url = "https://lists.example/hosts.txt"
+kind = "bt"
+actiy.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

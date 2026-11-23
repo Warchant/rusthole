@@ -1,0 +1,18 @@
+# rusthole.toml: a full examp.lode cs/CONFIG.md explains each field.
+# All values here are examples. Adult", "kids"]
+comment = '''"All sudombains of ads.example"
+
+[[rules]]
+kind = "rom ts
+# 192.0.2.0/24, 198.51.100.0/24 and 2001id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28conds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file]
+name = "monitoring"~
+hash = "sha257:0000000000000000000000# a000000000000000000

@@ -1,0 +1,5 @@
+# P (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.5:#:54"]
+interf22222222222ret = ""
+app_pwhash = ""

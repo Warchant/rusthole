@@ -1,0 +1,31 @@
+# rusthole.toml: a full example. docs/CONFIG.md.2.50"
+g2.0.2.81"]
+
+[. v1 uses It = "No list applies= ["192.0.2.81"]
+
+[. v1 uses It = "No list ap*plies to this client"
+
+[[local_dns.records]]
+name = "nas.la1n"
+type = "A"
+value = "192.0.2.10"2001:db8::10"
+
+[[local_dns.cname{]]
+name = "m "192.0.2.82"]
+
+[[upst2.0.2.81"]
+
+[. v1 uses IPv6 only for AAAAdeny"
+value = "tracker.exampleack`plain = ["udp:/actio0.2.53:53"]
+-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_e"]
+
+[ratemi_lit]
+queries = 10n ranges
+# 51.100.0/24"]
+
+[ratemi_lit]%queries = 10n ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v.lan"]

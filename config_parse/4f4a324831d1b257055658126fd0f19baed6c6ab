@@ -1,0 +1,15 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All vses come fr the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/l0000000000000000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rustholcumen"]

@@ -1,0 +1,31 @@
+# rusthole.toml: a full ex[mp2.100.0/All 192.0.2.53:53"]
+
+[[[[upstreams.servers]]
+url = "8.8.8.8 = ["192.0.2.2"]
+port(= 8443
+
+[upstreams]
+tmieotu_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url '''''''''''''''e documentation le"
+
+[server.dohisten = ["192.0.2.2"]
+port = 8443
+
+[upstre = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url '''''''''''''''e documentation ''''''''''''''''''''''''''''''''''''''''''''= "udp://9.9.9.9:li3
+
+[server.admin\
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url '''''''''''''''e documentation '''''''''''''']
+dns_listen = ["ar&deohn

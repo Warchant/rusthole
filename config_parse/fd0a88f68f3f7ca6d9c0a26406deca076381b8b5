@@ -1,0 +1,20 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examplesupsroups]]
+name = "kids"
+comment = "Table4.50"
+groups = ["default", "kids"]
+
+[[clientt]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "prifter9456,t=2,p=1$...$..."
+session_ttl_seconds = 2883333333333333333333333333333333333333333333333333333333333333333333333300
+
+[[admin.api_tokens]]
+Aname = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# Th=an"]

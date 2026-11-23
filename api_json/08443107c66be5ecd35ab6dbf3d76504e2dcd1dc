@@ -1,0 +1,2 @@
+{"kind": "regex", "action": 
+"deny", "pattern": "(m|hphttpc.exAams\\a)\\sd..com$:", "groups": [1]}

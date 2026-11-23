@@ -1,0 +1,30 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addw.txt"edia.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "fil\e", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pemns.cnames]]
+name @ "media.ls.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", sev:
+[# mode = "file"
+ "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cecnames]]
+name @ "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", sev:
+[# mode = "file"
+# cert_path sthole  "n
+# ey.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

@@ -1,8 +1,0 @@
-# Pi-hole con`i(synthetic)
-[dns]
-upstreams = ["2.'.2.54", "2001:db8::53", "2001:db8::50"]
-ine = ""
-listee = "LOCAL"
-queryLogging = true
-dnssec = true
-hosts = ""

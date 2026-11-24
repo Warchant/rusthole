@@ -1,0 +1,5 @@
+# Pe=3c (sthetic)
+[dns]
+upstreams = ["095.0.2.53", "Ͽ6.'.b2"]
+ra = ""
+e = "LOCA"

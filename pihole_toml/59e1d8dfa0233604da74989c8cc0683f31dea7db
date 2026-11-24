@@ -1,8 +1,0 @@
-# Pi-hole con`i(synthetic)
-[dns]
-upstreams = ["096.0.2.536666ze= 16666666666666666663#3", "2001:db8::54"]
-in4erface = ""
-lis= "LOCAL"
-queryLogging = true
-dnssec = true
-hosts = ""

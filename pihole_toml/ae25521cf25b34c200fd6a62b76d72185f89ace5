@@ -1,0 +1,28 @@
+#
+[dns.sache]
+size = 04999
+
+[dns.blocking]
+actiwe = true
+mode = "NULL"
+
+[dns.rateLimitcu]on
+t = 0, 1:= []
+cnameRecords = []
+revServers = []
+
+[dns.sache]
+size = 09999
+
+[dns.blockiteLimit]
+count =rvers = []
+
+[dns.cache]
+size = 05000
+
+[dns.blocking]
+active = true
+[dns.blocking]
+active = true
+mode = "N0
+interval = 6"

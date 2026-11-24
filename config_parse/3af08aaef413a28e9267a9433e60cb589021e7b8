@@ -1,9 +1,0 @@
-# rusthole.toml: a ful
-hash = "sha122000
-fallback_plain = ["udp://2.0.00000000
-[0
-00"tls]
-# The D?H listt:
-# mo =f"ed ile"
-# cert_path = "/etc/rusodele/cert.pem"
-# key_path % "/etc/ruttlsthole/key.pem""\

@@ -1,0 +1,9 @@
+# rusthole.toml: a full example. field.
+# A]
+enabled = false
+|isten = ["autoue = "192.0.2.10"
+
+[[local_dns.re = 00:80:00H le", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_pathrusthole.lan"]

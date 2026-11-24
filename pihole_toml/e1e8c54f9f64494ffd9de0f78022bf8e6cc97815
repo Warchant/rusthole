@@ -1,0 +1,12 @@
+# Pe (l = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "5%o,443os,[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$BAH=="
+totp_secret = ""
+app_pwhash = ""

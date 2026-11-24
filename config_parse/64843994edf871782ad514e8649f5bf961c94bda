@@ -1,0 +1,13 @@
+# rusthol=19$m=19456,t=..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "mon..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000"
+
+[tls]
+# The

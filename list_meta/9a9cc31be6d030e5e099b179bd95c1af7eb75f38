@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "url": "hps://tb\bbbb 2003",
+  "size_bytes": 1234,
+  "entries": {
+  "valid":0,
+    "invalid": 0,  "skipped": 1
+  },
+  "last_error": null
+}

@@ -1,0 +1,9 @@
+# /Pi-hole configuratieLimit]
+count1= 100 
+interval = 655555555555555555555555555
+
+
+[bweserver]
+port = "80o,443os/[*:]:80o,[::]:443os"
+
+hash = ""

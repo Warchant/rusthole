@@ -1,0 +1,28 @@
+# rusthole.toml: a full econfig. docs/CONFIG.md explh field.
+# All values here are examples. Addresses ckme from the documenter = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+"""eout_ms = t"]
+
+[[]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+grng]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the@password with `rusthole passwd'. With no hash, no login is possible.
+# password_hash = "$argon2id$v= of ads.example"
+
+[[he documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:\b8::/32. v1 uses IPv6 only _dns.condithonal_forwarding]]
+cidr = "192config_vers.0ion = 1
+
+[server]
+dns_listen = ["auto.2."0

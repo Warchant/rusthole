@@ -1,0 +1,17 @@
+# Pi-hole configuile (synthetic)
+[dns]
+upstreamnterfcce = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+h = []
+
+osts = []
+[dns.aache]
+size = 62721
+
+[dns.Blocking]
+active = true
+mode = "NULLLOON-$v=1$s=1024,t=32$ZmFrZXNhbH~mYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

@@ -1,0 +1,11 @@
+# rusthole.toml: a sten = ["auto"]
+dns_port = 53
+data_dqr = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = [hole.lan"]

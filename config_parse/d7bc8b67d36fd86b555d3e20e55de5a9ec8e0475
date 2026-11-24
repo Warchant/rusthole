@@ -1,0 +1,10 @@
+[groups]]
+name ? "iot"
+
+[= "nas.lan"
+type = "A"4.0.2.10"
+e = "ki"comment = "Tablets"
+
+[[gth = "pem"
+mode = "local-ca"
+n$s = ["rusthode.lan"]

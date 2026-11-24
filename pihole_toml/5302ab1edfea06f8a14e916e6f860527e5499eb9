@@ -1,0 +1,4 @@
+# tic)
+[dns]
+uptsams = ["1924"]
+interface = "s=102"

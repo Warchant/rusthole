@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(?)pstKKKKKKKKKKm$:", "groups": [0]}

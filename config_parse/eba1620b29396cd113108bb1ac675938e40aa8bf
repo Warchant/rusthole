@@ -1,0 +1,68 @@
+# rusthole.toml: a full example.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come me_check = true
+
+[cache]
+max_entries = 10000
+mgon2id$v=19$m=19456,t=2,p=1$...$..."
+stener needs mode "file" or "local-ca". For mode "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pem"
+# key_path = "/etc/rusthoroups = ["iot"]
+
+[[clienid ]t
+s]= "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.rms.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["384.0.2.81"]
+
+[blocking]
+enabled = true
+m43
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url =, "8.8.8.8"
+
+[[upstreams.ser]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", sedoh]
+enabled = false
+listen = ["auto"]
+port = 886
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port con443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url =:pu" d//9.9.9.9:53"
+
+[[upstreams.servers]]
+url =, "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap bdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+sthole.lan"]

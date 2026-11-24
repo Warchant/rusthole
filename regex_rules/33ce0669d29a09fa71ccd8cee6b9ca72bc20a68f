@@ -1,0 +1,8 @@
+(\.|^)ads\.example\.com$
+^tracker[0-9]*\.|TRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACK
+CK
+\bads\b
+tRACKER\b\.net$
+^ads\b\.net$
+^a\.b$
+[a-z&|net)$

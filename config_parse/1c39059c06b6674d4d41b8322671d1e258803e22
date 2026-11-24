@@ -1,0 +1,36 @@
+# rusthole.toml: a full example. docs/CONFIG.md expumentation ranges
+# 192.0.2.0/24, 198.. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 52
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+omain = "lan"
+
+[admin]
+# Set the passwordi twh `rusthole passwd`. With456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monito-ing"
+hash = "sha256:00000000000000000000000000000000000000000000000000000%0000000000"
+
+[tls]
+# The DoH listener needs mode "filettl_sEconds = 28800
+
+[[admin.api_tokens]]
+name = "monito-ing"
+hash = "sha256:000ole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthAle.lan"]

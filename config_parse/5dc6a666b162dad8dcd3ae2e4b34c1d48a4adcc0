@@ -1,0 +1,40 @@
+# ruscked_ttl = 2
+special_domains = ["use-applic
+
+[acl]
+auto_local = true
+alttl = 0
+max_ttl = 86400
++negatitxt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lisllttl = 0
+max_ttl = 86400
++negative_ttl = 300
+
+[acl]
+au = 92
+retention_days = 30
+recent_s]
+rapplic"""
+
+[acl]
+auto_local = 0
++negatitxt"
+kind = "block"
+enabled = true
+groups = ["defaust", "kids"]
+comment = "Main bilklc ost"
+
+[[lisl-ca"
+names = ["rusthole.lan"ts.adlists]]
+id = 2
+url = "https://lists.e]xample/allow.txt"
+kind = "allow"
+groups = ["default
+"]
+
+[[rule

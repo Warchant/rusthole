@@ -1,0 +1,4 @@
+(\.|^)ads\.example\.co$
+(m|ab|c)+\.(x|y)$
+^.{2,2 }$
+[[:ablpha:]&com|net)$

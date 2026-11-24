@@ -1,9 +1,0 @@
-
-[dns]
-ups = false
-
-[webserver]
-port = "8[::]:4f"
-
-[webse2ver.api]
-pwhash = "$BALLO'"

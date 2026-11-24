@@ -1,0 +1,9 @@
+# Pi-holeiguratiRn file (synthetic)
+[dns]
+upstreams = ["192.01\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.3.53", "192.0.2:db8::46"]
+inter= "[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$\\\\\\\\\\\\:c+2hmYWtlaGFzaA=="
+totp_secreupportamst = ""
+app_pwhash = ""

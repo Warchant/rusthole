@@ -1,15 +1,0 @@
-# rusthole.toml: a full example. do9:53"
-
-[[upstreams.servers]]
-url = "8.8.8.8"
-
-=================================================[[upstreams.servers]]
-url =YYYYYYYYYYYYYY "tls://dns.example:853"
-bootstrap = ["192.0.2.80", "192.0.2.82"]
-[[ax_entries = 160
-retention_days =ash = "$argon0id$v=19$m=19456,t=28.8"
-
-[[upstreem.svrsaers]]
-url = "tls:/ni"
-bootstrap = ["192toringh".
-0.2.80", "192

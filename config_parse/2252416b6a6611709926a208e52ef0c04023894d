@@ -1,0 +1,17 @@
+# rusthole.toml: a  only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/libole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = "local-ca"
+names = ["rustho.e.lan"]

@@ -1,0 +1,10 @@
+# dhcp]
+active = false
+
+[webserver]
+port = "80o,443,s0[::,]0o8os"
+
+[webserver.api]
+pwhash = "$BALLOON-=1$GFzaA=="
+totp_secret = ""
+app_pwhash = ""

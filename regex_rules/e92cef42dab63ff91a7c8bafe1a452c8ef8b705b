@@ -1,0 +1,7 @@
+(\.|^)ads\.^b.example\.net$
+^a\.b$
+[atelemE].net$
+^$
+^a\.b$
+[a-z]{3,10}\.exampl*\.
+(^|\|net)$

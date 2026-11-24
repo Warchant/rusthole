@@ -1,0 +1,5 @@
+# rusth/le.tmlogativl = 0
+max_ttl = 86400-
+negative_ttl = 300
+
+[acl:[

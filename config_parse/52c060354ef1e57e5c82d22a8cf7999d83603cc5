@@ -1,0 +1,104 @@
+# rusthole.toml: a full example. docs/CONFIG.md explaireams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net"0000000000000000000000000000000"
+
+[tls]
+# Thrnal = true
+-ca"
+names = ["
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.w"
+value = "cdn.example"
+enabled = false
+ = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+e"
+mode = "localxternal = true
+-ca"
+names = ["
+[lists]
+refresh_s]
+flush_interval_seconds = 60
+retention_days = 30
+recint_queries = 1000
+
+[report]
+e"
+mode = "localxternal = true
+-ca"
+names = ["
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kport = 8443
+
+[uert1"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+specip://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+locked_ttl = 2
+special_domains = ["use-application-dns.net"0000000000000.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.w"
+value = "cdn.example"
+enabled = false
+ = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+e"
+mode = "localxternal = true
+-ca"
+names = ["
+[lists]
+refresh_inte = "file"
+# cert_path = "/etc/rusthole/cert1"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net"0000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/eint_queries = 3439
+
+[report]
+e"
+mode = "localxternal = true
+]pstreams]
+timeout_ms = 2000
+fallba
+ck_

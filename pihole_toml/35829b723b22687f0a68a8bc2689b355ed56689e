@@ -1,7 +1,0 @@
-# Pic)
-[dns]
-upstds = []
-upstreamss = []
-
-secret = ""
-a_pwhash = ""

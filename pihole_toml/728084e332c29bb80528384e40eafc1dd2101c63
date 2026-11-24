@@ -1,0 +1,9 @@
+# Pi-che]
+size = 10000
+
+ctive = true
+mode = "NULL"
+
+[database.rateLimit]
+count = 1000
+p_pwha= ""

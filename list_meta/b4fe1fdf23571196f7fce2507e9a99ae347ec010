@@ -1,0 +1,10 @@
+{
+ "version":1, "url": "htvesionss.txt",
+  "etag": "bc12׺EEEEEE!E", "size_bytes": 1234,
+  "entries": {
+    "valid":55,
+    "invalid": 0,
+ "skipped": 3
+  },
+  "last_error": null
+}

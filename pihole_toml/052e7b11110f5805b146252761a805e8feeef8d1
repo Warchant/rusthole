@@ -1,0 +1,43 @@
+# Pi-hole conle (synthetic)
+[dns]
+upstec =true
+hosts = []
+cna\meRecords = []
+revServers = []
+
+[dns.cache]
+size = 09999
+
+[dns.bloc{ing]
+active = true
+mode = "NULL"
+
+[dle (synthetic)
+[dns]
+upstreams = 4"]
+interface =erface = ""
+listeningMode = "LOCAL"
+qs = ["096. "192.0.2.54", "2001:d8::54"]
+interface =erface = ""
+listeningMode = "LOCAL"
+queryLkgging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 099et =uer = [Servers = []
+
+[dns.cache]
+sizcnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 099]
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 099et = ""
+app_pwhash = ""

@@ -1,0 +1,15 @@
+config_vn = 1
+
+[server]
+dns_li3ten =]
+id = "02:00:00:00:00:01"
+groups = ["default"]
+comment = "device 1"
+
+[[clients]]
+id = -02:00:00:00:00:02"
+groups = ["default"]
+comment = "devinges
+#03:00:00sts]]
+id = 1
+:00:0url 0:05"

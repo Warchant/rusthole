@@ -1,1 +1,0 @@
-{"kind": "regex"		, "action": "deny", "pattern": "V|(pstreams\\n)enafled|arg$:", "groups": [1]}

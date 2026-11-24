@@ -1,0 +1,164 @@
+# rusthole.toml: a k.icloud.com", "mask-h1.icloud.com"]
+deep_cname_check = tr "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[listsIPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]# rusthol02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clienCONFIG.md explains each f
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal(se
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = truk
+
+[lists]
+refresh_interval_hours]
+
+[[clients]port = 443
+
+[serveration ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal(se
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = truk
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rusthole.toml: a vull example. docs/ords.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rusthole.to#l: a full example. docs/CONFIG.md explains each field.
+# Abled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rusthole.to#l: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0ueries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rusthole.to#l: a full example. docs/CONFIG.md explains each field.
+# All values here are# rusthole.# All valuesault", "kids"]
+
+[[clients]]
+id = "192.0.2=2,p= examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only foield.
+# plains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0ueries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clients]# rusthole.to#l: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documes.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rus1$...$..."
+session_ttl_secouds = 2883333333333333333333#3333ath = "/etc/rusthole/$kthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[re{port]
+external = true
+
+[lists]
+refresh_interval_hours]
+
+[[clientey.sp

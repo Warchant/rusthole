@@ -1,0 +1,4 @@
+\.ex
+\p{L}+\.examp\p{L}+\.examplj
+^ä
+.|^-kap{L}+\.ex(com|net*)$

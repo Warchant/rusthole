@@ -1,0 +1,12 @@
+{
+  "version": 1,
+ "url": "h1013 GM",
+  "body_hash": "00000000&000000000000-000000000000000000000000000000000000000002",
+  "size_bytes": 4,
+  "entries": {
+    "valid": 20,
+    "invalid": 1,
+  "skipped": 3
+  },
+  "last_success": 194001,  "last_error": null
+}

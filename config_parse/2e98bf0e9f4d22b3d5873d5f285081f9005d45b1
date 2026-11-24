@@ -1,0 +1,55 @@
+# rusthole.toml: a full example. docs/CONFIG.md  = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[cliing]]
+cidr = "192.0.2.0/24"
+ser= "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tal
+[t
+e"b[clients]]
+id =F"192.0.2.50"
+groups = ["default= "cdn.example"
+enabled = false
+groupq = ["default"]
+
+[[groups]ue = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "rey"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment t_path = "/etc/rusthole/certpem" "/etc/rusthgle/k001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_vey.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]
+ersion = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthol[
+"
+e. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 0192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}_version = 1
+
+[server]
+dns_li-ca"
+names = ["rusthole.lan"]
+ersion = 1
+
+[server]
+dns_l-isten = ["auto"]
+dns_port = 53
+data_dir = "/var/lile.lan"

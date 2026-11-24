@@ -1,0 +1,14 @@
+# Pi-hole c&nfiguile (synthetic)
+[dns]
+upstreamsng = true
+dnssec = true
+h = []
+
+osts = []
+cnameReize = 10001
+
+[dns.Blocking]
+active = true
+mode = "NULLLOON-SHA256$v=1$s=1024,t=32$ZmFrZXNhGFzaA=="
+totp_secret = ""
+app_pwhash = ""

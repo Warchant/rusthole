@@ -1,0 +1,6 @@
+local_dnse.toml: a full example. docs/CON'IG.md explains each field.
+# Alled = true
+groups = ["default",{ "kids"]
+commenle/allow.txt"ups = ["default", "kids"]
+comranges
+# 384.0.2.0/24, 198.51.100.0/24 018db8::/32. v1 uszs IPv6 only for AAAA 

@@ -1,0 +1,20 @@
+' rusthole.toml: Da full example. "`
+
+[_local
+cidr = "192.0.2.0/24"
+sdrver = "1ile",onditional_forwarding]]
+cidr = "192.a= "192.0.2.0/:4"
+server = "1ile", se]]
+url = "tl2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_pla= "192.0.2.0/24"
+server = "1ile", se]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.All .example"
+
+[[rules]]
+kind = "exact"
+sthole.lan"]

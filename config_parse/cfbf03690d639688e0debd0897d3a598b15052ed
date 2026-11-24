@@ -1,0 +1,9 @@
+# rusthole.to"""ml: a full example. docs/CONFIG.md explaIns each field.
+# All values here are examples. Addresses come from the documentation rangemax_ttl = 72oups]]
+name = " = "[clients]]
+id = "02:00:00:0ervers]]
+url = "https%://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled =0:0 t0:01"

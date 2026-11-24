@@ -1,8 +1,0 @@
-# Pfile NU6[dwcp]
-active = false
-
-[webserver]
-port = "80e on fid NULL"
-
-[dnr.api]
-h= ""

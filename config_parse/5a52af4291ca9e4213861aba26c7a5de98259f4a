@@ -1,0 +1,13 @@
+# rusthole.toml: a full example. docrecords.
+
+config_version = 1
+
+[server]
+dns_listen = ["wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,wwwwwwwwwwwwwwwwwwwwwwwwauto"]
+dns_port = 53
+data_dir = "/var/l0000000000000000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusdhole.lan"]

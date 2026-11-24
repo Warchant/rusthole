@@ -1,0 +1,6 @@
+#le synthetic)
+[dns]
+upstreams = ["38.0..54", "2001:dhcpdb8::53", "﻿2001:db8::254"]
+
+U0DDDDD= true
+dnsssh = ""

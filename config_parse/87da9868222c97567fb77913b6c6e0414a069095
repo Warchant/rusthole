@@ -1,0 +1,22 @@
+# r uses IPv6 only for AAAA records.
+
+config_version =+++++++++++++++++++++++++++++++++++++++++++++++++++ ["default"]
+
+[[rules]]
+kind0= "exact"
+abtion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[bules]]
+kind = "regex"
+action = " = "regex
+a"ction = "deny"
+value =blocking ow.txt"
+kind = "allow"
+groups =++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ["defaulreport"]
+
+[[rules]]
+kind0= "exem"
+# key_path = "/etc/rusthglcal-ca"
+names = ["rusthole.lan"]

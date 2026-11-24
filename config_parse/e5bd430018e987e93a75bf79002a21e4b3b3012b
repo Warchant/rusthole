@@ -1,0 +1,78 @@
+config_version = 1
+
+[server]
+dnps = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "de "tracker14.ettps://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+s.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+tainco = "deny"Avalue = '(\.|^)clicks\.example$'
+enabled = true
+grounabled = true
+s-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+s.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"Avalue = '(\.|^)cli ["udp://192.0.2.53:53"]
+
+[[upstreamsapi_tokens.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+ule"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "der.admin]
+enab*ed = true
+listen = ["096.0.2.2"]
+port = 8443
+
+[u81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+s.'
+enabled = true
+groups = ["def"( t"]
+
+[[rules]]
+kind = "regex"
+action = "deny"Avalue = '(\.|^)clicks\.example$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^pixel\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]id = "02:00:00:00:00:04"_path = "/etc/rus
+groups = ["default"]
+comment = thole/key.pe

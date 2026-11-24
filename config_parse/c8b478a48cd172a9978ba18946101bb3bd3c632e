@@ -1,20 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. Addw.txt"
-kin= "media.lans.lan"
-ttl = 600
-
-[[local_dns.conditl-e = "file"
-# cert_prget = "nas.lan"
-ttl = 300
-
-[[loacnd_ls.conditl-ca". F"
-# cert_path = "/etc/rusthole/cert,pemns.cnames]]
-nam600
-
-[[local_dns.conditl-ca". For mode "file", set:
-[# mode = "file"
-# cert_prget = "nas.lan"
-ttl = 300
-
-[[local_dns.conditl-ca". F"
-# cert_pa.lan"]

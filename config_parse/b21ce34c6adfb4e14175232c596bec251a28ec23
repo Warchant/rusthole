@@ -1,0 +1,16 @@
+# rustholabled = true
+
+[ ["iot"]
+
+[[clienr.la$v=18$m=19456,t=2,p$v=19$m=19456,t=2,p=1$...$..
+
+[[groups]]
+name = "default"
+enabled = true
+
+[ ["iot"]
+
+[[clients]]
+id = "prir.lan"
+groups 5 []
+

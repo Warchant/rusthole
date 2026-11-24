@@ -1,0 +1,27 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here atation rAangemax_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external =ztrue
+
+[lis{{{{{ = 28800
+
+[[admin.api_tokens]]
+name = "monitoring
+# 192.0.2.0/24, 198.51.100.0isten = ["auto"]
+port = /24 and ''''''''''''''''''''''''''''']]
+nns.conditional_forwarding]]
+cidr = "096.0.2.0/24"
+isten = cert_-path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rustho= "Main block list"
+[[li = "https://1.0sts].2

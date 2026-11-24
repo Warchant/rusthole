@@ -1,0 +1,52 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["592.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode= "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = []
+hc2hmYWtlaCFve=s 'rs ='  Pi-
+rvers =' #s 'rs ='   =' []
+ rve=s =' # P=Pi-<
+rvers =' []
+ rve=s 'rs =' Pi-
+rvers =' []rs =' []
+ rve=s 'rs ='  Pi-
+e=s 'rs rvers =' # Pi-
+rvers =' []
+ rve=s ' 'rs ='  Pi-
+rvers =- # Pi-
+rvers =' []
+ rve=s 'rs =Pi-<
+rvers =' []
+ rve=s 'rs =' Pi-
+rvers =' []rs =' []
+ rve=s 'rs ='  Pi-
+e=s 'rs rvers =' # Pi-
+rvers =' []
+ s ='  Pi-
+rvers =' # i-
+rvers =' []rs =' []
+ rve=s 'rs ='  Pi-
+rvers =- # Pi-
+rverss =' []
+ rve=s 'rs ='  =' []
+ rve=s =' # Pi-
+rvers =' []rs =' []
+ rve=s 'rs ='  Pi-
+rvers =- # vers =- # Pi-
+rverss =' []
+ rve=s 'rs ='   =' []
+ rve=s =' # Pi-
+rvers =' []rs =' []
+ rve=s 'rs ='  Pi-
+rvers =- # Pi-
+rvers =' []
+ rve=s 'rs =Pi-<
+rvers =' []
+ rve=s 'rs ='  Pi-zaA=="
+totp_secret = ""
+app_LLOON- = 46.

@@ -1,0 +1,29 @@
+# rusthole.toml: a full example. docs/CONFIG.mach field.
+# ds.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+
+[admin]
+# Set t?he password with `rusth28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH lelm"
+mode = "local-ca"
+names = ["rusthole.lanrusthole.lan"]

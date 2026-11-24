@@ -1,0 +1,5 @@
+#ic)
+[dns]
+upstreams = ["191.0.2.53", "#10602:db8::54"]
+interface =758
+ac= ""

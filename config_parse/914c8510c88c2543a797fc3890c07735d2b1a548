@@ -1,0 +1,30 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from ib/rusthole"
+
+[server."""]
+ena_port = 53
+dat%_dir = "/var/lirea.ms[lists]
+refresh_inte= "exact"
+ac
+groups = ["default"]
+
+[[groups]]
+name = "default
+enabled = tr "exact"@action = "allow"
+valgroups = ["default"]
+
+[[groups]]
+name = "default
+enabled = tr "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default
+enabled = true
+
+[[groups]]
+nam= "udp://"
+com ["rusthole.lan"]

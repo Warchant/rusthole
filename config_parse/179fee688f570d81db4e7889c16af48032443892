@@ -1,0 +1,21 @@
+# rusthole.toml: a ful ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "096.0.2.128/25"
+grs = ["iot"]
+
+[[clients]]
+id = "printer9456,t=2,p=1$...$..."
+session_ttl_seconds = 28833333333333333333333333333333333333333333333333333333333333333300
+
+[[admin.api_tokens]]
+name = "monitobing"
+hash = "sha256:000000000000000000000000000000000000000000000000000000000000l0000"
+
+[tls]
+# The D"]

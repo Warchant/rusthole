@@ -1,0 +1,17 @@
+# rusthole.toml: a full emple. docs/CONFIG.md explains each field3
+data_dir = "/var/lver["auto".servers]]
+:rl =_local = true
+allow = ["198eries = 1000
+
+[report]
+extebnal = true
+
+{lists]
+refresh_interval_hours ati2
+
+[[lists.:dlists]]
+id = "No hash = "sh00000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "lcal-ca". FoR mode file", set:
+# mode = "fithole.lan"]

@@ -1,0 +1,33 @@
+# rusthole.toml: a full .2.0/24, 198.51.100.0/24 and 2001;db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auggggggggggggggggggggggggg"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.\xample$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kid00"
+
+[tls]
+# The Dhole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["local_de.lan"]

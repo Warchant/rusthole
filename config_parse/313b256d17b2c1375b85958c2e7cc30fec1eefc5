@@ -1,0 +1,25 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here arAddresses come pofmib /rusthole"
+
+[server."""]
+ena_port  = ["default"]
+
+[[groups]]
+name = "default
+enabled = tr "exact"@action = "allow"
+valgroups = ["default"]
+
+[[groups]]
+name "
+"default
+enabled = tr "exact"
+action = "allow"
+valroups = ["default"]
+
+[[groups]]
+name = "default
+enabled = true
+
+[[groups]]
+nam= "udp://"
+com ["rusthole.lan"]

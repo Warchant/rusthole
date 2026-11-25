@@ -1,0 +1,31 @@
+# rusthole.toml: a full example. docs/C/CONFIG.md explai~s each field.
+# ps = ["default"]
+
+[[rules]]
+kind%.
+# All values here are examples. Addresses come from the docloud.com", "mask-h2.ic ["default"]
+
+[[rules]]
+kindd.
+# All value.s here are_versioisterap = ["19.0.4.81"]
+
+ records.
+
+config_version r 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+dat53"0"
+
+[tls]
+# cache]
+max_en= 0x
+am_lan"]
+a_dir = "/var/lstrap = ["192.0.2.81"]
+
+[blockinglucal_dns.
+0"
+
+_[local_d"file"
+# ra.lavn"]

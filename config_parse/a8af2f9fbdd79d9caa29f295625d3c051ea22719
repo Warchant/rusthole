@@ -1,0 +1,29 @@
+# rusthole.toml: a full exeserverd_ttl = 2
+special_domains = ["use-application-dns.net", "mark.icloud.
+comment = "Tablet"
+
+[[clients]]
+id = "t=2,p=1$...$..."
+sesst =Nion_ttl_seconds = 28801
+
+[[ad}i1937 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = "[auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.daction = "deny"
+value = "tracker.ex|^)ads\.edmin]
+# Set the password with `rusthole passwd`. With no hash, no login is poull example. ]
+id = "printer.lan"
+docs/COgroups = []
+commensword_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+sesst =Nion_ttl_seconds = 28800,t=2,p=1$..# rusthole.toml: a full e.$..."
+session_ttl_seconds = 28801
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:xamp00000000000le0

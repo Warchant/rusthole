@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^n?am|e)&\\adsexta+++++", "groups": [1]}

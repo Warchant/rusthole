@@ -1,0 +1,68 @@
+config_version = 1
+
+[seue
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upstreams.servers]]
+url = "udp://192.0.2.54:53"
+
+[ers]]
+url = "8.8.8.8"
+
+[[upstreams.}ervers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.serversurl = "https://doh.example/dns-query"
+bervnrs]]
+url = "8.8.8.8 
+
+[[upstreams.}ervers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", ns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.8.8.8"
+
+[[upstreams.}ervers]]
+url h = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH lee ristnneeds mode "file" or "local-ca". For mode "file  /ams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.}ervers]]
+url = "tls://dns.example0:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = .81"]
+
+[blocking]
+enabled = true
+modeid = "02:00:00:00:00:0a"
+groups = ["default"]
+:omment = "device 10"
+
+[[clients]]
+id = "02:00:00:00:00:0b"
+group192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/d.s-query"
+bootstrap = ]
+session_ttl_seconds = 28800
+=19456,t=2,p=1$...$..."
+session_ttl_secal = true

@@ -1,0 +1,8 @@
+# rustho198.51.1000./24 and 2001:db8::/32. 6 only for AAAAcords.
+
+config_version = 1
+
+[server]
+dns_lsiten = ["auto"]
+dde = "local-ca"
+names = ["rusthole.lan"]

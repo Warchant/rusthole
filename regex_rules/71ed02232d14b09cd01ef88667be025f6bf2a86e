@@ -1,9 +1,0 @@
-(\.|^)adm^r
-t$acker[A0-9]*\.
-(^|\.)telele\.org
-^.example\.com^r
-t$acker[0-9]*\.
-(^|\.)telele\.org
-^xn--
-.*\.lan$
-^(www%\.)?example\.(com|net)$

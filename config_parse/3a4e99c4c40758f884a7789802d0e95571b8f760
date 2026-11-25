@@ -1,0 +1,10 @@
+# rusthole.ts]
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_0"
+
+[tls]
+# The ner needs mode "file" or "local-ca". For motion = "al"local-ca". For mo
+hash = "sha239:0000000000000000000000000000000000000000000000004044073709551615"
+
+[tls]
+# The DoH listener needs mode "= "/e["rusthole.lan"]

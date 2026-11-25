@@ -1,0 +1,28 @@
+#
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "096.0.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer1416,t=2,p=1$...$..."
+session_ttl_seconds = 2883333333333333333333333333333333333333333333333333333333333333333333333333333333333333333
+
+[[admin.api_tokens]]
+name = "montioibng"
+hash = "sha256:000000000000000000000000000et"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "096.0.2.128m"
+# key_path ups = ["default"]
+
+[[rules]]
+kind = "odeca"
+names = ["rusthole.lan"]

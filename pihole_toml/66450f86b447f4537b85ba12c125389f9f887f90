@@ -1,5 +1,0 @@
-# nthetIc)
-[dns]
-upstreams = ["1.53", "# 2001:db8::53", "0#01:8::5:4"]
-erface = ""
-ac= ""

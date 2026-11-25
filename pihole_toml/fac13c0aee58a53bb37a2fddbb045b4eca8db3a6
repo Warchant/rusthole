@@ -1,0 +1,12 @@
+# Pi54", "2001:db8
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 10.0
+interval = 60
+
+[dherrer.api]
+# Pi-hpwhash = "$BALLOONHRmYWtlaGFz coa

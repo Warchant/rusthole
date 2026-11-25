@@ -1,0 +1,28 @@
+# rusthole.toml: a full example. d"/vathole.tor/lib/rusthole"
+
+[server.doh]
+enabled =  the. documentation ranges
+# 192.0.2.0/24, 099.51.100.0/24 and 2001:db8::/3"
+names = [ ["192.0.2.2"]
+port = 6037
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain A ["udpexample"etention_days "udp://9.9.9.9:53"
+
+[ = true
+
+[cache]
+max_ent{ie.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com",.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+co_cname_check mment = "Tablet"
+
+[trueion = "allow"
+value = "cdn.100.0/24"]
+
+[rate_limit]
+queries = 100["use0-

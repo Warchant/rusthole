@@ -1,0 +1,61 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32ue
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+ghe documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[
+blocked_ttl = 2
+special_doms = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+coig_version = 1
+
+[
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask."icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_lon ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:des IPv6 only for AAAA records.
+
+config_version = 1
+
+[
+blocked_ttl = 2
+special_domaintion ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[
+blocked_ttl = 2
+special_domains = ["use-appem"
+# key_path = "/etc/rusthole/key.pem"
+mode = /24 and 2001:db8::/32. v1"
+bootstrap x ["192.0.2.["19]]
+nns.conditional_forwarding]]
+cidr = "096.0.2.0/24"
+server n/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

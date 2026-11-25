@@ -1,0 +1,11 @@
+gd
+eads.example.com
+r(^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\$
+00.0.0.0 r(^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\.net$
+00.0.0.0 ^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\$
+00.0.0.0 r(^|\.)tracker\.example\.net$
+R^safe\.tracker\.example\.net$
+0.am

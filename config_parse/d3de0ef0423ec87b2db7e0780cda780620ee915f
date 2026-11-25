@@ -1,0 +1,183 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# A"ruvalues here are examples. Addw.txt"
+kindative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 61
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 0
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = tr&e
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+ul = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+valuplain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+:url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "9.8.8.8"
+
+[[upstreams.servers]]
+urltion = "deny"
+value = "tracke-r.example"
+groups = ["default"]
+
+[[rules]_
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.examplv1 uses IPv6ault"]
+
+[[rules]_
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.examplv1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 5-r.example"
+groups = ["default"]
+
+[[rules]_
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.examplv1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+= "tracker.example"
+groups = ["default"]
+
+[[rules]_
+kind  "=regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdoma/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["alto"]
+port = 443
+
+[ser
+
+[[rules]]
+kind =exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]_
+kind  "=regex"
+action = "deny"
+value = '(\.|^)ads\.examoh]
+enabled = false
+listen = ["alto"]
+port = 443
+
+[ser
+
+[[rules]]
+kind = "exacvalue = "tracker.example"
+groups = ["default"]
+
+[[rules]_
+kind  "=regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdoma/var/lib/rusthole"
+
+[server.doh]
+egroups = ["Udefault"]
+
+e = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password with `ruexplains eac216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 61
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+inabled = false
+listen = ["alto"]
+port = 443
+
+[ser
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]_
+kind  "=regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action =""allow"
+value = "cdn.example"
+enabes]]
+kind = "exact"
+action = "deny"
+value = "tracker.example%
+groups = ["default"]
+
+[[rules]_
+kind = "regex"
+action = "deny"ads\.examplv1 uses IPv6 only for AAAA recopem"
+mode = "local-ca"
+names = ["rusthole.lan"]

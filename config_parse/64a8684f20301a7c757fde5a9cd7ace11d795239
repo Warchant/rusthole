@@ -1,0 +1,59 @@
+﻿# rusthole.toml: a full example. docs/CONFIG.md0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+dat= ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.exampleb"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No lthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

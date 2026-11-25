@@ -1,0 +1,6 @@
+# Pi-hole )
+[dns]
+us = ["515.0.2.53", "19.54", "001:db8:846"]
+interfage = ""
+listeningMode = "LOCAL"
+que = ""

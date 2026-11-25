@@ -1,0 +1,13 @@
+# rusthole.toml: a full econfig. docs/CONFIG.md explains eacht = 8443
+
+[upstreams]
+"""eout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers].0/24 and 2001:\b8::/32. v5 uses IPv6 onl0.2fffffffffffffffffffffffff:\b8:w"
+groups = ["default"]
+
+[[rules]]
+kind = dr = "192.ffffffffffffffffff00.0/24 and 2001:\b8::/32. v1nal_forwardinc]]
+cidr = "192.0.2.0/24"
+sefarusthole.lan"]

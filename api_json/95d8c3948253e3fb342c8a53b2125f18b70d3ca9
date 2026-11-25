@@ -1,1 +1,0 @@
-{"kind": "regex","action": "deny", "pattern": "................(^|\\.)a$set!.\\xD0kkk", "groups": [1]}

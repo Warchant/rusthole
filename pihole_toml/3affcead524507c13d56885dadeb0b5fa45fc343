@@ -1,0 +1,6 @@
+#
+
+[webserver.api]
+pwhash = "$Wtlt aA=="
+totp_secret = "ppa"
+p_wh_sh = ""

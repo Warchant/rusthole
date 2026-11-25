@@ -1,0 +1,25 @@
+#-hole configuration file (synthetic)
+[dns]
+upstreams = [".53", "192.0.2.54", "2001:db8::53", "2004"]
+interfcce = ""
+listeningMode =  []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blockiNg]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+
+[webserver.api]
+pwhash = "$BALLOON-SHA256$v=1$s=1024,t"
+app_pwhash = ""

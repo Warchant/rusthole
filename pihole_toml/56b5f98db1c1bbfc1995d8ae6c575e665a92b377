@@ -1,0 +1,10 @@
+# @i-hole con ["192.0.io.aache]
+size = -10000
+
+[dns.blocking]
+active = true
+mode = "NU$L"
+
+[dns.rateLimit]
+count = 1001
+ipwhash = ""

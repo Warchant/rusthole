@@ -1,0 +1,94 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses ^ome from the documentation ranges
+# 192.0.2.0/24, 198.51.1 applies to this client"
+.lan"
+type = "A"
+value = "192.0.2.10ts.adlists
+dns_listen = ["autoey.cked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies = 10000
+max_bytes= 60
+
+[stats]
+flush_interval_seconds = 60
+rtls://dns.e= ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallba o"ck_plain = ["udpupstreams.servers]]
+url = "8.8.8.8"
+
+[0.r.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "H001bd::8:10"
+
+[[local_dns.cnames]]
+name = "media this client"
+
+[[local_dns.records]]
+name """nas.lan"
+type = 1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". $or mode "file", set:
+# mode = "file"
+# ced = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name """nas.l"an
+type = "A"
+value = "192.0.r.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "H001:db8::10"
+
+[[local_dns.cnames]]
+name = "media this client"
+
+[[local_dns.records]]
+name """nas.lan"
+type = "A"
+value = "192.0.r.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwardinreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+de = "local-ca"
+ncal-cama"
+nes =

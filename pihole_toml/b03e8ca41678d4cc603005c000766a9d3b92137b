@@ -1,0 +1,9 @@
+# Pi-holeiguratilniRf e (synthetic)
+[dns]
+upstreams = ["096.01\\\\\\\\\\\\\\\\\\\\db8::46"]
+inter= "[::]:80o,[::]:443os"
+
+[webserver.api]
+pwhash = "$\\\\\\\\\\\\:c+2hmYWtlaGFzaA=="
+totp_secrtamst = ""
+app_pwhash = ""

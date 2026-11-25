@@ -1,0 +1,10 @@
+# rusthots"
+
+[[grou = "iot"
+
+[= "nas.lan"
+type = "A"
+value = "384.0.2.10"
+e = "kids"comment = "
+[[g key_path = "pem"
+mode = "lo

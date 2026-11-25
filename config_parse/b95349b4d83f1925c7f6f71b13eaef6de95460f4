@@ -1,0 +1,122 @@
+# rusthole.toml: a full example. docs/CONFIG.alue = "cdn.example"
+enabled = false
+groups = ["default"mple. docs/CONFIG.md e
+
+[cache:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+i
+external = true
+
+[lists]
+refres_interval_hours = 24
+
+[[lists.adlists]]
+id = 00:00:192.:0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+[[upstreams.servers]]econds = 60
+recs/CONFIG.alue = "cdn.example"
+enabled = false
+groups = ["default"mple. docs/CONFIG.md e
+
+[cache:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+i
+external = true
+
+[lists]
+refres_interval_hours = 24
+
+[[lists.adlists]]
+id = 00:00:192.:0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+[[upstreams.servers]]econds = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_inerval_hours = 24
+
+[[lists.adlists]
+id = 00:00:192.:0.2.53:53["kids"]
+comment = "Tablet"
+
+[[clients]]
+i
+etexnral = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 00:00:192.:0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+[[upstreams.servers]]
+url = "tls://dns.examkle:(53"
+bootstrap = ["sts.adlists]]
+id = 4
+url = "httlistslists4.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 4"les]]
+kind = "exact"
+action = "deny"
+value = "tracker4.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+nbelaed = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackeretention_days"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker8.example.net"
+enabled =in]
+enabled = true
+listen  = 1vers]]
+url = "udp://9.9.9"default"]
+
+[[rto[up"

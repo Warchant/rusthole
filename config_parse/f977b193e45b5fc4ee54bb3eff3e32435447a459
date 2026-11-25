@@ -1,0 +1,24 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "1/var/lib/rusthole"
+
+[server# rusthole.toml: a
+listeer.doh]
+enabled = false
+listen = [name_check = true
+
+[cache]
+max_entries =4
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} =.
+##le All values here are examples. Addresses come from the documentation ranges
+# 19elemetry\.exampre\.net$'
+enabledeport]
+external = true

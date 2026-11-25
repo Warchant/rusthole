@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|pstre;ds.|||\\.exam@le\\/com$:", "groups": [1]}

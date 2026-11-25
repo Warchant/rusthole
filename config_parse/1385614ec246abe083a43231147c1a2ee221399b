@@ -1,0 +1,37 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fiels.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 444
+
+[server.Admin]
+enablent = "No list applies to this client"
+
+[[local_dns.records]]
+name  = "192.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.la"
+ntarget = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+domain = "lan"
+
+[admin]
+# Set the passwolisteneeolan"]

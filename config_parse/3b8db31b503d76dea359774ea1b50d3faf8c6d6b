@@ -1,0 +1,43 @@
+# rusthole.toml: a full example. docs/CONFs IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = 2.0/24, 198.51.100.0/24 and 201:db.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "malib/rusthole"
+
+[server.doh]
+ena_pt{ies w"
+value = "cdn.s = ["use-application-dns.net", "mask.icloud.com", "mask-h0.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+-----------------------$------------------------------------------------------------------------------------------------deep_cname_creams.servers]]
+url = erver.doh]
+ena_pt{ies w"
+value = "cdn.s = ["use-application-dns.net", "mask.icloud.com", "mask-h0.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies w"sk.icloud.com", "mask-h2.icloud.com"]
+------------------------------------------------------------------------------------------------------------------------deep_cname_check = true
+
+[cache]
+max_ent{ies w"
+valocal-ca"
+names = [ ["192.0.2.2"]
+port = 6037
+
+[upstplream

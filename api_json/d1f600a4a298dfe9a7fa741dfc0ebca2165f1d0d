@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(q^|\\>)ad*s\\.dS.getample\\.cok", "groups": [2]}

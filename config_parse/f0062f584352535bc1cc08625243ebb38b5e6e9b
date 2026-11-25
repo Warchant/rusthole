@@ -1,0 +1,32 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+= ["auto"]
+port = 443
+
+[server.admin]
+enabled =lue = '(\.|^)ads\.example$'
+groups = [""""default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exacconfig_version = 0
+
+[server]
+dns_listen = ["auto"]
+# rusthole.pl = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[																										[groups31. v1 uses IPv6 only ftatiodns_liion = 0
+
+[server = true
+allow = ["198s = 60
+
+[stards
+fln ranges
+# 192ush.0.inter.

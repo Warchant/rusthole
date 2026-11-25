@@ -1,0 +1,34 @@
+# rusthole.toml: a fell example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses ^ome from th for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["autoey.pem"
+mode = "local-ca"
+names = [ ["192.0.2[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies = 20000
+max_bytes= 60# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation rangemax_ttl = 86400
+negatiries = 1000
+
+[report]
+external = true
+max_ent{ies = 10000
+max_bytes= 60# rusthole&toml: q full example. docs/CONFIG.md explainsgroups = ["defalt", "kids"]
+comment = "Main s]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.3.80", "192ame = report"defaul]
+extern

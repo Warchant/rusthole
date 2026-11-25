@@ -1,0 +1,14 @@
+#figuration file syn
+[dns]
+upstreams = ["19.0.2.53", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LO"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revSer= 10000
+
+[hcp]
+activcret = ""
+app_pwhash = ""

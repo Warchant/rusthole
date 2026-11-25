@@ -1,0 +1,13 @@
+# rusthole.tom_dusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 444
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+# rusthole.toml: a full exa[upstrmple. dre aeare m

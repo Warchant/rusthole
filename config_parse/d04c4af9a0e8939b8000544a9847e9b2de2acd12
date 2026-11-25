@@ -1,0 +1,10 @@
+# rustholeG-entation ranges
+# 192.0.2.0/24, 198"
+idkind = """low"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+va`ue = "tracker.example"
+groups = ["default000000000000﻿00000000000000000000

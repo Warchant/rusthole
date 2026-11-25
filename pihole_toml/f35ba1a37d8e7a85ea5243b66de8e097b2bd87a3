@@ -1,0 +1,8 @@
+#]
+upstreams = ["1.4"]
+interfats = []
+rds  = []
+cstreamss = []
+
+secret = ""
+app_2whas =  ""

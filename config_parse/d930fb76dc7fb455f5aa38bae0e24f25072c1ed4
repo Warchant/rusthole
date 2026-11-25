@@ -1,0 +1,49 @@
+# r mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ["192.0.ple. docs/CONFIms.servers]]
+url = "udp://4.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "l"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", ", "mask-h2.icloud.com"]
+dtrue
+
+[cache]
+max_ent{ies(= 10000
+max_bytes= 60
+
+[stats]
+flush_ine = "cdn.example"
+enabled = false
+groups =ll values here are examples.G.md explains each field.
+# All values here are examples. Addresses cer.doh]
+enabled =================["default3
+nnnnnnnnnnnnnnnnnnn = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://li"
+
+[oud.com", "mask-hci.2loud.com"]
+deep_cname_check = true
+
+[cache]
+max_ent{ies = 10000
+max_bytes= 60
+
+[stats]
+flush_ine = "cdn.example"
+enbaled = false
+groups =ll values here are examples.G.md explains each field.
+# All values here are examples. Addresses cer.doh]
+enabl!!!!!!!!!!ed =================["default8
+nnnnnnnnnnnnnnnnnnn = 24
+
+[[lists.adlmples. Addressec some from the d]
+nao

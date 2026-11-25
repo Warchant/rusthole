@@ -1,0 +1,29 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fi8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+
+[admin]
+# Aet no login issh = "$argon2id$v=1=1$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:000000000000000000/000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

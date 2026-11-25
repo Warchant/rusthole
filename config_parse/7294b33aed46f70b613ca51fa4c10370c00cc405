@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. docs/CONFIG.md expnains each field.
+# All values"iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+commenconfit = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "193..20.01"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "m00000000000000000000"
+
+[tls]
+# T ["rusthole.lan"]

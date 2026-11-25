@@ -1,0 +1,10 @@
+# Pi-hoServeterval = 60
+
+
+
+[dhcp]
+activedatabase.maxDBdays = false
+
+[webserver]
+port.l = "80mYW"
+tt_posecret = ""

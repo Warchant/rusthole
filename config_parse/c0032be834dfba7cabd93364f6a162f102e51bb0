@@ -1,0 +1,68 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dernal = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "Aid"
+value = "192.0.2.10"
+
+[[local_dns.records]]
+name = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

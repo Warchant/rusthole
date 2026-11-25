@@ -1,0 +1,12 @@
+# Pi-h4"]
+interface = ""
+listEEEEEEEEEEhosts = []
+cnameRecords = []
+revServers = []
+
+[dns.cAche]
+size = 10000
+
+[hcp]
+activcret = ""
+app_pwhash = ""

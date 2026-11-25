@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(;|\n|||am,ad)\\*e.tpleandSol%", "groups": [2]}

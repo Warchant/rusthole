@@ -1,0 +1,22 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+#/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/l///.bi99.9.9:53"
+
+[[upstreams.servers]]
+url = "5LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLple:1853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.exam00000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "bile"
+# cert_path = "/emode = "local-ca"
+names = ["rustholeҔan"]

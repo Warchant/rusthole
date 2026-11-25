@@ -1,8 +1,0 @@
-# P= 60
-
-[dhcp]
-active = false
-
-[webserver]
-port = "3%o,443os:]:80=="
-totp_echssah = ""

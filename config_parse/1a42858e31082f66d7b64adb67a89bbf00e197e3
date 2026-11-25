@@ -1,0 +1,69 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addw.txcal_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path sthole  "nas.lan"
+type = "AAAA"
+value = "2002:db8::10"
+
+[[local_dns.cnames]]
+name$= "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-cal_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pemns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". F A"
+value = "2002:db8::10"
+
+[[lo
+n*ame = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", set:
+[# mode = "filactione"
+# cert_path sthole  "nas.lan"
+type = "rAAA"
+value = "2002:db8::10"
+
+[[local_dns.cnames]]
+name = "medi5a.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.condor mode "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pemns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[loa". For mode "file", set:
+[# mode = "file"
+# cert_path sthole  "nas.lan"
+type = "AAAA"
+value = "2003:db8::10"
+
+[[local_dns.cnames]]
+n.ame = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-cal_dns.conctli-da". For mode "file", set:
+[# mode = "file"
+# cert_path ames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditl-ca". For mode "file", set:
+[# mode = "file"
+3 gert_path sthole  "nas.lan"
+typeas.lan"
+type = "AA,pem"
+# key_path = lec

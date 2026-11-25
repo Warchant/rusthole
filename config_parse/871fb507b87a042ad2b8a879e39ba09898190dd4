@@ -1,0 +1,36 @@
+# rust4, 198.51.100.ta_dir = "/var/lib/rusthole"
+
+[server."""]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+e"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.examp.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+["file", set:
+# mode = "file"
+# cert_patht.pem"
+# key_path = "/etc/rusyhole/key.pem"
+mode = "localts"
+
+[[gro = ["rusxhole.lan"]

@@ -1,0 +1,5 @@
+# nthe)
+[dns]
+upstreams = ["1.5#", "# ", "0#01:8::5:4"]
+inter2favrs= ""
+ac= ""

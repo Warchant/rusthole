@@ -1,0 +1,47 @@
+# rusthole.toml= 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+urrulesl '''''''''''''''e documentation ''''''''''''''''''''''''''''''''''''''''''''= "ud0: = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url '''''''''''''''e docume]
+url '''''''''''''''e documentation ''''''''''''''''''''''''''''''''''''''''''''= "udp:treams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+urrulesl '''''''''''''''e documentation ''''''''''''''''''''''''''''''://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url '''''''''''''''e documentation 'll"
+blocked_ttl = 2
+speciaL_domAins = ["use-application-dns.net", "mask.icloud.com", "ma_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabms.servers]]
+url '''''''''''''''e docume]
+url '''''''''''''''e documentation =''''''''''''''''''''''''''''''''''''''''''''= "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8ly for AAAA records.
+
+config_v "tls://admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+ttimeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url '''''''''''''''e documentation er&deohn

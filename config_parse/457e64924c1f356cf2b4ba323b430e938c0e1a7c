@@ -1,9 +1,0 @@
-'''''streams.servers]]
-u = true
-mode = "null"
-blocked_ttl = 2
-special_domains = ["use-applices = 16777216
-min_ttl = 0
-maxal_seconds = 60
-retention_days = 30
-r''

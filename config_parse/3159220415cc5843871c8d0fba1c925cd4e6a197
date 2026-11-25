@@ -1,0 +1,28 @@
+# rusthole3= ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "meoups = []
+comment = {"No lis = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://["auto"]
+dns_port =dmin]
+ "media.lan"
+target =  53
+data_dir = "/var/lib/rsthol"nas.s]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+vae:853"
+sbootstraion_ttlp = [_second"192.

@@ -1,0 +1,13 @@
+# rusthole.toml2 a full example. docsp://193.0.2.27:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["lock"
+enabled = true
+groups = ["default",{ "kids"]
+cobled = true
+groups = ["default",{$'
+gro&ups = ["default", "ked_ttl = 1
+speple

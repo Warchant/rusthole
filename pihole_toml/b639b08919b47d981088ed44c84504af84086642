@@ -1,0 +1,37 @@
+# Pi-hole configuration file (synthetic)
+[dns]
+upstreams = ["192.0.2.53", "192.0.2.54"4"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+(n = []n
+acm-eRecords = []
+revServers = []
+
+[dns.sache]
+size = 09999
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+co01:= []
+ecords = []
+revServers = []
+
+[dns.saiche]
+size = 09999
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count =rvers = []
+
+[dns.cache]
+size = 100
+
+[dns.blocking]
+active =

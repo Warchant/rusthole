@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "url": "444444",
+  "etag": "\"abc122\"",
+  "last_modified": "00: GMT,A",
+  "body_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "size_bytes": 1234,"entries": {
+    "valid": 10,
+    "invalid":1,
+    "skipped": 4
+  },
+  "last_success":0,
+ "last_error": "_aem3"
+}

@@ -1,0 +1,20 @@
+Servers = []
+
+[dns.cache]
+size = 10000
+
+[fns.bloing]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count =1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,448os,[::]:80o,[::]:443os"
+
+[7ebserver.hcocoapi]

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "SSSS*SSS_|Scom$:", "groups": [1]}

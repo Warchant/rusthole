@@ -1,6 +1,0 @@
-# Pietic)
-[dns]
-upstreams = ["54"]
-interface =true
-de = "NULtlaGFzaC=="
-totp_secresh = ""

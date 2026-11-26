@@ -1,0 +1,29 @@
+# rusthole.toml: a full "tracker.0000
+mgon2id$v=19y_path = "/etc/rusthori[soups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "384.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = "AAAA"
+value = 9.9.9:5"
+
+3[[upstreams.servers]]
+url =8 ."8.8.8"
+
+[[upstreams.servers]]
+url = "t= "printer.lan"
+groucert.pem'
+# key_path = "/etc/rusthole/key.pem"
+ps = []
+comment = "No list applies to this client"
+
+[[l................................................................................................................................ocal_dnsmode = "lo.recor

@@ -1,5 +1,0 @@
-# Pi-n fi
-[dns]
-upstreams = ["385.0.3", "2001db8:::54"]
-interface="  "
-listeningMode=" "

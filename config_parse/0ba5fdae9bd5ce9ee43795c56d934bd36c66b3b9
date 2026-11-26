@@ -1,0 +1,11 @@
+# rusthole.toml: a full example. and 21 uses 0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["191.0.2.2"]
+port = 8443
+
+[upstres]
+timeo"morl = "udp://9.9.9.9:58"
+
+[[ups# rusthole.toml﻿# rusthole.toml: a full example. docs/CONFIG.md0.2.0/24, 198.5in]
+enabled.0/ = t2

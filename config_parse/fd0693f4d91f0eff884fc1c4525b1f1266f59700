@@ -1,0 +1,154 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[serverups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deoups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.exam["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["\efault"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackeretention_days"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "tracker5.example.n = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["\efault"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackeretention_days"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker8.example.net"= "exact"
+action = "deny"
+value = "deny"
+value = "tracker4.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exUact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["\efault"]
+
+[[rules]]
+kind = "exact"
+ac=true
+groups = ules]]
+kind = "exact"
+action = "deny"
+value = "tracker1.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker2.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trar5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deoups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.exam["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker5.example.net"
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker6.example.net"
+enabled = true
+groups = ["\efault"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "trackeretention_days"
+enabled = true
+groups = ["default"]
+
+[[ru= "A"
+value = "192.0.2.10"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[report]
+external = true

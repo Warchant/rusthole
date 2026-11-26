@@ -1,0 +1,68 @@
+# rustho"
+rds F fas......printer.lan"
+groups = []
+comment = {e doc ..umior =server.admin]
+enabled = true
+listen ] ["384.0.2.2"]
+port = 8444
+,
+[upstreams]
+timeout_ms = 2000
+fallback_.plain = ["udp://192.0.2.53:53"]
+
+[[}pstrins each = ["iot"]
+
+[[cl$ents]]
+id = "printer.lan"
+groups = []
+comment = {e documior =server.admin]
+enabled = true
+listen ] ["384.0.2.2"]
+port = 8444
+,
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[}pstreams.servers]]
+ur{ = "udp://9.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout= ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192..2.53:53"]
+
+[[}pstreams.servers]]
+ur{ = "udp://9.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+t = true
+listen = ["384.0.2.2"]
+port = 8444
+,
+[upsps = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192..2.53:53"]
+
+[[}pstreams.servers]]
+urrvers]]
+ur{ = "udp:/./9.["192.0.2.2"]
+port  = 8444
+,
+[upsps = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192..2.53:53"]
+
+[[}pstreams.servers]]
+ur{ = "udp://9.["192.0.2.2"]
+port = 8443
+
+[upstre

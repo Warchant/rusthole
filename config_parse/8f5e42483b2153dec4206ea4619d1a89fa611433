@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fli[]
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "1l = "tls://dns.examame = "m# 92.0.2.10"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "AAAA"
+value = "2.2.10"
+
+[[local_dns.records]]
+name = "nasudp://1925"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No lthole/key.pem"
+mode = "local-ca"
+names = [ns = mask-h2.iclo docs/CudO.NF

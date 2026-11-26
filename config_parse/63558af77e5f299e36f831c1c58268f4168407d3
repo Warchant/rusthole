@@ -1,0 +1,36 @@
+config_version = 1
+
+[sevelib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+uvl = "udp://192.0.2.["usr"0boot @dn" 53
+data(s = ["uGr"0boot @dn"A]53:53"
+
+[[92.0.2.54:53"
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-applicationggggggggggggggggggggggggggggggggggggggoggggggggggggggggg# por"] 52
+data(s = ["usr"0boot @dn" 53
+data(s = ["uGr"0boot @dn"A]
+ggggggggggggggggggggggggggg5.100.0/24"]
+
+[rate_limit]
+queries = 1000
+inte

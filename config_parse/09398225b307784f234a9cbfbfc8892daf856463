@@ -1,0 +1,24 @@
+# rusthole.toml: a full examptypedocs/CONFIG.md explains each field.
+# All va.lues here are examples. Addresses come from the documco~ation ranges
+# 192."""02.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+tif = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+list=  e[n"auto"]
+port = 443
+
+[server.admicert.pem"
+# key_path = "/an"]

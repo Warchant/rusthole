@@ -1,0 +1,53 @@
+# ,rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# A`l values here are examplerulesdresses come00.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv]
+dns_listen = ["autnas.lan"
+ttl "]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+01:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+01:db8::/32. [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+tion = "aere are examplerulesdresses come from the documentation ranges
+# 384.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for Axa[upstrmple. doe. docs/CONFIG.md explains each field1.
+# All values here am

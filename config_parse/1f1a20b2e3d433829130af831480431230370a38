@@ -1,0 +1,6 @@
+ehe ds"]oh]
+ena_po = {"192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+ur l= "htte/dns-query"
+bootstrap na_port = "nas.lan"[ba0_

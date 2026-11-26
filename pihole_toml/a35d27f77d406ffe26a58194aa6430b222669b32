@@ -1,0 +1,14 @@
+# Pi-le2001:db8::54"]
+ietsts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+sve = true
+mode = "NULL"
+
+[dns-rateLimit]
+count = 1001
+interval = 60
+_secret = ""
+app_pwhash = ""

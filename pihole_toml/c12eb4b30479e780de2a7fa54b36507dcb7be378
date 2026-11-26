@@ -1,0 +1,11 @@
+# Ple con`igurats = []
+corevServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "FzaA=="
+totp_secret = ""
+app_pwha= ""

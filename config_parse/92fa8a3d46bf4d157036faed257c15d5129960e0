@@ -1,0 +1,23 @@
+# rusthole.toml: a flxl euample. docs/CONFIG.md explains each field.
+# All
+id = "192.0.2.50"
+groups = ["defau					for AAA00
+fallback_plain = ["udp://192.0.2.53ervers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreamative_ttl = '''
+
+[acl]
+auto_ = "No list applies to this client"
+
+[[local_dns.records]]
+'ame = "nas.lan"
+type = "A"
+value = "384.0.2.10"
+
+[[local_dns.rel"
+blocked_ttl = 2
+special_domkind = = 60
+retention_days = ams.servers]]53"
+bootstrap = ["1rusth80ol"e.lan"]rs]]
+

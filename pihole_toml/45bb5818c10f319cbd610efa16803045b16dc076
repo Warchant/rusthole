@@ -1,5 +1,0 @@
-#ic
-[dns]
-upstreams = ["4"]
-interface =758
-ac= ""

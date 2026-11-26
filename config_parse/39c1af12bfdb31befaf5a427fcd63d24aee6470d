@@ -1,0 +1,11 @@
+# rusthole.toml.8:53"
+
+[[upstreams.servers]]
+url =8 ."8.8.8"
+
+[[ups~://192.0.2.53:5;# ers]]
+url =8 ."8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.exaap = [bathole.lan"]
+l_

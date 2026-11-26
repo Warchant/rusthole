@@ -1,0 +1,10 @@
+# rusthole.tONFIG.md explains eace sd.fhd.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+data_dirZ = 53
+data_dir = "/var/l6744073709551615The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

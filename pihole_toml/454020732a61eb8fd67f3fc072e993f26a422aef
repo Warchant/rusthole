@@ -1,7 +1,0 @@
-# Pi-hol3etrue
-dns= 1000
-
-[dns.cache]
-size = 10000
-
-[dns.blockin

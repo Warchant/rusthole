@@ -1,0 +1,73 @@
+# rusthole.
+special_domains = ["use-application-dns.net"0000000000000000000000000000000"
+
+[tls]
+# Thrnal = true
+-ca"
+names = ["
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.w"
+value = "cdn.example"
+enabled = false
+ = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+e"
+mode = "localxternal = true
+-ca"
+names = ["
+[lists]
+refresh_s]
+flush_interval_seconds = 60
+retention_days = 30
+recint_queries = 1000=
+
+[report]
+e"
+mode = "localxternal = true
+-ca"
+names = ["
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlisupstreams.servers]]
+url = "https://doh.example/ds= "cdn.example"
+enabled = false
+ = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+e"
+mode = "localxternal = true
+-ca"
+names = ["
+[lists]
+refresh_inte = "file"
+# cert_path = "/etc/rusthole/cert1"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net"0000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "flile"
+# cert_path = "/eint_queries = 3439
+
+[report]
+e"
+mode = "localxternal = true
+]pstreams]
+timeout_ms = 2000
+fallba
+ck_

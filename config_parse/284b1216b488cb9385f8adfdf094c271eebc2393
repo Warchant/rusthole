@@ -1,0 +1,59 @@
+# rus]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.ep_cname_check = true
+
+[cache]
+maserverses = 10000
+maxetb_ys = 16777216
+min_ttl = 0omains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[gample"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name ["192.0.2.80", "192.ep_cname_check = true
+
+[cache]
+maserverses = 10000
+maxetb_ys = 16777216
+min_ttl = 0omains of ads.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment =20000
+max_bytes = 16777216
+min_ttl = 0omains a fods.example"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups] = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+commetc/rusthole/key.pem"
+mode = "loclan"]

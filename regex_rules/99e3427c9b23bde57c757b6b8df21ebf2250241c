@@ -1,0 +1,5 @@
+^xn--bcher--bcher-kv\p{L}+\.exaa\^bücher$
+^bücher\.example$
+\p{L}+\.exa-kv\p{L}+\.exaa\^büle$
+\p{L}+\.example
+^ä

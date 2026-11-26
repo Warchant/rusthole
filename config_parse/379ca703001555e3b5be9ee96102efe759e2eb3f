@@ -1,0 +1,64 @@
+# rusthole.toml: adocumentation ranges
+# 192.0.2.0/24, 198.51.10y _dns.conditional_forwarding]]
+cidr = "193.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://193.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.$9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[ups# rusthole.toml: a full example.d explaiome from thole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = f"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = [:192.0.2.2"]
+port = 8443
+
+[ 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for r/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["aurate_lto"]
+port = 443
+
+[server.admin]
+enabled = tfield.
+# All values here are examples. Addresses come from thole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = [:192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_//doh.example/dns-qu

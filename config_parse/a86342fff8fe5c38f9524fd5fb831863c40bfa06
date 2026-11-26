@@ -1,0 +1,58 @@
+# rusthole.toml: a full example. docs/CONFIG.md explow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker2.0/24, 198.51.100.0/24 and 2001:db8::/32. v"]
+port = 443
+
+[server.admin]
+groupsenabled = true
+listen = ["192.//192.0.2.53:53"]
+
+[[upstreams.sesvers]]
+url = "udp://9.9.9.9:53"
+
+[[0", "192.0.2.82"]
+
+[[up = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entx_ries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[zeport]
+external = true
+
+[lists]
+refresh_interval_hours = 2groups = ["kids"]
+comment = "Tablet"
+
+[[blients]]
+id = "1ert.pem"
+# key_path =ec"/t /russ = ["rusthole.lan"]

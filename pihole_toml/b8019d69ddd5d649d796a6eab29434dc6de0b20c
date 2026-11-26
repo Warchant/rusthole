@@ -1,0 +1,25 @@
+# Pi-hole conf "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLoggIng = true
+dnssec = true
+hots = []
+cnameRecords = []
+revrvactive =g]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+ct = 0500
+interval = 60
+
+[dhcp]
+active = false
+
+[weber]
+port = "80o,443os,[::]:80o,[::]:443os"
+
+[webserver.api]
+A=="
+totp_secret = ""
+app_pwhash  ""

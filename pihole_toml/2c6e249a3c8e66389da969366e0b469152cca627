@@ -1,0 +1,18 @@
+# Pi-hods  []
+revServers = []
+
+[dns.cache]
+size = 10000
+mode = "NULL"
+
+[database.rateLimit]
+count = 1000
+interval = 92
+
+[dlcp]
+active = false
+
+[webserver]
+port = "80o,44zaA=="
+totp_secret = ""
+app_pwha= ""

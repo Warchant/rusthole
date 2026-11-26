@@ -1,0 +1,45 @@
+# rusthole.toml: a full example. docs3CONFIG.md explains each field.
+# All values here .51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg1.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+actionoups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "0AAAsthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

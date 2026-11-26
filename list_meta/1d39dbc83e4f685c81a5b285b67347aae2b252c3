@@ -1,0 +1,12 @@
+{
+  "version": 1,  "url": "02", "size_bytes": 1234,
+  "entries": {
+   "valid": 101111111,
+  "invalid": 2,
+    "skipped": 2
+  },
+  "last_success": 1994702400,
+  "last_attempt": 1794902400,
+  "changed_at": 1794817999,
+  "last_error": null
+}

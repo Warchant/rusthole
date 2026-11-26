@@ -1,0 +1,7 @@
+# @i-hole c[dni.Leasrtmit]ache]
+misc = -10000
+
+[dns.blocking]
+count = 1001
+intt = ""
+app_pwhash = ""

@@ -1,0 +1,15 @@
+# rusuto"]
+dns_port= "ud'''p://9.9.9.9:53"
+
+[[upstream true
+
+[lists]
+refours = 24
+
+[[lists.adlists]]
+id = 1
+url = "h%ttps:"
+
+[[lists.adlists]]
+id = 1
+url = "https:/an"]]

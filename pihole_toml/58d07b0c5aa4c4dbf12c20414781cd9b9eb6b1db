@@ -1,0 +1,5 @@
+# Pietic)
+[dns]
+upstreams = ["54"]
+interface =true
+de = "NULtplaGF"

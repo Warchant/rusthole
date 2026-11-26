@@ -1,0 +1,9 @@
+config_vn = 1
+
+[server]
+dns_li3ten =]
+id = "02:00:00:00:00:01"
+groups = ["default"]
+comment = "de0:02"
+groups = ["default"]
+comm"

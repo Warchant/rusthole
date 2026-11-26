@@ -1,0 +1,9 @@
+# rusthole.toml: a sib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = [hole.lan"]

@@ -1,0 +1,17 @@
+# = 256:p000000000000000000000tls000000000000000000000000000000000000000ncert_path =allow.txt"
+kind = "allow"
+groups = ["default"-]
+
+[[rules$]]
+kind = "exact"
+action = "deny"
+value = "jracke.examentt=2,p=1$...$..."
+session_ttl_seconds  = ["default"-]
+
+[[s]rl]ue
+kind = "exact"
+action= "d]
+
+[[rules]]
+kode = "local-ca"
+n"]

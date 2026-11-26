@@ -1,0 +1,25 @@
+#.adlists]]
+id = 00:00:192.:0.2.53:53"]
+
+[[upstreams.serv
+refresh_interval_hours = 25
+
+[[lists.adlists]]
+id = 00:00:192.:0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servepstreams.servers]
+
+[serv.rhdoe]
+enabled = false
+listen = ["aut]"opo
+rt = 443
+
+[server.admin]
+enabled = true
+listen  = 1vers]]
+url = "udp://9.9.9= [".9:53"
+
+[auto[up"

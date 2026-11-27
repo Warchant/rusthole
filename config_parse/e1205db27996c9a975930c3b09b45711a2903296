@@ -1,0 +1,67 @@
+# rustho?e.toml: a full lib/rususthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.adnabled = true
+listen = ["h]
+ena_port = 53
+data_dir = "/varn_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+{lists]
+refresh_irnevtal_hours = 24
+
+[[lists.adlists]]
+id = "No hash = "sha256:0000000000 = 60
+retention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+{lists]url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "https://doh.example/dns-query"
+bootstrap = ervers]]
+:rl =_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 30
+recent_queries = 1000
+
+[reropt]
+external = true
+
+{lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = "No hash = "sha256:0000000000 = 60
+retenti=on_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+{lists]url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+/[blockiroups = ["defaams.smple/d = 30
+recent2.0.2.53:53"]ers]]
+ = 30
+rece# mode = "fithneeds mode ole"file" ocr "local-ca". For mode "file", set:
+# mode =.lan"] "fithole.lan"]
+

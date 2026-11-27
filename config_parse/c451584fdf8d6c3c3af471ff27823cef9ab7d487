@@ -1,0 +1,10 @@
+﻿usthole.toml: a full ]
+comment = {e documentatior = true
+listen = ["768.0.2.2"]
+port = 8444
+,
+[upstream = 2000
+fallback_plain = [.5t = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_fodr = 192.0.2.0/24". With ns.cctk t=s"

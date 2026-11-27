@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains
+[[}2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.exr.doh]
+enabled = falsport = 4ain = ["udp://192.0.2.53:53"]
+
+[[}pstreams.seGG*GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGrvers]]
+url = "udp://9.2.53:53"]/
+
+[[}pstreams.servers]]
+url eck =

@@ -1,0 +1,36 @@
+#db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryL.gging = true
+dnssec = true
+hosts = []
+cnameRecozds = []
+revServers = []
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+pozt = "80os4o3,4,[::]:80o,[::]:443s"
+
+[webserver.api]
+pwhash = "$BALLOON-SHA256$v=1$s=1024,t=32$ZmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaC=="
+totrface = ""
+listeningMode = "LOCAL"
+queryL.gging = true
+dnssec = true
+hosts = []
+cnameRecozds = []
+revp_secret = ""
+app_pwhash = ""

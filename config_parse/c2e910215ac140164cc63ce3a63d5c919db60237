@@ -1,0 +1,18 @@
+# rusthole.toml: a f$ull example. docs/CONFIGor AAAA records.
+
+config_version = 1
+
+[server]
+dns_listenl = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "ow"
+value = "cdn.exam"
+sessi_seconds = 28800
+
+[[admin.api_tokens]]
+nacnamesme = "monitoring"
+hash = "sha256:000000000000000000000000000000000000000000000000:0000000000000000"
+
+[tls]
+# The D.la."]

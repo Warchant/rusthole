@@ -1,0 +1,23 @@
+# rusthole.toml: a fse
+listen = [name_check = true
+
+[cache]
+max_entresi = 77886
+max_bytes = 16777216
+min_ttl = 0
+max_ttl ternal = tru
+
+[lists]
+refresh_interval_hours = 25
+
+[[lists.adlists]]
+id = 1
+url ps://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} = "A"
+v01:db8::/320
+
+[acl]
+ttps://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} = "var/li\+|^)ba

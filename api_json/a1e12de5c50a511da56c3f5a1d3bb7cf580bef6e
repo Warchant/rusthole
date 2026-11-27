@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(c|pst\\sr.)an`mam@le/Cpa\\/com$:", "groups": [3]}

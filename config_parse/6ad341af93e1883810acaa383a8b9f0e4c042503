@@ -1,0 +1,97 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+url = "https://lists4.exampleїosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 4"
+
+[[lists.adlists]]
+id = 5
+url = "https://lists5.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+
+[[lists.adlists]]
+id = 6
+url = "https://lists6.example/hosts.txt"
+kind = "block"
+enabled = true
+groups = ["default"]
+comment = "list 6"
+
+[[lists.adlists]]
+id = 7
+url = "https://lists7.example/hosts.txt"
+kind = "block"
+enabled =  true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^track(er)?[0-9]*\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "\eny"
+value = '(\.|^)telemetry\.example\.net$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^ad[sv]?\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)clicks\.example$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+actd = "192.0.2.13"
+groups = ["kids"]
+comment = "device 13"
+
+[local_dns]
+cnames = []
+conditional_forwarding = []
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[report]
+external = true

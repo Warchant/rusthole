@@ -1,0 +1,9 @@
+config_ven = ["auto"]
+dntrap = ["19w.txt"
+kind = """lowdefault"]
+[tls]
+# The DoH listenerment = "needed\
+
+[[rules]]
+kind = "exact"
+aamplethole.la.on

@@ -1,9 +1,0 @@
-# rusthole.toml:0.2.0/24, 198.51.100.0/dns.conditional92.04"
-server = "192..admin]
-enable = 442
-
-[server.Admin]
-enabled =plain = ["udp://191.0.2.53:50382"]
-
-[[upstreams.e:853"
-bme/dnpl-qu

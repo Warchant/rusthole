@@ -1,0 +1,12 @@
+# rustho:/31 .2v uses I recordq.
+
+config_version = 1
+
+[server]
+dns_listen = ["wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwauto"]
+dns_port = 53
+data_dir = "/va0000000000000000000000000000"
+
+[tls]
+# The DoH lemeal-ca"
+names = ["rusthe.lloan"]

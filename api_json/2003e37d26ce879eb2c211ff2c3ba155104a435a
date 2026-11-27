@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^!|pstreams\\.)^ds\\*;;.*******WWWWWWWW***********************************", "groups": [1]}

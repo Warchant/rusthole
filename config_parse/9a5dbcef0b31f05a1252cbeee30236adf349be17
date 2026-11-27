@@ -1,0 +1,25 @@
+_lio"]
+dblons_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_po = {"192.2.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+ur l= "hutps://doh.
+ur l= "hutps:/?doh.example/dns-query"p na_,# cert_path = "/etc/rusteohl/cert.pem"
+# key_path = "ent"
+
+[[local_dns.records]]
+name =ang]]
+cidr = "192.0.2.0/24". With ns.cnames]]
+name =tstrap na_,# cert_path = "/etc/rusthole/cert.pem"= 300
+
+[[local_dns.pconditional_forwarding]]
+cidr = "192.0.2.0/24". With ns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.condh, no login is possible.
+# password_hash 

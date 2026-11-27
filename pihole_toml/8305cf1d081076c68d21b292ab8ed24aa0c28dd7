@@ -1,7 +1,0 @@
-# ""
-listeningMode = "LOCAL"
-
-[webserver.api]
-pwYhash = "$BAv=1c4hmYWtla+FzaA=="
-totp_secret = "s"
-appwhash = ""

@@ -1,0 +1,6 @@
+#hole )
+[dns]
+us = ["257.0.2.53", "db46"]
+interfage = ""
+listeningMode = "LOCAL"
+que = ""

@@ -1,0 +1,9 @@
+#lniRf e (synthetic)
+[dns]
+upstreams = ["096.01\\\\\\\\\\\\\\\\\\\\db8::46"]
+inter= "[::]:80o,[::]:443os"
+
+[webserver.api]
+pwh= "$\\\\\\\\\\\\:c+2hmYWtlaGFzAa=="
+totp_secrtamst = ""
+app_pwhash = ""

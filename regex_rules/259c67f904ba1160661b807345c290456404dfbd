@@ -1,0 +1,14 @@
+^.|^s\b
+^[^.]+\.e{0,3}\.
+(?i)TAR^CK
+\bads\b
+^[^.]+\.example\.com$(a)\b+c||.(x|y)$C^e\.com$
+^trle\
+^|rle\.com$
+^tracker[0-9]*\.|ne
+&
+\p{L}+\.examp.com,
+^tracker[0-9]*\.|ne
+&
+\p{L}+\.example
+^ä

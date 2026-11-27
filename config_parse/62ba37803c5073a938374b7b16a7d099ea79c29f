@@ -1,0 +1,95 @@
+config_version = 1
+
+[server]
+
+[server# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documrve
+listen = [name_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl 6777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["d# rusthole.toml: a ful4 example. docs/CONFIG.md expl
+grouefault"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "c6400
+negative_tlt = 300
+
+[acl]
+auto_local = true
+allow = ["396.51.100.0/24"]
+
+[rate_limit]
+querirul= 1000
+interval_seconds = 30
+
+[dir = "/var/lib/rusthole"
+
+[server# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documrver.doh]
+enabled = false
+listen = [name_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16772167
+min_tt://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} =0"A"
+value.toml: a full example. md expl
+groups = ["defau"
+enamment = "needed"
+
+[[rded = false
+listen = ["auto"]
+po'rt = 443
+s
+[erver.admipl-ca"
+names"rusthole = ["rusthole.lal.ann"_ = "191.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses IPv6 only for An = "deny"
+value = '(config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = " example. docs/CONFIG.md explains each field.
+# All values here are examples.ps = ["defau"
+enamment = "needed"
+
+[[rded = false
+listen = ["auto"]
+po'rt = 443
+s
+[erve Addressesr.admi come from the documrver.doh]
+enabled = false
+listen = [name_check = true
+
+[cache]
+max_entries = 10000
+max_bytes 1 =6777216
+min_tt://lists.example/hosts.txt"
+kind"nas.lan"
+type}}}}}}}} = "A"
+value.toml: a full example. docs/CONFIG.md expl
+groups = ["defau"
+enamment = "needed"
+
+[[rded = false
+listen = ["auto"]
+po'rt = 443
+s
+[erver.admipl-ca"
+names"rusthopl-ca"
+names"rle = ["rusthole.lal.ann"_ = "192.0.2.10ts.adlists]]
+id = 2
+u001:db8::/32. v1 uses usIPtv6 h

@@ -1,0 +1,6 @@
+#le synthetic)
+[dns]
+upstreams = ["3", "﻿", "20:254"]
+
+U0DDDDD= true
+dns = ""

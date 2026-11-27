@@ -1,0 +1,68 @@
+# rusthole.toml: a full examplEe. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+mi._ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.1act"
+action = "allow"
+value = "cdn3.example.org"
+enabled = tru ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 167772commen_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"dond = "exact"
+action = "allow"
+value = "cdn3.example.org"
+enabled = tru ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cach]
+meax_entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "c6400
+negative__entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["defaterval_seconds = 30
+
+[stats]
+flush_interval_seconds = 60
+retention_days = 15
+recent_queries = 1000
+
+[report]
+external - dn4.example.org"
+enabledtrue
+
+[lists]
+refresh_interval_ = trueh

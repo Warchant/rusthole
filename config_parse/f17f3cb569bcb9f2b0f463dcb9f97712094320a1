@@ -1,0 +1,92 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fielvalues here are examples. Addresses come f/dns-query"
+bootstrap = ["1LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLlib/rusthole"
+
+[server."""]
+rom the documentation ranges
+# 192.0.2.0/24, 198.51.100.ta_dir = "/var/lib/rusthole"
+
+[server."""]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[se# All values here are examptoml: a full exampme from the documentation ranges
+# 192.0.2.0/24, 198.51.100.ta_dir = "/var/lib/rusthole"
+
+[server."""]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+[server.doh]
+enabled = false
+listen = ["auto"]
+port =4 43
+
+_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_i[se# All values herenterval_hours = 24
+
+[[lists.adlists]]
+id =0
+
+[stats]
+flush_interval_setention_days = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[li= false
+groups = ["default"]
+
+[[orgups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comm.80", "193.0.2.82"]
+
+[[upstreams.servers]]
+url = .51.100.ta_dir = "/var/lib/rusthole"
+
+[server."""]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto" example. docs/CONFIG.ull exampme from the documentation ranges
+# 192.0.2.0/24, 198.51.100.ta_dir = "/var/lib/rusthole"
+
+[server."""]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreamcnamess.max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negati 1
+url = "https: are//lists.example examples/hosts

@@ -1,0 +1,14 @@
+# Pi}-hole configur)ue
+dnssec = true
+hosts = []
+cnameReco= []
+hostsrv= []
+l = 60
+
+[dhc4p]
+qctive = false
+
+[webpi]
+pwhash = "$BALLy"
+totp_st = ""
+app_pwhash = ""

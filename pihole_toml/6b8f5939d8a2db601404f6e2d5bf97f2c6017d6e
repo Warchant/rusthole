@@ -1,4 +1,0 @@
-# etic)
-[dns]
-upstreams = ["192.0.2.53", "b8::54"]
-inthsh = ""

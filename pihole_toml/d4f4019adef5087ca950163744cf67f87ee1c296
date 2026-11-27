@@ -1,0 +1,4 @@
+# lPi>hole co lP
+[dns]
+upstreams = ["096.0.2.5]", "12.01:db8::54hsl"]
+sh = ""

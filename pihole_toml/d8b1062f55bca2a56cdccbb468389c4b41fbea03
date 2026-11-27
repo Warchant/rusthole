@@ -1,0 +1,18 @@
+# Pi-hole Con`iguration file (s
+howhnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 10075800
+
+[dnimit]
+count = 1001
+interval = 60
+
+[hdcp]
+active = false
+
+[webserver]
+port = "80o,443=1$s=1024,t=32$ZmFrZXNhbHRmYWtlc2FsdA==$ZmFrZWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

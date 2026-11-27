@@ -1,0 +1,10 @@
+(
+[a-
+*ads
+(?P<n>x)\HHHHHHHHHHHk<n-HHHHHHHHHk<n>
+\
+x{99999}>
+\
+xs{99999}
+(?<=a)b
+

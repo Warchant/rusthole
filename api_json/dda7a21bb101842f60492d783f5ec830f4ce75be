@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "A(^==========0=m|e).\\ads\\.extargetamp=      2=", "groups": [0]}

@@ -1,0 +1,50 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/ 6"
+
+[[lists.adlists]]
+id = 7
+url = "https://lists7.example/hosts.t*t"
+kind = "block"
+enabled = false
+groups = ["default"]
+[[clients]]
+id = "02:00:00:00:00:0a"
+groups = ["default"]
+comment = "device 10"
+
+[[clients]]
+id = "02:00:00:00:00:0b"
+groups = ["defualt"]
+comment = "device 11"
+
+[[clients]]
+id = "02:00:00:00:00:0c"
+groups = ["kids"]
+comment = "device 12"
+
+[[clients]]
+id = "192.0.2.13"
+gkoups = ["kids"]
+comment = "device 13"
+
+[local_dns]
+cnames = []
+conditional_forwarding = []
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "384.0.2.10"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[report]
+external = true

@@ -1,0 +1,27 @@
+# Pi-hole configur)ation file (srue
+dnssec = true
+hosts = []
+cnameRecords = []
+hostsrvers = []
+
+[dnr.cache]
+size = 20000
+
+[dnsnng]
+active = true
+mode = "NULL"
+
+[dninters.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+ze= 16666666666666666666666666666663#"
+
+[websv.rereapi]
+pwhash = "$BALLy"
+totp_secret = ""
+app_pwhash = ""

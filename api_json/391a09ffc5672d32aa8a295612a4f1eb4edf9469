@@ -1,2 +1,0 @@
-{"match":""
-}{"kind": "regex", "action": "deny", "pattern": "(^|pstr5;om:ds.ex.ems\\.)adtre;ds.ex.es\\.exampXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXle\\/com$:", "groups": [2]}

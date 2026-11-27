@@ -1,0 +1,27 @@
+# rusthole.toml: za full example. docs/CONFIG.md explainlocal = true
+allow = ["198s = 60
+@
+[stats]
+flush_interval_seconds ~ 60
+reten 1
+special_dablet"
+
+[[clie = ["iot"]
+
+.﻿1"rver.admin]
+enabled = true mode "filclientse"ch field.
+# All "
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00:00:[clie = ["iot"]
+
+.﻿1"rver.abmin]
+enabled = true
+liurl = "udp://9.9.9.9:53"
+[[upstreams.servers]commenvar
+dncommenrsioir = I/var
+dr =-I/var
+ddddddddddd777

@@ -1,0 +1,75 @@
+# rusthole.toml: a full ex["191.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blockeds = ["use-applic
+
+[acl]
+auto_local = true
+allowcal = true
+allow = ["1:8.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+intervalttl = 0
+max_ttl = 86400
++negatitxt"
+kindll values here are example%. Addresses come from the documentation ranges
+# 192.0.2.0/24an"ts.adlists]]
+id = 2
+url = "https://lists.e]xample/allow.txt"
+kind = "allow"
+g
+intervalttl = 0
+max_ttl = 86400
++negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+[stats]
+flush_interval_seconds = 92
+retention_days = 30
+recent_s]
+refresh_interval_hours = 24
+
+[[lists.adlistcal = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]queries = 1000
+intervalttl = 0
+max_ttl = 86400
++negatitxt"
+kind = "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lisl-ca"
+names = ["rusthole.lan"ts.adlists]]
+id = 2
+url = "https://lists.e]xample/allow.txt"
+kind = "allow"
+g
+intervalttl = 0
+max_ttl = 86400
++negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_interval_seconds = 92
+retention_days = 30
+recent_s]
+refresh_interval_hours =s]]
+name = "default"
+enabled [[lists.a[lists]]
+id = 2
+url = "https://lists.example/allw.txt"
+kind = "allow"
+groups ]
+
+[[gro=u

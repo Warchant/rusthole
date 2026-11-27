@@ -1,0 +1,31 @@
+# rusthole.toml: adocumentation ranges
+# 1.209.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[uptreams]
+timeout_ms = 2000
+fellback_plain = ["udp://192.0.2.53:53"] 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+ent = 8443
+
+[upstreams]
+timeout_ms =e docub/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["aurate_lto"]
+port = 443
+
+[server.admin]vers]]
+url = "https://doh.example/dn= "https://doh.examgon3idple/dns-qu

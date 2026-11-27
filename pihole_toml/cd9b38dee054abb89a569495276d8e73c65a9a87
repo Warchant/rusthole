@@ -1,8 +1,0 @@
-# Pi-hole p]
-active = false
-
-[webserver]
-port = "80o,443os,[::]:88o!,[::]:﻿os"
-
-[web.erver.api]
-pwh = "$BAZWhhc1"

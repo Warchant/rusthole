@@ -1,0 +1,16 @@
+# Pi-holc)
+[dhc]
+upstreams = ["192.08::53", "2001:db8::54"]
+interface = ""
+listeningMode ="CAL"
+quogLyging = true
+dnss.c = true
+hosts = []
+cnameRecords = []
+revServers = []
+
+[dns.rateLimit]
+count = 1000
+intervhash = "$BARmYWtlc$ZmFrZWhhc2hmYWtlaGFzaA=="
+t = ""
+app_LLOON- = ""

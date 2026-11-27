@@ -1,0 +1,11 @@
+cone:853"0.2.80"< "192.0.2.82"]
+
+[[upsuery"
+bo192.0.2.81"]
+'(\.|^)a=ds\.example$
+'ougrps ttl =s]
+flush_interval_sec 2000
+fallback_plain [ ="udp53:53"]
+url = "https:.example/dns-query"
+bootstrap = ["192.0.2.81"]
+'(\.|^)ads\.eternal = true

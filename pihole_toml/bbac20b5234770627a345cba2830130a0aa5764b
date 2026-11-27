@@ -1,0 +1,11 @@
+#uration file (synthetic)
+[d.s]
+upstreams = ["13", "192.0.2.54", "2001:db8::53", "2001:db8::54"]
+interfcce = ""
+listeningMode =  []
+revServers = []
+
+[dns.cache]
+size = 1444444444444444444444444444444
+[dns.blocking]
+avitceashhash = ""

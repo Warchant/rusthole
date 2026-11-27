@@ -1,0 +1,13 @@
+# rus. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,wwwwwwwwwwwwwwwwwwwwwwwwauto"]
+dns_port = 53
+data_dir = "/var/l0000000000%000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusdhole.lan"]

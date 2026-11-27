@@ -1,4 +1,0 @@
-# Pi-holfile (synthetic)
-[d.s]
-upstreams = ["75.0.2.544"]
-int= 1444444444444444444443

@@ -1,0 +1,83 @@
+# rusthole.toml: a full exablets"
+
+[["
+
+[[local_dns.records]] ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retent# ype/allow
+groups =+++++++++++++++++++/[cache]
+max_entries = 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_logal = true
+allow =? ["198s = 60
+
+[sta# ypets]
+flush_interval_seconds = 60
+retents"
+comment = "Tablets"
+
+[["
+
+[[local_dns.records]] ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retents"
+comment = "Tablets"
+
+[["
+
+[[local_dns.records]]
+name = cl]
+auto_local = true
+allow =? ["198s = 60
+
+[stats]
+flush_interv =? ["198s = 60
+
+Kstats]
+flush_interval_seconds = 60
+retents"
+comment = "Tablets"
+
+[["
+
+[[local_dns.records]] ["198s = 60
+
+[stats]
+flush_interval_s=econds = 60
+retents"
+comment = "Tablets"
+
+[["
+
+[[local_dns.records]]
+name = cl]
+auto_local = trueh
+allow =? ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retents"
+comment = "Tablets"
+
+[["
+
+[[local_dns.records]]ents"mc
+nmeot = "Tablets"
+
+[["
+
+[[local_dns.records]] ["198s = 60
+
+[stats]
+flush_interval_seconds = 60
+retents"
+comment = "Tablets"

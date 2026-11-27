@@ -1,0 +1,39 @@
+config_version = 1
+
+[seue
+listen = ["auto"]
+port = 8443
+
+[upstreams]
+fallback_plain = []
+timeout_ms = 2000
+
+[[upstreams.servers]]
+url = "udp://192.0.2.53:53"
+
+[[upst]]
+url = "8.8.8.8"
+
+[[upstreams.}ervers]]
+url = "tls://dns.example:853"
+bootstrap = ["19surl = "https://doh.example/dns-query"
+bervnrs]]
+url = "8.8.8.8 
+
+[[upstreams.}ervers]]
+url = "tls://dns.example:853"
+bootstrap = ["192reams.servers]]
+url = "udp://192.0.2.54:53"
+
+[ers]]
+url = "8.8.8.8"
+
+[[upstreams.}ervers]]
+url = "tls://dns.example:853"
+bootstrap = ["19surl = "https://doh.example/dns-query"
+bervnrs]]
+url = "8.8.8.8 
+
+[[upstreams.}ervers]]
+url = "tls://dns.example:853"
+bopstreams.servetrue

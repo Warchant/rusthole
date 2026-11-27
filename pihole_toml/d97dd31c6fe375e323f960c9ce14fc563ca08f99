@@ -1,5 +1,0 @@
-# c)
-[dns]
-upstreams = ["192.0.2.53", "191:db8::53", "#0lNULL."]
-interface = ""
-lapp_pwh = ""

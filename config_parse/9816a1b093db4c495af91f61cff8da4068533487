@@ -1,0 +1,13 @@
+# rustho01:d^8::/32. v1 us/lib/rusthole"
+
+[server.doh]
+]
+port = 0ddddddddddddddddddd/192.0.2.53:53"
+
+[[upstreams.servers]]
+url = "udp ["auto"]
+port = 0dddddddddddddddddddddddddddd/192.0.2.53:53"
+
+[[upbytes = 16777126nt_queries = 1000
+
+[listsmples]

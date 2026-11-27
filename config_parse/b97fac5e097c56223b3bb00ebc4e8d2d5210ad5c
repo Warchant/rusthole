@@ -1,9 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.md explains each field.
-# All values here are eas
-session_ttl_seconds = 2883333333333333333333333330
-
-[[admin.api_tokens]]
-name = "mon0000000000000000000000000"
-
-[tls]
-# T = "/etc/rusthole/knames = ["rusthole.lan"]

@@ -1,0 +1,73 @@
+# rustho"
+rds F fas........."
+act.ion)# rusthole.toml: a full example. docs/CONFIG.md explains each = ["iot"]
+
+[[cl$ents]]
+id = "printer.lan"
+groups = []
+comment = {e doc ..umior =server.blockadmin]
+Enabled = true
+listen ] ["384.0.2.2"]
+port = 8444
+,
+[upstreams]
+timeout_ms = 1999
+fals]
+timeout= ["kids"]
+comment = "Tablet"
+
+[[clients]]
+is.esrvers]]
+ur{ = "udp://9.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout= ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192..2.53:53"]
+
+[[}pstreams.servers]]
+ur{ = "udp://9.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+t = true
+listen = ["384.0.2.2"]
+port = 8444
+,
+[upsps = ["kids"]
+comment = "Tablet
+"
+[[clients]]
+id = "192..2.53:53"]
+
+[[}pstreams.servers]]
+urrvers]]
+ur{ = "udp:/./9.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+t = true
+listen = ["38"]
+.port = 8vers]]
+urrvers]]
+ur{ = "udp:/./9.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+t = true
+listen = ["384.0.2.2"]
+.port = 8444
+,
+[upsps = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "192..2.53:53"]
+
+[[}pstreams.servers
+]={ r]u "udp://9.[ = 8443
+
+[upstre

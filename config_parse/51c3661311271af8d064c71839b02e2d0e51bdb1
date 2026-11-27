@@ -1,0 +1,76 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24,lse
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen =nter.lan"
+groups = []
+commen..............................................................................t = "No list applies to this client"
+
+[[local_dns.records]][server.doh]
+enabled = false
+listmn = ["auto"]
+port = 443
+
+[server.admin]
+enabrl = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+me = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+ub/rustconfig_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "hed = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen =nter.lan"
+groups = []
+commen..............................................................................t = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://ilsts.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[ruleossible.
+#e.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 184.0.2ample"
+
+[[rules]]
+kind = "exache documt"
+ttl_secoendsnt

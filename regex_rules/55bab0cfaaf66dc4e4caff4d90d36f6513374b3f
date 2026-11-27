@@ -1,0 +1,3 @@
+(\.|^)ads\.example\b$
+[a-z]{3,10}\.example\.lb$
+(www\.)?example\.(com|net)$*

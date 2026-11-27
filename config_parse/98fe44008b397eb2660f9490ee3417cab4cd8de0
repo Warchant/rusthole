@@ -1,0 +1,19 @@
+# rusthole.toml: a full FIG.md explains each fli[]
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "1l = "t this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "1l = = "AAAA"
+valuethis client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = ey.pem"
+mode = "ludO.NF

@@ -1,0 +1,11 @@
+# Pi-holnthetic)
+[dhc]
+listenin = ["192.0db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+ts = []
+cnameRecords = []
+reecret =" "
+app_LLOON- = ""

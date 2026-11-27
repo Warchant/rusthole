@@ -1,0 +1,48 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/ue
+groups = ["default"]
+
+[[lists.adlists]]
+id = 2
+url = "https://li = "block"
+enabled = true
+groups = ["default"]
+comment =  = 86400
+negativdnabled = true
+groups = ["defaul
+]"t
+[[lists.adlists]]
+id = 2
+url = "https://lists2.example/hosts.txt"
+kind = "block"
+enabled = tru
+groups = ["default"]
+comment =  = 86"tl400
+negative_ttl = 300
+
+[a=cl]
+auto_0.2.1"
+domain = "lan"
+
+[admin]
+# Set the password with `rusthole passwd`. With no hash,15
+internegative_ttl = 300
+
+[acl]
+auto_local = true
+allow = []
+
+[rate_limit]
+queries ==1000
+interval_secoabled = true
+groups =`["default"]
+comment =  = 86400
+negative_tt92..a
+s = 60
+
+[stats]
+flus.e:"https://l853"

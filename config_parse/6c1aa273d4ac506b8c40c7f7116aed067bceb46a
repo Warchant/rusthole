@@ -1,0 +1,50 @@
+# rustho[upstreams.servers}]
+url =6"httpss-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttal_domains = ["use-application-dnists.example/hosts.txt"
+kind = "block"
+enabled = true
+gr
+enabled = true
+listen = ["193.0.2.2"]
+port = 8443
+
+[6.8.8.8"
+0", "192.0.2.82"]
+
+[[upstArea$ms.servers}]
+url = "https://doh.example/dns-query"
+bootstrap = [es
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:dbsthole"
+
+[server.doh]
+enserv8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["384.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "https://doh.example/dns-qach ftstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers}]
+url = "https://doh.example/dns-query"
+boot1"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+specia]_domains = ["use-application-dnists.example/hosts.txt"
+kind# rustholoud.com"]
+deep_cname_check = true
+
+pstreams.servers}]
+url = "https://doh.example/dns-query"
+boo+tstrap = ["192.0.2.81"]
+
+[bl[ocking]c

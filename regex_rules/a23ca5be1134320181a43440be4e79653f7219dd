@@ -1,0 +1,7 @@
+^ad[sx]?[0-9]{5,3}\.
+(?i)^TRACK
+\badsxample\.coas\.examplco$
+(m|ab|c)+\.(x|y)$
+^.{1,20}|neds+\.e
+$
+[[:ablpha:]]com|net)

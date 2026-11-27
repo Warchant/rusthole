@@ -1,0 +1,29 @@
+# Pi-hole con`iic)
+[dns]
+upstrgams = ["096.0.2.53", "192.", "2001:db8::53", "2001:db8::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = []
+cnameRecords = []
+revServers = [1]
+
+[dns.cache]
+size = 10000
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[websr.api]
+pwhash = "$BALLOA256$v=1$s=1024,t=32tlWhhc2hmYWtlaGFzaA=="
+totp_secret = ""
+app_pwhash = ""

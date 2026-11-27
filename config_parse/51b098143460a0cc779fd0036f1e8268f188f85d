@@ -1,0 +1,98 @@
+# rusthole.toml: a ful_cname_check = true
+
+[cache]
+max_entries = 10000
+max_= "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+t_path = "/etc/rusthole/cert.pe"m
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca".names =x_ttl = 4[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = 0blocki
+max_ttl = 86400
+negativ= 0blpplies to this client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = e/cert.pe"m
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca".names =x_ttl/ = 8[[clients]]
+id = "192.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = 0blpplies to this client"
+
+[[local_dns.records]000
+max_bytes = 16777216
+min_ttl = 0blocki
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_seconds = 60
+
+[ss.example/allow.txt"
+kind = "allow"
+groups = ["defaul	t"]
+
+[[rules]]
+kinups = ["kids"]
+com000000000000000000000000000"
+
+[t]000
+max_bytes = 16777216
+min_ttl = 0blocki
+max_ttl = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+interval_ses = ["use-application-dns.net", [lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.examp ["rusthole.lan"]

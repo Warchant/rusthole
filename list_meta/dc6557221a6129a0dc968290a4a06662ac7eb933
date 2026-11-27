@@ -1,0 +1,9 @@
+{
+  "version": 1, "url": "xt",
+ "etag": "\"a000 00000000000000001",
+  "size_bytes": 1234,
+"entries": {
+    "valid": 10,
+  "invalid": 1,  "skipped": 1
+  }
+}

@@ -1,0 +1,7 @@
+# ""
+listeningMode = "LOCAL"
+
+[webserver.api]
+pwYodh = "$BAv=1c4hmYWtla+FzaA=="
+totp_secret = "s"
+appwhash = ""

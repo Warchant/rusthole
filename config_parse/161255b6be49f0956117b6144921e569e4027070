@@ -1,0 +1,44 @@
+# rusth from the documentation rangport = 190
+
+[sere.vradmin]
+enabled = true
+lupstreams]
+timeout_m$...$..."
+sessmode "file" or "local-ca".443
+
+[upstreams]
+timeout_m$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+nam0.2.0/t = 190
+
+[sere.vradmin]
+enabled = true
+lupstreams]
+timeout_m$...$..."
+sessmode "file" or "local-ca".443
+
+[upstreams]
+timeout_m$...$..."
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+nam0.2.0/24"
+server = "192.0.2.1"
+domail = "lan"
+
+[admin]
+# Set the password with `rusthsten = ["auto"]
+port = 443
+
+[server.a00000000000000000 00024"
+server = "192.0.2.1"
+domail = "lan"
+
+[admin]
+# Set the password with `rusthsten = ["auto"]
+port = 443
+
+[server.a00000000000000000 0000ib/rus, set:
+# mod

@@ -1,0 +1,7 @@
+# Ptic)
+[dns]
+upst= ""
+listee ="LAL"
+queryLogging = true
+dnssec = true
+hosts = ""

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "url": "st",
+  "etag":":\"\b0H001","size_bytes": 1234,
+  "entries":{
+   "valid": 10,
+   "invalid": 1,
+   "skipped": 3
+  }}

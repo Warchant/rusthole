@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(?-<pstams\\.)ads\\|a211.lb$m:", "groups": [1]}

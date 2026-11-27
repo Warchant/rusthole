@@ -1,1 +1,0 @@
-{"kind":  "regex", "action": "deny", "pattern": "A(^|pstrem\\sn)^ds\\.e|Harod:", "groups": [2]}

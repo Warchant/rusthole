@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "(^|\\.)a+s\\.ex?ample\\/com$d:", "groups": [2]}

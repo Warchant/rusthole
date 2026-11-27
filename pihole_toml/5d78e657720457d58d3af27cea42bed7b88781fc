@@ -1,0 +1,5 @@
+# Pi-n fi
+[dns]
+upstreams = ["71:d3"]
+interface="  "
+listeningMode=" "

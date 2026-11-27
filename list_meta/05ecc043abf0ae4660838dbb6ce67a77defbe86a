@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "url": "ht",
+ "size_bytes": 112,
+  "entries": { "valid": 810,
+    "invalid": 0,
+ "skipped": 2
+ },
+  "last_attempt": 1700,
+  "last_error": "HP53"
+}

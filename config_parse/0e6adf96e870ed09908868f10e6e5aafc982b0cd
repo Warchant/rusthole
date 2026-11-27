@@ -1,0 +1,32 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addree:853"
+bootstrap = ["170.0.1.80", "192.*.2.82"]
+
+[[upst/rusthole/cert,pem"
+# kets]]
+id = "printer.lan"
+groups = []
+cnmment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lans = ["use-application-dns.ame_check = true
+
+[cabhe]
+m`x_entries = 10000
+mgon2id$v='9$m=19456,t=2,p=1$...$..."
+steneexample:853"
+bootstrap = ["192.0.2.80"k-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+mgon2id$v='9$m=19456,t=2,p=1$...$..."
+stener needs mode "file" or "local-ca". For mode "file", set:
+::10"
+
+[[local_dns.cnames]]
+ncommef ads.example"
+
+[[rules]]
+kind = "exact"
+sthole.lan"]

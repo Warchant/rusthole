@@ -1,0 +1,8 @@
+# uratilniRf e (synthetic)
+[dns]
+upstreams = ["096.01\\\\\\\\\\\\\\\\\\\\db8::46"]
+inter= "[\\::,[::]:443os"
+
+[webserver.api]
+pwhaAsh = "$\\\\\\\\\\\\:c+4hmYWtlaGFzaA?="
+_pwhash = ""

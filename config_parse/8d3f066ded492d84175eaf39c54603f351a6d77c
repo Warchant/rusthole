@@ -1,0 +1,33 @@
+# rusthole.tomdb8::/32. ve"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rction = "deny"
+value = "tracker.example"
+rgoups  = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the p''assword with `rusthole passwd`. With no hash, no lo='#=''=''gin is possibleusthole/key.pem"
+mode = .
+# password_hasnames
+[[admin.a$..."
+session_ttl_seconds = 28800
+"local-ca"
+names
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:000000000000000='0000min]"''=''=
+# key_path = "/etc/rction = "deny"
+value =ith no hash, no login is possibleusthole/key.pem"
+mode = .
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds = 28800
+"local-ca"
+names
+[[admin.api_tokens]]
+name = "monitoringh no hash, n? login is possibleusthole/key.pem"
+mode = .
+# password_hash = "$argon2id$v=19$m=19456,t=2,p=1$..*$..."
+session_ttl_seconds = 28800
+"local-ca"
+names
+[[admin.api_tokens]]
+name = "monitor'ing"
+hash = "sh)a256:00c

@@ -1,160 +1,0 @@
-  = "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+tls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0luk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+@dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ].|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-por = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\  = "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruau(tls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+)dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ].|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ]:
- at=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="s = ["default"]
-
-[[rules]]
-kind = "exact"
-action = "allow"
-vruautIls
-port=+0dtdd=the.llan"]:
- add:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\  = "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruau(tls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+)dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten +0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\  = "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruau(tls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+)dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0d:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ]:
- at=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="s = ["default"]
-
-[[rules]]
-kind = "exact"
-action = "allow"
-vruautIls
-port=+0dtdd=the.llan"]:
- add:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\  = "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruau(tls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+)dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan" "deny"
-valuk = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ].|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-por = '(\.|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a=in]
-enabled = true
-listen = ["auto"]
-port = 8443
-
-[upstreams]
-fallback_plain = []
-timeout_ms = 2000
-
-[[upstreams.servers]]
-url = "udp://192.0.2.53:53"
-
-[[upstreams.servers]]
-url = "udp://192.0.2.54:53"
-
-[blocking]
-enabled = true
-mode = "null"
-blocked_ttl = 2
-special_domains = ["use-application-dns.net", "mask.icloud[lists.adlists]]
-id = 4
-url = "httlistslists4.example/hosts.txt"
-kind = "block"
-enabled = true
-groups = ["default"]
-comment = "list 4"
-
-[[lists.adlists]]
-id = 5
-url = "https://lists5.example/hosts.txt"
-kind = "block"
-]]
-name = "kids"
-enabled = true
-comment = "Tablets"
-
-[[clients]]
-id = "02:00:00:00:00:01"
-grouort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ].|^۞|e"s/u#er th:o00:d01:en ="ruauttls
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dddd=the.l+lan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ]:
- at=+0dddd=the.llan"]:
- a= s
-port=+0ort=+0dd:db8::ten ="ruautIls
-port=+0dtdd=the.llan"]:
- a= ]:
- a= 

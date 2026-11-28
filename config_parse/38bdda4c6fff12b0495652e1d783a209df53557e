@@ -1,0 +1,31 @@
+# rusthole.toml: a full exampme. doONFIG.md explains each field.
+# All valuesrecords.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://384.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:85XXXXXXXXXXXXXXXXXXX00000000000000000000"
+
+[tls]
+# The DoH listener needs mode  = "file"
+# cer.lan"]

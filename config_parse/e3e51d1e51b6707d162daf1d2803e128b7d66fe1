@@ -1,0 +1,57 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+#sts]]
+id = 0
+url = "https://lists.example/hosts.txt"
+kind =? "block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list"
+
+[[lists.adlists]]
+id = 1rs]]
+ = 30
+recent_queries = 1000
+
+[report]
+external =]
+enabled = false
+listen = ["auto"]
+prt = 443
+
+[server8.9.9.8:53"
+
+[[upstreams.7servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+ = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_intbbbbbbbbbbbbbbb
+[[lists.adlists]]
+id = 1
+url = "httadlists]]
+id = 1rs]]
+ = 30
+receKKKKKKKKKKKKKKKKKKKnt_queries = 1000
+
+[report]
+external =]
+enabled = false
+listen = ["auto"]
+prt = 443
+
+[serv"] = "exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+na',m[ = "default"
+enabled '',''= 

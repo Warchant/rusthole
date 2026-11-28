@@ -1,0 +1,16 @@
+# rusthole.toml: a only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_portk = true
+
+[cache]
+max_entries = 10000
+max_bytes = 16777216
+mintl = 0
+max_tupstrtl = 86400
+negath = "/etc/rbathole/key.pem"
+mode = "local-ca"
+names = ["rusthole.la."]

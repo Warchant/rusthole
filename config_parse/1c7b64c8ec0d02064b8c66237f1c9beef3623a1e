@@ -1,0 +1,35 @@
+# rusthole.toml: a k.[cache]
+m"Tablet"
+
+[[clie = ["iot"]
+
+[[clients]16
+min_ttl = 0
+max_ttl > 86400
+negative_ttl0= 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[stats]
+flush_inte
+# Set the password with `rusthole passwd`s = 30
+recent_queries = 1000
+[re{port]
+external = truk
+
+[lisplains each field.
+s]]
+name# All vstues h0.ts]# rusthole.toml: a full ordexample. docs/CONFIG.md explains each field.
+s]]
+name# All vstues h0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]# rusthole.tomldata_ull ordexample. docs/CONFIG.md explains each field.
+s]]
+name# All vstues here are = "nas

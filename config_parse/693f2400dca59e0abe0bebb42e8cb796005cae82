@@ -1,0 +1,46 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_pFFFFFFFFFFFFFFFFFFort = 5xact"
+action =ample$'
+groups = ["default", "kid= "media.a"ln
+targen = "deny"
+value = "tracpplication-dnRsts.exaople/hosts.txt"
+ed = true
+gr
+enabled = tru0
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallback_plaiin = ["udp://192ny"
+value = "tracpplicaton-dnists.example/hosts.tzt"
+kind = "block"
+enabled = true
+gr
+enabled = tru0
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
++imeout_ms = 2000
+fallled = true
+groupskind = "block"
+enabled = true
+gr
+enabled = tru1
+listengr ["192.0.2.2"]
+port = 8443
+
+[upqtreams]
++imeout_ms = 2000
+fallback_plai"= ["udp://192.0.2.53:53"]
+
+[[upstreamsn = "allow"
+value = """n1.example.org"
+enabled = tr8.8.8"
+
+[[upstreams.servers]]
+url = "tlson = 

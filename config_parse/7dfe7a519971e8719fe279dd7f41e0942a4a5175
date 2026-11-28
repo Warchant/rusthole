@@ -1,0 +1,80 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here ar2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.:5.5233"]
+
+[[upstreams.max_ttl]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.sr.doh]
+ena_po98.51.100.0/24 and 2001:db8::/32. v1 t= ["auto"]
+dns_port = 53
+data:/32. v1 u= ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusuhole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/ru ["auto"]
+port = 0dddddddddddddddddddddd5555555555555555555555555500215323334r = "/var/lib/rusuhole"
+
+ir = "/var/lib/rusuhole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/ru ["auto"]
+port = 0dddddddddddddddddddddd5555555555555555555555555500215323334426stiole"
+
+[server.doh]
+enabled = falsttl]]
+url = "udp://9.9.9.9:53"
+
+[[upstrear/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.an]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstrea00.0/24 and 2001:db8::/32. v1 u= ["auto"]
+dns_port = 26
+data_dir = "/var/lib/rusuhole"
+
+[server.doh]
+ena_port = 53
+dataidir = "/var/lib/ru ["auto"]
+port = 0dddddddddddddddddddddd555555555555rt = 8443
+
+[upstreams]
+timeout_mstrap = ["192.0.2.80", "192.0.2.82"24 and 2001:db8::/32. v1 ve555555555500215323334426stiole"
+
+[server.doh]
+enabled = fib/rusuhole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/ru ["auto"]
+port = 0dddddddddddddddddddddd5555555555555555555555555500215323334426stiole"
+
+[server.doh]
+enabled = falsttl]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "4.s = ["rusthole.lan"]
+dd5555555555555555555555555500215323334426stiole"
+
+[server.doh]
+enabled = falsttl]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "4.s = ["rusthole.lan"]

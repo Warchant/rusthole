@@ -1,6 +1,0 @@
-# Pdns]
-upstreams = ["31111111db8::54"]
-intcor = []
-upstreamss =[]
-
-secret  = ""

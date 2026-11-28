@@ -1,0 +1,78 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.dot_ms = 2000
+
+[[upstreams.servers]_
+url = "udp://192.0.2.53:53"
+
+[[upstreams.serd = true
+groups = ["default""""]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)example\.com$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = 'ads\d+\.example'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+ion = "deny"
+value = '^track(er)?[0-9]*\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)telemetry\.example\.net$'
+enabled = true
+groups = ["default"]
+
+[[ps = ["default"]
+
+[[rules]]
+kind = # rustdattion = "deny"
+value = '^pixel\.'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\[.|^)metrics\.example\.org$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^analytics[0-9]*\.example\.'
+enabled = true
+:00:08"
+group explarver.doh"regex"
+action = "deny"
+value = '(\.|^)clicks\.example$'
+enabled = true
+groups = ["default"]
+
+[[rules]]
+kinegex"
+actioadmin]
+session_tcets_lonXs = 288]00
+api_tokens = [p]
+
+[tls]
+[report]
+exvernal = true

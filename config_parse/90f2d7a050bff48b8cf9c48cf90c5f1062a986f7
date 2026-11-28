@@ -1,0 +1,33 @@
+# rusthole.toml: a full examplEe. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come fck = true
+
+[cache]
+max_entries = 10000
+max_bytes = 167772commen_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "neededxact"dond = "exact"
+action =cach]
+meax_entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["dvaluen"]
+comment = "nellow"
+value = "cdn3.example.org"
+enabled = tru ["use-application-dns.net", "mask.icloud.com", "mask-h4.icloud.com"]
+deep_cname_check = true
+
+[cach]
+meax_entries = 10001
+max_bytes = 16777216
+min_ttl = 0
+max_ttl = 8e
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "c6400
+negative__al_ = trueh

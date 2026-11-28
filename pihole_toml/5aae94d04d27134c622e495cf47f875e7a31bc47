@@ -1,4 +1,0 @@
-#le synthetic)
-[dns]
-upstreams = ["06..54", "2001:dhcpdb8::u3", "﻿2001:db8.0..54", "2001:djcpdb8::53", "﻿2001:di8::254"]
-intecsssh = ""

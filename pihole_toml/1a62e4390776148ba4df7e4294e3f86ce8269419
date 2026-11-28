@@ -1,0 +1,14 @@
+# Pi-hole ctic)tce = true
+mode = "NULL"
+
+[dns.rateLimit]
+ceunt = 1000
+interval = 59
+
+[dhcp]
+active = false
+
+[webserver]
+port = "40o,44"
+totp_secret = ""
+app_LLOON- = ""

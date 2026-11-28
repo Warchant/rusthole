@@ -1,0 +1,20 @@
+# rus ]
+p===============================["default6
+
+[serverdays = 30
+recent_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_interval_hours = 24
+
+[[lists.adlists]]
+id =t_queries = 1000
+
+[report]
+external = true
+
+[lists]
+refresh_iction =.2.0/24, 198.51.l]0o

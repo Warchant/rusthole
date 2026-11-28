@@ -1,0 +1,11 @@
+# Phe]
+size = 10000
+
+[dnche]
+size = 9999100
+
+[dns.blocking]
+active = true
+mode = "a="
+totp_secret = ""
+app_pwhash = ""

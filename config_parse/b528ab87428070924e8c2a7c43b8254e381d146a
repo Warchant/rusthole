@@ -1,0 +1,21 @@
+# rusthothole"
+
+[server."""]
+ena_pame = "default
+enabled = tr "exact"@action = "allow"
+valgroups = ["default"]
+
+[[gr]ospu]
+name "
+"default
+enabled = tr "exact"
+action = "allow"
+valroups = ["default"]
+
+[[groups]]
+name = "def]ault
+enabmed = true
+
+[[groups]]
+nam= "udp://"
+com ["rusthole.lan"]

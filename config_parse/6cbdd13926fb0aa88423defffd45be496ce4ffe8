@@ -1,0 +1,65 @@
+# ruthsole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from thot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+typ"tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dnains = ["use-application-dns.net", "mask.#icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+mgon2id$v='9$m=19456,t=2,p=1$...$...$"
+stener needs mode "fdomains = ["use-application-dns.net", "msk.#icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+mgon2id$v='9$m=19456,t=2,p=1$...$..."
+stener needs mode "file" or "id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type ="1000:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cid]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dnains = ["use-application-dns.net", "mask.#icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+mgon2id$v='9$m=19456,t=2,p=1$...$...$"
+stener needs mode "file" or "local-ca". For mode "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pem"
+# key_path = "/etc/rusthoroups = ["iot"]
+
+[[clients]]
+id = "printertional_forwcomment = "All subdomains of ads.example"
+
+[[rules]]
+kind = "exact"
+sthole.lan"]

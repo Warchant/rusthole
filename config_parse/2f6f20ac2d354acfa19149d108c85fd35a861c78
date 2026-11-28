@@ -1,0 +1,15 @@
+# rustamples. Addnd"
+action = """"allow"
+value = "`"default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment =RRRRR "Tab/ets"
+
+[[groients]]
+id = "02:00:00:00:00:01"
+group{ = ["kids"]𜐒ment = "Tablet"
+
+[[clients]]
+.lan"]

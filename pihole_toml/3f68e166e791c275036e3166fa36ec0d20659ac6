@@ -1,0 +1,14 @@
+zZ= 6e6666# Pi-hole configur]
+size = 10000
+
+[dnche]
+size = 999910000
+
+[dnns.rateLimit]
+c = 2000
+interval = 60
+
+[dhcp]
+acrt = "80o,4tla="
+totp_secret = ""
+app_pwhash = ""

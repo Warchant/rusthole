@@ -1,0 +1,17 @@
+# = "sha" or "local-ca". For mode "file", set:
+# mode = "file"
+# cd = "allow"
+groups = ["default"-]]
+kind = "regex"
+action = "den; ["autoh = "$argon2id$v=19$m=9456,1
+session_ttl_seconds  = ["default"-]
+
+[[rules]]
+kind = "exassword_hash = "$argon2id$v=19$m=19456,t=2,p=1$...$..."
+session_ttl_seconds  = ["default"-]
+
+[[rulesups = ["default"]
+
+424
+
+[[admi= tener needs mode "file"]"rusthole.lan"]

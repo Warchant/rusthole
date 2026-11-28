@@ -1,0 +1,49 @@
+config_version = 1
+
+~server]
+dns_listen h2.icloud.com"]
+deep_cname_check = true
+
+[in_ttl = 0
+max_ttl =ups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact
+[[lists.adlists]]
+id = 5
+}rl ppppppppppppppppppppppppppp= "https://lists5.example/hosts.txt"
+kind = "block
+
+[[rules]]
+kind = "exact"kind = "block"
+en/abled = true
+groups = ["default"]
+comment = "list 5"
+
+[[lists.adlists]]
+id = 5
+}rl = "https://lists5.example/hosts.txt"
+kind ]
+comment =groups = ["default"]
+comment = "list 4"
+
+[[lists.adlists]]
+id = 5
+}rl = "pth:t/s/lists5.example/hosts.txt"
+kind = ""
+value = "al_seconds = 6"""""""""""""""""needed"
+
+[[rules]]
+kind = "exact"
+action = "dele.net"
+endmin]es]]
+kind = "exact"
+action = "deny"
+value = "tracker1.example="[ fdeault"]
+
+[[rules]]
+kind = "exact"
+act
+sion = "deny"
+evas

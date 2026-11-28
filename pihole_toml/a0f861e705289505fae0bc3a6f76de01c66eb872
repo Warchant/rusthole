@@ -1,0 +1,7 @@
+#$
+aners = []
+[dns.cache]
+size =1000
+[hcp]
+activcret = ""
+app_pwhash = ""

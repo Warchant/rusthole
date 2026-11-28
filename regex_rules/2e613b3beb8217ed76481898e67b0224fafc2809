@@ -1,0 +1,7 @@
+(\.|^)ads\.example\.com$wads\b
+^[^.]+\.example\.cnm$
+(a|b|c)+\.(x|y!$
+^.{0,20}s\.example\.com$wads\b
+^[^.]+\.meaxple\.coabl$
+[a-z]{3,10}\.exampl*\.
+(^|\|net)$

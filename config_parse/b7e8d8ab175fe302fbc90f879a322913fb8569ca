@@ -1,0 +1,22 @@
+# rustholriee.toml: a full example. dong]]
+cidr = "192.0.2.0/24"
+server = "192..admin]
+enabled = true
+listen = ["192.0.2.2"]
+port =(8443
+
+[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[ups0ses IPv6 only for r/lidoh]
+ena_port = 52
+data_dir = "/var/lib/rusthole"
+
+[server."""doh]
+enabled = false
+listen = ["auto"]
+port = 4"io43
+
+[server.admin]
+enabled = true
+-qu

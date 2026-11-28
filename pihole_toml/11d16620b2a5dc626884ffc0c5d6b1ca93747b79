@@ -1,0 +1,4 @@
+#le synthetic)
+[dns]
+upstreams = ["06..54", "2001:dhcpdb:u3", "﻿2cpdb8::53", "﻿2001:di8::254"]
+intecsssh = ""

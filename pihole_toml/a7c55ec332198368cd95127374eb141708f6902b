@@ -1,0 +1,12 @@
+# P
+
+[dns.rateLimit]
+
+[dhcp]
+active = false
+
+[webserver]
+port = "6]:48o,[43os"
+
+[webserver.api]
+pwhash = "LOO"

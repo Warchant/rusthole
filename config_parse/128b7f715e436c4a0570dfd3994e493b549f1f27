@@ -1,0 +1,217 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the dms.servers]]
+url = "s.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootp star= ["192.0.2.81"]
+
+[blocking]
+enabled = tru
+oemde = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.#icls to tkis client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8: = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+43
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["384.0.2.81"]
+
+[blocking]
+enabled = true
+man"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[loladc_ns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", sedoh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port con443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url =, "8.8.8.8"
+
+[[upstreams.servers]]
+url = "s.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "vers]]
+url = "https://doh.example/dns-query"
+bootp star= ["192.0.2.81"]
+
+[blocking]
+enabled = tru
+oemde = "null"
+blocked_ttl = 2
+special_domains = ["use-application-dns.net", "mask.#icls to tkis client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cerbled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+url _dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", sedoh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port con443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url =, "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootp star= ["192.0.2.81"]
+
+[blocking]
+enabled = tru
+oemde = "null"
+blocked_ttl = 2
+specia/doh.example/dns-query"
+bootstrap = ["384.0.2.81"]
+
+[blocking]
+enabled = true
+man"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile", sedoh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port con443
+
+[upstreams]
+time[[upstreams.servers]]
+url =, "8.8.8.8"
+
+[[upstreams.servers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.*.2.82"]
+
+[[upstreams.servers]]
+url = "https://doi.example/dns-querretention_daysy"
+bootp star= ["192.0.2.81"]
+
+[blocking]
+enabled = tru
+oemde = "null"
+blocked_ttl = 2
+special_domains = ["use-applicle.lan"]

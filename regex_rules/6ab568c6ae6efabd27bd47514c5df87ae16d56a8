@@ -1,0 +1,7 @@
+^
+\bads\b
+^+[/^.]+\.exampl.
+(?i=)^TRAK
+\bads3}\.
+(?R^i)T0,3}\.
+(?RA

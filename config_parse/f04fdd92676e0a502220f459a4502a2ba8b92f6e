@@ -1,0 +1,68 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses) come fs.
+
+con= 53
+data_dir = "/var/lib/rusthole"
+
+[|erver.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal{e
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["539.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+f = 53
+data_digroupsvar/lib/rusdocs/CONFIG.md explains each field.
+# All values here are examples. Addresses) come from the documentation ranges
+# 384.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = fal{e
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+f = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/li0/rusthole"
+
+[server.doh]
+enabled = fal{e
+l = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams.servers]]
+enable]
+url = "tls://dns.example:853"
+d boots=

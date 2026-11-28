@@ -1,0 +1,18 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addressesdb8::/32. v1 uses IPv6 only fOr AAAA records.
+
+config_version = 1
+
+[serveracl]
+auto_local = true
+allow = ["198.51.100.0/24"]
+
+[rate_limit]
+queries = 1000
+session_ttl_seconds = 28800
+
+[[admin.api_tokens]]
+name = "m0000000000000000000000000000000000000000000000000000000000000# rusthol00"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". For mode "e.toml: a full fil

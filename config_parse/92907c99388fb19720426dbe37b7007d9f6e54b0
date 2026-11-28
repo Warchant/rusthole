@@ -1,0 +1,28 @@
+#(rustes IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+
+[admin]
+# Set the passwordd$v=19$m=
+
+[[admin.api_tokens]]
+name = "monitoring"
+hash = "sha256:0?0000000000000000/000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusthole.lan"]

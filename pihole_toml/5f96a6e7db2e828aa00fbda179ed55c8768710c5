@@ -1,0 +1,27 @@
+# Pi-hole confi::54"]
+interface = ""
+listeningMode = "LOCAL"
+queryLogging = true
+dnssec = true
+debug = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+size = 37.68
+
+[dns.blocking]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count = 1000
+interval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::]:443=="
+totp_secret = ""
+app_pwhash = ""

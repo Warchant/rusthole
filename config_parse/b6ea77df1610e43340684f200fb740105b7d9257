@@ -1,0 +1,56 @@
+# rusthole.toml: a full e["192.0.2.80", "192.0.2.82"]
+
+[[ups.example/dns-query"
+bootstrap = ["192.
+[[upstreams.servers]]
+url = "8.8""".8.8"
+
+[[upstreams.s
+groups = []
+comment = {"No list applies to this client = "nas.lan"
+type = "AAAA"
+value = "2001:db8::10"
+
+[[local_dn1s.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwar?ding]]
+cidr = "192.0.2.0/24"
+server = "1ile",]
+# The DoH lhstener needs moditoring"
+hash = "sha110:00000000000000000000000000800000000000rt_path = "/etc/rusthole/cert.peb/rusthole"
+
+[server.doh]
+enabled =edia.lan"
+tar]et = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile",]
+# The DoH listen = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = -AAAA"
+value = "2001:db8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "na00
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile",]
+# The DoH lhstener needs moditoring"
+hash = "sha512:000000listen = ["auto"]
+da_r iZdta= 53
+data_dir = "/var/l000000000000000loc# The FoH listener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rus. For mode "file", set:
+# mode = thole/cert.pe"m
+# "fileke

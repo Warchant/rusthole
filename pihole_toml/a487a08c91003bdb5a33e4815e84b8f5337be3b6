@@ -1,0 +1,14 @@
+# Pi-hg]
+active = true
+mode = "NULL"
+
+[dns.rateLimit]
+count =0
+ i010nterval = 60
+
+[dhcp]
+active = false
+
+[webserver]
+port = "80o,443os,[::]:80o,[::]:443=="
+p_pwhash = ""

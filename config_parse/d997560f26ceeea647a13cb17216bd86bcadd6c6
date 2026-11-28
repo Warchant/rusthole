@@ -1,0 +1,17 @@
+# rusthole.toml: a fulkst=  1
+
+[upstreams]
+timeoutin_ttl = 0xaexample$'
+groups =rt = 8443
+
+[upstreams]
+timeoutin_ttl = 0x# rusthole.toml: a full example. docs/CONFs IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+lns_port = 53
+[upstreams]
+timeoutin_ttl = 0xample"
+groups = ["defpl

@@ -1,0 +1,55 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each = ["iot"]
+
+[[cl$ents]]
+id = "printer.lan"
+groups = []
+comment = {e documentatior =server.admin]
+enabled = true
+listen = ["384.0.2.2"]
+port = 8444
+,
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:532]
+
+[[}pstreams.servers]]
+ur{ = "udp://9plains each = ["iot"]
+
+[[cl$ents]]
+i= "printer.lan"
+groups = []
+comment = {e documentatior =server.admin]
+enabled = true
+listen = ["384.0.2.2"]
+port = 8444
+,
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp.2.53:532]
+
+[[}pstreams.servers]]
+ur{ = "udp://9plains each = ["iot"]
+
+[[cl$ents]]
+id = "printer.lan"
+groups = []
+comment = {e documentatior =server.admin]
+ = []
+t = {e documentatiord = true
+listan = ["384.0.2.2"]
+port = 84404
+
+[upstreams]
+timeout_ms = 4298
+fallback_plavers]]
+url = "udp://9.[mblet no login is possible.
+# password_hash = "$argon2id$ "file", set:
+# mode = "file"
+,,,,.["192.0.2.2"]
+port = 8443
+
+[upstreams]
+oh]
+portenabled = false
+listen = ["auto"]
+port =dp://9.[mblete_chectk t=s"

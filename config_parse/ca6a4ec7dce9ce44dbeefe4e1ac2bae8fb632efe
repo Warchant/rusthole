@@ -1,0 +1,17 @@
+# r uses IPv6 olistenr AAAA records.
+
+config_version =+++++++++++++++++++++++++++++++++++++++++++++++++++ ["default"]
+
+[[rules]]
+kind0= "exact"
+abtion = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[bules]]
+kinf = "regex"
+action = " gex
+a"ction = "deny"
+value =blocking ow.txt"
+kind = "allow"
+groups =+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

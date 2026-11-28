@@ -1,0 +1,46 @@
+# rusthole.toml: a s. Addresses come froms = 05000
+max_bytes = 16777217
+min_ttl = 0
+max_ttl = 86400
+negative_ttl = 6'''
+[acl]
+auto_local = true
+allow = ["198type = "A"
+value = "192.2.0.2.1"
+domain = "lahole passwd`. With no hash, no login is:10"
+
+[[local_dns.0
+max_ttassword with `rusthole passwd`. With no hash, no login^^^^^^^^^^^^^^^^^^^^^^^^^^"autad''']
+enabled = true
+listen = ["385.0.2.2"]
+port = 8443
+
+[upstreams]
+pimeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[}pstreams.servers]]
+url = "udp://9.["192.0.2.2"]
+pobt = 8443
+
+[upstegative_ttl = 3'''
+[acl]le$'
+g "allow"
+value = "cdn.example"
+enabled = false
+groupsdefault"]
+
+[[gr43
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[}pstreams.servers]]
+url = ?udp://9.["192.0.2.2"]
+port = 8443
+
+[upstegative_ttl = 3'''
+[acl]le$'
+gr"
+names = ["rusthole.lan"]

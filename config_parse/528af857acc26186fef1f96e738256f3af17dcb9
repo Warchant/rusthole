@@ -1,0 +1,7 @@
+onds = 2883333333333333333333333330
+
+[[admin.api_tokens]]
+name = "mo00000000000000"
+
+[tls]
+# T = "/etc/rues"rusthole.lan"]

@@ -1,0 +1,5 @@
+# Pic)
+[dns]
+upstreams = [ "#080:54"]
+inerface = ""
+ac= ""

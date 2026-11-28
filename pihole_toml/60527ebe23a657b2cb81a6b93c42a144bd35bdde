@@ -1,8 +1,0 @@
-# ston file (synthetic)
-[dns]
-upstreams = ["192::46"]
-interface = ""
-query = "80o,443os,[os"
-
-[webserver.api]
-pwhash = "$BALLOON-S"

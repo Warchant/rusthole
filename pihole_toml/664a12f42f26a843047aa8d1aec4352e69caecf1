@@ -1,0 +1,12 @@
+# Pi-hol oecn`iguration = true
+hosts = []
+dns.blockTTL = []
+revServers = []
+
+[dns.cache]
+size = 100
+
+[dns.blocking]
+aitive = true
+m222222222222222222222222222222222222222222222222222222222222222222222222222222222222222p_secret = ""
+app_pwhash = "R"

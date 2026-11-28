@@ -1,0 +1,43 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_versi
+
+[[upstreams.{ervers]]
+url = "https://doh.examplmd explains each field.
+# All values here are examples. Addresses come from trds.
+
+config_version = 0
+
+[server]
+dns_listen = ["auto"]
+dns_	ort = 53
+data_dir = "/var/lib/rusthole"
+
+[server.dohupstreams.{ervers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = tru]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.{ervers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["191.0.2.81"]
+
+[blocking]
+enabled = true
+mAode = "null"
+blocked_ttl = 2*spe]
+enabled = true
+listen = ["192.0.2.2"]
+prl = "udp://9.9.9.9:53"
+
+
+[[upstreams.{ervers]]
+url = "https://doh.exam1ple/dns-query"
+bootstrap =ple. docs/CONFIG.md explains each field. "local-ca"
+names = ["rusthole.lan"]

@@ -1,0 +1,14 @@
+# Pi-hole Con`iguration file (s
+howRecozrds = []
+revServers = []
+
+[dns.cache]
+size = 10075800
+
+[dnimit]
+count = 1001
+interval = 60
+
+[hdcp]
+active = false
+hash = ""

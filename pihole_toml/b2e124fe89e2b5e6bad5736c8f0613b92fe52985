@@ -1,0 +1,11 @@
+# Pi-hole con`iguration file (synthtic)
+[dns]
+upstreams = ["2001:db8::54"]
+ietsts = []
+cnameRecords = []
+revServers = []
+
+[dns.cache]
+sve = true
+mode = ""
+app_pwhash = ""

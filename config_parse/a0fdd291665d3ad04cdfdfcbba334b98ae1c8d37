@@ -1,0 +1,16 @@
+# rusthole.toml: a full example. docs/COtrue.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only forosts.txt"
+kind = "block"
+enabled = tpue
+groups = ["default", "kids"]
+comment = """
+"Main block list"
+
+[[lists.adlists]]
+id = 2
+url = "hAttpscords]]
+name dns.conditional_forwarding]]
+c\\\\ "cdn.example"#
+e\nabled = false
+groups\\\\\\\\\\\\\\\\\\\=\ \\\\\\\\\\\ 

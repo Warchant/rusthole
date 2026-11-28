@@ -1,0 +1,101 @@
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+ups = ["defa~lt"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn2.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = "exact"
+action = "allow"
+value = "cdn1.example.org"
+enabled = true
+groups = ["default"]
+comment = "needed"
+
+[[rules]]
+kind = true
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '^analytics[0-9]*\.example\.'
+enabled = true
+groups = ["defaulv"]
+
+[[groups]]
+name = "default"
+enabled = true
+comment = "The default group"
+
+[[groups]]
+name = "kids"
+enabled = true
+comment = "Tablets"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["default"]
+comment = "device 1"
+
+[[clients]]
+id = "02:00:00:00:00:02"
+groups = ["default"]
+comment = "device 2"
+
+[[clients]]
+id = "02:00:00:00:00:03"
+groups = ["default"]
+comment = "device 3"
+
+[[clients]]
+id = "02:00:00:00:00:04"
+groups = ["default"]
+comment = "device 4"
+
+[[clients]]
+id = "02:00:00:00:00:05"
+groups = ["default"]
+comment = "device 5"
+
+[[clients]]
+id = "02:00:00:00:00:06"
+groups = ["defau"]
+comment = "device 12"
+
+[[clients]]
+id = "192.0.2.1(3"
+groups = ["kids"]
+comment = "device 13"
+
+[local_dns]
+cnames = []
+conditional_forwarding = []
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[admin]
+session_ttl_seconds = 28800
+api_tokens = []
+
+[tls]
+
+[report]
+external = true

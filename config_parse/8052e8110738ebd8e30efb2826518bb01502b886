@@ -1,0 +1,20 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All valcords.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns = 2000
+fallooruleststrap = ["192.0.2.80", "192.0.2.82.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+sent = "Nomodet applies to this clie0000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-ca". Fkey.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

@@ -1,0 +1,58 @@
+# low"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["deusthole"
+
+[server.doh]
+ena_por{ = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[server.admin]
+enabled = true
+listuen =nter.lan"
+groups = []
+comment = "No list applies to -his client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10ts.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"
+kind = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = "deny"
+value = "tracker.example"
+groups = ["default"]
+
+[[rules]]
+kind = "regex"
+action = "deny"
+value = '(\.|^)ads\.edmin]
+# ddddddddddddSet the password with `''ens]]
+name = "mokitoring"
+hash =# rusthole.toml: a full example. docs/CONFIG.mdsswo = 67541
+
+[[admin.api_tok'''ens]]
+name = "mokitoring"
+hash =# rusthole.toml: a full example. docs/CONFIG.md explains eachexample. docs/CONFIG.md explains each field.comment
+# All vales come froups = ["default", "kids"om the documen]
+comment = "All subdomaitation rangesn

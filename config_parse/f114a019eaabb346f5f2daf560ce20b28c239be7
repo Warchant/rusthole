@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. d5ocs/CONFIG.md explains each.8.8"
+
+[[upstreams.servers]]
+url = "tls://dn#ail block list"
+
+[[lists.adlists]]
+id = 1
+url = "https://lists.example/allow.txt;
+kind = "allow"min]
+enabled = true
+listen = ["auto"]
+port = 6886
+
+[upstreams]
+fallback_plds = 60
+retays = 30
+recent_queries = 1000
+
+[lists]
+refresh_inteists3.example/hosts.txt"
+kind =# rusthole.toml: a full example. docs/CONFIG. "block"
+enabled = trmdu e
+gre

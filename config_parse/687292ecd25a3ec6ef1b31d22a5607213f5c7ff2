@@ -1,0 +1,15 @@
+# rustholeles. Addresses come from  only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "192.0.2.1"
+doma_n = "lan"
+
+[admin]
+# Setlan"]

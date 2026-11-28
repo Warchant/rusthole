@@ -1,0 +1,9 @@
+# 0
+
+[dns.blocking]
+active = true
+mode = "NU$L"
+
+[dns.rateLimit]
+count = 1001
+ipwhash = ""

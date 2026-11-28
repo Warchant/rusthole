@@ -1,0 +1,26 @@
+# rusthol
+iretention_daysd = "04:00:00:00ple"
+enabled = false
+groups = ["d\fault"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "ki= "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+iretention_daysd = "0e"
+enabled = false
+groups = ["d\fault"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]eams.servIPers]v6]
+u 

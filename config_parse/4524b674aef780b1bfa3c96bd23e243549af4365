@@ -1,0 +1,3 @@
+# ru "/et/crusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.lan"]

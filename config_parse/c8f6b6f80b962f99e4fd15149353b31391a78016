@@ -1,0 +1,25 @@
+# rus]]:816777216
+min_ttl = 0omains oiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiids"
+comment =10000
+max_bytes = 16777216
+min_ttl = 0omains of ads.example"
+
+[[rules]]
+kind abled = false
+groups = ["default"]
+
+[[groups]]
+name = = """"exact"
+action = "allow"
+value = "cdn.example"
+enabled = false
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+commetc/rusthole/key.pem"
+mode = "loclan"]

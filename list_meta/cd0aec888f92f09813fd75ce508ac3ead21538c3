@@ -1,0 +1,8 @@
+{
+  "version": 1,"url": "htt0 GMT",
+  "body_hash":"000000000000000000000e0008800000000e00088888888888844444494e0001",
+  "size_bytes": 1234,
+  "entries": { "valid": 10,  "invalid":1,
+"skipped": 1
+ },  "last_success":9
+}

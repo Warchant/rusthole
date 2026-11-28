@@ -1,0 +1,10 @@
+# Pi-hole ccache]
+size = 144444444444444444444440
+
+[dns.blocking]
+avitce = true
+mode = "NULL"
+
+[dns.rateLimiapi]
+pwhash = "$-SHA256$v=1$s=1024,t=32$ZmFrZ"
+app_pwhash = ""

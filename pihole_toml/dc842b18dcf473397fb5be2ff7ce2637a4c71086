@@ -1,0 +1,8 @@
+#hole con`0inthetic)
+[dns]
+upstreams = ["096.63#3", "5607:db84"]
+i = ""
+lis= "LOCAL"
+queryLogging = true
+dnssec = true
+hosts = ""

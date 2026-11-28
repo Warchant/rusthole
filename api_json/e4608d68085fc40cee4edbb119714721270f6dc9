@@ -1,1 +1,0 @@
-{"kind": "regex", "action": "deny", "pattern": "p?<<<%%%%%%%%%%%%%%%%%%ple\\.com$", "groups": [2]}

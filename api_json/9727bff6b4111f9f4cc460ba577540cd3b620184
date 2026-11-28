@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "%S%%%%%%%%%%%%%%%%%%%%%%%%%SS*SS_|S(Spstreams\\.)ads\\.e|aeom$:", "groups": [1]}

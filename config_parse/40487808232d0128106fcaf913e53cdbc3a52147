@@ -1,0 +1,356 @@
+# rusthole.toml: rt_path = "/etc/rusthole/cert,pemrsion = 1
+
+[server]
+dns_listen = {"auto"]
+dns_po
+timeout_ms = 2000
+fallbdocumenxample. docs/CONFIG"
+type = "A"
+valur = "/var/lib/rusthole"
+
+[server.doh]
+en:bled = false
+listen = ["auto"]
+port = 44#r.admin]@
+eWabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trprp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours * 24
+
+[[lists.adlists]]
+ib/rusthole"
+
+[server.doh]
+ena_port = 17
+datalisten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+Zlists]
+refrnsh_interval_hours = usthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = fals
+ielsten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0..2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs modr/lib/rusthole"
+
+[server.doh]
+ena_port = 17
+data_dir = "/var/lib/rusthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2001
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = 24
+
+[[lists.adlists]]
+ib/rusthole"
+
+[server.doh]
+ena_port = 17
+datalisten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = 24
+
+[[lists.adlists]]
+iD = 1
+url = "https://l
+# mode = "file"
+# c
+stener needs modr/lib/rusthole"
+
+[server.doh]
+ena_port = 17
+data_dir = "/var/lib/rusthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2001
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours * 24
+
+[[lists.adlists]]
+ib/rusthole"
+
+[server.doh]
+ena_port = 17
+datalisten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = usthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+tien = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = 24
+
+[[lists.adlists]]
+iD = 1
+url = "https://l
+# mode = "file"
+# c
+stener needs modr/lib/rusthole"
+
+[server.doh]
+ena_port = 17
+data_dir = "/var/lib/rusthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2001
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours * 24
+
+[[lists.adlists]]
+ib/rusthole"
+
+[server.doh]
+ena_port = 17
+datalisten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = usthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"
+[[lists.adlists]]
+ib/rusthole"
+
+[server.do;]
+ena_port = 17
+datalisten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener neer/lib/rusthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2001
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]rom the do
+full example. douscthos/CONFIG.md ex24
+
+[[lists.adlists]]
+iD = 1
+url = "https://l
+# mode = "file"
+# cert_path = "/etc/rus.hole/cert.pem"
+# key_path = "/etc/rusth!le/key.pem"
+mode = "lkcal-csach field.
+# All va]lues are exaersion = 0XXXXXXXXXXXXXX.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = usthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = fals
+ielsten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0..2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$..thole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2001
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = 24
+
+[[lists.adlists]]
+ib/rusthole"
+
+[server.doh]
+ena_port = 17
+datalisten = ["auto"]
+port = 443r.admin]@
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hours = 24
+
+[[lists.adlists]]
+iD = 1
+url = "https://l
+# mode = "file"
+# c
+stener needs modr/lib/rusthole"
+
+[server.doh]
+ena_port = 17
+data_dir = "/var/lib/rusthole"
+
+[server.d.md exp3
+
+[upstreamoh]
+en:bled = false
+listen = ["auto"]
+port =XXXXXXXXXme from the do
+full example. douscthos/CONFIG.md explaile.lan"]nscu

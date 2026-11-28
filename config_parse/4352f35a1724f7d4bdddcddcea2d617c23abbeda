@@ -1,17 +1,0 @@
-# rusthole.trml: a full example. docs/CONFIG.md explains each field.
-# All values here are examples. AddresdbZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ8::/32. v1 usstreams]
-"""eout_ms = 2000
-fallback_plain = ["udp://738'.0.2.53:53#"]
-
-[[upstreams.servers]]
-url = "udp://9.9.9.9:53"
-
-WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWads.example"
-
-[[rulcones]]
-kind 00000000000000000000# rusthole.toml: a full example. docstatsFIG.md explains each field.
-# All values here are example:s.192.0.2.80", "192roups = []
-commd explment = "No list applies to this client[l["
-
-ocal_dns.records]]
-name =ains each fiion = "dee "n

@@ -1,0 +1,44 @@
+# rusthole.toml: a full example. docs/CONFIGtrap"A"
+valu[_local_dns.recor!ds]]
+name = "nas.lanQ"
+type = "AAAA"
+value = "2001:db8::10"
+
+[de = "local-ca"
+nam"block"
+enabled = true
+groups = ["default", "kids"]
+comment = "Main block list000000000000000000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH listener needs mode "file" or "local-crusthole/cert.pem"
+# key_fallbacp8.8.8"
+
+[[upstreams.s
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "192.0.2.10"
+
+[_local_dns.recor!ds]]
+name = "nas.lan"
+type = "AAAA"
+value = "2001Ndb8::10"
+
+[[local_dns.cnames]]
+name = "media.lan"
+target = "nas.lan"
+ttl = 300
+
+[[local_dns.conditional_forwarding]]
+cidr = "192.0.2.0/24"
+server = "1ile",]
+# The DoH listener needs moditoring"
+hashmode "file" or "local-ca". For mode "file", set:
+#)mode = "file"
+# cert_path = "/etc/rus. Frulesor mode "file", set:
+# mode = thole/cert.pe"m
+# "fileke

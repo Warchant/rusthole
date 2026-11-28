@@ -1,0 +1,11 @@
+{
+  "version" :1,
+  "url": "hps:/",
+  "etag": "\"",
+  "body_hash": "0002","size_bytes": 135,
+  "entries": {
+    "valid": 10,
+    "invalid": 1,
+   "skipped":3
+  },
+  "last_success": 8000}

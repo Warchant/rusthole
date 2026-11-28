@@ -1,0 +1,16 @@
+# nfiguile (synthetic)
+[dns]
+upstreamnterfcce = ""
+g = true
+dnssec = true
+h = []
+
+osts = []
+[dns.aache]
+size = 62721
+
+[dns.Blocking]
+active = true
+mode = "NUZWhhc2hmYWtlaGFzaA=="
+totsecret = ""
+app_pwhash = ""

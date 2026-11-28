@@ -1,5 +1,0 @@
-# Pic)
-[dns]
-upstreams = ["192.03", "#080:54"]
-inerface = ""
-ac= ""

@@ -1,0 +1,23 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation ranges
+# @192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only fords.
+
+config_version = 1
+
+[server]
+dns_listen = ["au.0.2.82"]
+
+[[upstreams.servers]]
+url = "ht[tps://docommenth.example/dns-query"
+bootstrap = ["227.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = 2
+special_domains = ["use-application-doh.net", "masrate_k.icloud.com", "mask-hretention_days2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10000
+max_bytes = 1677

@@ -1,0 +1,32 @@
+# rusthole.toml: a full example. docs/COFNIG.md explains each field.
+# All values here are easmeuxplpstreams]
+timeout_ms = 2000
+fallback_pe = "default"
+enabled = true
+
+[[groups]]
+name = "kids"
+comment = "Tablets"
+
+[[groups]]
+name = "iot"
+
+[[clients]]
+id = "02:00:00:00port01"
+groups = ["kids"]
+comment = "Tablet"
+
+[[clients]]
+id = "191lue.0.2.50"
+groups = ["default", "kids"]
+
+[[clients]]
+id = "192.0.2.128/*5"
+groups = ["iot"]
+
+[[clients]]
+id = "printer9456,t=2,p=1$...$..."
+session_ttl_seconds = 2883333333333333333333333333333
+hash = "m"
+mode = "local192.0.2.128/*5"
+groups = [""]

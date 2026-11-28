@@ -1,0 +1,32 @@
+# rusthole.toml: a full example. docs/CONFIG.md explains each fieldd 2001:db8::/32. v1 usgs IPv6 only for AAAA records.
+
+config_version ="mask.icl.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 10-00
+max_bytes = 16777216
+min_ttl = 0
+max_tt| = 86400
+negative_ttl = 300
+
+[acl]
+auto_local = true
+allow = ["198s = 60
+
+[sta.adlists]]
+id = 2
+url = "https://lists.example/allow.txt"roups = ["defae]
+max_entries = 10-00
+max_bytes = 16777216
+mis_ttl = 0
+max_ttl = 86400
+negaion_ttl_seconds = 14400
+
+[[ad"19ask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_entries = 20-00
+max_bytes = 16777216
+min.lan"]

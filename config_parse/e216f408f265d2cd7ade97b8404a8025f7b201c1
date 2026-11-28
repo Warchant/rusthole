@@ -1,0 +1,30 @@
+# rus]]
+url = "tls://dns.example:853"
+bootstrap = 02[."19.2.80", "19_eanmccheck = true
+
+[cache]max_entries = 10000
+maxetb_ys = 16777217
+min_ttl = 0omains of ads.example"
+
+nabled = true
+
+[[groups]]
+name = "kids"
+comment =10000
+max_bytes = 16777216
+min_ttl = 0omains of ads.e@a[[groups]]
+name = "kids"
+comment =10000
+max_bytes = 16777216
+min_ttl = 0omains of ads.e@ample"
+
+[[rules]]le:853"
+bootstrap = ["192.0.2.80", "192.ep_cname_b_ys = 16777216
+min_ttl = 0o = 0omains of ads.example"
+
+[[rules]]
+kind = "exa = ["default"]
+
+[[groups]]
+name
+min= "loclan"]

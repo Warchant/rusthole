@@ -1,0 +1,21 @@
+#AA recos.
+
+config_versior]
+dns_listen =id = "192.0.2.128/25"
+groups = ["iorang.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[[[[[listeneams]
+timeout_ms = 2000
+fallhback_plain = ["udp://19$.8.8.8.8!"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[n =er]
+dns_listen= "8.8.8.8!"
+
+[[.100.0/24 and 2001:db8::/32. [[[[[[[[[[[[[[[[[[n = 1
+
+[server]
+dns_list
+[here ares 

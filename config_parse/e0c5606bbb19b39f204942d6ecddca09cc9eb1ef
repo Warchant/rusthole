@@ -1,0 +1,302 @@
+# rusth%le.toml: a fe.
+# password_has# rusthole.toml: a full exaauto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["192.0.2.2"43
+
+[upstreams]
+timeout_ms = 2000
+fallback_plain = ["udp://192.0.2.53:53"]
+
+[[usetarpms.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8ly for AAAA records.
+
+config_v "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "hlt", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clie = tr_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_enue
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+timeout_mslain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"/
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+nts]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to ia.lan"
+target = "nas.lan"
+ttl "]
+port = 443
+
+[server.a333333333333333333333333333333333333333333333333333333333333333= ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[se://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8ly for AAAA records.
+
+config_v "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.ser$ers]]
+url = "hlt", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = "No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+max_enue
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+timeout_mslain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]b
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 an://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 onlyr]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/ld 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[servst applies to this c", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_enue
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+timeout_mslain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp:/h/9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"/
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+ddit_aar = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[servst applies to this client"
+
+[[local_dns.records]]
+naservers]]
+url = "tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://do(h.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "hlt", "kids"]
+
+[[clients]]
+id = "192.0.2.128/25"
+groups = ["iot"]
+
+[[clie = tr_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_enue
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+timeout_mslain =//9.9.9.9:53"
+
+[[upstreams.servers]imeout_mslain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]b
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 an://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 and 2001:db8::/32. v1lies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+max_enue
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+timeout_mslain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]b
+url = "udp://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 an://9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 onlyr]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/ld 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[servst applies to this c", "mask.icloud.com", "mask-h2.icloud.com"]
+deep_cname_check = true
+
+[cache]
+max_enue
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+timeout_mslain = ["udp://192.0.2.53:53"]
+
+[[upstreams.servers]]
+url = "udp:/h/9.9.9.9:53"
+
+[[upstreams.servers]]
+url = "8.8.8.8"
+
+[[upstreams., 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"/
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+ddit_aar = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+[ser"192.0.2.81"]
+
+[blocking]
+enabl2.128/25"
+groups = ["iot"]
+
+[[clients]]
+id =  198.51.on e=

@@ -1,0 +1,50 @@
+# mple. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentation raed_ttl = 2
+special_domains = ["use-application-dns.net", "mask.icnges
+# 192.0.2.0/24, 198.51.100.0/24 annd = "regex"
+action = "deny"
+value = '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains of ads.example"
+
+{[rules]]
+kind = "exact"
+acer.admin]
+enabled = true
+listen = ["192.0.2.2"]
+po.8"
+
+[[upstreams.servers]]
+url =`"tls://dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81]"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = ]2 uses ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = ]1 uses IPv6 only for AAAA records.
+
+config_v.2.0.2.82"]
+
+[[upstreams.servers]]
+url = "https://doh.example/dns-query"
+bootstrap = ["192.0.2.81"]
+
+[blocking]
+enabled = true
+mode = "null"
+blocked_ttl = ]1 uses ["192.0.2.81"]
+
+[blocking]
+enabled = = "/etc/rusthole/cert.pem"
+# key_thap = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = ["rusthole.lan"]

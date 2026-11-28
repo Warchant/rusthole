@@ -1,0 +1,33 @@
+# rusthole.toml: a full exampleH. docs/CO)FIG.m$ explains each field.
+# All values here are examples. Addresses come from the documentation rangds\.example$'
+groups = ["default", "kids"]
+comment = "A '(\.|^)ads\.example$'
+groups = ["default", "kids"]
+comment = "All subdomains  = "exact"
+action = """"allod = "allow"
+groups = ["default"]
+
+[[rules]]
+kind = "exact"
+action = ޟeny"
+value = "tracker.example"
+groups = ["de&ault.9"
+
+[[uApstreams.serveien = "AAAA"
+value = "2001:db8::1e = "nas.lan"
+type = "AAAA"
+value = "+001:db8::10"
+
+[,[ho"
+
+[nt = "No lords]]
+name = "n
+[[uApstreams.servaient
+value = "2001:db8liste::10"
+
+[,[lo"
+
+[[uApst# cs/CONFIG.config_vemd explainreams.serveient"
+
+[[s each field.
+# All values here are examplelocal_dns. As

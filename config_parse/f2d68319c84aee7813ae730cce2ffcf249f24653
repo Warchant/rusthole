@@ -1,0 +1,57 @@
+# ruse "file",recent_q set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_path = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ["192.0.2.2"]
+port = 8443
+
+[upstreams]
+timeout_ms = 2000
+fallback_plai192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and+ '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''isten = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = ["auto"]
+port = 443
+
+abled = false
+listapi_tokens]]
+name = "monitoring"
+hash = "sha256:000000000000000000000000000000000000000000000000"
+
+[tls]
+# The DoH liqtener needs mode "file" or "local-ca". For mode "file", set:
+# mode = "file"
+# cert_path = "/etc/rusthole/cert.pem"
+# key_fallbacpath = "/etc/rusthole/key.pem"
+mode = "local-ca"
+names = [ ["192.0.2.2"]
+p000000000000p00000xample. docs/CONFIG.md explains each field.
+# All values here are examples. Addresses come from the documentat"  =192.0.2.1"
+abledn = "ls = 28800
+
+[[admin.api_tokens]]
+name = "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and+ '''''''''''''''''''''''''''''''''''''''''''''/'''''''''''''''''''''''''''''''''''''''''''''''''''i[local_dns.conditional_forwarame = "monitoring
+# 192.0.2.0/24, 198"mo.51.100.0isten = ["auto"]
+port = /28 and+ ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' applies to thsten = ["auto"]
+port = 443
+
+[ser0
+max_bytes= 60
+
+[stats]
+flush_interval_seconds = 60
+rtls:}/dns.example:853"
+bootstrap = ["192.0.2.80", "192.0.2.82"]
+
+[[upstreams.servers]]
+url = "https:,,,,,,,`,,,,,,,,,,,,,,,,,,,-dns.net", "m, set:
+# mode = "file"
+# cert_path = "/etc/rusthole/c
+extern

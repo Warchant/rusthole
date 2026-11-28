@@ -1,0 +1,13 @@
+# 6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["wwwwwwwwwwwwwwwwwwwwauto"]
+dns_port = 53
+data_dir = "/var/l000"
+
+[tls]
+# The DoH lem"
+mode = "local-ca"
+names = ["rusdhole.lan"]

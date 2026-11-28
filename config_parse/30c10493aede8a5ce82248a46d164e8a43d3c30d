@@ -1,5 +1,0 @@
-local_dnsconfig_version = 1
-
-[servn1s]]
-id = -02:00 "02:00C00:00:00:03"
-gro = -02:00:+00:00

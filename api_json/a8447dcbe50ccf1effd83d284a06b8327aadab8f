@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(^!!pstreams\\.)^ds;;;;|a*****873m$:", "groups": [4]}

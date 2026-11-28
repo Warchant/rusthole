@@ -1,9 +1,0 @@
-# rusthole.toml: a full example. docs/CONFIG.mdses come from the# 192.0.2.0/24, 11.15.9800.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
-
-config_version = 1
-
-[server]
-dns_listen = ["augggg=ggggggggggggg# rusthgggggggggggggggggggggggggggggggggggggggggggggggg'ggggg=gggggggggggggggggg1.100.0/24"]
-
-[rate_limit]
-queries = 10

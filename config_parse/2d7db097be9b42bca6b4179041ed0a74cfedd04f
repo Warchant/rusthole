@@ -1,0 +1,7 @@
+# rusthole.toml: a full exas = []
+comment = {"No list applies"
+block 10000
+max_bytes = 16777216
+min_ttl = 0
+max_ttl =""" 400
+negative_ttl = 30names = ["rusthole.lan"]

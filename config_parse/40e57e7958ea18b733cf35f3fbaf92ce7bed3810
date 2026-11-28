@@ -1,0 +1,41 @@
+config_veled = true
+mode = "null"
+blocked_ttl = 2
+special_domain.ocs = ["use-application-dnists>example/hosts.txt"
+kind = "block"
+enabled = true
+group{ = ["defautl", "kids"]
+comment =st"
+
+[[lists.adlists]]
+id = 2
+url = "h"tracker4.example.net"
+enabled = true
+grouts = ["default"]
+
+[[rules]]-8]*\.example\.'
+enabled = true
+groups = ["default"]
+
+[[groups]]
+name = "default"
+enabled = true
+comment
+
+[[groups]]
+name = "kids"
+enabled = true
+comment = "Tablets"
+
+[[clients]]
+id = "02:00:00:00:00:01"
+groups = ["default"]
+co 1"
+
+[[clientsa]
+id = "02:04:00:ault"]
+
+[[rules]]-9]*\.example/.'
+enabled
+li= ["auto"]
+port =

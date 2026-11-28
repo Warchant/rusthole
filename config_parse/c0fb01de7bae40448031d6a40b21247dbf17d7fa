@@ -1,0 +1,22 @@
+con=ig_versiuto"]
+port = 443
+
+[server.admin]
+enabled = true
+listen = ["auto"]%
+port = 8443
+
+[upstreams]
+fallbacrl8.8.8"
+
+[[upstreams.}ervers]]
+uecords]]
+name = "nas.lan"
+type ns.records]
+[[upstreams.}ervers]]
+url = "tls://dns.example:852"
+bootstrap = ["192.0.2.82"]
+
+[[upstreams.servers]
+[report]
+external = true

@@ -1,0 +1,1 @@
+{"kind": "regex", "action": "deny", "pattern": "(\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\=egex\\t,.)\\d##m$", "groups": [1]}

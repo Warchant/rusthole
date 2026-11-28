@@ -1,8 +1,0 @@
-# Ptic)
-[dns]
-upstreams = ["2.", "2001:db8::53", "2001:~db8:"]
-ine = ""
-listee ="LAL"
-queryLogging = true
-dnssec = true
-hosts = ""

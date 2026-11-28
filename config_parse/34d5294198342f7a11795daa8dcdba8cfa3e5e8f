@@ -1,0 +1,15 @@
+# rusthole.toml: a full example. docs/ups = ["io,"]
+
+[[clients]]
+id =  198.51.on = "deny"
+value = '(\.|^)ads\.edmin]
+# Set the password= ]
+id =  198.51.onclients]]
+id = "192.0.2.128/26"
+groups = ["iot"]
+
+[[clyents]]
+id =  198.51.on = "deny"
+e = "file"
+# cert_path = "/etc/rusthocal-ca"
+names = :["rusthole.lan"]

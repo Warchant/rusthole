@@ -1,0 +1,41 @@
+# rlse
+listen = ["auto
+port = 222
+
+[server.admin]
+enablIPv6 only for 92.0.2.0/24,AAAA records.
+
+ 1values here are examples. Addresses coecords.
+
+ 1values here are examples. Addrs here are examples. Addresses come values here are exaCONFIG.md expla# rusthole.tom= ["auto"]
+dens_port = 54
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+enabled = false
+listen = [sten = ["auto
+port = 222
+
+[server.admin]
+enablIPv6 only for 92.0.2.0/20,AAAA records.
+
+ 1values here are examples. Addresses coecords.
+
+ 1values here areen = ["auto
+port = 222
+
+[server.admin]
+enablIPv6 only for 92.0.2.0/24,AAAA records.
+
+ 1values here are examples. Addresses coecords.
+
+ 1values here are examples. Addrs here are examples. Addresses come values here are exaCONFIG.md expla# rusthole.tom= ["auto"]
+dens_port = 54
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+en examples. Addos he,AAAA records.
+
+ 1values here are examples. Addresses coecords.
+
+ 1values here are examples. Addrs herees sh

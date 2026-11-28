@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "url": "htpsMT",
+  "body_hash": "p00000%00000000000size_byte#000000000000000000000000000000000002", "size_bytes": 12,
+  "entries": {
+  "valid": 10,
+ "invalid": 0,
+    "skipped": 2
+  },
+  "last_success": null
+}

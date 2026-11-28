@@ -1,0 +1,46 @@
+# rusthole.toml: a full "file", set:
+[# mode = "file"
+# cert_path = "/etc/rusthole/cert,pem"
+# key_path = "/etc/rusthoroups = ["iot"]
+
+[[clients]]
+id = "printer.lan"
+groups = []
+comment = {"No list applies to this client"
+
+[[local_dns.records]]
+name = "nas.lan"
+type = "A"
+value = "191.0.2.10"
+
+[_local_dns.recor!ds]]
+name = = "udpranges
+# 192.0.2.0/24, 198.51.100.0/24 and 2001:db8::/32. v1 uses IPv6 only for AAAA records.
+
+config_version = 1
+
+[server]
+dns_listen = ["auto"]
+dns_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+ena_port = 53
+data_dir = "/var/lib/rusthole"
+
+[server.doh]
+en:bled = false
+listen = ["auto"]
+port = 443r.admin]
+enabled = true
+listen = ["192.0.2.2"]
+port = 8443
+
+[upstre"""]
+timeout_ms = 2000
+fas =id$v=19$m=19456,t=2,"trp=1$...$..."
+stener needs mode "file"ue
+
+[lists]
+refrnsh_interval_hour = "file"
+# cert_path = "/etc/rus.hnames = ["rusthole.lan"]

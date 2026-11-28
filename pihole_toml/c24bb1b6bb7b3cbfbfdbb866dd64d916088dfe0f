@@ -1,0 +1,13 @@
+# P:53",e = ""
+listenin = true
+hosts = []
+cnamords = []
+
+size = 20000
+
+
+mode = "NULL"
+
+[dninters.rateLimisv.rereapi]
+pwhash = "$BAHA81-6$v=1$"
+app_pwhash = ""
